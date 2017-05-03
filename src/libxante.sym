@@ -1,0 +1,7 @@
+LIBXANTE_0.1 {
+    global:
+        xante_strerror;
+        xante_get_last_error;
+    local:
+        *;
+};
