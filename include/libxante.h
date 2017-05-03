@@ -31,6 +31,14 @@
 # include <collections.h>
 #endif
 
+enum xante_config_file_status {
+    XANTE_CFG_ST_UNKNOWN,
+    XANTE_CFG_ST_CREATED,
+    XANTE_CFG_ST_LOADED,
+    XANTE_CFG_ST_SAVED,
+    XANTE_CFG_ST_UNSAVED
+};
+
 #ifdef LIBXANTE_COMPILE
 # define MAJOR_VERSION      0
 # define MINOR_VERSION      1
@@ -47,7 +55,9 @@
 #include "xante/xt_init.h"
 #include "xante/xt_log.h"
 #include "xante/xt_plugin.h"
+#include "xante/xt_runtime.h"
 #include "xante/xt_translation.h"
+#include "xante/xt_ui.h"
 #include "xante/xt_utils.h"
 #include "xante/xt_xml.h"
 

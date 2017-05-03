@@ -10,6 +10,7 @@ A library to build (dialog based) applications using XML templates.
 
 * libcollections
 * libdialog
+* libxml2
 
 ## Bindings
 

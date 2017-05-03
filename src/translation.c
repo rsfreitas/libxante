@@ -1,6 +1,7 @@
 
 /*
- * Description:
+ * Description: Functions to handle application user interface
+ *              internationalization.
  *
  * Author: Rodrigo Freitas
  * Created at: Tue May  2 21:03:18 2017

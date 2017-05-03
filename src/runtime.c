@@ -1,10 +1,9 @@
 
 /*
- * Description: Functions to handle an application log file from within the
- *              library.
+ * Description:
  *
  * Author: Rodrigo Freitas
- * Created at: Tue May  2 21:03:17 2017
+ * Created at: Tue May  2 22:17:07 2017
  * Project: libxante
  *
  * Copyright (C) 2017 Rodrigo Freitas
@@ -24,6 +23,4 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  * USA
  */
-
-#include "libxante.h"
 

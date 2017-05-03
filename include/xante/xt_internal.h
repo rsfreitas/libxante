@@ -24,8 +24,8 @@
  * USA
  */
 
-#ifndef _XT_INTERNAL_H
-#define _XT_INTERNAL_H          1
+#ifndef _LIBXANTE_XT_INTERNAL_H
+#define _LIBXANTE_XT_INTERNAL_H          1
 
 /*
  * An internal representation of a public function. It does not affect the code
@@ -41,6 +41,34 @@
  * }
  */
 #define __PUB_API__
+
+/** Application informations loaded from the XML file (tag <general>) */
+struct xante_info {
+    char            *cfg_pathname;
+    char            *application_name;
+    char            *plugin_name;
+    char            *version;
+    int             revision;
+    int             build;
+    bool            beta;
+};
+
+/** Application runtime informations */
+struct xante_runtime {
+    bool                            discard_changes;
+    bool                            discard_changes_on_timeout;
+    bool                            execute_plugin;
+    bool                            create_default_config_file;
+    bool                            force_config_file_saving;
+    int                             ui_dialog_timeout;          /** seconds */
+    enum xante_config_file_status   config_file_status;
+};
+
+/** Library main structure */
+struct xante_app {
+    struct xante_info       info;
+    struct xante_runtime    runtime;
+};
 
 #endif
 

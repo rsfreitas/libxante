@@ -2,6 +2,10 @@ LIBXANTE_0.1 {
     global:
         xante_strerror;
         xante_get_last_error;
+        xante_init;
+        xante_uninit;
+        xante_load_config;
+        xante_unload_config;
     local:
         *;
 };

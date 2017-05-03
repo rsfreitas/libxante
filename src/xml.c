@@ -1,6 +1,6 @@
 
 /*
- * Description:
+ * Description: Functions to handle the XML file from an application.
  *
  * Author: Rodrigo Freitas
  * Created at: Tue May  2 21:03:18 2017

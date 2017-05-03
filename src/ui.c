@@ -1,10 +1,9 @@
 
 /*
- * Description: Functions to handle an application log file from within the
- *              library.
+ * Description: Functions to handle User Interface.
  *
  * Author: Rodrigo Freitas
- * Created at: Tue May  2 21:03:17 2017
+ * Created at: Tue May  2 21:58:11 2017
  * Project: libxante
  *
  * Copyright (C) 2017 Rodrigo Freitas

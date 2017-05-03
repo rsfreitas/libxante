@@ -1,6 +1,7 @@
 
 /*
- * Description:
+ * Description: Functions to handle the main configuration file from an
+ *              application.
  *
  * Author: Rodrigo Freitas
  * Created at: Tue May  2 21:03:18 2017
@@ -25,4 +26,16 @@
  */
 
 #include "libxante.h"
+
+__PUB_API__ void xante_load_config(void)
+{
+}
+
+__PUB_API__ void xante_unload_config(void)
+{
+}
+
+__PUB_API__ void xante_write_config(void)
+{
+}
 

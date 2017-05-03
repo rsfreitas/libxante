@@ -1,6 +1,7 @@
 
 /*
- * Description:
+ * Description: Functions to handle the library initialization an
+ *              uninitialization.
  *
  * Author: Rodrigo Freitas
  * Created at: Tue May  2 21:03:17 2017

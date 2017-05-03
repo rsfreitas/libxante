@@ -1,6 +1,6 @@
 
 /*
- * Description:
+ * Description: Functions to handle user access control inside an application.
  *
  * Author: Rodrigo Freitas
  * Created at: Tue May  2 21:03:18 2017

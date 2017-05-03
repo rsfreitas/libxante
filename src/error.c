@@ -1,6 +1,6 @@
 
 /*
- * Description:
+ * Description: Functions to handle the library internal error.
  *
  * Author: Rodrigo Freitas
  * Created at: Tue May  2 20:25:58 2017
