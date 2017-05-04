@@ -25,7 +25,7 @@
  */
 
 #ifndef _LIBXANTE_XT_INTERNAL_H
-#define _LIBXANTE_XT_INTERNAL_H          1
+#define _LIBXANTE_XT_INTERNAL_H             1
 
 /*
  * An internal representation of a public function. It does not affect the code
@@ -42,7 +42,16 @@
  */
 #define __PUB_API__
 
-/** Application informations loaded from the XML file (tag <general>) */
+/** Timeout to close a dialog */
+#define UI_DIALOG_TIMEOUT                   120 /* seconds */
+
+/** Different ways of creating menus */
+enum xante_menu_creator {
+    XANTE_MENU_CREATED_FROM_JTF,
+    XANTE_MENU_CREATED_INTERNALLY
+};
+
+/** Application informations loaded from the JSON file (general object) */
 struct xante_info {
     char            *cfg_pathname;
     char            *application_name;
@@ -60,14 +69,37 @@ struct xante_runtime {
     bool                            execute_plugin;
     bool                            create_default_config_file;
     bool                            force_config_file_saving;
+    bool                            show_config_saving_question;
+    bool                            accent_characters;
+    bool                            close_ui;
+    bool                            ui_active;
     int                             ui_dialog_timeout;          /** seconds */
+    int                             exit_value;
     enum xante_config_file_status   config_file_status;
+};
+
+/** UI Menu Item informations */
+struct xante_item {
+    char                    **attr;
+    struct cl_ref_s         ref;
+};
+
+/** UI Menu informations */
+struct xante_menu {
+    char                    *name;
+    char                    *object_id;
+    enum xante_menu_creator creator;
+    bool                    move_to_menus_to_be_released;
+    cl_list_t               *items;
+    struct cl_ref_s         ref;
 };
 
 /** Library main structure */
 struct xante_app {
     struct xante_info       info;
     struct xante_runtime    runtime;
+    cl_list_t               *menu;
+    struct cl_ref_s         ref;
 };
 
 #endif

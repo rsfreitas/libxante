@@ -1,9 +1,9 @@
 
 /*
- * Description: Functions to handle the XML file from an application.
+ * Description:
  *
  * Author: Rodrigo Freitas
- * Created at: Tue May  2 21:03:18 2017
+ * Created at: Tue May  2 21:07:38 2017
  * Project: libxante
  *
  * Copyright (C) 2017 Rodrigo Freitas
@@ -24,5 +24,18 @@
  * USA
  */
 
-#include "libxante.h"
+#ifndef _LIBXANTE_XT_JTF_H
+#define _LIBXANTE_XT_JTF_H          1
+
+#ifndef LIBXANTE_COMPILE
+# ifndef _LIBXANTE_H
+#  error "Never use <xt_jtf.h> directly; include <libxante.h> instead."
+# endif
+#else
+
+/* Internal library declarations */
+int jtf_parse(const char *pathname, struct xante_app *xpp);
+#endif
+
+#endif
 

@@ -31,6 +31,17 @@
 # ifndef _LIBXANTE_H
 #  error "Never use <xt_ui.h> directly; include <libxante.h> instead."
 # endif
+#else
+
+/* Internal library declarations */
+void ui_xante_item_ref(struct xante_item *item);
+void ui_xante_item_unref(struct xante_item *item);
+struct xante_item *ui_new_xante_item(void);
+void ui_xante_menu_ref(struct xante_menu *menu);
+void ui_xante_menu_unref(struct xante_menu *menu);
+struct xante_menu *ui_new_xante_menu(const char *name, const char *object_id,
+                                     enum xante_menu_creator creator);
+
 #endif
 
 #endif

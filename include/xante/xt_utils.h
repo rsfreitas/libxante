@@ -31,6 +31,11 @@
 # ifndef _LIBXANTE_H
 #  error "Never use <xt_utils.h> directly; include <libxante.h> instead."
 # endif
+#else
+
+/* Internal library declarations */
+bool is_valid_config_file_status(enum xante_config_file_status status);
+
 #endif
 
 #endif

@@ -25,10 +25,91 @@
  * USA
  */
 
+#include <stdlib.h>
+
 #include "libxante.h"
 
-__PUB_API__ void xante_init(void)
+/*
+ *
+ * Internal functions
+ *
+ */
+
+static void destroy_xante_app(const struct cl_ref_s *ref)
 {
+    struct xante_app *xpp = cl_container_of(ref, struct xante_app, ref);
+
+    if (NULL == xpp)
+        return;
+
+    free(xpp);
+}
+
+static struct xante_app *new_xante_app(void)
+{
+    struct xante_app *xpp = NULL;
+
+    xpp = calloc(1, sizeof(struct xante_app));
+
+    if (NULL == xpp) {
+        errno_set(XANTE_ERROR_NO_MEMORY);
+        return NULL;
+    }
+
+    /* Initialize the reference count */
+    xpp->ref.count = 1;
+    xpp->ref.free = destroy_xante_app;
+
+    return xpp;
+}
+
+/*
+ *
+ * API
+ *
+ */
+
+__PUB_API__ xante_t *xante_init(const char *jtf_pathname, bool use_plugin)
+{
+    struct xante_app *xpp = NULL;
+
+    errno_clear();
+
+    if (NULL == jtf_pathname) {
+        errno_set(XANTE_ERROR_NULL_ARG);
+        return NULL;
+    }
+
+    xpp = new_xante_app();
+
+    if (NULL == xpp)
+        return NULL;
+
+    /* Set runtime flags */
+    runtime_start(xpp);
+
+    /* Start user access control */
+
+    /* Start translation environment */
+
+    /* Parse the JTF file */
+    if (jtf_parse(jtf_pathname, xpp) < 0)
+        goto error_block;
+
+    /* Start user modifications monitoring */
+
+    /* Start log file */
+
+    /* Call the plugin initialization function or disable its using */
+    if (use_plugin == false)
+        xante_runtime_set_execute_plugin(xpp, false);
+    else {
+    }
+
+    return xpp;
+
+error_block:
+    return NULL;
 }
 
 __PUB_API__ void xante_uninit(void)

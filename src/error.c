@@ -27,28 +27,45 @@
 #include "libxante.h"
 
 static const char *__description[] = {
-    cl_tr_noop("Ok")
+    cl_tr_noop("Ok"),
+    cl_tr_noop("No internal memory available"),
+    cl_tr_noop("A NULL argument was passed"),
+    cl_tr_noop("An invalid argument was passed"),
+    cl_tr_noop("Unable to parse JTF file"),
+    cl_tr_noop("JTF file has no 'general' object"),
+    cl_tr_noop("JTF object was not found"),
+    cl_tr_noop("JTF object has no value")
 };
 
 static const char *__unknown_error = cl_tr_noop("Unknown error");
 #define __errno     (*cl_errno_storage())
 
+/**
+ * @name errno_clear
+ * @brief Clears the library internal error code.
+ */
 void errno_clear(void)
 {
     __errno = XANTE_NO_ERROR;
 }
 
+/**
+ * @name errno_set
+ * @brief Sets the current value of the library internal error code.
+ *
+ * @param [in] code: The new erro code.
+ */
 void errno_set(enum xante_error_code code)
 {
     __errno = code;
 }
 
-enum xante_error_code xante_get_last_error(void)
+__PUB_API__ enum xante_error_code xante_get_last_error(void)
 {
     return __errno;
 }
 
-const char *xante_strerror(enum xante_error_code code)
+__PUB_API__ const char *xante_strerror(enum xante_error_code code)
 {
     if (code >= XANTE_MAX_ERROR_CODE)
         return __unknown_error;

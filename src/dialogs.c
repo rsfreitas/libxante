@@ -1,9 +1,9 @@
 
 /*
- * Description:
+ * Description: Functions to handle UI from the user level.
  *
  * Author: Rodrigo Freitas
- * Created at: Tue May  2 21:07:38 2017
+ * Created at: Wed May  3 13:48:23 2017
  * Project: libxante
  *
  * Copyright (C) 2017 Rodrigo Freitas
@@ -24,14 +24,5 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_XML_H
-#define _LIBXANTE_XT_XML_H          1
-
-#ifndef LIBXANTE_COMPILE
-# ifndef _LIBXANTE_H
-#  error "Never use <xt_xml.h> directly; include <libxante.h> instead."
-# endif
-#endif
-
-#endif
+#include "libxante.h"
 

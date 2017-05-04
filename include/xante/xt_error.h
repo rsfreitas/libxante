@@ -36,6 +36,14 @@
 enum xante_error_code {
     XANTE_NO_ERROR,
 
+    XANTE_ERROR_NO_MEMORY,
+    XANTE_ERROR_NULL_ARG,
+    XANTE_ERROR_INVALID_ARG,
+    XANTE_ERROR_WRONG_JTF_FORMAT,
+    XANTE_ERROR_JTF_NO_GENERAL_OBJECT,
+    XANTE_ERROR_JTF_NO_INFO,
+    XANTE_ERROR_JTF_INFO_WITHOUT_VALUE,
+
     XANTE_MAX_ERROR_CODE
 };
 
@@ -46,7 +54,22 @@ void errno_set(enum xante_error_code code);
 
 #endif
 
+/**
+ * @name xante_get_last_error
+ * @brief Gets the current library internal error code.
+ *
+ * @return Returns the current error code.
+ */
 enum xante_error_code xante_get_last_error(void);
+
+/**
+ * @name xante_strerror
+ * @brief Gives a description message about an error code.
+ *
+ * @param [in] code: The error code to be translated.
+ *
+ * @return Returns the descriptive string of the error.
+ */
 const char *xante_strerror(enum xante_error_code code);
 
 #endif

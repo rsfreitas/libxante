@@ -39,6 +39,8 @@ enum xante_config_file_status {
     XANTE_CFG_ST_UNSAVED
 };
 
+typedef void                xante_t;
+
 #ifdef LIBXANTE_COMPILE
 # define MAJOR_VERSION      0
 # define MINOR_VERSION      1
@@ -50,16 +52,18 @@ enum xante_config_file_status {
 #include "xante/xt_access.h"
 #include "xante/xt_changes.h"
 #include "xante/xt_config.h"
+#include "xante/xt_dialogs.h"
 #include "xante/xt_error.h"
 #include "xante/xt_events.h"
 #include "xante/xt_init.h"
+#include "xante/xt_jtf.h"
 #include "xante/xt_log.h"
 #include "xante/xt_plugin.h"
 #include "xante/xt_runtime.h"
+#include "xante/xt_theme.h"
 #include "xante/xt_translation.h"
 #include "xante/xt_ui.h"
 #include "xante/xt_utils.h"
-#include "xante/xt_xml.h"
 
 #endif
 

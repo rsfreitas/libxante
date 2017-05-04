@@ -3,7 +3,7 @@
  * Description:
  *
  * Author: Rodrigo Freitas
- * Created at: Tue May  2 20:25:58 2017
+ * Created at: Wed May  3 11:19:39 2017
  * Project: libxante
  *
  * Copyright (C) 2017 Rodrigo Freitas
@@ -24,35 +24,14 @@
  * USA
  */
 
-#include "libxante.h"
+#ifndef _LIBXANTE_XT_THEME_H
+#define _LIBXANTE_XT_THEME_H          1
 
-/*
- *
- * Internal API
- *
- */
+#ifndef LIBXANTE_COMPILE
+# ifndef _LIBXANTE_H
+#  error "Never use <xt_theme.h> directly; include <libxante.h> instead."
+# endif
+#endif
 
-/**
- * @name is_valid_config_file_status
- * @brief Checks if a given status is valid inside the library environment.
- *
- * @param [in] status: The status to be checked.
- *
- * @return Returns true if is a valid internal status or false otherwise.
- */
-bool is_valid_config_file_status(enum xante_config_file_status status)
-{
-    switch (status) {
-        case XANTE_CFG_ST_CREATED:
-        case XANTE_CFG_ST_LOADED:
-        case XANTE_CFG_ST_SAVED:
-        case XANTE_CFG_ST_UNSAVED:
-            return true;
-
-        default:
-            break;
-    }
-
-    return false;
-}
+#endif
 

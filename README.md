@@ -1,6 +1,13 @@
 # libxante
 
-A library to build (dialog based) applications using XML templates.
+A library to build (dialog based) applications using JSON templates and
+plugins.
+
+## Overview
+
+This library is intended to build and run dialog based applications.
+
+## Templates
 
 ## Plugins
 
@@ -10,7 +17,6 @@ A library to build (dialog based) applications using XML templates.
 
 * libcollections
 * libdialog
-* libxml2
 
 ## Bindings
 
