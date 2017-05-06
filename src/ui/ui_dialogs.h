@@ -33,7 +33,14 @@
 # endif
 #endif
 
+/* Main cancel button label */
 #define MAIN_MENU_CANCEL_LABEL      "Exit"
+
+/* Minimum width of a window */
+#define MINIMUM_WIDTH               60
+
+/* Dialog without text */
+#define DIALOG_HEIGHT_WITHOUT_TEXT  6
 
 /* Maximum number of items of a dialog */
 #define MAX_DLG_ITEMS               15
@@ -41,8 +48,22 @@
 #define dialog_get_dlg_items(a)     \
     ((a) > MAX_DLG_ITEMS ? MAX_DLG_ITEMS : (a))
 
+/* Window border size */
+#define WINDOW_BORDER_SIZE          10
+
+/* Default columns of a dialog */
+#define DIALOG_COLUMNS              4
+
+/* Columns of a dialog with an internal dialog */
+#define WINDOW_COLUMNS              (DIALOG_COLUMNS + 2)
+
+/* Just gives us the right item value */
+#define item_value(item)            \
+    ((item->value != NULL) ? item->value : item->default_value)
+
 /* utils.c */
 void dialog_set_backtitle(void);
+char *dialog_get_item_value_as_text(const struct xante_item *item);
 
 /* menu */
 int ui_dialog_menu(struct xante_app *xpp, const struct xante_menu *menu,

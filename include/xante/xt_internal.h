@@ -58,6 +58,8 @@ enum xante_menu_creator {
 /** Application informations loaded from the JSON file (general object) */
 struct xante_info {
     cl_string_t     *cfg_pathname;
+    cl_string_t     *log_pathname;
+    cl_string_t     *log_level;
     cl_string_t     *application_name;
     cl_string_t     *plugin_name;
     cl_string_t     *version;
@@ -92,9 +94,12 @@ struct xante_item {
     cl_string_t             *config_block;
     cl_string_t             *config_item;
     cl_string_t             *help;
+    cl_string_t             *options;
+    cl_object_t             *default_value;
 
     /* Internal */
     cl_object_t             *value;
+    cl_string_list_t        *checklist_options;
     struct cl_ref_s         ref;
 };
 
@@ -118,11 +123,16 @@ struct xante_ui {
     cl_string_t             *main_menu_object_id;
 };
 
+struct xante_log {
+    cl_log_t                *log;
+};
+
 /** Library main structure */
 struct xante_app {
     struct xante_info       info;
     struct xante_runtime    runtime;
     struct xante_ui         ui;
+    struct xante_log        log;
     struct cl_ref_s         ref;
 };
 

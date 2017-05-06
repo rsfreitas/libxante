@@ -40,6 +40,8 @@
 #define APPLICATION_NAME    "name"
 #define PLUGIN_NAME         "plugin"
 #define CONFIG_PATHNAME     "config_pathname"
+#define LOG_PATHNAME        "log_pathname"
+#define LOG_LEVEL           "log_level"
 #define JTF_VERSION         "version"
 #define JTF_REVISION        "revision"
 #define JTF_BUILD           "build"
@@ -55,6 +57,8 @@
 #define CONFIG_ITEM         "config_item"
 #define HELP                "help"
 #define ITEMS               "items"
+#define OPTIONS             "options"
+#define DEFAULT_VALUE       "default_value"
 
 static int fill_info(cl_json_t *node, const char *subnode_name, void **data)
 {
@@ -104,6 +108,8 @@ static int parse_jtf_info(cl_json_t *jtf, struct xante_app *xpp)
     fill_info(general, APPLICATION_NAME, (void **)&xpp->info.application_name);
     fill_info(general, PLUGIN_NAME, (void **)&xpp->info.plugin_name);
     fill_info(general, CONFIG_PATHNAME, (void **)&xpp->info.cfg_pathname);
+    fill_info(general, LOG_PATHNAME, (void **)&xpp->info.log_pathname);
+    fill_info(general, LOG_LEVEL, (void **)&xpp->info.log_level);
     fill_info(general, JTF_VERSION, (void **)&xpp->info.version);
     fill_info(general, JTF_REVISION, (void **)&xpp->info.revision);
     fill_info(general, JTF_BUILD, (void **)&xpp->info.build);
@@ -115,6 +121,7 @@ static int parse_jtf_info(cl_json_t *jtf, struct xante_app *xpp)
 static int parse_menu_item(cl_json_t *item, struct xante_menu *menu)
 {
     struct xante_item *i;
+    cl_string_t *default_value = NULL;
 
     i = ui_new_xante_item();
 
@@ -125,10 +132,16 @@ static int parse_menu_item(cl_json_t *item, struct xante_menu *menu)
     fill_info(item, TYPE, (void **)&i->type);
     fill_info(item, MODE, (void **)&i->mode);
     fill_info(item, HELP, (void **)&i->help);
+    fill_info(item, OPTIONS, (void **)&i->options);
+    fill_info(item, DEFAULT_VALUE, (void **)&default_value);
     fill_info(item, CONFIG_BLOCK, (void **)&i->config_block);
     fill_info(item, CONFIG_ITEM, (void **)&i->config_item);
 
+    ui_adjusts_item_info(i, default_value);
     cl_list_unshift(menu->items, i, -1);
+
+    if (default_value != NULL)
+        cl_string_unref(default_value);
 
     return 0;
 }
@@ -270,6 +283,12 @@ void jtf_release_info(struct xante_app *xpp)
 
     if (xpp->info.cfg_pathname != NULL)
         cl_string_unref(xpp->info.cfg_pathname);
+
+    if (xpp->info.log_pathname != NULL)
+        cl_string_unref(xpp->info.log_pathname);
+
+    if (xpp->info.log_level != NULL)
+        cl_string_unref(xpp->info.log_level);
 
     if (xpp->info.application_name != NULL)
         cl_string_unref(xpp->info.application_name);

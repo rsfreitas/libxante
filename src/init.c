@@ -42,11 +42,11 @@ static void destroy_xante_app(const struct cl_ref_s *ref)
     if (NULL == xpp)
         return;
 
-    printf("%s\n", __FUNCTION__);
+    xante_info(cl_tr("Finishing application"));
     ui_uninit(xpp);
     jtf_release_info(xpp);
+    log_uninit(xpp);
     free(xpp);
-    printf("%s\n", __FUNCTION__);
 }
 
 static struct xante_app *new_xante_app(void)
@@ -105,12 +105,16 @@ __PUB_API__ xante_t *xante_init(const char *jtf_pathname, bool use_plugin)
     /* Start user modifications monitoring */
 
     /* Start log file */
+    log_init(xpp);
 
     /* Call the plugin initialization function or disable its using */
     if (use_plugin == false)
         xante_runtime_set_execute_plugin(xpp, false);
     else {
     }
+
+    xante_info(cl_tr("Initializing application - %s"),
+               cl_string_valueof(xpp->info.application_name));
 
     return xpp;
 
@@ -130,7 +134,6 @@ __PUB_API__ int xante_uninit(xante_t *xpp)
     }
 
     cl_ref_dec(&x->ref);
-    printf("%s\n", __FUNCTION__);
 
     return 0;
 }

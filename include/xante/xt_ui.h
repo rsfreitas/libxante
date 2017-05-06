@@ -42,6 +42,7 @@ void ui_xante_menu_unref(struct xante_menu *menu);
 struct xante_menu *ui_new_xante_menu(enum xante_menu_creator creator);
 void ui_init(struct xante_app *xpp);
 void ui_uninit(struct xante_app *xpp);
+void ui_adjusts_item_info(struct xante_item *item, cl_string_t *default_value);
 #endif
 
 int xante_ui_run(xante_t *xpp);

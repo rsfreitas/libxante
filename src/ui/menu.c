@@ -1,6 +1,6 @@
 
 /*
- * Description:
+ * Description: Handles the menu dialog.
  *
  * Author: Rodrigo Freitas
  * Created at: Fri May  5 21:08:15 2017
@@ -33,29 +33,102 @@
  *
  */
 
+/* A structure to be used while mapping lists */
+struct list_data {
+    int total;
+    int name_size;
+    int item_size;
+};
+
 static int check_item_availability(cl_list_node_t *node, void *a)
 {
     struct xante_item *item = cl_list_node_content(node);
-    int *total = (int *)a;
+    struct list_data *ld = (struct list_data *)a;
 
     if (is_item_available(item))
-        (*total)++;
+        ld->total++;
 
     return 0;
 }
 
 static int calc_menu_items(const struct xante_menu *menu)
 {
-    int total = 0;
+    struct list_data ld = {
+        .total = 0,
+    };
 
-    cl_list_map(menu->items, check_item_availability, &total);
+    cl_list_map(menu->items, check_item_availability, &ld);
 
-    return total;
+    return ld.total;
+}
+
+static bool item_may_have_value(const struct xante_item *item)
+{
+    switch (item->type) {
+        /*
+         * These are all dialogs that may have values and their values are
+         * viewed beside its name inside a menu. So the user may know its
+         * current value.
+         */
+        case XANTE_UI_DIALOG_INPUT_INT:
+        case XANTE_UI_DIALOG_INPUT_FLOAT:
+        case XANTE_UI_DIALOG_INPUT_STRING:
+        case XANTE_UI_DIALOG_INPUT_DATE:
+        case XANTE_UI_DIALOG_INPUT_TIME:
+        case XANTE_UI_DIALOG_INPUT_PASSWD:
+        case XANTE_UI_DIALOG_CALENDAR:
+        case XANTE_UI_DIALOG_TIMEBOX:
+        case XANTE_UI_DIALOG_RADIO_CHECKLIST:
+        case XANTE_UI_DIALOG_YES_NO:
+            return true;
+
+        default:
+            break;
+    }
+
+    return false;
+}
+
+static int check_item_width(cl_list_node_t *node, void *a)
+{
+    struct xante_item *item = cl_list_node_content(node);
+    struct list_data *ld = (struct list_data *)a;
+    int length = 0;
+    char *s = NULL;
+
+    length = cl_string_length(item->name);
+
+    if (length > ld->name_size)
+        ld->name_size = length;
+
+    /* We only check items that may have values */
+    if (item_may_have_value(item) == true) {
+        s = dialog_get_item_value_as_text(item);
+        length = strlen(s);
+        free(s);
+
+        if (length > ld->item_size)
+            ld->item_size = length;
+    }
+
+    return 0;
 }
 
 static int calc_menu_width(const struct xante_menu *menu)
 {
-    return 0;
+    int w = 0;
+    struct list_data ld = {
+        .name_size = 0,
+        .item_size = 0,
+    };
+
+    cl_list_map(menu->items, check_item_width, &ld);
+    w = (ld.name_size + ld.item_size) + WINDOW_BORDER_SIZE;
+
+    if (w < MINIMUM_WIDTH)
+        w = MINIMUM_WIDTH;
+
+    return (w == 0) ? MINIMUM_WIDTH : w;
 }
 
 static void calc_menu_limits(const struct xante_menu *menu, int *lines,
@@ -64,12 +137,54 @@ static void calc_menu_limits(const struct xante_menu *menu, int *lines,
     *total = calc_menu_items(menu);
     *items = dialog_get_dlg_items(*total);
     *width = calc_menu_width(menu);
-    *lines = *items;
+    *lines = *items + DIALOG_HEIGHT_WITHOUT_TEXT;
 }
 
-static DIALOG_LISTITEM *prepare_dialog_content(const struct xante_menu *menu)
+static int add_item_content(unsigned int index, cl_list_node_t *node, void *a)
 {
-    return NULL;
+    struct xante_item *item = cl_list_node_content(node);
+    DIALOG_LISTITEM *litems = (DIALOG_LISTITEM *)a;
+    DIALOG_LISTITEM *listitem = NULL;
+    char *value = NULL;
+
+    if (is_item_available(item) == false)
+        return 0;
+
+    /* Fills litems[index] with item content */
+    listitem = &litems[index];
+    value = dialog_get_item_value_as_text(item);
+
+    if (NULL == value)
+        listitem->text = strdup("");
+    else
+        listitem->text = value;
+
+    listitem->name = strdup(cl_string_valueof(item->name));
+    listitem->help = strdup("");
+    listitem->state = 0;
+
+    /* XXX: This is from our libdialog fork */
+//    listitem->custom_highlight = 0;
+//    listitem->idx_highlight = 0;
+
+    return 0;
+}
+
+static DIALOG_LISTITEM *prepare_dialog_content(const struct xante_menu *menu,
+    int total_items)
+{
+    DIALOG_LISTITEM *litems = NULL;
+
+    litems = calloc(total_items, sizeof(DIALOG_LISTITEM));
+
+    if (NULL == litems) {
+        errno_set(XANTE_ERROR_NO_MEMORY);
+        return NULL;
+    }
+
+    cl_list_map_indexed(menu->items, add_item_content, litems);
+
+    return litems;
 }
 
 static void prepare_dialog_look(struct xante_app *xpp,
@@ -95,6 +210,13 @@ static void release_dialog_look(void)
 
 static void release_dialog_content(DIALOG_LISTITEM *listitem, int total_items)
 {
+    int i;
+
+    for (i = 0; i < total_items; i++) {
+        free(listitem[i].name);
+        free(listitem[i].help);
+        free(listitem[i].text);
+    }
 }
 
 /*
@@ -134,7 +256,7 @@ int ui_dialog_menu(struct xante_app *xpp, const struct xante_menu *menu,
         calc_menu_limits(menu, &dlg_lines, &dlg_width, &items_to_select,
                          &total_items);
 
-        dlg_items = prepare_dialog_content(menu);
+        dlg_items = prepare_dialog_content(menu, total_items);
         prepare_dialog_look(xpp, cancel_label);
         ret_dialog = dlg_menu(cl_string_valueof(menu->name), "", dlg_lines,
                               dlg_width, items_to_select, total_items,
@@ -146,7 +268,11 @@ int ui_dialog_menu(struct xante_app *xpp, const struct xante_menu *menu,
 
             case DLG_EXIT_ESC:
             case DLG_EXIT_CANCEL:
-                loop = true;
+                /* Are we leaving the application? */
+                if (strcmp(cancel_label, MAIN_MENU_CANCEL_LABEL) == 0) {
+                }
+
+                loop = false;
                 break;
 
             case DLG_EXIT_HELP:

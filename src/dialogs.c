@@ -62,8 +62,6 @@ __PUB_API__ int xante_ui_set_backtitle(xante_t *xpp)
 
 __PUB_API__ int xante_ui_clear_backtitle(xante_t *xpp)
 {
-    struct xante_app *x = (struct xante_app *)xpp;
-
     errno_clear();
 
     if (NULL == xpp) {

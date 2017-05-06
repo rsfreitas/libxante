@@ -77,7 +77,8 @@ bool is_valid_ui_dialog(enum xante_ui_dialog type)
         case XANTE_UI_DIALOG_INPUT_TIME:
         case XANTE_UI_DIALOG_CALENDAR:
         case XANTE_UI_DIALOG_TIMEBOX:
-        case XANTE_UI_DIALOG_OPTION:
+        case XANTE_UI_DIALOG_CHECKLIST:
+        case XANTE_UI_DIALOG_RADIO_CHECKLIST:
         case XANTE_UI_DIALOG_YES_NO:
         case XANTE_UI_DIALOG_CUSTOM:
         case XANTE_UI_DIALOG_DYNAMIC_MENU:
@@ -94,6 +95,8 @@ bool is_valid_ui_dialog(enum xante_ui_dialog type)
 /**
  * @name is_available_item
  * @brief Checks if a specific item is available to the user.
+ *
+ * Its mode must be different of XANTE_ACCESS_HIDDEN to be available.
  *
  * @param [in] item: The item to be checked.
  *

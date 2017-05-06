@@ -71,11 +71,16 @@ static void destroy_xante_item(const struct cl_ref_s *ref)
     if (item->help != NULL)
         cl_string_unref(item->help);
 
+    if (item->options != NULL)
+        cl_string_unref(item->options);
+
     if (item->value != NULL)
         cl_object_unref(item->value);
 
+    if (item->default_value != NULL)
+        cl_object_unref(item->default_value);
+
     free(item);
-    printf("Libera item\n");
 }
 
 static void destroy_xante_menu(const struct cl_ref_s *ref)
@@ -95,7 +100,6 @@ static void destroy_xante_menu(const struct cl_ref_s *ref)
         cl_list_destroy(menu->items);
 
     free(menu);
-    printf("Libera menu\n");
 }
 
 /*
@@ -297,6 +301,34 @@ void ui_uninit(struct xante_app *xpp)
         cl_list_destroy(xpp->ui.menus);
 }
 
+/**
+ * @name ui_adjusts_item_info
+ * @brief Do some adjustments inside an item after its informations is
+ *        completely loaded.
+ *
+ * For example, here we must split a checklist options into a cl_string_list_t
+ * object.
+ *
+ * @param [in,out] item: The item to be adjusted.
+ */
+void ui_adjusts_item_info(struct xante_item *item, cl_string_t *default_value)
+{
+    if (default_value != NULL)
+        item->default_value = cl_object_from_cstring(default_value);
+
+    switch (item->type) {
+        case XANTE_UI_DIALOG_RADIO_CHECKLIST:
+        case XANTE_UI_DIALOG_CHECKLIST:
+            if (item->options != NULL)
+                item->checklist_options = cl_string_split(item->options, "|");
+
+            break;
+
+        default:
+            break;
+    }
+}
+
 /*
  *
  * API
@@ -344,7 +376,6 @@ end_block:
     dialog_uninit();
     xante_runtime_set_ui_active(xpp, false);
 
-    printf("%s\n", __FUNCTION__);
     return 0;
 }
 
