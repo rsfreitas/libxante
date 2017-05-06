@@ -34,7 +34,11 @@ static const char *__description[] = {
     cl_tr_noop("Unable to parse JTF file"),
     cl_tr_noop("JTF file has no 'general' object"),
     cl_tr_noop("JTF object was not found"),
-    cl_tr_noop("JTF object has no value")
+    cl_tr_noop("JTF object has no value"),
+    cl_tr_noop("JTF file has no 'items' object"),
+    cl_tr_noop("JTF file has no 'menu' object"),
+    cl_tr_noop("JTF file has no 'ui' object"),
+    cl_tr_noop("UI has not been initialized")
 };
 
 static const char *__unknown_error = cl_tr_noop("Unknown error");

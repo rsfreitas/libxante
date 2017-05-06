@@ -1,5 +1,5 @@
 .PHONY: shared static clean dest_clean install outputdirs purge \
-    dext_install install_headers
+    dev_install install_headers
 
 CC = gcc
 AR = ar
@@ -42,12 +42,15 @@ ifeq ($(gccversion), 5)
 endif
 
 LIBDIR =
-LIBS = -lcollections
+LIBS = -lcollections -ldialog -lncursesw
 
 VPATH = ../include:.
 
 C_FILES := $(wildcard *.c)
-OBJS = $(C_FILES:.c=.o)
+UI_FILES = $(wildcard ui/*.c)
+OBJS = 		\
+	$(C_FILES:.c=.o)	\
+	$(UI_FILES:.c=.o)
 
 shared: outputdirs $(OBJS)
 	$(CC) -shared -Wl,-soname,$(SONAME),--version-script,$(PREFIX).sym -o $(TARGET_SHARED) $(OBJS) $(LIBDIR) $(LIBS)
@@ -77,6 +80,6 @@ install_headers:
 	$(shell for f in `ls ../include/xante/xt_*.h | egrep -v '^xt_internal.h'`; do cp -f $$f /usr/local/include/xante; done)
 	cp -f ../include/libxante.h /usr/local/include
 
-dext_install: install_headers install
+dev_install: install_headers install
 
 

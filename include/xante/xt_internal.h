@@ -27,6 +27,10 @@
 #ifndef _LIBXANTE_XT_INTERNAL_H
 #define _LIBXANTE_XT_INTERNAL_H             1
 
+#ifndef DIALOG_H_included
+# include <dialog.h>
+#endif
+
 /*
  * An internal representation of a public function. It does not affect the code
  * or the function visibility. Its objective is only to let clear what is and
@@ -53,10 +57,10 @@ enum xante_menu_creator {
 
 /** Application informations loaded from the JSON file (general object) */
 struct xante_info {
-    char            *cfg_pathname;
-    char            *application_name;
-    char            *plugin_name;
-    char            *version;
+    cl_string_t     *cfg_pathname;
+    cl_string_t     *application_name;
+    cl_string_t     *plugin_name;
+    cl_string_t     *version;
     int             revision;
     int             build;
     bool            beta;
@@ -80,25 +84,45 @@ struct xante_runtime {
 
 /** UI Menu Item informations */
 struct xante_item {
-    char                    **attr;
+    /* JTF objects */
+    enum xante_access_mode  mode;
+    enum xante_ui_dialog    type;
+    cl_string_t             *name;
+    cl_string_t             *object_id;
+    cl_string_t             *config_block;
+    cl_string_t             *config_item;
+    cl_string_t             *help;
+
+    /* Internal */
+    cl_object_t             *value;
     struct cl_ref_s         ref;
 };
 
 /** UI Menu informations */
 struct xante_menu {
-    char                    *name;
-    char                    *object_id;
-    enum xante_menu_creator creator;
-    bool                    move_to_menus_to_be_released;
-    cl_list_t               *items;
-    struct cl_ref_s         ref;
+    /* JTF objects */
+    cl_string_t                 *name;
+    cl_string_t                 *object_id;
+    enum xante_access_mode      mode;
+
+    /* Internal */
+    enum xante_menu_creator     creator;
+    bool                        move_to_be_released;
+    cl_list_t                   *items;
+    struct cl_ref_s             ref;
+};
+
+/** UI informations */
+struct xante_ui {
+    cl_list_t               *menus;
+    cl_string_t             *main_menu_object_id;
 };
 
 /** Library main structure */
 struct xante_app {
     struct xante_info       info;
     struct xante_runtime    runtime;
-    cl_list_t               *menu;
+    struct xante_ui         ui;
     struct cl_ref_s         ref;
 };
 

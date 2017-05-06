@@ -31,6 +31,26 @@
 # include <collections.h>
 #endif
 
+/** Supported UI dialogs */
+enum xante_ui_dialog {
+    XANTE_UI_DIALOG_UNKNOWN,
+    XANTE_UI_DIALOG_MENU,
+    XANTE_UI_DIALOG_INPUT_INT,
+    XANTE_UI_DIALOG_INPUT_FLOAT,
+    XANTE_UI_DIALOG_INPUT_DATE,
+    XANTE_UI_DIALOG_INPUT_STRING,
+    XANTE_UI_DIALOG_INPUT_PASSWD,
+    XANTE_UI_DIALOG_INPUT_TIME,
+    XANTE_UI_DIALOG_CALENDAR,
+    XANTE_UI_DIALOG_TIMEBOX,
+    XANTE_UI_DIALOG_OPTION,
+    XANTE_UI_DIALOG_YES_NO,
+    XANTE_UI_DIALOG_CUSTOM,
+    XANTE_UI_DIALOG_DYNAMIC_MENU,
+    XANTE_UI_DIALOG_RM_DYNAMIC_MENU
+};
+
+/** A possible state from the application config file */
 enum xante_config_file_status {
     XANTE_CFG_ST_UNKNOWN,
     XANTE_CFG_ST_CREATED,
@@ -39,6 +59,14 @@ enum xante_config_file_status {
     XANTE_CFG_ST_UNSAVED
 };
 
+/** A access mode from a menu or a menu item */
+enum xante_access_mode {
+    XANTE_ACCESS_HIDDEN     = 0,
+    XANTE_ACCESS_VIEW       = (1 << 0),
+    XANTE_ACCESS_EDIT       = (1 << 1)
+};
+
+/** The library main object */
 typedef void                xante_t;
 
 #ifdef LIBXANTE_COMPILE

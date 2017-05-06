@@ -26,3 +26,59 @@
 
 #include "libxante.h"
 
+/*
+ *
+ * API
+ *
+ */
+
+__PUB_API__ int xante_ui_set_backtitle(xante_t *xpp)
+{
+    struct xante_app *x = (struct xante_app *)xpp;
+    cl_string_t *title = NULL;
+
+    errno_clear();
+
+    if (NULL == xpp) {
+        errno_set(XANTE_ERROR_NULL_ARG);
+        return -1;
+    }
+
+    if (xante_runtime_ui_active(xpp) == false) {
+        errno_set(XANTE_ERROR_UI_NOT_INITIALIZED);
+        return -1;
+    }
+
+    title = cl_string_create(cl_tr("%s - Version %s.%d.%d %s"),
+                             cl_string_valueof(x->info.application_name),
+                             cl_string_valueof(x->info.version),
+                             x->info.revision, x->info.build,
+                             (x->info.beta == true) ? "BETA" : "");
+
+    dialog_vars.backtitle = strdup(cl_string_valueof(title));
+
+    return 0;
+}
+
+__PUB_API__ int xante_ui_clear_backtitle(xante_t *xpp)
+{
+    struct xante_app *x = (struct xante_app *)xpp;
+
+    errno_clear();
+
+    if (NULL == xpp) {
+        errno_set(XANTE_ERROR_NULL_ARG);
+        return -1;
+    }
+
+    if (xante_runtime_ui_active(xpp) == false) {
+        errno_set(XANTE_ERROR_UI_NOT_INITIALIZED);
+        return -1;
+    }
+
+    free(dialog_vars.backtitle);
+    dialog_vars.backtitle = NULL;
+
+    return 0;
+}
+

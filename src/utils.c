@@ -56,3 +56,54 @@ bool is_valid_config_file_status(enum xante_config_file_status status)
     return false;
 }
 
+/**
+ * @name is_valid_ui_dialog
+ * @brief Checks if a given dialog type is valid inside the library
+ *        environment.
+ *
+ * @param [in] type: The dialog type to be checked.
+ *
+ * @return Returns true if is a valid dialog type or false otherwise.
+ */
+bool is_valid_ui_dialog(enum xante_ui_dialog type)
+{
+    switch (type) {
+        case XANTE_UI_DIALOG_MENU:
+        case XANTE_UI_DIALOG_INPUT_INT:
+        case XANTE_UI_DIALOG_INPUT_FLOAT:
+        case XANTE_UI_DIALOG_INPUT_DATE:
+        case XANTE_UI_DIALOG_INPUT_STRING:
+        case XANTE_UI_DIALOG_INPUT_PASSWD:
+        case XANTE_UI_DIALOG_INPUT_TIME:
+        case XANTE_UI_DIALOG_CALENDAR:
+        case XANTE_UI_DIALOG_TIMEBOX:
+        case XANTE_UI_DIALOG_OPTION:
+        case XANTE_UI_DIALOG_YES_NO:
+        case XANTE_UI_DIALOG_CUSTOM:
+        case XANTE_UI_DIALOG_DYNAMIC_MENU:
+        case XANTE_UI_DIALOG_RM_DYNAMIC_MENU:
+            return true;
+
+        default:
+            break;
+    }
+
+    return false;
+}
+
+/**
+ * @name is_available_item
+ * @brief Checks if a specific item is available to the user.
+ *
+ * @param [in] item: The item to be checked.
+ *
+ * @return Returns true if the item is available or false otherwise.
+ */
+bool is_item_available(struct xante_item *item)
+{
+    if (item->mode == XANTE_ACCESS_HIDDEN)
+        return false;
+
+    return true;
+}
+

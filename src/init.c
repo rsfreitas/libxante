@@ -42,7 +42,11 @@ static void destroy_xante_app(const struct cl_ref_s *ref)
     if (NULL == xpp)
         return;
 
+    printf("%s\n", __FUNCTION__);
+    ui_uninit(xpp);
+    jtf_release_info(xpp);
     free(xpp);
+    printf("%s\n", __FUNCTION__);
 }
 
 static struct xante_app *new_xante_app(void)
@@ -55,6 +59,8 @@ static struct xante_app *new_xante_app(void)
         errno_set(XANTE_ERROR_NO_MEMORY);
         return NULL;
     }
+
+    ui_init(xpp);
 
     /* Initialize the reference count */
     xpp->ref.count = 1;
@@ -112,7 +118,20 @@ error_block:
     return NULL;
 }
 
-__PUB_API__ void xante_uninit(void)
+__PUB_API__ int xante_uninit(xante_t *xpp)
 {
+    struct xante_app *x = (struct xante_app *)xpp;
+
+    errno_clear();
+
+    if (NULL == xpp) {
+        errno_set(XANTE_ERROR_NULL_ARG);
+        return -1;
+    }
+
+    cl_ref_dec(&x->ref);
+    printf("%s\n", __FUNCTION__);
+
+    return 0;
 }
 

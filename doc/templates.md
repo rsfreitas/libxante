@@ -25,15 +25,17 @@ it may reference an application skeleton.
         "build":
         "beta":
     },
-    "main_menu": "object_id",
     "ui": {
+        "main_menu": "object_id",
         "menus": [
             {
                 "name": "Main",
                 "object_id": "",
                 "id": 9999,
-                "itens": [
+                "mode":,
+                "items": [
                     {
+                        "mode":
                         "default_value":,
                         "config_block":,
                         "config_name":,
@@ -45,7 +47,7 @@ it may reference an application skeleton.
                 "name": "Debug",
                 "object_id":
                 "id":
-                "itens": [
+                "items": [
                     {
                         "default_value":,
                         "config_block":,
@@ -58,7 +60,7 @@ it may reference an application skeleton.
                 "name": "Help",
                 "object_id":
                 "id":
-                "itens": [
+                "items": [
                     {
                         "default_value":,
                         "config_block":,

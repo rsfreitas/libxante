@@ -35,6 +35,7 @@
 
 /* Internal library declarations */
 bool is_valid_config_file_status(enum xante_config_file_status status);
+bool is_valid_ui_dialog(enum xante_ui_dialog type);
 
 #endif
 

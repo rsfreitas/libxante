@@ -37,5 +37,8 @@
 
 #endif
 
+int xante_ui_set_backtitle(xante_t *xpp);
+int xante_ui_clear_backtitle(xante_t *xpp);
+
 #endif
 

@@ -3,7 +3,7 @@
  * Description:
  *
  * Author: Rodrigo Freitas
- * Created at: Tue May  2 21:07:38 2017
+ * Created at: Fri May  5 21:08:21 2017
  * Project: libxante
  *
  * Copyright (C) 2017 Rodrigo Freitas
@@ -23,18 +23,4 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  * USA
  */
-
-#ifndef _LIBXANTE_XT_INIT_H
-#define _LIBXANTE_XT_INIT_H          1
-
-#ifndef LIBXANTE_COMPILE
-# ifndef _LIBXANTE_H
-#  error "Never use <xt_init.h> directly; include <libxante.h> instead."
-# endif
-#endif
-
-xante_t *xante_init(const char *jtf_pathname, bool use_plugin);
-int xante_uninit(xante_t *xpp);
-
-#endif
 

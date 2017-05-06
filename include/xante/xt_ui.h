@@ -39,10 +39,12 @@ void ui_xante_item_unref(struct xante_item *item);
 struct xante_item *ui_new_xante_item(void);
 void ui_xante_menu_ref(struct xante_menu *menu);
 void ui_xante_menu_unref(struct xante_menu *menu);
-struct xante_menu *ui_new_xante_menu(const char *name, const char *object_id,
-                                     enum xante_menu_creator creator);
-
+struct xante_menu *ui_new_xante_menu(enum xante_menu_creator creator);
+void ui_init(struct xante_app *xpp);
+void ui_uninit(struct xante_app *xpp);
 #endif
+
+int xante_ui_run(xante_t *xpp);
 
 #endif
 

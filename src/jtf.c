@@ -35,6 +35,7 @@
  *
  */
 
+/* JTF object names */
 #define GENERAL             "general"
 #define APPLICATION_NAME    "name"
 #define PLUGIN_NAME         "plugin"
@@ -43,6 +44,17 @@
 #define JTF_REVISION        "revision"
 #define JTF_BUILD           "build"
 #define JTF_BETA            "beta"
+#define UI                  "ui"
+#define MAIN_MENU           "main_menu"
+#define MENUS               "menus"
+#define NAME                "name"
+#define OBJECT_ID           "object_id"
+#define MODE                "mode"
+#define TYPE                "type"
+#define CONFIG_BLOCK        "config_block"
+#define CONFIG_ITEM         "config_item"
+#define HELP                "help"
+#define ITEMS               "items"
 
 static int fill_info(cl_json_t *node, const char *subnode_name, void **data)
 {
@@ -67,7 +79,7 @@ static int fill_info(cl_json_t *node, const char *subnode_name, void **data)
     type = cl_json_get_object_type(subnode);
 
     if (type == CL_JSON_STRING)
-        *data = strdup(cl_string_valueof(value));
+        *data = cl_string_ref(value);
     else if (type == CL_JSON_NUMBER)
         *data = (void **)cl_string_to_int(value);
     else if (type == CL_JSON_TRUE)
@@ -100,8 +112,88 @@ static int parse_jtf_info(cl_json_t *jtf, struct xante_app *xpp)
     return 0;
 }
 
+static int parse_menu_item(cl_json_t *item, struct xante_menu *menu)
+{
+    struct xante_item *i;
+
+    i = ui_new_xante_item();
+
+    if (NULL == i)
+        return -1;
+
+    fill_info(item, NAME, (void **)&i->name);
+    fill_info(item, TYPE, (void **)&i->type);
+    fill_info(item, MODE, (void **)&i->mode);
+    fill_info(item, HELP, (void **)&i->help);
+    fill_info(item, CONFIG_BLOCK, (void **)&i->config_block);
+    fill_info(item, CONFIG_ITEM, (void **)&i->config_item);
+
+    cl_list_unshift(menu->items, i, -1);
+
+    return 0;
+}
+
+static int parse_ui_menu(cl_json_t *menu, struct xante_app *xpp)
+{
+    cl_json_t *items;
+    int i, t;
+    struct xante_menu *m = NULL;
+
+    m = ui_new_xante_menu(XANTE_MENU_CREATED_FROM_JTF);
+
+    if (NULL == m)
+        return -1;
+
+    fill_info(menu, NAME, (void **)&m->name);
+    fill_info(menu, OBJECT_ID, (void **)&m->object_id);
+    fill_info(menu, MODE, (void **)&m->mode);
+    items = cl_json_get_object_item(menu, ITEMS);
+
+    if (NULL == items) {
+        errno_set(XANTE_ERROR_JTF_NO_ITEMS_OBJECT);
+        return -1;
+    }
+
+    t = cl_json_get_array_size(items);
+
+    for (i = 0; i < t; i++)
+        if (parse_menu_item(cl_json_get_array_item(items, i), m) < 0)
+            return -1;
+
+    cl_list_unshift(xpp->ui.menus, m, -1);
+
+    return 0;
+}
+
 static int parse_ui(cl_json_t *jtf, struct xante_app *xpp)
 {
+    cl_json_t *ui, *node;
+    int i, t;
+
+    ui = cl_json_get_object_item(jtf, UI);
+
+    if (NULL == ui) {
+        errno_set(XANTE_ERROR_JTF_NO_UI_OBJECT);
+        return -1;
+    }
+
+    /* menus */
+    node = cl_json_get_object_item(ui, MENUS);
+
+    if (NULL == node) {
+        errno_set(XANTE_ERROR_JTF_NO_MENUS_OBJECT);
+        return -1;
+    }
+
+    t = cl_json_get_array_size(node);
+
+    for (i = 0; i < t; i++)
+        if (parse_ui_menu(cl_json_get_array_item(node, i), xpp) < 0)
+            return -1;
+
+    /* main menu */
+    fill_info(ui, MAIN_MENU, (void **)&xpp->ui.main_menu_object_id);
+
     return 0;
 }
 
@@ -155,6 +247,11 @@ int jtf_parse(const char *pathname, struct xante_app *xpp)
 
     /* Translate the JSON format to our menus and its items */
     ret = parse_jtf_json(jtf, xpp);
+
+    /*
+     * FIXME: libcollections shares the same errno variable with us,
+     *        and it's cleaning it here. we must fix there.
+     */
     cl_json_delete(jtf);
 
     return ret;
@@ -172,15 +269,15 @@ void jtf_release_info(struct xante_app *xpp)
         return;
 
     if (xpp->info.cfg_pathname != NULL)
-        free(xpp->info.cfg_pathname);
+        cl_string_unref(xpp->info.cfg_pathname);
 
     if (xpp->info.application_name != NULL)
-        free(xpp->info.application_name);
+        cl_string_unref(xpp->info.application_name);
 
     if (xpp->info.plugin_name != NULL)
-        free(xpp->info.plugin_name);
+        cl_string_unref(xpp->info.plugin_name);
 
     if (xpp->info.version != NULL)
-        free(xpp->info.version);
+        cl_string_unref(xpp->info.version);
 }
 
