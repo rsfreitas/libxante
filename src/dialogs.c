@@ -49,7 +49,7 @@ __PUB_API__ int xante_ui_set_backtitle(xante_t *xpp)
         return -1;
     }
 
-    title = cl_string_create(cl_tr("%s - Version %s.%d.%d %s"),
+    title = cl_string_create(cl_tr("%s - Version %s.%d Build %d %s"),
                              cl_string_valueof(x->info.application_name),
                              cl_string_valueof(x->info.version),
                              x->info.revision, x->info.build,

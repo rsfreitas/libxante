@@ -110,3 +110,49 @@ bool is_item_available(struct xante_item *item)
     return true;
 }
 
+/**
+ * @name translate_string_dialog_type
+ * @brief Translates a string representing a dialog type to its numeric value.
+ *
+ * @param [in] type: The dialog type as a string.
+ *
+ * @return Returns the numeric value of the dialog type.
+ */
+enum xante_ui_dialog translate_string_dialog_type(const char *type)
+{
+    enum xante_ui_dialog dialog = XANTE_UI_DIALOG_UNKNOWN;
+
+    if (strcmp(type, "menu") == 0)
+        dialog = XANTE_UI_DIALOG_MENU;
+    else if (strcmp(type, "input_int") == 0)
+        dialog = XANTE_UI_DIALOG_INPUT_INT;
+    else if (strcmp(type, "input_float") == 0)
+        dialog = XANTE_UI_DIALOG_INPUT_FLOAT;
+    else if (strcmp(type, "input_date") == 0)
+        dialog = XANTE_UI_DIALOG_INPUT_DATE;
+    else if (strcmp(type, "input_string") == 0)
+        dialog = XANTE_UI_DIALOG_INPUT_STRING;
+    else if (strcmp(type, "input_passwd") == 0)
+        dialog = XANTE_UI_DIALOG_INPUT_PASSWD;
+    else if (strcmp(type, "input_TIME") == 0)
+        dialog = XANTE_UI_DIALOG_INPUT_TIME;
+    else if (strcmp(type, "calendar") == 0)
+        dialog = XANTE_UI_DIALOG_CALENDAR;
+    else if (strcmp(type, "timebox") == 0)
+        dialog = XANTE_UI_DIALOG_TIMEBOX;
+    else if (strcmp(type, "radio_cheklist") == 0)
+        dialog = XANTE_UI_DIALOG_RADIO_CHECKLIST;
+    else if (strcmp(type, "checklist") == 0)
+        dialog = XANTE_UI_DIALOG_CHECKLIST;
+    else if (strcmp(type, "yesno") == 0)
+        dialog = XANTE_UI_DIALOG_YES_NO;
+    else if (strcmp(type, "custom") == 0)
+        dialog = XANTE_UI_DIALOG_CUSTOM;
+    else if (strcmp(type, "dynamic_menu") == 0)
+        dialog = XANTE_UI_DIALOG_DYNAMIC_MENU;
+    else if (strcmp(type, "delete_dynamic_menu") == 0)
+        dialog = XANTE_UI_DIALOG_RM_DYNAMIC_MENU;
+
+    return dialog;
+}
+

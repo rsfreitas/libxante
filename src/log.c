@@ -49,7 +49,7 @@ static enum cl_log_level tr_log_level(const char *level)
         return CL_LOG_ERROR;
     else if (strcmp(level, "critical") == 0)
         return CL_LOG_CRITI;
-    else if (strcmp(level, "altert") == 0)
+    else if (strcmp(level, "alert") == 0)
         return CL_LOG_ALERT;
     else if (strcmp(level, "emergency") == 0)
         return CL_LOG_EMERG;

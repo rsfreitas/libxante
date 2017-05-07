@@ -25,11 +25,14 @@
  */
 
 #ifndef _LIBXANTE_H
-#define _LIBXANTE_H         1
+#define _LIBXANTE_H             1
 
 #ifndef _COLLECTIONS_H
 # include <collections.h>
 #endif
+
+/** Supported line break character to be used inside JTF strings */
+#define XANTE_STR_LINE_BREAK    '^'
 
 /** Supported UI dialogs */
 enum xante_ui_dialog {

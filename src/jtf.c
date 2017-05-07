@@ -73,6 +73,16 @@ static int fill_info(cl_json_t *node, const char *subnode_name, void **data)
         return -1;
     }
 
+    type = cl_json_get_object_type(subnode);
+
+    if (type == CL_JSON_TRUE) {
+        *data = (void **)true;
+        goto end_block;
+    } else if (type == CL_JSON_FALSE) {
+        *data = (void **)false;
+        goto end_block;
+    }
+
     value = cl_json_get_object_value(subnode);
 
     if (NULL == value) {
@@ -80,17 +90,12 @@ static int fill_info(cl_json_t *node, const char *subnode_name, void **data)
         return -1;
     }
 
-    type = cl_json_get_object_type(subnode);
-
     if (type == CL_JSON_STRING)
         *data = cl_string_ref(value);
     else if (type == CL_JSON_NUMBER)
         *data = (void **)cl_string_to_int(value);
-    else if (type == CL_JSON_TRUE)
-        *data = (void **)true;
-    else if (type == CL_JSON_FALSE)
-        *data = (void **)false;
 
+end_block:
     return 0;
 }
 
@@ -263,7 +268,7 @@ int jtf_parse(const char *pathname, struct xante_app *xpp)
 
     /*
      * FIXME: libcollections shares the same errno variable with us,
-     *        and it's cleaning it here. we must fix there.
+     *        and it's cleaning it here. We must fix there.
      */
     cl_json_delete(jtf);
 

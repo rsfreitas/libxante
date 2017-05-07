@@ -88,7 +88,7 @@ struct xante_runtime {
 struct xante_item {
     /* JTF objects */
     enum xante_access_mode  mode;
-    enum xante_ui_dialog    type;
+    cl_string_t             *type;
     cl_string_t             *name;
     cl_string_t             *object_id;
     cl_string_t             *config_block;
@@ -97,9 +97,12 @@ struct xante_item {
     cl_string_t             *options;
     cl_object_t             *default_value;
 
+    /* Events */
+
     /* Internal */
     cl_object_t             *value;
     cl_string_list_t        *checklist_options;
+    enum xante_ui_dialog    dialog_type;
     struct cl_ref_s         ref;
 };
 

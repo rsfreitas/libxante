@@ -115,26 +115,15 @@ static void __destroy_xante_menu(void *a)
     ui_xante_menu_unref(menu);
 }
 
-static void dialog_uninit(void)
+static int search_menu_by_object_id(cl_list_node_t *node, void *a)
 {
-    int dialog_return_value = DLG_EXIT_OK;
+    struct xante_menu *menu = cl_list_node_content(node);
+    char *object_id = (char *)a;
 
-    dlg_killall_bg(&dialog_return_value);
+    if (strcmp(cl_string_valueof(menu->object_id), object_id) == 0)
+        return 1;
 
-    if (dialog_state.screen_initialized) {
-        (void)refresh();
-        end_dialog();
-    }
-}
-
-static void dialog_init(bool temporarily)
-{
-    memset(&dialog_state, 0, sizeof(dialog_state));
-
-    if (temporarily == false)
-        memset(&dialog_vars, 0, sizeof(dialog_vars));
-
-    init_dialog(stdin, stdout);
+    return 0;
 }
 
 /*
@@ -304,7 +293,7 @@ void ui_uninit(struct xante_app *xpp)
 /**
  * @name ui_adjusts_item_info
  * @brief Do some adjustments inside an item after its informations is
- *        completely loaded.
+ *        completely loaded from the JTF file.
  *
  * For example, here we must split a checklist options into a cl_string_list_t
  * object.
@@ -313,10 +302,13 @@ void ui_uninit(struct xante_app *xpp)
  */
 void ui_adjusts_item_info(struct xante_item *item, cl_string_t *default_value)
 {
+    item->dialog_type =
+        translate_string_dialog_type(cl_string_valueof(item->type));
+
     if (default_value != NULL)
         item->default_value = cl_object_from_cstring(default_value);
 
-    switch (item->type) {
+    switch (item->dialog_type) {
         case XANTE_UI_DIALOG_RADIO_CHECKLIST:
         case XANTE_UI_DIALOG_CHECKLIST:
             if (item->options != NULL)
@@ -327,6 +319,36 @@ void ui_adjusts_item_info(struct xante_item *item, cl_string_t *default_value)
         default:
             break;
     }
+}
+
+/**
+ * @name ui_search_menu_by_object_id
+ * @brief Searches a xante_menu structure inside the main menu list which have
+ *        a specific object_id.
+ *
+ * @param [in] xpp: The main library object.
+ * @param [in] object_it_to_search: The menu object_id which will be used to
+ *                                  search.
+ *
+ * @return On success, i.e, the menu is found, returns a pointer to its
+ *         xante_menu structure or NULL otherwise.
+ */
+struct xante_menu *ui_search_menu_by_object_id(const struct xante_app *xpp,
+    const char *object_id_to_search)
+{
+    cl_list_node_t *node = NULL;
+    struct xante_menu *menu = NULL;
+
+    node = cl_list_map(xpp->ui.menus, search_menu_by_object_id,
+                       (void *)object_id_to_search);
+
+    if (NULL == node)
+        return NULL;
+
+    menu = cl_list_node_content(node);
+    cl_list_node_unref(node);
+
+    return menu;
 }
 
 /*

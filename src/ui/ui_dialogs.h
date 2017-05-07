@@ -42,6 +42,9 @@
 /* Dialog without text */
 #define DIALOG_HEIGHT_WITHOUT_TEXT  6
 
+/* Message box window without text */
+#define MSGBOX_HEIGHT_WITHOUT_TEXT  4
+
 /* Maximum number of items of a dialog */
 #define MAX_DLG_ITEMS               15
 
@@ -62,13 +65,24 @@
     ((item->value != NULL) ? item->value : item->default_value)
 
 /* utils.c */
+void dialog_uninit(void);
+void dialog_init(bool temporarily);
 void dialog_set_backtitle(void);
 char *dialog_get_item_value_as_text(const struct xante_item *item);
+int dialog_count_lines_by_delimiters(const char *text);
+int dialog_count_lines(const char *text, int width);
+bool dialog_question(struct xante_app *xpp, const char *title, const char *msg,
+                     const char *button1_label, const char *button2_label);
+
+void dialog_update_cancel_button_label(void);
 
 /* menu */
 int ui_dialog_menu(struct xante_app *xpp, const struct xante_menu *menu,
                    const char *cancel_label, bool remove_item_from_menu,
                    struct xante_item *selected_item);
+
+/* yesno */
+bool ui_dialog_yesno(struct xante_app *xpp, struct xante_item *item);
 
 #endif
 

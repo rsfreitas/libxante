@@ -13,59 +13,66 @@ it may reference an application skeleton.
 ```
 {
     "internal": {
-        "revision":,
-        "language":
+        "revision": int
+        "language": string
     },
     "general": {
-        "name":
-        "plugin":
-        "config_pathname":
-        "version":
-        "revision":
-        "build":
-        "beta":
+        "name": string
+        "plugin": string
+        "config_pathname": string
+        "log_pathname": string
+        "log_level": string
+        "version": string
+        "revision": int
+        "build": int
+        "beta": bool
     },
     "ui": {
-        "main_menu": "object_id",
+        "main_menu": string
         "menus": [
             {
-                "name": "Main",
-                "object_id": "",
-                "id": 9999,
-                "mode":,
+                "name": string
+                "object_id": string
+                "mode": int
                 "items": [
                     {
-                        "mode":
-                        "default_value":,
-                        "config_block":,
-                        "config_name":,
-                        "type":
+                        "mode": int
+                        "default_value": string
+                        "config_block": string
+                        "config_name": string
+                        "type": string
+                        "options": string
+                        "name": string
                     }
                 ]
             },
             {
-                "name": "Debug",
-                "object_id":
-                "id":
+                "name": string
+                "object_id": string
                 "items": [
                     {
-                        "default_value":,
-                        "config_block":,
-                        "config_name":,
-                        "type":
+                        "mode": int
+                        "default_value": string
+                        "config_block": string
+                        "config_name": string
+                        "type": string
+                        "options": string
+                        "name": string
                     }
                 ]
             },
             {
-                "name": "Help",
-                "object_id":
-                "id":
+                "name": string
+                "object_id": string
                 "items": [
                     {
-                        "default_value":,
-                        "config_block":,
-                        "config_name":,
-                        "type":
+                        "mode": int
+                        "default_value": string
+                        "config_block": string
+                        "config_name": string
+                        "type": string
+                        "options": string
+                        "name": string
                     }
                 ]
             }
