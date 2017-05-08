@@ -267,3 +267,29 @@ void dialog_update_cancel_button_label(void)
     dialog_vars.cancel_label = strdup(cl_tr("Back"));
 }
 
+/**
+ * @name dialog_free_input
+ * @brief Releases the dialog input buffer previously allocated.
+ */
+void dialog_free_input(void)
+{
+    if (dialog_vars.input_result != NULL) {
+        free(dialog_vars.input_result);
+        dialog_vars.input_result = NULL;
+    }
+}
+
+/**
+ * @name dialog_alloc_input
+ * @brief Allocates the dialog input buffer.
+ *
+ * @param [in] bytes: The input size in bytes.
+ */
+void dialog_alloc_input(unsigned int bytes)
+{
+    if (dialog_vars.input_result != NULL)
+        dialog_free_input();
+
+    dialog_vars.input_result = calloc(bytes, sizeof(char));
+}
+

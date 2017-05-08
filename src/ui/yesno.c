@@ -52,7 +52,7 @@ bool ui_dialog_yesno(struct xante_app *xpp, struct xante_item *item)
     int choice = -1, height, ret_dialog = DLG_EXIT_OK;
 
     /* Prepare dialog */
-    xante_ui_set_backtitle(xpp);
+    dialog_set_backtitle();
     dialog_update_cancel_button_label();
 
     /* Sets the button labels using the item value */

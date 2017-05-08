@@ -75,6 +75,8 @@ bool dialog_question(struct xante_app *xpp, const char *title, const char *msg,
                      const char *button1_label, const char *button2_label);
 
 void dialog_update_cancel_button_label(void);
+void dialog_free_input(void);
+void dialog_alloc_input(unsigned int bytes);
 
 /* menu */
 int ui_dialog_menu(struct xante_app *xpp, const struct xante_menu *menu,
@@ -83,6 +85,14 @@ int ui_dialog_menu(struct xante_app *xpp, const struct xante_menu *menu,
 
 /* yesno */
 bool ui_dialog_yesno(struct xante_app *xpp, struct xante_item *item);
+
+/* calendar */
+bool ui_dialog_calendar(struct xante_app *xpp, struct xante_item *item,
+                        bool edit_value);
+
+/* timebox */
+bool ui_dialog_timebox(struct xante_app *xpp, struct xante_item *item,
+                       bool edit_value);
 
 #endif
 

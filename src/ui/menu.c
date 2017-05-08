@@ -200,7 +200,7 @@ static void prepare_dialog_look(struct xante_app *xpp,
         dialog_vars.timeout_secs = timeout;
 }
 
-static void release_dialog_look(void)
+static void release_dialog_labels(void)
 {
     if (dialog_vars.cancel_label != NULL) {
         free(dialog_vars.cancel_label);
@@ -246,13 +246,13 @@ static bool call_input_dialog(struct xante_app *xpp,
 static bool call_calendar_dialog(struct xante_app *xpp,
     struct xante_item *selected_item, bool edit_value)
 {
-    return false;
+    return ui_dialog_calendar(xpp, selected_item, edit_value);
 }
 
 static bool call_timebox_dialog(struct xante_app *xpp,
     struct xante_item *selected_item, bool edit_value)
 {
-    return false;
+    return ui_dialog_timebox(xpp, selected_item, edit_value);
 }
 
 static bool call_checklist_dialog(struct xante_app *xpp,
@@ -375,7 +375,7 @@ int ui_dialog_menu(struct xante_app *xpp, const struct xante_menu *menu,
     int ret_dialog = DLG_EXIT_OK, items_to_select = 0, total_items = 0,
         dlg_width = 0, selected_index = -1, dlg_lines = 0;
 
-    release_dialog_look();
+    release_dialog_labels();
 
     do {
         if (xante_runtime_close_ui(xpp) == true)
@@ -421,7 +421,7 @@ int ui_dialog_menu(struct xante_app *xpp, const struct xante_menu *menu,
                 break;
         }
 
-        release_dialog_look();
+        release_dialog_labels();
         release_dialog_content(dlg_items, total_items);
     } while (loop);
 
