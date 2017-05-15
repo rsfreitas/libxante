@@ -3,7 +3,7 @@
  * Description:
  *
  * Author: Rodrigo Freitas
- * Created at: Fri May  5 21:08:15 2017
+ * Created at: Mon May  8 21:03:34 2017
  * Project: libxante
  *
  * Copyright (C) 2017 Rodrigo Freitas
@@ -23,4 +23,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  * USA
  */
+
+#include "libxante.h"
+#include "addon_dialogs.h"
 

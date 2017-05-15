@@ -26,6 +26,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 
 #include "libxante.h"
 
@@ -59,12 +60,21 @@
 #define ITEMS               "items"
 #define OPTIONS             "options"
 #define DEFAULT_VALUE       "default_value"
+#define INPUT_RANGES        "input_ranges"
+#define STRING_LENGTH       "string_length"
+#define MAX_RANGE           "max"
+#define MIN_RANGE           "min"
 
-static int fill_info(cl_json_t *node, const char *subnode_name, void **data)
+static int fill_info(cl_json_t *node, const char *subnode_name, ...)
 {
+    va_list ap;
     cl_json_t *subnode = NULL;
-    cl_string_t *value = NULL;
+    cl_string_t *value = NULL, *s = NULL;
     enum cl_json_type type;
+    bool *b, btrue = true, bfalse = false;
+    int *i, i_tmp;
+    float *f, f_tmp;
+    void **pp;
 
     subnode = cl_json_get_object_item(node, subnode_name);
 
@@ -73,13 +83,20 @@ static int fill_info(cl_json_t *node, const char *subnode_name, void **data)
         return -1;
     }
 
+    va_start(ap, NULL);
     type = cl_json_get_object_type(subnode);
 
     if (type == CL_JSON_TRUE) {
-        *data = (void **)true;
+        b = va_arg(ap, bool *);
+        memcpy(b, &btrue, sizeof(bool));
         goto end_block;
     } else if (type == CL_JSON_FALSE) {
-        *data = (void **)false;
+        b = va_arg(ap, bool *);
+        memcpy(b, &bfalse, sizeof(bool));
+        goto end_block;
+    } else if (type == CL_JSON_ARRAY) {
+        pp = va_arg(ap, void **);
+        *pp = subnode;
         goto end_block;
     }
 
@@ -90,12 +107,23 @@ static int fill_info(cl_json_t *node, const char *subnode_name, void **data)
         return -1;
     }
 
-    if (type == CL_JSON_STRING)
-        *data = cl_string_ref(value);
-    else if (type == CL_JSON_NUMBER)
-        *data = (void **)cl_string_to_int(value);
+    if (type == CL_JSON_STRING) {
+        pp = va_arg(ap, void **);
+        s = cl_string_ref(value);
+        *pp = s;
+    } else if (type == CL_JSON_NUMBER) {
+        i = va_arg(ap, int *);
+        i_tmp = cl_string_to_int(value);
+        memcpy(i, &i_tmp, sizeof(int));
+    } else if (type == CL_JSON_NUMBER_FLOAT) {
+        f = va_arg(ap, float *);
+        f_tmp = cl_string_to_float(value);
+        memcpy(f, &f_tmp, sizeof(float));
+    }
 
 end_block:
+    va_end(ap);
+
     return 0;
 }
 
@@ -123,10 +151,39 @@ static int parse_jtf_info(cl_json_t *jtf, struct xante_app *xpp)
     return 0;
 }
 
+static int parse_item_input_ranges(cl_json_t *item, struct xante_item *i,
+    void **max, void **min)
+{
+    cl_json_t *input_range = NULL;
+
+    /*
+     * Dont't need to parse if we're not an input item.
+     *
+     * XXX: We just need to remember that the 'type' object must be previously
+     *      loaded.
+     */
+    if (is_input_item(i->type) == false)
+        return 0;
+
+    input_range = cl_json_get_object_item(item, INPUT_RANGES);
+
+    if (NULL == input_range) {
+        errno_set(XANTE_ERROR_JTF_NO_INPUT_RANGES);
+        return -1;
+    }
+
+    fill_info(input_range, STRING_LENGTH, (void **)&i->string_length);
+    fill_info(input_range, MIN_RANGE, min);
+    fill_info(input_range, MAX_RANGE, max);
+
+    return 0;
+}
+
 static int parse_menu_item(cl_json_t *item, struct xante_menu *menu)
 {
     struct xante_item *i;
     cl_string_t *default_value = NULL;
+    void *options = NULL, *max = NULL, *min = NULL;
 
     i = ui_new_xante_item();
 
@@ -137,12 +194,15 @@ static int parse_menu_item(cl_json_t *item, struct xante_menu *menu)
     fill_info(item, TYPE, (void **)&i->type);
     fill_info(item, MODE, (void **)&i->mode);
     fill_info(item, HELP, (void **)&i->help);
-    fill_info(item, OPTIONS, (void **)&i->options);
+    fill_info(item, OPTIONS, (void **)&options);
     fill_info(item, DEFAULT_VALUE, (void **)&default_value);
     fill_info(item, CONFIG_BLOCK, (void **)&i->config_block);
     fill_info(item, CONFIG_ITEM, (void **)&i->config_item);
 
-    ui_adjusts_item_info(i, default_value);
+    if (parse_item_input_ranges(item, i, &max, &min) < 0)
+        return -1;
+
+    ui_adjusts_item_info(i, default_value, options, max, min);
     cl_list_unshift(menu->items, i, -1);
 
     if (default_value != NULL)

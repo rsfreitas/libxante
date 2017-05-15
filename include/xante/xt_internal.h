@@ -31,6 +31,10 @@
 # include <dialog.h>
 #endif
 
+#ifndef DLG_KEYS_H_included
+# include <dlg_keys.h>
+#endif
+
 /*
  * An internal representation of a public function. It does not affect the code
  * or the function visibility. Its objective is only to let clear what is and
@@ -94,14 +98,22 @@ struct xante_item {
     cl_string_t             *config_block;
     cl_string_t             *config_item;
     cl_string_t             *help;
-    cl_string_t             *options;
     cl_object_t             *default_value;
 
     /* Events */
 
+    /* Input range */
+    /* TODO: use cl_spec_t for data ranges */
+    cl_object_t             *min;
+    cl_object_t             *max;
+    int                     string_length;
+    cl_spec_t               *value_spec;
+
     /* Internal */
+    cl_string_t             *options;
     cl_object_t             *value;
     cl_string_list_t        *checklist_options;
+    int                     dialog_checklist_type;
     enum xante_ui_dialog    dialog_type;
     struct cl_ref_s         ref;
 };

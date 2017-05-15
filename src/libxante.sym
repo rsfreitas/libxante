@@ -34,6 +34,7 @@ LIBXANTE_0.1 {
         xante_ui_run;
         xante_ui_suspend;
         xante_ui_continue;
+        xante_theme_set;
     local:
         *;
 };

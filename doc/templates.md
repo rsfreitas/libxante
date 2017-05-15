@@ -39,40 +39,16 @@ it may reference an application skeleton.
                         "mode": int
                         "default_value": string
                         "config_block": string
-                        "config_name": string
+                        "config_item": string
                         "type": string
-                        "options": string
-                        "name": string
-                    }
-                ]
-            },
-            {
-                "name": string
-                "object_id": string
-                "items": [
-                    {
-                        "mode": int
-                        "default_value": string
-                        "config_block": string
-                        "config_name": string
-                        "type": string
-                        "options": string
-                        "name": string
-                    }
-                ]
-            },
-            {
-                "name": string
-                "object_id": string
-                "items": [
-                    {
-                        "mode": int
-                        "default_value": string
-                        "config_block": string
-                        "config_name": string
-                        "type": string
-                        "options": string
-                        "name": string
+                        "options": string/array of strings
+                        "name": string,
+                        "help": string
+                        "input_ranges": {
+                            "string_length": int
+                            "max": int/float
+                            "min": int/float
+                        }
                     }
                 ]
             }

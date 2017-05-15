@@ -33,5 +33,18 @@
 # endif
 #endif
 
+/**
+ * @name xante_set_theme
+ * @brief Sets the UI color theme.
+ *
+ * This function receives a \a pathname with a dialog's RC file to be used as
+ * the UI color theme.
+ *
+ * @param [in] pathname: The dialog's RC file pathname.
+ *
+ * @return On success returns 0 or -1 otherwise.
+ */
+int xante_theme_set(const char *pathname);
+
 #endif
 

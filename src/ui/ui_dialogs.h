@@ -29,7 +29,7 @@
 
 #ifndef LIBXANTE_COMPILE
 # ifndef _LIBXANTE_H
-#  error "Never use <xt_dialogs.h> directly; include <libxante.h> instead."
+#  error "Never use <ui_dialogs.h> directly; include <libxante.h> instead."
 # endif
 #endif
 
@@ -44,6 +44,9 @@
 
 /* Message box window without text */
 #define MSGBOX_HEIGHT_WITHOUT_TEXT  4
+
+/* Form dialog without text */
+#define FORM_HEIGHT_WITHOUT_TEXT    7
 
 /* Maximum number of items of a dialog */
 #define MAX_DLG_ITEMS               15
@@ -63,6 +66,13 @@
 /* Just gives us the right item value */
 #define item_value(item)            \
     ((item->value != NULL) ? item->value : item->default_value)
+
+/* Maximum number of characters that a user may type */
+#define MAX_INPUT_VALUE             1024
+
+/* Default ranges */
+#define DATE_MAX_INPUT_LENGTH       10
+#define TIME_MAX_INPUT_LENGTH       8
 
 /* utils.c */
 void dialog_uninit(void);
@@ -93,6 +103,14 @@ bool ui_dialog_calendar(struct xante_app *xpp, struct xante_item *item,
 /* timebox */
 bool ui_dialog_timebox(struct xante_app *xpp, struct xante_item *item,
                        bool edit_value);
+
+/* checklist */
+bool ui_dialog_checklist(struct xante_app *xpp, struct xante_item *item,
+                         bool edit_value);
+
+/* passwd */
+int ui_dialog_passwd(struct xante_item *item, bool edit_value, char *input,
+                     unsigned int input_length, int height, cl_string_t *text);
 
 #endif
 

@@ -3,7 +3,7 @@
  * Description:
  *
  * Author: Rodrigo Freitas
- * Created at: Wed May  3 11:19:24 2017
+ * Created at: Mon May  8 21:03:35 2017
  * Project: libxante
  *
  * Copyright (C) 2017 Rodrigo Freitas
@@ -25,36 +25,5 @@
  */
 
 #include "libxante.h"
-
-/*
- *
- * Internal functions
- *
- */
-
-/*
- *
- * Internal API
- *
- */
-
-/*
- *
- * API
- *
- */
-
-__PUB_API__ int xante_theme_set(const char *pathname)
-{
-    errno_clear();
-
-    if (NULL == pathname) {
-        errno_set(XANTE_ERROR_NULL_ARG);
-        return -1;
-    }
-
-    setenv("DIALOGRC", pathname, 1);
-
-    return 0;
-}
+#include "addon_dialogs.h"
 

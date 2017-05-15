@@ -79,6 +79,8 @@ static void split_item_value(struct xante_item *item, int *hour, int *minutes,
  *
  * @param [in] xpp: The main library object.
  * @param [in] item: The item to be used inside the dialog.
+ * @param [in] edit_value: A flag to indicate if the value will be editable
+ *                         or not.
  *
  * @return Returns a boolean value indicating if the item's value has been
  *         changed (true) or not (false).

@@ -24,3 +24,143 @@
  * USA
  */
 
+#include "libxante.h"
+#include "ui_dialogs.h"
+
+/*
+ *
+ * Internal functions
+ *
+ */
+
+static DIALOG_LISTITEM *prepare_dialog_content(struct xante_item *item,
+    int total_items)
+{
+    DIALOG_LISTITEM *litems = NULL, *listitem = NULL;
+    int index, total, current_value;
+    cl_string_t *option = NULL;
+
+    litems = calloc(total_items, sizeof(DIALOG_LISTITEM));
+
+    if (NULL == litems) {
+        errno_set(XANTE_ERROR_NO_MEMORY);
+        return NULL;
+    }
+
+    current_value = CL_OBJECT_AS_INT(item_value(item));
+    total = cl_string_list_size(item->checklist_options);
+
+    for (index = 0; index < total; index++) {
+        listitem = &litems[index];
+        option = cl_string_list_get(item->checklist_options, index);
+
+        listitem->name = "";
+        listitem->help = "";
+        listitem->text = strdup(cl_string_valueof(option));
+
+        if (((item->dialog_checklist_type == FLAG_RADIO) &&
+             ((int)index == current_value)) ||
+            ((item->dialog_checklist_type == FLAG_CHECK) &&
+             ((int)pow(2, index) & current_value)))
+        {
+            listitem->state = 1;
+        } else
+            listitem->state = 0;
+
+        cl_string_unref(option);
+    }
+
+    return litems;
+}
+
+static void release_dialog_content(DIALOG_LISTITEM *listitem, int total_items)
+{
+    int i;
+
+    for (i = 0; i < total_items; i++)
+        free(listitem[i].text);
+}
+
+static void calc_checklist_limits(const struct xante_item *item, int *options,
+    int *height, int *list_height)
+{
+    *list_height = cl_string_list_size(item->checklist_options);
+    *options = dialog_get_dlg_items(*list_height);
+
+    /* XXX: This 1 is from the dialog text message. */
+    *height = *options + DIALOG_HEIGHT_WITHOUT_TEXT + 1;
+}
+
+/*
+ *
+ * Internal API
+ *
+ */
+
+/**
+ * @name ui_dialog_checklist
+ * @brief Creates a dialog to choose an option inside a list of options.
+ *
+ * @param [in] xpp: The main library object.
+ * @param [in] item: The item to be used inside the dialog.
+ * @param [in] edit_value: A flag to indicate if the value will be editable
+ *                         or not.
+ *
+ * @return Returns a boolean value indicating if the item's value has been
+ *         changed (true) or not (false).
+ */
+bool ui_dialog_checklist(struct xante_app *xpp, struct xante_item *item,
+    bool edit_value)
+{
+    bool loop = true, value_changed = false;
+    int ret_dialog = DLG_EXIT_OK, list_options_height = 0, height = 0,
+        number_of_options = 0, selected_index = -1;
+    DIALOG_LISTITEM *dlg_items = NULL;
+
+    /* Prepare dialog */
+    dialog_set_backtitle();
+    dialog_update_cancel_button_label();
+
+    /* Prepares dialog content */
+    calc_checklist_limits(item, &number_of_options, &height,
+                          &list_options_height);
+
+    dlg_items = prepare_dialog_content(item, list_options_height);
+
+    /* Enables the help button */
+    if (item->help != NULL)
+        dialog_vars.help_button = 1;
+
+    do {
+        ret_dialog = dlg_checklist(cl_string_valueof(item->name),
+                                   cl_tr("Choose an option"), height,
+                                   MINIMUM_WIDTH, list_options_height,
+                                   number_of_options, dlg_items, " X",
+                                   item->dialog_checklist_type,
+                                   &selected_index);
+
+        switch (ret_dialog) {
+            case DLG_EXIT_OK:
+                loop = false;
+                value_changed = true;
+                /* TODO: Update value */
+                break;
+
+            case DLG_EXIT_ESC:
+            case DLG_EXIT_CANCEL:
+                loop = false;
+                break;
+
+            case DLG_EXIT_HELP:
+                break;
+        }
+    } while (loop);
+
+    if (item->help != NULL)
+        dialog_vars.help_button = 0;
+
+    release_dialog_content(dlg_items, list_options_height);
+
+    return value_changed;
+}
+

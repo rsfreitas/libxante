@@ -52,6 +52,8 @@ enum xante_ui_dialog {
     XANTE_UI_DIALOG_CUSTOM,
     XANTE_UI_DIALOG_DYNAMIC_MENU,
     XANTE_UI_DIALOG_RM_DYNAMIC_MENU
+//    XANTE_UI_DIALOG_RANGE,
+//    XANTE_UI_DIALOG_FORM
 };
 
 /** A possible state from the application config file */

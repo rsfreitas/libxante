@@ -140,7 +140,7 @@ enum xante_ui_dialog translate_string_dialog_type(const char *type)
         dialog = XANTE_UI_DIALOG_CALENDAR;
     else if (strcmp(type, "timebox") == 0)
         dialog = XANTE_UI_DIALOG_TIMEBOX;
-    else if (strcmp(type, "radio_cheklist") == 0)
+    else if (strcmp(type, "radio_checklist") == 0)
         dialog = XANTE_UI_DIALOG_RADIO_CHECKLIST;
     else if (strcmp(type, "checklist") == 0)
         dialog = XANTE_UI_DIALOG_CHECKLIST;
@@ -154,5 +154,48 @@ enum xante_ui_dialog translate_string_dialog_type(const char *type)
         dialog = XANTE_UI_DIALOG_RM_DYNAMIC_MENU;
 
     return dialog;
+}
+
+/**
+ * @name is_input_item
+ * @brief Checks if an item is of an input kind.
+ *
+ * @param [in] type: The item type, in a cl_string_t format.
+ *
+ * @return Returns true is is an input kind or false if not.
+ */
+bool is_input_item(const cl_string_t *type)
+{
+    enum xante_ui_dialog dlg_type;
+
+    dlg_type = translate_string_dialog_type(cl_string_valueof(type));
+
+    switch (dlg_type) {
+        case XANTE_UI_DIALOG_INPUT_INT:
+        case XANTE_UI_DIALOG_INPUT_FLOAT:
+        case XANTE_UI_DIALOG_INPUT_DATE:
+        case XANTE_UI_DIALOG_INPUT_STRING:
+        case XANTE_UI_DIALOG_INPUT_PASSWD:
+        case XANTE_UI_DIALOG_INPUT_TIME:
+            return true;
+
+        default:
+            break;
+    }
+
+    return false;
+}
+
+/**
+ * @name idigits
+ * @brief Gets the number of digits of an integer number.
+ *
+ * @param [in] n: The integer number.
+ *
+ * @return Returns the number of digits.
+ */
+int idigits(int n)
+{
+    return floor(log10(abs(n))) + 1;
 }
 

@@ -80,6 +80,15 @@ static void destroy_xante_item(const struct cl_ref_s *ref)
     if (item->default_value != NULL)
         cl_object_unref(item->default_value);
 
+    if (item->min != NULL)
+        cl_object_unref(item->min);
+
+    if (item->max != NULL)
+        cl_object_unref(item->max);
+
+    if (item->checklist_options != NULL)
+        cl_string_list_destroy(item->checklist_options);
+
     free(item);
 }
 
@@ -299,9 +308,19 @@ void ui_uninit(struct xante_app *xpp)
  * object.
  *
  * @param [in,out] item: The item to be adjusted.
+ * @param [in] default_value: A default value loaded from the JTF.
+ * @param [in] options: The options value loaded from the JTF.
+ * @param [in] max_range: The maximum range of an input item.
+ * @param [in] min_range: The minimum range of an input item.
  */
-void ui_adjusts_item_info(struct xante_item *item, cl_string_t *default_value)
+void ui_adjusts_item_info(struct xante_item *item, cl_string_t *default_value,
+    void *options, void *max_range, void *min_range)
 {
+    int i, t, i_max, i_min;
+    float f_max, f_min;
+    cl_json_t *node = NULL;
+    cl_string_t *value = NULL;
+
     item->dialog_type =
         translate_string_dialog_type(cl_string_valueof(item->type));
 
@@ -311,14 +330,59 @@ void ui_adjusts_item_info(struct xante_item *item, cl_string_t *default_value)
     switch (item->dialog_type) {
         case XANTE_UI_DIALOG_RADIO_CHECKLIST:
         case XANTE_UI_DIALOG_CHECKLIST:
-            if (item->options != NULL)
-                item->checklist_options = cl_string_split(item->options, "|");
+            if (options != NULL) {
+                t = cl_json_get_array_size(options);
+                item->checklist_options = cl_string_list_create();
 
+                for (i = 0; i < t; i++) {
+                    node = cl_json_get_array_item(options, i);
+                    value = cl_json_get_object_value(node);
+                    cl_string_list_add(item->checklist_options, value);
+                }
+            }
+
+            item->dialog_checklist_type =
+                (item->dialog_type == XANTE_UI_DIALOG_CHECKLIST) ? FLAG_CHECK
+                                                                 : FLAG_RADIO;
+
+            break;
+
+        case XANTE_UI_DIALOG_INPUT_DATE:
+            item->string_length = DATE_MAX_INPUT_LENGTH;
+            break;
+
+        case XANTE_UI_DIALOG_INPUT_TIME:
+            item->string_length = TIME_MAX_INPUT_LENGTH;
+            break;
+
+        case XANTE_UI_DIALOG_INPUT_INT:
+            i_min = *(int *)&min_range;
+            i_max = *(int *)&max_range;
+            item->min = cl_object_create(CL_INT, i_min);
+            item->max = cl_object_create(CL_INT, i_max);
+            break;
+
+        case XANTE_UI_DIALOG_INPUT_FLOAT:
+            f_min = *(float *)&min_range;
+            f_max = *(float *)&max_range;
+            item->min = cl_object_create(CL_FLOAT, f_min);
+            item->max = cl_object_create(CL_FLOAT, f_max);
             break;
 
         default:
             break;
     }
+
+    if ((item->dialog_type != XANTE_UI_DIALOG_CHECKLIST) &&
+        (item->dialog_type != XANTE_UI_DIALOG_RADIO_CHECKLIST))
+    {
+        if (options != NULL)
+            item->options = cl_string_ref(options);
+    }
+
+    if (is_input_item(item->type) == true)
+        item->value_spec = cl_spec_create(CL_READABLE | CL_WRITABLE, item->min,
+                                          item->max, item->string_length);
 }
 
 /**

@@ -240,7 +240,7 @@ static void call_menu_dialog(struct xante_app *xpp,
 static bool call_input_dialog(struct xante_app *xpp,
     struct xante_item *selected_item, bool edit_value)
 {
-    return false;
+    return ui_dialog_input(xpp, selected_item, edit_value);
 }
 
 static bool call_calendar_dialog(struct xante_app *xpp,
@@ -258,7 +258,7 @@ static bool call_timebox_dialog(struct xante_app *xpp,
 static bool call_checklist_dialog(struct xante_app *xpp,
     struct xante_item *selected_item, bool edit_value)
 {
-    return false;
+    return ui_dialog_checklist(xpp, selected_item, edit_value);
 }
 
 static bool call_yesno_dialog(struct xante_app *xpp,
@@ -269,7 +269,7 @@ static bool call_yesno_dialog(struct xante_app *xpp,
 
 static void call_selected_item(struct xante_app *xpp,
     const struct xante_menu *menu, cl_list_node_t *selected_item_node,
-    DIALOG_LISTITEM *dlg_item, bool remove_item_from_menu)
+    bool remove_item_from_menu)
 {
     bool update_internal_menus = false, edit_item_value = true;
     struct xante_item *selected_item = cl_list_node_content(selected_item_node);
@@ -394,7 +394,6 @@ int ui_dialog_menu(struct xante_app *xpp, const struct xante_menu *menu,
             case DLG_EXIT_OK:
                 call_selected_item(xpp, menu,
                                    cl_list_at(menu->items, selected_index),
-                                   &dlg_items[selected_index],
                                    remove_item_from_menu);
 
                 break;
