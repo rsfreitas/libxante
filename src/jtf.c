@@ -244,6 +244,7 @@ static int parse_menu_item(cl_json_t *item, struct xante_menu *menu)
     fill_info(item, HELP, (void **)&i->help);
     fill_info(item, OPTIONS, (void **)&options);
     fill_info(item, DEFAULT_VALUE, (void **)&default_value);
+    fill_info(item, OBJECT_ID, (void **)&i->object_id);
     parse_item_config(item, i);
 
     if (parse_item_input_ranges(item, i, &max, &min) < 0)

@@ -223,7 +223,7 @@ static void release_dialog_content(DIALOG_LISTITEM *listitem, int total_items)
 }
 
 static void call_menu_dialog(struct xante_app *xpp,
-    struct xante_item *selected_item)
+    struct xante_item *selected_item, bool remove_item_from_menu)
 {
     struct xante_menu *menu = NULL;
     char *btn_cancel_label = NULL;
@@ -235,8 +235,10 @@ static void call_menu_dialog(struct xante_app *xpp,
         return;
     }
 
-    btn_cancel_label = strdup(cl_tr("Cancel"));
-    ui_dialog_menu(xpp, menu, btn_cancel_label, true, selected_item);
+    btn_cancel_label = strdup(cl_tr("Back"));
+    ui_dialog_menu(xpp, menu, btn_cancel_label, remove_item_from_menu,
+                   selected_item);
+
     free(btn_cancel_label);
 }
 
@@ -297,7 +299,7 @@ static void call_selected_item(struct xante_app *xpp,
     switch (selected_item->dialog_type) {
         case XANTE_UI_DIALOG_MENU:
         case XANTE_UI_DIALOG_DYNAMIC_MENU:
-            call_menu_dialog(xpp, selected_item);
+            call_menu_dialog(xpp, selected_item, remove_item_from_menu);
             break;
 
         case XANTE_UI_DIALOG_INPUT_INT:
@@ -411,7 +413,8 @@ int ui_dialog_menu(struct xante_app *xpp, const struct xante_menu *menu,
                     {
                         loop = false;
                     }
-                }
+                } else
+                    loop = false;
 
                 break;
 
