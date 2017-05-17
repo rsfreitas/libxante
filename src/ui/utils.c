@@ -175,10 +175,13 @@ bool dialog_question(struct xante_app *xpp, const char *title, const char *msg,
 {
     cl_string_t *form_msg = NULL;
     int width = 45, lines = 0;
-    bool ret_value = false;
+    bool ret_value = false, dialog_needs_closing = false;
 
-    if (xante_runtime_ui_active(xpp) == false)
+    if (xante_runtime_ui_active(xpp) == false) {
         dialog_init(false);
+        xante_runtime_set_ui_active(xpp, true);
+        dialog_needs_closing = true;
+    }
 
     dialog_set_backtitle(xpp);
     dialog_vars.yes_label = (char *)button1_label;
@@ -194,8 +197,10 @@ bool dialog_question(struct xante_app *xpp, const char *title, const char *msg,
     } else
         ret_value = false;
 
-    if (xante_runtime_ui_active(xpp) == false)
+    if (dialog_needs_closing == true) {
         dialog_uninit();
+        xante_runtime_set_ui_active(xpp, false);
+    }
 
     cl_string_unref(form_msg);
 

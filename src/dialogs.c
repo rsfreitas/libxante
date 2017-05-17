@@ -106,9 +106,14 @@ __PUB_API__ int xante_ui_set_backtitle(xante_t *xpp)
         return -1;
     }
 
-    right = cl_string_create("[%s%c] %s", cl_string_valueof(x->auth.username),
-                             (change_has_occourred(xpp) == true) ? '*' : ' ',
-                             cl_string_valueof(x->info.company));
+    if (change_has_occourred(xpp)) {
+        right = cl_string_create("[%s*] %s",
+                                 cl_string_valueof(x->auth.username),
+                                 cl_string_valueof(x->info.company));
+    } else
+        right = cl_string_create("[%s] %s",
+                                 cl_string_valueof(x->auth.username),
+                                 cl_string_valueof(x->info.company));
 
     left = cl_string_create(cl_tr("%s - Version %s.%d Build %d %s"),
                             cl_string_valueof(x->info.application_name),
