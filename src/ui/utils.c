@@ -123,10 +123,8 @@ char *dialog_get_item_value_as_text(const struct xante_item *item)
         case XANTE_UI_DIALOG_INPUT_STRING:
             value = cl_object_to_cstring(item_value(item));
 
-            if ((value != NULL) && (cl_string_length(value) > 0)) {
+            if ((value != NULL) && (cl_string_length(value) > 0))
                 text = strdup(cl_string_valueof(value));
-                cl_string_unref(value);
-            }
 
             break;
 
@@ -134,10 +132,8 @@ char *dialog_get_item_value_as_text(const struct xante_item *item)
             index = CL_OBJECT_AS_INT(item_value(item));
             value = cl_string_list_get(item->checklist_options, index);
 
-            if (value != NULL) {
+            if (value != NULL)
                 text = strdup(cl_string_valueof(value));
-                cl_string_unref(value);
-            }
 
             break;
 
@@ -154,6 +150,9 @@ char *dialog_get_item_value_as_text(const struct xante_item *item)
         default:
             break;
     }
+
+    if (value != NULL)
+        cl_string_unref(value);
 
     return text;
 }

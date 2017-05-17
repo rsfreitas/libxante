@@ -59,6 +59,9 @@ static void destroy_xante_item(const struct cl_ref_s *ref)
     if (item->name != NULL)
         cl_string_unref(item->name);
 
+    if (item->type != NULL)
+        cl_string_unref(item->type);
+
     if (item->object_id != NULL)
         cl_string_unref(item->object_id);
 
@@ -88,6 +91,9 @@ static void destroy_xante_item(const struct cl_ref_s *ref)
 
     if (item->checklist_options != NULL)
         cl_string_list_destroy(item->checklist_options);
+
+    if (item->value_spec != NULL)
+        cl_spec_destroy(item->value_spec);
 
     free(item);
 }
@@ -377,7 +383,7 @@ void ui_adjusts_item_info(struct xante_item *item, cl_string_t *default_value,
         (item->dialog_type != XANTE_UI_DIALOG_RADIO_CHECKLIST))
     {
         if (options != NULL)
-            item->options = cl_string_ref(options);
+            item->options = options;
     }
 
     if (is_input_item(item->type) == true)

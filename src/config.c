@@ -177,7 +177,7 @@ static int save_menu_config(cl_list_node_t *node, void *a)
 static int write_config(struct xante_app *xpp, int ui_return_status)
 {
     if (need_to_write_config_file(xpp, ui_return_status) == false)
-        return 0;
+        goto end_block;
 
     /* Do we need to ask the user for saving the changes? */
     if (xante_runtime_show_config_saving_question(xpp) == true) {
@@ -203,13 +203,15 @@ static int write_config(struct xante_app *xpp, int ui_return_status)
     cl_cfg_sync(xpp->config.cfg_file, xpp->config.filename);
     xante_debug("%s", cl_strerror(cl_get_last_error()));
     xante_runtime_set_config_file_status(xpp, XANTE_CFG_ST_SAVED);
-    free(xpp->config.filename);
 
     if (change_has_occourred(xpp) == true) {
         /* TODO: Run plugin changes event */
     }
 
 end_block:
+    if (xpp->config.filename != NULL)
+        free(xpp->config.filename);
+
     cl_cfg_unload(xpp->config.cfg_file);
     return 0;
 }

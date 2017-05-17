@@ -54,8 +54,8 @@ static DIALOG_LISTITEM *prepare_dialog_content(struct xante_item *item,
         listitem = &litems[index];
         option = cl_string_list_get(item->checklist_options, index);
 
-        listitem->name = "";
-        listitem->help = "";
+        listitem->name = strdup("");
+        listitem->help = strdup("");
         listitem->text = strdup(cl_string_valueof(option));
 
         if (((item->dialog_checklist_type == FLAG_RADIO) &&
@@ -77,8 +77,13 @@ static void release_dialog_content(DIALOG_LISTITEM *listitem, int total_items)
 {
     int i;
 
-    for (i = 0; i < total_items; i++)
+    for (i = 0; i < total_items; i++) {
         free(listitem[i].text);
+        free(listitem[i].name);
+        free(listitem[i].help);
+    }
+
+    free(listitem);
 }
 
 static void calc_checklist_limits(const struct xante_item *item, int *options,

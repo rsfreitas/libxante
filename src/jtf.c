@@ -411,5 +411,8 @@ void jtf_release_info(struct xante_app *xpp)
 
     if (xpp->info.version != NULL)
         cl_string_unref(xpp->info.version);
+
+    if (xpp->info.company != NULL)
+        cl_string_unref(xpp->info.company);
 }
 

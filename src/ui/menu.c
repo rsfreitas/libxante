@@ -220,6 +220,8 @@ static void release_dialog_content(DIALOG_LISTITEM *listitem, int total_items)
         free(listitem[i].help);
         free(listitem[i].text);
     }
+
+    free(listitem);
 }
 
 static void call_menu_dialog(struct xante_app *xpp,
