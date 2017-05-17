@@ -37,6 +37,7 @@ LIBXANTE_0.1 {
         xante_theme_set;
         xante_load_config;
         xante_write_config;
+        xante_messagebox;
     local:
         *;
 };

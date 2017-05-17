@@ -181,38 +181,35 @@ __PUB_API__ int xante_ui_clear_backtitle(xante_t *xpp)
  */
 __PUB_API__ int xante_messagebox(struct xante_app *xpp,
     enum xante_msgbox_type type, enum xante_buttons buttons __attribute__((unused)),
-    const char *title,
-    const char *message, ...)
+    const char *title, const char *message, ...)
 {
     va_list ap;
     char *msg = NULL;
     enum xante_buttons key;
     int height = 0, ret_dialog;
     cl_string_t *real_msg = NULL;
-
-    errno_clear();
-
-    if (NULL == xpp) {
-        errno_set(XANTE_ERROR_NULL_ARG);
-        return -1;
-    }
+    bool dialog_needs_close = false;
 
     va_start(ap, message);
     vasprintf(&msg, message, ap);
     va_end(ap);
 
-    if (xante_runtime_ui_active(xpp) == false)
+    if ((NULL == xpp) || (xante_runtime_ui_active(xpp) == false)) {
         dialog_init(true);
+        dialog_needs_close = true;
+    }
 
     real_msg = cl_string_create("%s", msg);
     cl_string_rplchr(real_msg, XANTE_STR_LINE_BREAK, '\n');
     height = dialog_count_lines(msg, MINIMUM_WIDTH);
 
-    xante_info("MSGBOX: %s", msg);
+    if (xpp != NULL)
+        xante_info("MSGBOX: %s", msg);
+
     ret_dialog = xante_dlg_messagebox(MINIMUM_WIDTH, height, type, title,
                                       cl_string_valueof(real_msg));
 
-    if (xante_runtime_ui_active(xpp) == false)
+    if (dialog_needs_close == true)
         dialog_uninit();
 
     if (real_msg != NULL)
