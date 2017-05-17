@@ -333,7 +333,7 @@ bool ui_dialog_input(struct xante_app *xpp, struct xante_item *item,
     cl_string_t *text = NULL, *value = NULL;
 
     /* Prepare dialog */
-    dialog_set_backtitle();
+    dialog_set_backtitle(xpp);
     dialog_update_cancel_button_label();
 
     /* Prepares dialog content */

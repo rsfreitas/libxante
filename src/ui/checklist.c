@@ -224,7 +224,7 @@ bool ui_dialog_checklist(struct xante_app *xpp, struct xante_item *item,
     int selected_items;
 
     /* Prepare dialog */
-    dialog_set_backtitle();
+    dialog_set_backtitle(xpp);
     dialog_update_cancel_button_label();
 
     /* Prepares dialog content */

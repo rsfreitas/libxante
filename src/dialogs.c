@@ -70,6 +70,7 @@ static int xante_dlg_messagebox(int width, int height,
     title_attr = dlg_color;
     border2_attr = dlg_color;
 
+    dlg_put_backtitle();
     ret_dialog = dialog_msgbox(title, text, height, width, pause_opt);
 
     /* Restores libdialog dialog attr */
@@ -90,7 +91,8 @@ static int xante_dlg_messagebox(int width, int height,
 __PUB_API__ int xante_ui_set_backtitle(xante_t *xpp)
 {
     struct xante_app *x = (struct xante_app *)xpp;
-    cl_string_t *title = NULL;
+    cl_string_t *title = NULL, *left = NULL, *format = NULL, *right = NULL;
+    unsigned int screen_width = 0;
 
     errno_clear();
 
@@ -104,13 +106,47 @@ __PUB_API__ int xante_ui_set_backtitle(xante_t *xpp)
         return -1;
     }
 
-    title = cl_string_create(cl_tr("%s - Version %s.%d Build %d %s"),
-                             cl_string_valueof(x->info.application_name),
-                             cl_string_valueof(x->info.version),
-                             x->info.revision, x->info.build,
-                             (x->info.beta == true) ? "BETA" : "");
+    right = cl_string_create("[%s%c] %s", cl_string_valueof(x->auth.username),
+                             (change_has_occourred(xpp) == true) ? '*' : ' ',
+                             cl_string_valueof(x->info.company));
+
+    left = cl_string_create(cl_tr("%s - Version %s.%d Build %d %s"),
+                            cl_string_valueof(x->info.application_name),
+                            cl_string_valueof(x->info.version),
+                            x->info.revision, x->info.build,
+                            (x->info.beta == true) ? "BETA" : "");
+
+    if ((screen_width = dlg_box_x_ordinate(0) * 2) > 256)
+        screen_width = 128;
+
+    if (screen_width  > (unsigned int)(cl_string_length(left) +
+                                       cl_string_length(right)))
+    {
+        format = cl_string_create("%%s%%%ds",
+                                  (screen_width - cl_string_length(left)));
+    } else
+        format = cl_string_create("%%s - %%s");
+
+    title = cl_string_create(cl_string_valueof(format),
+                             cl_string_valueof(left),
+                             cl_string_valueof(right));
+
+    if (dialog_vars.backtitle != NULL)
+        free(dialog_vars.backtitle);
 
     dialog_vars.backtitle = strdup(cl_string_valueof(title));
+
+    if (title != NULL)
+        cl_string_unref(title);
+
+    if (left != NULL)
+        cl_string_unref(left);
+
+    if (right != NULL)
+        cl_string_unref(right);
+
+    if (format != NULL)
+        cl_string_unref(format);
 
     return 0;
 }

@@ -47,6 +47,7 @@ static void destroy_xante_app(const struct cl_ref_s *ref)
     ui_uninit(xpp);
     jtf_release_info(xpp);
     log_uninit(xpp);
+    auth_uninit(xpp);
     free(xpp);
 }
 
@@ -76,13 +77,14 @@ static struct xante_app *new_xante_app(void)
  *
  */
 
-__PUB_API__ xante_t *xante_init(const char *jtf_pathname, bool use_plugin)
+__PUB_API__ xante_t *xante_init(const char *jtf_pathname, bool use_plugin,
+    const char *username, const char *password)
 {
     struct xante_app *xpp = NULL;
 
     errno_clear();
 
-    if (NULL == jtf_pathname) {
+    if ((NULL == jtf_pathname) || (NULL == username) || (NULL == password)) {
         errno_set(XANTE_ERROR_NULL_ARG);
         return NULL;
     }
@@ -96,6 +98,8 @@ __PUB_API__ xante_t *xante_init(const char *jtf_pathname, bool use_plugin)
     runtime_start(xpp);
 
     /* Start user access control */
+    if (auth_init(xpp, username, password) < 0)
+        goto error_block;
 
     /* Start translation environment */
 

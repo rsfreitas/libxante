@@ -31,6 +31,14 @@
 # ifndef _LIBXANTE_H
 #  error "Never use <xt_auth.h> directly; include <libxante.h> instead."
 # endif
+#else
+
+/* Internal library declarations */
+int auth_init(struct xante_app *xpp, const char *username,
+              const char *password);
+
+void auth_uninit(struct xante_app *xpp);
+
 #endif
 
 #endif

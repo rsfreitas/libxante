@@ -195,7 +195,7 @@ static void prepare_dialog_look(struct xante_app *xpp,
 {
     int timeout = -1;
 
-    dialog_set_backtitle();
+    dialog_set_backtitle(xpp);
     dialog_vars.cancel_label = strdup(cancel_label);
     timeout = xante_runtime_ui_dialog_timeout(xpp);
 

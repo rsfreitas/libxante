@@ -85,10 +85,13 @@ void dialog_init(bool temporarily)
 /**
  * @name dialog_set_backtitle
  * @brief Sets the application backtitle.
+ *
+ * @param [in] xpp: The main library object.
  */
-void dialog_set_backtitle(void)
+void dialog_set_backtitle(struct xante_app *xpp)
 {
     dlg_clear();
+    xante_ui_set_backtitle(xpp);
     dlg_put_backtitle();
 }
 
@@ -177,7 +180,7 @@ bool dialog_question(struct xante_app *xpp, const char *title, const char *msg,
     if (xante_runtime_ui_active(xpp) == false)
         dialog_init(false);
 
-    dialog_set_backtitle();
+    dialog_set_backtitle(xpp);
     dialog_vars.yes_label = (char *)button1_label;
     dialog_vars.no_label = (char *)button2_label;
     lines = dialog_count_lines(msg, width);

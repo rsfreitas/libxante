@@ -26,3 +26,51 @@
 
 #include "libxante.h"
 
+/*
+ *
+ * Internal function
+ *
+ */
+
+/*
+ *
+ * Internal API
+ *
+ */
+
+/**
+ * @name auth_init
+ * @brief Starts the internal user access validation.
+ *
+ * @param [in,out] xpp: The main library object.
+ * @param [in] username: The username.
+ * @param [in] password: The username password.
+ *
+ * @return On succcess returns 0 or -1 otherwise.
+ */
+int auth_init(struct xante_app *xpp, const char *username,
+    const char *password)
+{
+    xpp->auth.username = cl_string_create("%s", username);
+    xpp->auth.password = cl_string_create("%s", password);
+
+    /* TODO: Validate user/pass inside a DB */
+
+    return 0;
+}
+
+/**
+ * @name auth_uninit
+ * @brief Finishes the internal user validation.
+ *
+ * @param [in,out] xpp: The main library object.
+ */
+void auth_uninit(struct xante_app *xpp)
+{
+    if (xpp->auth.password != NULL)
+        cl_string_unref(xpp->auth.password);
+
+    if (xpp->auth.username != NULL)
+        cl_string_unref(xpp->auth.username);
+}
+

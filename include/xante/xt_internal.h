@@ -67,6 +67,7 @@ struct xante_info {
     cl_string_t     *application_name;
     cl_string_t     *plugin_name;
     cl_string_t     *version;
+    cl_string_t     *company;
     int             revision;
     int             build;
     bool            beta;

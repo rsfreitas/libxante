@@ -121,7 +121,7 @@ bool ui_dialog_timebox(struct xante_app *xpp, struct xante_item *item,
     int ret_dialog = DLG_EXIT_OK, hour = 0, minutes = 0, seconds = 0;
 
     /* Prepare dialog */
-    dialog_set_backtitle();
+    dialog_set_backtitle(xpp);
     dialog_update_cancel_button_label();
     dialog_alloc_input(64);
 

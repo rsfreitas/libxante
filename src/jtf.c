@@ -65,6 +65,9 @@
 #define MAX_RANGE           "max"
 #define MIN_RANGE           "min"
 #define CONFIG              "config"
+#define INTERNAL            "internal"
+#define APPLICATION         "application"
+#define COMPANY             "company"
 
 static int fill_info(cl_json_t *node, const char *subnode_name, ...)
 {
@@ -128,9 +131,39 @@ end_block:
     return 0;
 }
 
+static int parse_application_version(cl_json_t *internal,
+    struct xante_app *xpp)
+{
+    cl_json_t *app = NULL;
+
+    app = cl_json_get_object_item(internal, APPLICATION);
+
+    if (NULL == app) {
+        errno_set(XANTE_ERROR_JTF_NO_APPLICATION_OBJECT);
+        return -1;
+    }
+
+    fill_info(app, JTF_VERSION, (void **)&xpp->info.version);
+    fill_info(app, JTF_REVISION, (void **)&xpp->info.revision);
+    fill_info(app, JTF_BUILD, (void **)&xpp->info.build);
+    fill_info(app, JTF_BETA, (void **)&xpp->info.beta);
+
+    return 0;
+}
+
 static int parse_jtf_info(cl_json_t *jtf, struct xante_app *xpp)
 {
-    cl_json_t *general = NULL;
+    cl_json_t *general = NULL, *internal = NULL;
+
+    internal = cl_json_get_object_item(jtf, INTERNAL);
+
+    if (NULL == internal) {
+        errno_set(XANTE_ERROR_JTF_NO_INTERNAL_OBJECT);
+        return -1;
+    }
+
+    if (parse_application_version(internal, xpp) < 0)
+        return -1;
 
     general = cl_json_get_object_item(jtf, GENERAL);
 
@@ -144,10 +177,7 @@ static int parse_jtf_info(cl_json_t *jtf, struct xante_app *xpp)
     fill_info(general, CONFIG_PATHNAME, (void **)&xpp->info.cfg_pathname);
     fill_info(general, LOG_PATHNAME, (void **)&xpp->info.log_pathname);
     fill_info(general, LOG_LEVEL, (void **)&xpp->info.log_level);
-    fill_info(general, JTF_VERSION, (void **)&xpp->info.version);
-    fill_info(general, JTF_REVISION, (void **)&xpp->info.revision);
-    fill_info(general, JTF_BUILD, (void **)&xpp->info.build);
-    fill_info(general, JTF_BETA, (void **)&xpp->info.beta);
+    fill_info(general, COMPANY, (void **)&xpp->info.company);
 
     return 0;
 }

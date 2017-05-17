@@ -77,7 +77,7 @@
 /* utils.c */
 void dialog_uninit(void);
 void dialog_init(bool temporarily);
-void dialog_set_backtitle(void);
+void dialog_set_backtitle(struct xante_app *xpp);
 char *dialog_get_item_value_as_text(const struct xante_item *item);
 int dialog_count_lines_by_delimiters(const char *text);
 int dialog_count_lines(const char *text, int width);
