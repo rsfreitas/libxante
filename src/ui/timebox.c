@@ -162,6 +162,11 @@ bool ui_dialog_timebox(struct xante_app *xpp, struct xante_item *item,
                 break;
 
             case DLG_EXIT_HELP:
+                dialog_vars.help_button = 0;
+                xante_messagebox(xpp, XANTE_MSGBOX_INFO, 0, cl_tr("Help"),
+                                 cl_string_valueof(item->help));
+
+                dialog_vars.help_button = 1;
                 break;
         }
     } while (loop);
