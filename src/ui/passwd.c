@@ -61,7 +61,7 @@ int ui_dialog_passwd(struct xante_item *item, bool edit_value, char *input,
     fitem.text_x = 0;
 
     if (edit_value == true)
-        fitem.text_flen = 43;
+        fitem.text_flen = 53;
     else
         fitem.text_flen = 0;
 

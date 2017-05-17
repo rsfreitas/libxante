@@ -87,6 +87,7 @@ bool dialog_question(struct xante_app *xpp, const char *title, const char *msg,
 void dialog_update_cancel_button_label(void);
 void dialog_free_input(void);
 void dialog_alloc_input(unsigned int bytes);
+char *dialog_get_input_result(void);
 
 /* menu */
 int ui_dialog_menu(struct xante_app *xpp, const struct xante_menu *menu,
@@ -111,6 +112,10 @@ bool ui_dialog_checklist(struct xante_app *xpp, struct xante_item *item,
 /* passwd */
 int ui_dialog_passwd(struct xante_item *item, bool edit_value, char *input,
                      unsigned int input_length, int height, cl_string_t *text);
+
+/* input */
+bool ui_dialog_input(struct xante_app *xpp, struct xante_item *item,
+                     bool edit_value);
 
 #endif
 

@@ -15,8 +15,8 @@ This library is intended to build and run dialog based applications.
 
 ## Dependencies
 
-* libcollections
-* libdialog
+* [libcollections](https://github.com/rsfreitas/libcollections)
+* [libdialog](http://invisible-island.net/dialog/)
 
 ### Alternative libdialog
 

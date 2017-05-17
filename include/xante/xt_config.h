@@ -33,5 +33,28 @@
 # endif
 #endif
 
+/**
+ * @name xante_load_config
+ * @brief Loads the configuration file from the application.
+ *
+ * @param [in,out] xpp: The main library object.
+ *
+ * @return On success returns 0 or -1 otherwise.
+ */
+int xante_load_config(xante_t *xpp);
+
+/**
+ * @name xante_write_config
+ * @brief Unloads and save the configuration file from the application.
+ *
+ * The saving is made when needed.
+ *
+ * @param [in,out] xpp: The main library object.
+ * @param [in] ui_return_status: The UI return value.
+ *
+ * @return On sucess returns 0 or -1 otherwise.
+ */
+int xante_write_config(xante_t *xpp, int ui_return_status);
+
 #endif
 

@@ -431,6 +431,7 @@ __PUB_API__ int xante_ui_run(xante_t *xpp)
     struct xante_menu *root = NULL;
     char *btn_cancel_label = NULL;
     cl_list_node_t *root_node = NULL;
+    int ret_dialog;
 
     errno_clear();
 
@@ -451,7 +452,7 @@ __PUB_API__ int xante_ui_run(xante_t *xpp)
     }
 
     root = cl_list_node_content(root_node);
-    ui_dialog_menu(xpp, root, btn_cancel_label, false, NULL);
+    ret_dialog = ui_dialog_menu(xpp, root, btn_cancel_label, false, NULL);
     cl_list_node_unref(root_node);
 
 end_block:
@@ -462,7 +463,7 @@ end_block:
     dialog_uninit();
     xante_runtime_set_ui_active(xpp, false);
 
-    return 0;
+    return ret_dialog;
 }
 
 __PUB_API__ void xante_ui_suspend(void)

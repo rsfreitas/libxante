@@ -77,9 +77,19 @@ bool ui_dialog_yesno(struct xante_app *xpp, struct xante_item *item)
 
         switch (ret_dialog) {
             case DLG_EXIT_OK:
+                /* Selecting the "OK" button always changes the item value. */
                 loop = false;
                 value_changed = true;
-                /* TODO: Update value */
+
+                change_add(xpp, cl_string_valueof(item->name),
+                           dialog_vars.no_label, dialog_vars.yes_label);
+
+                /* Updates the item value */
+                if (NULL == item->value)
+                    item->value = cl_object_create(CL_INT, !choice);
+                else
+                    cl_object_set(item->value, !choice);
+
                 break;
 
             case DLG_EXIT_ESC:
@@ -88,6 +98,7 @@ bool ui_dialog_yesno(struct xante_app *xpp, struct xante_item *item)
                 break;
 
             case DLG_EXIT_HELP:
+                /* TODO */
                 break;
         }
     } while (loop);

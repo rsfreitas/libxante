@@ -24,12 +24,12 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_ACCESS_H
-#define _LIBXANTE_XT_ACCESS_H          1
+#ifndef _LIBXANTE_XT_AUTH_H
+#define _LIBXANTE_XT_AUTH_H          1
 
 #ifndef LIBXANTE_COMPILE
 # ifndef _LIBXANTE_H
-#  error "Never use <xt_access.h> directly; include <libxante.h> instead."
+#  error "Never use <xt_auth.h> directly; include <libxante.h> instead."
 # endif
 #endif
 

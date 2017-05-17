@@ -49,6 +49,14 @@ struct xante_menu *ui_search_menu_by_object_id(const struct xante_app *xpp,
                                                const char *object_id_to_search);
 #endif
 
+/**
+ * @name xante_ui_run
+ * @brief
+ *
+ * @param [in,out] xpp:
+ *
+ * @return
+ */
 int xante_ui_run(xante_t *xpp);
 
 #endif

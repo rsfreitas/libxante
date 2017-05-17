@@ -43,6 +43,7 @@ static void destroy_xante_app(const struct cl_ref_s *ref)
         return;
 
     xante_info(cl_tr("Finishing application"));
+    change_uninit(xpp);
     ui_uninit(xpp);
     jtf_release_info(xpp);
     log_uninit(xpp);
@@ -103,6 +104,7 @@ __PUB_API__ xante_t *xante_init(const char *jtf_pathname, bool use_plugin)
         goto error_block;
 
     /* Start user modifications monitoring */
+    change_init(xpp);
 
     /* Start log file */
     log_init(xpp);

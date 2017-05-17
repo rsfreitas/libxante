@@ -119,8 +119,12 @@ char *dialog_get_item_value_as_text(const struct xante_item *item)
         case XANTE_UI_DIALOG_TIMEBOX:
         case XANTE_UI_DIALOG_INPUT_STRING:
             value = cl_object_to_cstring(item_value(item));
-            text = strdup(cl_string_valueof(value));
-            cl_string_unref(value);
+
+            if ((value != NULL) && (cl_string_length(value) > 0)) {
+                text = strdup(cl_string_valueof(value));
+                cl_string_unref(value);
+            }
+
             break;
 
         case XANTE_UI_DIALOG_RADIO_CHECKLIST:
@@ -167,7 +171,7 @@ bool dialog_question(struct xante_app *xpp, const char *title, const char *msg,
     const char *button1_label, const char *button2_label)
 {
     cl_string_t *form_msg = NULL;
-    int width = 40, lines = 0;
+    int width = 45, lines = 0;
     bool ret_value = false;
 
     if (xante_runtime_ui_active(xpp) == false)
@@ -291,5 +295,28 @@ void dialog_alloc_input(unsigned int bytes)
         dialog_free_input();
 
     dialog_vars.input_result = calloc(bytes, sizeof(char));
+}
+
+/**
+ * @name dialog_get_input_result
+ * @brief Gets libdialog's input result content.
+ *
+ * @return On success returns a copy of libdialog's input result or NULL
+ *         otherwise.
+ */
+char *dialog_get_input_result(void)
+{
+    char *result = NULL;
+
+    result = calloc(1, strlen(dialog_vars.input_result));
+
+    if (NULL == result)
+        return NULL;
+
+    /* Removes an invalid char at the input end */
+    strncpy(result, dialog_vars.input_result,
+            strlen(dialog_vars.input_result) - 1);
+
+    return result;
 }
 

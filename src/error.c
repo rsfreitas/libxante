@@ -39,7 +39,8 @@ static const char *__description[] = {
     cl_tr_noop("JTF file has no 'menu' object"),
     cl_tr_noop("JTF file has no 'ui' object"),
     cl_tr_noop("UI has not been initialized"),
-    cl_tr_noop("JTF file has no 'input_ranges' object")
+    cl_tr_noop("JTF file has no 'input_ranges' object"),
+    cl_tr_noop("JTF file has no 'config' object")
 };
 
 static const char *__unknown_error = cl_tr_noop("Unknown error");

@@ -142,12 +142,34 @@ struct xante_log {
     cl_log_t                *log;
 };
 
+struct xante_plugin {
+    cl_plugin_t             *plugin;
+};
+
+struct xante_config {
+    cl_cfg_file_t           *cfg_file;
+    char                    *filename;
+};
+
+struct xante_changes {
+    cl_list_t               *user_changes;
+};
+
+struct xante_auth {
+    cl_string_t         *username;
+    cl_string_t         *password;
+};
+
 /** Library main structure */
 struct xante_app {
     struct xante_info       info;
     struct xante_runtime    runtime;
     struct xante_ui         ui;
     struct xante_log        log;
+    struct xante_config     config;
+    struct xante_changes    changes;
+    struct xante_plugin     plugin;
+    struct xante_auth       auth;
     struct cl_ref_s         ref;
 };
 

@@ -67,6 +67,34 @@ static void split_item_value(struct xante_item *item, int *hour, int *minutes,
     cl_string_list_destroy(time);
 }
 
+static bool item_value_has_changed(struct xante_app *xpp,
+    struct xante_item *item)
+{
+    cl_object_t *value = NULL;
+    char *str_value = NULL, *result = NULL;
+    bool changed = false;
+
+    result = dialog_get_input_result();
+    value = item_value(item);
+    str_value = CL_OBJECT_AS_STRING(value);
+
+    if (equals(result, str_value) == false) {
+        change_add(xpp, cl_string_valueof(item->name), str_value, result);
+        changed = true;
+
+        /* Updates item value */
+        if (NULL == item->value)
+            item->value = cl_object_create(CL_STRING, result);
+        else
+            cl_object_set(item->value, result);
+    }
+
+    free(str_value);
+    free(result);
+
+    return changed;
+}
+
 /*
  *
  * Internal API
@@ -116,8 +144,16 @@ bool ui_dialog_timebox(struct xante_app *xpp, struct xante_item *item,
         switch (ret_dialog) {
             case DLG_EXIT_OK:
                 loop = false;
-                value_changed = true;
-                /* TODO: Update value */
+
+                if (edit_value == false)
+                    break;
+                else {
+                    if (item_value_has_changed(xpp, item)) {
+                        value_changed = true;
+                        break;
+                    }
+                }
+
                 break;
 
             case DLG_EXIT_ESC:

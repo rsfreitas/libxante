@@ -50,7 +50,7 @@ void runtime_start(struct xante_app *xpp)
     xante_runtime_set_discard_changes_on_timeout(xpp, true);
     xante_runtime_set_execute_plugin(xpp, true);
     xante_runtime_set_create_default_config_file(xpp, false);
-    xante_runtime_set_force_config_file_saving(xpp, true);
+    xante_runtime_set_force_config_file_saving(xpp, false);
     xante_runtime_set_ui_dialog_timeout(xpp, UI_DIALOG_TIMEOUT);
     xante_runtime_set_config_file_status(xpp, XANTE_CFG_ST_UNKNOWN);
     xante_runtime_set_show_config_saving_question(xpp, true);

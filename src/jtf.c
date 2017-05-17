@@ -54,8 +54,8 @@
 #define OBJECT_ID           "object_id"
 #define MODE                "mode"
 #define TYPE                "type"
-#define CONFIG_BLOCK        "config_block"
-#define CONFIG_ITEM         "config_item"
+#define BLOCK               "block"
+#define ITEM                "item"
 #define HELP                "help"
 #define ITEMS               "items"
 #define OPTIONS             "options"
@@ -64,6 +64,7 @@
 #define STRING_LENGTH       "string_length"
 #define MAX_RANGE           "max"
 #define MIN_RANGE           "min"
+#define CONFIG              "config"
 
 static int fill_info(cl_json_t *node, const char *subnode_name, ...)
 {
@@ -179,6 +180,23 @@ static int parse_item_input_ranges(cl_json_t *item, struct xante_item *i,
     return 0;
 }
 
+static int parse_item_config(cl_json_t *item, struct xante_item *it)
+{
+    cl_json_t *config = NULL;
+
+    config = cl_json_get_object_item(item, CONFIG);
+
+    if (NULL == config) {
+        errno_set(XANTE_ERROR_JTF_NO_CONFIG_OBJECT);
+        return -1;
+    }
+
+    fill_info(config, BLOCK, (void **)&it->config_block);
+    fill_info(config, ITEM, (void **)&it->config_item);
+
+    return 0;
+}
+
 static int parse_menu_item(cl_json_t *item, struct xante_menu *menu)
 {
     struct xante_item *i;
@@ -196,8 +214,7 @@ static int parse_menu_item(cl_json_t *item, struct xante_menu *menu)
     fill_info(item, HELP, (void **)&i->help);
     fill_info(item, OPTIONS, (void **)&options);
     fill_info(item, DEFAULT_VALUE, (void **)&default_value);
-    fill_info(item, CONFIG_BLOCK, (void **)&i->config_block);
-    fill_info(item, CONFIG_ITEM, (void **)&i->config_item);
+    parse_item_config(item, i);
 
     if (parse_item_input_ranges(item, i, &max, &min) < 0)
         return -1;

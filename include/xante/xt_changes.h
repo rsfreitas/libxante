@@ -31,6 +31,15 @@
 # ifndef _LIBXANTE_H
 #  error "Never use <xt_changes.h> directly; include <libxante.h> instead."
 # endif
+#else
+
+/* Internal library declarations */
+bool change_has_occourred(struct xante_app *xpp);
+void change_init(struct xante_app *xpp);
+void change_uninit(struct xante_app *xpp);
+int change_add(struct xante_app *xpp, const char *item_name,
+               const char *old_value, const char *new_value);
+
 #endif
 
 #endif

@@ -75,7 +75,6 @@ static bool item_may_have_value(const struct xante_item *item)
         case XANTE_UI_DIALOG_INPUT_STRING:
         case XANTE_UI_DIALOG_INPUT_DATE:
         case XANTE_UI_DIALOG_INPUT_TIME:
-        case XANTE_UI_DIALOG_INPUT_PASSWD:
         case XANTE_UI_DIALOG_CALENDAR:
         case XANTE_UI_DIALOG_TIMEBOX:
         case XANTE_UI_DIALOG_RADIO_CHECKLIST:
@@ -104,6 +103,10 @@ static int check_item_width(cl_list_node_t *node, void *a)
     /* We only check items that may have values */
     if (item_may_have_value(item) == true) {
         s = dialog_get_item_value_as_text(item);
+
+        if (NULL == s)
+            return 0;
+
         length = strlen(s);
         free(s);
 

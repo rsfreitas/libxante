@@ -40,6 +40,7 @@ bool is_item_available(struct xante_item *item);
 enum xante_ui_dialog translate_string_dialog_type(const char *type);
 bool is_input_item(const cl_string_t *type);
 int idigits(int n);
+bool equals(const char *a, const char *b);
 
 #endif
 

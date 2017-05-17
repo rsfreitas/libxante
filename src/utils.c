@@ -134,7 +134,7 @@ enum xante_ui_dialog translate_string_dialog_type(const char *type)
         dialog = XANTE_UI_DIALOG_INPUT_STRING;
     else if (strcmp(type, "input_passwd") == 0)
         dialog = XANTE_UI_DIALOG_INPUT_PASSWD;
-    else if (strcmp(type, "input_TIME") == 0)
+    else if (strcmp(type, "input_time") == 0)
         dialog = XANTE_UI_DIALOG_INPUT_TIME;
     else if (strcmp(type, "calendar") == 0)
         dialog = XANTE_UI_DIALOG_CALENDAR;
@@ -173,10 +173,8 @@ bool is_input_item(const cl_string_t *type)
     switch (dlg_type) {
         case XANTE_UI_DIALOG_INPUT_INT:
         case XANTE_UI_DIALOG_INPUT_FLOAT:
-        case XANTE_UI_DIALOG_INPUT_DATE:
         case XANTE_UI_DIALOG_INPUT_STRING:
         case XANTE_UI_DIALOG_INPUT_PASSWD:
-        case XANTE_UI_DIALOG_INPUT_TIME:
             return true;
 
         default:
@@ -197,5 +195,22 @@ bool is_input_item(const cl_string_t *type)
 int idigits(int n)
 {
     return floor(log10(abs(n))) + 1;
+}
+
+/**
+ * @name equals
+ * @brief Compares two strings.
+ *
+ * @param [in] a: The first string.
+ * @param [in] b: The second string.
+ *
+ * @return Returns true if \a a and \a b are equals or false otherwise.
+ */
+bool equals(const char *a, const char *b)
+{
+    if (!strcmp(a, b))
+        return true;
+
+    return false;
 }
 

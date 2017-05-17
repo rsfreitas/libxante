@@ -39,6 +39,9 @@
 
 int xante_ui_set_backtitle(xante_t *xpp);
 int xante_ui_clear_backtitle(xante_t *xpp);
+int xante_messagebox(struct xante_app *xpp, enum xante_msgbox_type type,
+                     enum xante_buttons buttons, const char *title,
+                     const char *message, ...);
 
 #endif
 

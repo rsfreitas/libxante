@@ -255,8 +255,8 @@ int dlg_inputbox(int width, int height, const char *title,
         getyx(dialog, cur_y, cur_x);
 
     /* Internal window to input */
-    dlg_draw_box(dialog, cur_y + 1 + jump_y, 2, 3, width - 4, border2_attr,
-                 border2_attr);
+    dlg_draw_box2(dialog, cur_y + 1 + jump_y, 2, 3, width - 4, dialog_attr,
+                  border_attr, border2_attr);
 
     editor = dlg_sub_window(dialog, 1, width - INTERNAL_H_MARGIN,
                             dlg_y + (cur_y + 2 + jump_y), dlg_x + 3);
@@ -349,7 +349,7 @@ int dlg_inputbox(int width, int height, const char *title,
                      * change its color.
                      */
                     if ((input_check)(input_s) < -1)
-                        form_attr = form_error_attr;
+                        form_attr = inputbox_error_attr;
                     else
                         form_attr = form_active_text_attr;
 #endif
