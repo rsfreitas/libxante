@@ -126,7 +126,7 @@ enum xante_ui_menu translate_string_menu_type(const char *type)
     if (NULL == type)
         return menu;
 
-    if (strcmp(type, "dynamic") == 0)
+    if (strcmp(type, XANTE_UI_STR_DYNAMIC_MENU) == 0)
         menu = XANTE_UI_MENU_DYNAMIC;
 
     return menu;

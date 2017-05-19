@@ -110,6 +110,10 @@ enum xante_ui_menu {
 #define XANTE_UI_STR_DIALOG_DYNAMIC_MENU        "dynamic_menu"
 #define XANTE_UI_STR_DIALOG_DELETE_DYNAMIC_MENU "delete_dynamic_menu"
 
+/** String keys of supported menus */
+#define XANTE_UI_STR_DEFAULT_MENU               "default"
+#define XANTE_UI_STR_DYNAMIC_MENU               "dynamic"
+
 /** The library main object */
 typedef void                                    xante_t;
 

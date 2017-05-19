@@ -90,6 +90,7 @@ static int load_config(struct xante_app *xpp)
          * application.
          */
         xante_runtime_set_force_config_file_saving(xpp, true);
+        dm_init(xpp, NULL);
         goto ok_block;
     }
 
