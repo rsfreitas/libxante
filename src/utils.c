@@ -110,6 +110,28 @@ bool is_item_available(struct xante_item *item)
     return true;
 }
 
+
+/**
+ * @name translate_string_menu_type
+ * @brief Translates a string representing a menu type to its numeric value.
+ *
+ * @param [in] type: The menu type as a string.
+ *
+ * @return Returns the numeric value of the menu type.
+ */
+enum xante_ui_menu translate_string_menu_type(const char *type)
+{
+    enum xante_ui_menu menu = XANTE_UI_MENU_DEFAULT;
+
+    if (NULL == type)
+        return menu;
+
+    if (strcmp(type, "dynamic") == 0)
+        menu = XANTE_UI_MENU_DYNAMIC;
+
+    return menu;
+}
+
 /**
  * @name translate_string_dialog_type
  * @brief Translates a string representing a dialog type to its numeric value.
@@ -154,6 +176,33 @@ enum xante_ui_dialog translate_string_dialog_type(const char *type)
         dialog = XANTE_UI_DIALOG_RM_DYNAMIC_MENU;
 
     return dialog;
+}
+
+/**
+ * @name is_menu_item
+ * @brief Checks if an item is of a menu kind.
+ *
+ * @param [in] type: The item type, in a cl_string_t format.
+ *
+ * @return Returns true is is a menu kind or false if not.
+ */
+bool is_menu_item(const cl_string_t *type)
+{
+    enum xante_ui_dialog dlg_type;
+
+    dlg_type = translate_string_dialog_type(cl_string_valueof(type));
+
+    switch (dlg_type) {
+        case XANTE_UI_DIALOG_MENU:
+        case XANTE_UI_DIALOG_DYNAMIC_MENU:
+        case XANTE_UI_DIALOG_RM_DYNAMIC_MENU:
+            return true;
+
+        default:
+            break;
+    }
+
+    return false;
 }
 
 /**

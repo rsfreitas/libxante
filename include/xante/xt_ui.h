@@ -45,8 +45,11 @@ void ui_uninit(struct xante_app *xpp);
 void ui_adjusts_item_info(struct xante_item *item, cl_string_t *default_value,
                           void *options, void *max_range, void *min_range);
 
+void ui_adjusts_menu_info(struct xante_menu *menu, void *copies);
 struct xante_menu *ui_search_menu_by_object_id(const struct xante_app *xpp,
                                                const char *object_id_to_search);
+
+void ui_print_menu_tree(struct xante_app *xpp);
 #endif
 
 /**

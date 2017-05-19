@@ -124,10 +124,19 @@ struct xante_menu {
     /* JTF objects */
     cl_string_t                 *name;
     cl_string_t                 *object_id;
+    cl_string_t                 *type;
     enum xante_access_mode      mode;
+
+    /* Dynamic menu details */
+    cl_string_list_t            *dynamic_names;
+    cl_string_t                 *dynamic_block_prefix;
+    int                         copies;
+    cl_string_t                 *dynamic_origin_block;
+    cl_string_t                 *dynamic_origin_item;
 
     /* Internal */
     enum xante_menu_creator     creator;
+    enum xante_ui_menu          menu_type;
     bool                        move_to_be_released;
     cl_list_t                   *items;
     struct cl_ref_s             ref;

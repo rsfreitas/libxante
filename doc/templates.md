@@ -15,6 +15,12 @@ it may reference an application skeleton.
     "internal": {
         "revision": int
         "language": string
+        "application": {
+            "version": string
+            "revision": int
+            "build": int
+            "beta": bool
+        }
     },
     "general": {
         "name": string
@@ -22,10 +28,7 @@ it may reference an application skeleton.
         "config_pathname": string
         "log_pathname": string
         "log_level": string
-        "version": string
-        "revision": int
-        "build": int
-        "beta": bool
+        "company": string
     },
     "ui": {
         "main_menu": string
@@ -34,12 +37,23 @@ it may reference an application skeleton.
                 "name": string
                 "object_id": string
                 "mode": int
+                "type": string
+                "dynamic": {
+                    "copies": int/array of strings
+                    "block_prefix": string
+                    "origin": {
+                        "block": string
+                        "item": string
+                    }
+                },
                 "items": [
                     {
                         "mode": int
                         "default_value": string
-                        "config_block": string
-                        "config_item": string
+                        "config": {
+                            "block": string
+                            "item": string
+                        },
                         "type": string
                         "options": string/array of strings
                         "name": string,

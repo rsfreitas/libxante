@@ -234,6 +234,10 @@ static void call_menu_dialog(struct xante_app *xpp,
                                        cl_string_valueof(selected_item->object_id));
 
     if (NULL == menu) {
+        xante_messagebox(xpp, XANTE_MSGBOX_ERROR, 0, cl_tr("Error"),
+                         cl_tr("No menu '%s' was found!"),
+                         cl_string_valueof(selected_item->name));
+
         return;
     }
 

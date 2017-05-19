@@ -68,6 +68,10 @@
 #define INTERNAL            "internal"
 #define APPLICATION         "application"
 #define COMPANY             "company"
+#define DYNAMIC             "dynamic"
+#define COPIES              "copies"
+#define BLOCK_PREFIX        "block_prefix"
+#define ORIGIN              "origin"
 
 static int fill_info(cl_json_t *node, const char *subnode_name, ...)
 {
@@ -259,11 +263,34 @@ static int parse_menu_item(cl_json_t *item, struct xante_menu *menu)
     return 0;
 }
 
+static void parse_menu_dynamic(cl_json_t *menu, struct xante_menu *m,
+    void **copies)
+{
+    cl_json_t *dynamic = NULL, *origin = NULL;
+
+    dynamic = cl_json_get_object_item(menu, DYNAMIC);
+
+    if (NULL == dynamic)
+        return;
+
+    fill_info(dynamic, BLOCK_PREFIX, (void **)&m->dynamic_block_prefix);
+    fill_info(dynamic, COPIES, copies);
+
+    origin = cl_json_get_object_item(dynamic, ORIGIN);
+
+    if (NULL == origin)
+        return;
+
+    fill_info(origin, BLOCK, (void **)&m->dynamic_origin_block);
+    fill_info(origin, ITEM, (void **)&m->dynamic_origin_item);
+}
+
 static int parse_ui_menu(cl_json_t *menu, struct xante_app *xpp)
 {
     cl_json_t *items;
     int i, t;
     struct xante_menu *m = NULL;
+    void *copies = NULL;
 
     m = ui_new_xante_menu(XANTE_MENU_CREATED_FROM_JTF);
 
@@ -273,6 +300,14 @@ static int parse_ui_menu(cl_json_t *menu, struct xante_app *xpp)
     fill_info(menu, NAME, (void **)&m->name);
     fill_info(menu, OBJECT_ID, (void **)&m->object_id);
     fill_info(menu, MODE, (void **)&m->mode);
+    fill_info(menu, TYPE, (void **)&m->type);
+    parse_menu_dynamic(menu, m, &copies);
+
+    /*
+     * We must adjust some internal menu informations before loading its
+     * items.
+     */
+    ui_adjusts_menu_info(m, copies);
     items = cl_json_get_object_item(menu, ITEMS);
 
     if (NULL == items) {

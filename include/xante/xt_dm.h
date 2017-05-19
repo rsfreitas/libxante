@@ -3,7 +3,7 @@
  * Description:
  *
  * Author: Rodrigo Freitas
- * Created at: Tue May  2 20:25:58 2017
+ * Created at: Thu May 18 00:13:49 2017
  * Project: libxante
  *
  * Copyright (C) 2017 Rodrigo Freitas
@@ -24,25 +24,17 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_UTILS_H
-#define _LIBXANTE_XT_UTILS_H          1
+#ifndef _LIBXANTE_XT_DM_H
+#define _LIBXANTE_XT_DM_H          1
 
 #ifndef LIBXANTE_COMPILE
 # ifndef _LIBXANTE_H
-#  error "Never use <xt_utils.h> directly; include <libxante.h> instead."
+#  error "Never use <xt_dm.h> directly; include <libxante.h> instead."
 # endif
 #else
 
 /* Internal library declarations */
-bool is_valid_config_file_status(enum xante_config_file_status status);
-bool is_valid_ui_dialog(enum xante_ui_dialog type);
-bool is_item_available(struct xante_item *item);
-enum xante_ui_menu translate_string_menu_type(const char *type);
-enum xante_ui_dialog translate_string_dialog_type(const char *type);
-bool is_input_item(const cl_string_t *type);
-bool is_menu_item(const cl_string_t *type);
-int idigits(int n);
-bool equals(const char *a, const char *b);
+void dm_init(struct xante_app *xpp, cl_cfg_file_t *cfg_file);
 
 #endif
 

@@ -27,6 +27,7 @@
 
 #include "libxante.h"
 #include "ui/ui_dialogs.h"
+
 /*
  *
  * Internal functions
@@ -92,8 +93,13 @@ static int load_config(struct xante_app *xpp)
         goto ok_block;
     }
 
-    /* TODO: dm_init */
+    /*
+     * If we have a dynamic menu we'll need to replicate it an its submenus and
+     * items.
+     */
+    dm_init(xpp, cfg_file);
 
+    /* Load the configuration values */
     cl_list_map(xpp->ui.menus, load_menu_config, cfg_file);
 
 ok_block:

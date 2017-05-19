@@ -87,6 +87,12 @@ enum xante_msgbox_type {
     XANTE_MSGBOX_ERROR
 };
 
+/** Types of menu */
+enum xante_ui_menu {
+    XANTE_UI_MENU_DEFAULT,
+    XANTE_UI_MENU_DYNAMIC
+};
+
 /** The library main object */
 typedef void                xante_t;
 
@@ -102,6 +108,7 @@ typedef void                xante_t;
 #include "xante/xt_changes.h"
 #include "xante/xt_config.h"
 #include "xante/xt_dialogs.h"
+#include "xante/xt_dm.h"
 #include "xante/xt_error.h"
 #include "xante/xt_events.h"
 #include "xante/xt_init.h"
