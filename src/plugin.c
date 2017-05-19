@@ -26,3 +26,15 @@
 
 #include "libxante.h"
 
+/*
+ *
+ * Internal functions
+ *
+ */
+
+/*
+ *
+ * Internal API
+ *
+ */
+

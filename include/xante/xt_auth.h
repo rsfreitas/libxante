@@ -3,7 +3,7 @@
  * Description:
  *
  * Author: Rodrigo Freitas
- * Created at: Wed May  3 14:17:57 2017
+ * Created at: Tue May  2 21:07:38 2017
  * Project: libxante
  *
  * Copyright (C) 2017 Rodrigo Freitas
@@ -24,24 +24,22 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_DIALOGS_H
-#define _LIBXANTE_XT_DIALOGS_H          1
+#ifndef _LIBXANTE_XT_AUTH_H
+#define _LIBXANTE_XT_AUTH_H          1
 
 #ifndef LIBXANTE_COMPILE
 # ifndef _LIBXANTE_H
-#  error "Never use <xt_dialogs.h> directly; include <libxante.h> instead."
+#  error "Never use <xt_auth.h> directly; include <libxante.h> instead."
 # endif
 #else
 
 /* Internal library declarations */
+int auth_init(struct xante_app *xpp, const char *username,
+              const char *password);
+
+void auth_uninit(struct xante_app *xpp);
 
 #endif
-
-int xante_ui_set_backtitle(xante_t *xpp);
-int xante_ui_clear_backtitle(xante_t *xpp);
-int xante_messagebox(struct xante_app *xpp, enum xante_msgbox_type type,
-                     enum xante_buttons buttons, const char *title,
-                     const char *message, ...);
 
 #endif
 

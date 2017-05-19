@@ -25,11 +25,14 @@
  */
 
 #ifndef _LIBXANTE_H
-#define _LIBXANTE_H         1
+#define _LIBXANTE_H             1
 
 #ifndef _COLLECTIONS_H
 # include <collections.h>
 #endif
+
+/** Supported line break character to be used inside JTF strings */
+#define XANTE_STR_LINE_BREAK    '^'
 
 /** Supported UI dialogs */
 enum xante_ui_dialog {
@@ -49,6 +52,8 @@ enum xante_ui_dialog {
     XANTE_UI_DIALOG_CUSTOM,
     XANTE_UI_DIALOG_DYNAMIC_MENU,
     XANTE_UI_DIALOG_RM_DYNAMIC_MENU
+//    XANTE_UI_DIALOG_RANGE,
+//    XANTE_UI_DIALOG_FORM
 };
 
 /** A possible state from the application config file */
@@ -67,6 +72,27 @@ enum xante_access_mode {
     XANTE_ACCESS_EDIT       = (1 << 1)
 };
 
+/** Buttons from a dialog */
+enum xante_buttons {
+    XANTE_BTN_OK        = (1 << 0),
+    XANTE_BTN_CANCEL    = (1 << 1),
+    XANTE_BTN_HELP      = (1 << 2),
+    XANTE_BTN_INFO      = (1 << 3)
+};
+
+/** Messagebox type */
+enum xante_msgbox_type {
+    XANTE_MSGBOX_INFO,
+    XANTE_MSGBOX_WARNING,
+    XANTE_MSGBOX_ERROR
+};
+
+/** Types of menu */
+enum xante_ui_menu {
+    XANTE_UI_MENU_DEFAULT,
+    XANTE_UI_MENU_DYNAMIC
+};
+
 /** The library main object */
 typedef void                xante_t;
 
@@ -78,10 +104,11 @@ typedef void                xante_t;
 # include "xante/xt_internal.h"
 #endif
 
-#include "xante/xt_access.h"
+#include "xante/xt_auth.h"
 #include "xante/xt_changes.h"
 #include "xante/xt_config.h"
 #include "xante/xt_dialogs.h"
+#include "xante/xt_dm.h"
 #include "xante/xt_error.h"
 #include "xante/xt_events.h"
 #include "xante/xt_init.h"

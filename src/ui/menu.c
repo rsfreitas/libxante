@@ -64,7 +64,7 @@ static int calc_menu_items(const struct xante_menu *menu)
 
 static bool item_may_have_value(const struct xante_item *item)
 {
-    switch (item->type) {
+    switch (item->dialog_type) {
         /*
          * These are all dialogs that may have values and their values are
          * viewed beside its name inside a menu. So the user may know its
@@ -75,7 +75,6 @@ static bool item_may_have_value(const struct xante_item *item)
         case XANTE_UI_DIALOG_INPUT_STRING:
         case XANTE_UI_DIALOG_INPUT_DATE:
         case XANTE_UI_DIALOG_INPUT_TIME:
-        case XANTE_UI_DIALOG_INPUT_PASSWD:
         case XANTE_UI_DIALOG_CALENDAR:
         case XANTE_UI_DIALOG_TIMEBOX:
         case XANTE_UI_DIALOG_RADIO_CHECKLIST:
@@ -104,6 +103,10 @@ static int check_item_width(cl_list_node_t *node, void *a)
     /* We only check items that may have values */
     if (item_may_have_value(item) == true) {
         s = dialog_get_item_value_as_text(item);
+
+        if (NULL == s)
+            return 0;
+
         length = strlen(s);
         free(s);
 
@@ -192,7 +195,7 @@ static void prepare_dialog_look(struct xante_app *xpp,
 {
     int timeout = -1;
 
-    dialog_set_backtitle();
+    dialog_set_backtitle(xpp);
     dialog_vars.cancel_label = strdup(cancel_label);
     timeout = xante_runtime_ui_dialog_timeout(xpp);
 
@@ -200,7 +203,7 @@ static void prepare_dialog_look(struct xante_app *xpp,
         dialog_vars.timeout_secs = timeout;
 }
 
-static void release_dialog_look(void)
+static void release_dialog_labels(void)
 {
     if (dialog_vars.cancel_label != NULL) {
         free(dialog_vars.cancel_label);
@@ -216,6 +219,142 @@ static void release_dialog_content(DIALOG_LISTITEM *listitem, int total_items)
         free(listitem[i].name);
         free(listitem[i].help);
         free(listitem[i].text);
+    }
+
+    free(listitem);
+}
+
+static void call_menu_dialog(struct xante_app *xpp,
+    struct xante_item *selected_item, bool remove_item_from_menu)
+{
+    struct xante_menu *menu = NULL;
+    char *btn_cancel_label = NULL;
+
+    menu = ui_search_menu_by_object_id(xpp,
+                                       cl_string_valueof(selected_item->object_id));
+
+    if (NULL == menu) {
+        xante_messagebox(xpp, XANTE_MSGBOX_ERROR, 0, cl_tr("Error"),
+                         cl_tr("No menu '%s' was found!"),
+                         cl_string_valueof(selected_item->name));
+
+        return;
+    }
+
+    btn_cancel_label = strdup(cl_tr("Back"));
+    ui_dialog_menu(xpp, menu, btn_cancel_label, remove_item_from_menu,
+                   selected_item);
+
+    free(btn_cancel_label);
+}
+
+static bool call_input_dialog(struct xante_app *xpp,
+    struct xante_item *selected_item, bool edit_value)
+{
+    return ui_dialog_input(xpp, selected_item, edit_value);
+}
+
+static bool call_calendar_dialog(struct xante_app *xpp,
+    struct xante_item *selected_item, bool edit_value)
+{
+    return ui_dialog_calendar(xpp, selected_item, edit_value);
+}
+
+static bool call_timebox_dialog(struct xante_app *xpp,
+    struct xante_item *selected_item, bool edit_value)
+{
+    return ui_dialog_timebox(xpp, selected_item, edit_value);
+}
+
+static bool call_checklist_dialog(struct xante_app *xpp,
+    struct xante_item *selected_item, bool edit_value)
+{
+    return ui_dialog_checklist(xpp, selected_item, edit_value);
+}
+
+static bool call_yesno_dialog(struct xante_app *xpp,
+    struct xante_item *selected_item)
+{
+    return ui_dialog_yesno(xpp, selected_item);
+}
+
+static void call_selected_item(struct xante_app *xpp,
+    const struct xante_menu *menu, cl_list_node_t *selected_item_node,
+    bool remove_item_from_menu)
+{
+    bool update_internal_menus = false, edit_item_value = true;
+    struct xante_item *selected_item = cl_list_node_content(selected_item_node);
+
+    cl_list_node_unref(selected_item_node);
+
+    if (NULL == selected_item) {
+        return;
+    }
+
+    /* Are we leaving? */
+    if (xante_runtime_close_ui(xpp) == true)
+        return;
+
+    if (remove_item_from_menu == true) {
+        /* TODO: Future */
+        return;
+    }
+
+    /* TODO: Verify input edit */
+
+    switch (selected_item->dialog_type) {
+        case XANTE_UI_DIALOG_MENU:
+        case XANTE_UI_DIALOG_DYNAMIC_MENU:
+            call_menu_dialog(xpp, selected_item, remove_item_from_menu);
+            break;
+
+        case XANTE_UI_DIALOG_INPUT_INT:
+        case XANTE_UI_DIALOG_INPUT_FLOAT:
+        case XANTE_UI_DIALOG_INPUT_DATE:
+        case XANTE_UI_DIALOG_INPUT_STRING:
+        case XANTE_UI_DIALOG_INPUT_TIME:
+        case XANTE_UI_DIALOG_INPUT_PASSWD:
+            update_internal_menus = call_input_dialog(xpp, selected_item,
+                                                      edit_item_value);
+
+            break;
+
+        case XANTE_UI_DIALOG_CALENDAR:
+            update_internal_menus = call_calendar_dialog(xpp, selected_item,
+                                                         edit_item_value);
+
+            break;
+
+        case XANTE_UI_DIALOG_TIMEBOX:
+            update_internal_menus = call_timebox_dialog(xpp, selected_item,
+                                                        edit_item_value);
+
+            break;
+
+        case XANTE_UI_DIALOG_RADIO_CHECKLIST:
+        case XANTE_UI_DIALOG_CHECKLIST:
+            update_internal_menus = call_checklist_dialog(xpp, selected_item,
+                                                          edit_item_value);
+
+            break;
+
+        case XANTE_UI_DIALOG_YES_NO:
+            if (edit_item_value == true)
+               update_internal_menus = call_yesno_dialog(xpp, selected_item);
+            else {
+            }
+
+            break;
+
+        case XANTE_UI_DIALOG_RM_DYNAMIC_MENU:
+            break;
+
+        default:
+            break;
+    }
+
+    if (update_internal_menus == true) {
+        /* TODO */
     }
 }
 
@@ -247,7 +386,7 @@ int ui_dialog_menu(struct xante_app *xpp, const struct xante_menu *menu,
     int ret_dialog = DLG_EXIT_OK, items_to_select = 0, total_items = 0,
         dlg_width = 0, selected_index = -1, dlg_lines = 0;
 
-    release_dialog_look();
+    release_dialog_labels();
 
     do {
         if (xante_runtime_close_ui(xpp) == true)
@@ -264,15 +403,25 @@ int ui_dialog_menu(struct xante_app *xpp, const struct xante_menu *menu,
 
         switch (ret_dialog) {
             case DLG_EXIT_OK:
+                call_selected_item(xpp, menu,
+                                   cl_list_at(menu->items, selected_index),
+                                   remove_item_from_menu);
+
                 break;
 
             case DLG_EXIT_ESC:
             case DLG_EXIT_CANCEL:
                 /* Are we leaving the application? */
                 if (strcmp(cancel_label, MAIN_MENU_CANCEL_LABEL) == 0) {
-                }
+                    if (dialog_question(xpp, cl_tr("Closing"),
+                                        cl_tr("Do you really want to quit?"),
+                                        cl_tr("Yes"), cl_tr("No")) == true)
+                    {
+                        loop = false;
+                    }
+                } else
+                    loop = false;
 
-                loop = false;
                 break;
 
             case DLG_EXIT_HELP:
@@ -283,7 +432,7 @@ int ui_dialog_menu(struct xante_app *xpp, const struct xante_menu *menu,
                 break;
         }
 
-        release_dialog_look();
+        release_dialog_labels();
         release_dialog_content(dlg_items, total_items);
     } while (loop);
 

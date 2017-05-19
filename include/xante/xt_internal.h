@@ -31,6 +31,10 @@
 # include <dialog.h>
 #endif
 
+#ifndef DLG_KEYS_H_included
+# include <dlg_keys.h>
+#endif
+
 /*
  * An internal representation of a public function. It does not affect the code
  * or the function visibility. Its objective is only to let clear what is and
@@ -63,6 +67,7 @@ struct xante_info {
     cl_string_t     *application_name;
     cl_string_t     *plugin_name;
     cl_string_t     *version;
+    cl_string_t     *company;
     int             revision;
     int             build;
     bool            beta;
@@ -88,18 +93,29 @@ struct xante_runtime {
 struct xante_item {
     /* JTF objects */
     enum xante_access_mode  mode;
-    enum xante_ui_dialog    type;
+    cl_string_t             *type;
     cl_string_t             *name;
     cl_string_t             *object_id;
     cl_string_t             *config_block;
     cl_string_t             *config_item;
     cl_string_t             *help;
-    cl_string_t             *options;
     cl_object_t             *default_value;
 
+    /* Events */
+
+    /* Input range */
+    /* TODO: use cl_spec_t for data ranges */
+    cl_object_t             *min;
+    cl_object_t             *max;
+    int                     string_length;
+    cl_spec_t               *value_spec;
+
     /* Internal */
+    cl_string_t             *options;
     cl_object_t             *value;
     cl_string_list_t        *checklist_options;
+    int                     dialog_checklist_type;
+    enum xante_ui_dialog    dialog_type;
     struct cl_ref_s         ref;
 };
 
@@ -108,10 +124,19 @@ struct xante_menu {
     /* JTF objects */
     cl_string_t                 *name;
     cl_string_t                 *object_id;
+    cl_string_t                 *type;
     enum xante_access_mode      mode;
+
+    /* Dynamic menu details */
+    cl_string_list_t            *dynamic_names;
+    cl_string_t                 *dynamic_block_prefix;
+    int                         copies;
+    cl_string_t                 *dynamic_origin_block;
+    cl_string_t                 *dynamic_origin_item;
 
     /* Internal */
     enum xante_menu_creator     creator;
+    enum xante_ui_menu          menu_type;
     bool                        move_to_be_released;
     cl_list_t                   *items;
     struct cl_ref_s             ref;
@@ -127,12 +152,34 @@ struct xante_log {
     cl_log_t                *log;
 };
 
+struct xante_plugin {
+    cl_plugin_t             *plugin;
+};
+
+struct xante_config {
+    cl_cfg_file_t           *cfg_file;
+    char                    *filename;
+};
+
+struct xante_changes {
+    cl_list_t               *user_changes;
+};
+
+struct xante_auth {
+    cl_string_t         *username;
+    cl_string_t         *password;
+};
+
 /** Library main structure */
 struct xante_app {
     struct xante_info       info;
     struct xante_runtime    runtime;
     struct xante_ui         ui;
     struct xante_log        log;
+    struct xante_config     config;
+    struct xante_changes    changes;
+    struct xante_plugin     plugin;
+    struct xante_auth       auth;
     struct cl_ref_s         ref;
 };
 

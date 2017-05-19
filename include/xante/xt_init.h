@@ -33,7 +33,9 @@
 # endif
 #endif
 
-xante_t *xante_init(const char *jtf_pathname, bool use_plugin);
+xante_t *xante_init(const char *jtf_pathname, bool use_plugin,
+                    const char *username, const char *password);
+
 int xante_uninit(xante_t *xpp);
 
 #endif

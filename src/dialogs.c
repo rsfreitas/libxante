@@ -24,7 +24,63 @@
  * USA
  */
 
+#include <stdlib.h>
+#include <stdarg.h>
+
 #include "libxante.h"
+#include "ui/ui_dialogs.h"
+
+/*
+ *
+ * Internal functions
+ *
+ */
+
+static int xante_dlg_messagebox(int width, int height,
+    enum xante_msgbox_type type, const char *title, const char *text)
+{
+    int pause_opt = 1, ret_dialog = DLG_EXIT_OK;
+    chtype dlg_color, dialog_attr_b, border_attr_b, title_attr_b,
+           border2_attr_b;
+
+    /* TODO: Change here to make theme compatible */
+    switch (type) {
+        case XANTE_MSGBOX_INFO:
+            dlg_color = dlg_color_pair(COLOR_BLACK, COLOR_GREEN);
+            break;
+
+        case XANTE_MSGBOX_WARNING:
+            dlg_color = dlg_color_pair(COLOR_BLACK, COLOR_YELLOW);
+            break;
+
+        case XANTE_MSGBOX_ERROR:
+            dlg_color = dlg_color_pair(COLOR_WHITE, COLOR_RED);
+            break;
+    }
+
+    /* Saves libdialog dialog attr */
+    dialog_attr_b = dialog_attr;
+    border_attr_b = border_attr;
+    title_attr_b = title_attr;
+    border2_attr_b = border2_attr;
+
+    /* Sets our new attr */
+    dialog_attr = dlg_color;
+    border_attr = dlg_color;
+    title_attr = dlg_color;
+    border2_attr = dlg_color;
+
+    dlg_put_backtitle();
+    ret_dialog = dialog_msgbox(title, text, height, width, pause_opt);
+
+    /* Restores libdialog dialog attr */
+    dialog_attr = dialog_attr_b;
+    border_attr = border_attr_b;
+    title_attr = title_attr_b;
+    border2_attr = border2_attr_b;
+
+    return ret_dialog;
+}
 
 /*
  *
@@ -35,7 +91,8 @@
 __PUB_API__ int xante_ui_set_backtitle(xante_t *xpp)
 {
     struct xante_app *x = (struct xante_app *)xpp;
-    cl_string_t *title = NULL;
+    cl_string_t *title = NULL, *left = NULL, *format = NULL, *right = NULL;
+    unsigned int screen_width = 0;
 
     errno_clear();
 
@@ -49,13 +106,52 @@ __PUB_API__ int xante_ui_set_backtitle(xante_t *xpp)
         return -1;
     }
 
-    title = cl_string_create(cl_tr("%s - Version %s.%d.%d %s"),
-                             cl_string_valueof(x->info.application_name),
-                             cl_string_valueof(x->info.version),
-                             x->info.revision, x->info.build,
-                             (x->info.beta == true) ? "BETA" : "");
+    if (change_has_occourred(xpp)) {
+        right = cl_string_create("[%s*] %s",
+                                 cl_string_valueof(x->auth.username),
+                                 cl_string_valueof(x->info.company));
+    } else
+        right = cl_string_create("[%s] %s",
+                                 cl_string_valueof(x->auth.username),
+                                 cl_string_valueof(x->info.company));
+
+    left = cl_string_create(cl_tr("%s - Version %s.%d Build %d %s"),
+                            cl_string_valueof(x->info.application_name),
+                            cl_string_valueof(x->info.version),
+                            x->info.revision, x->info.build,
+                            (x->info.beta == true) ? "BETA" : "");
+
+    if ((screen_width = dlg_box_x_ordinate(0) * 2) > 256)
+        screen_width = 128;
+
+    if (screen_width  > (unsigned int)(cl_string_length(left) +
+                                       cl_string_length(right)))
+    {
+        format = cl_string_create("%%s%%%ds",
+                                  (screen_width - cl_string_length(left)));
+    } else
+        format = cl_string_create("%%s - %%s");
+
+    title = cl_string_create(cl_string_valueof(format),
+                             cl_string_valueof(left),
+                             cl_string_valueof(right));
+
+    if (dialog_vars.backtitle != NULL)
+        free(dialog_vars.backtitle);
 
     dialog_vars.backtitle = strdup(cl_string_valueof(title));
+
+    if (title != NULL)
+        cl_string_unref(title);
+
+    if (left != NULL)
+        cl_string_unref(left);
+
+    if (right != NULL)
+        cl_string_unref(right);
+
+    if (format != NULL)
+        cl_string_unref(format);
 
     return 0;
 }
@@ -78,5 +174,71 @@ __PUB_API__ int xante_ui_clear_backtitle(xante_t *xpp)
     dialog_vars.backtitle = NULL;
 
     return 0;
+}
+
+/*
+ * TODO: Show buttons which was set in @buttons.
+ */
+__PUB_API__ int xante_messagebox(struct xante_app *xpp,
+    enum xante_msgbox_type type, enum xante_buttons buttons __attribute__((unused)),
+    const char *title, const char *message, ...)
+{
+    va_list ap;
+    char *msg = NULL;
+    enum xante_buttons key;
+    int height = 0, ret_dialog;
+    cl_string_t *real_msg = NULL;
+    bool dialog_needs_close = false;
+
+    va_start(ap, message);
+    vasprintf(&msg, message, ap);
+    va_end(ap);
+
+    if ((NULL == xpp) || (xante_runtime_ui_active(xpp) == false)) {
+        dialog_init(true);
+        dialog_needs_close = true;
+    }
+
+    real_msg = cl_string_create("%s", msg);
+    cl_string_rplchr(real_msg, XANTE_STR_LINE_BREAK, '\n');
+    height = dialog_count_lines(msg, MINIMUM_WIDTH);
+
+    if (xpp != NULL)
+        xante_info("MSGBOX: %s", msg);
+
+    ret_dialog = xante_dlg_messagebox(MINIMUM_WIDTH, height, type, title,
+                                      cl_string_valueof(real_msg));
+
+    if (dialog_needs_close == true)
+        dialog_uninit();
+
+    if (real_msg != NULL)
+        cl_string_unref(real_msg);
+
+    if (msg != NULL)
+        free(msg);
+
+    switch (ret_dialog) {
+        case DLG_EXIT_OK:
+            key = XANTE_BTN_OK;
+            break;
+
+        case DLG_EXIT_CANCEL:
+#ifdef ALTERNATIVE_DIALOG
+        case DLG_EXIT_TIMEOUT:
+#endif
+            key = XANTE_BTN_CANCEL;
+            break;
+
+        case DLG_EXIT_HELP:
+            key = XANTE_BTN_HELP;
+            break;
+
+        case DLG_EXIT_EXTRA:
+            key = XANTE_BTN_INFO;
+            break;
+    }
+
+    return key;
 }
 

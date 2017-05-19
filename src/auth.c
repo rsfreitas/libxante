@@ -1,9 +1,9 @@
 
 /*
- * Description:
+ * Description: Functions to handle user access control inside an application.
  *
  * Author: Rodrigo Freitas
- * Created at: Tue May  2 21:07:38 2017
+ * Created at: Tue May  2 21:03:18 2017
  * Project: libxante
  *
  * Copyright (C) 2017 Rodrigo Freitas
@@ -24,37 +24,53 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_CONFIG_H
-#define _LIBXANTE_XT_CONFIG_H          1
+#include "libxante.h"
 
-#ifndef LIBXANTE_COMPILE
-# ifndef _LIBXANTE_H
-#  error "Never use <xt_config.h> directly; include <libxante.h> instead."
-# endif
-#endif
+/*
+ *
+ * Internal function
+ *
+ */
+
+/*
+ *
+ * Internal API
+ *
+ */
 
 /**
- * @name xante_load_config
- * @brief Loads the configuration file from the application.
+ * @name auth_init
+ * @brief Starts the internal user access validation.
  *
  * @param [in,out] xpp: The main library object.
+ * @param [in] username: The username.
+ * @param [in] password: The username password.
  *
- * @return On success returns 0 or -1 otherwise.
+ * @return On succcess returns 0 or -1 otherwise.
  */
-int xante_load_config(xante_t *xpp);
+int auth_init(struct xante_app *xpp, const char *username,
+    const char *password)
+{
+    xpp->auth.username = cl_string_create("%s", username);
+    xpp->auth.password = cl_string_create("%s", password);
+
+    /* TODO: Validate user/pass inside a DB */
+
+    return 0;
+}
 
 /**
- * @name xante_write_config
- * @brief Unloads and save the configuration file from the application.
- *
- * The saving is made when needed.
+ * @name auth_uninit
+ * @brief Finishes the internal user validation.
  *
  * @param [in,out] xpp: The main library object.
- * @param [in] ui_return_status: The UI return value.
- *
- * @return On sucess returns 0 or -1 otherwise.
  */
-int xante_write_config(xante_t *xpp, int ui_return_status);
+void auth_uninit(struct xante_app *xpp)
+{
+    if (xpp->auth.password != NULL)
+        cl_string_unref(xpp->auth.password);
 
-#endif
+    if (xpp->auth.username != NULL)
+        cl_string_unref(xpp->auth.username);
+}
 

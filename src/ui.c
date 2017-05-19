@@ -59,6 +59,9 @@ static void destroy_xante_item(const struct cl_ref_s *ref)
     if (item->name != NULL)
         cl_string_unref(item->name);
 
+    if (item->type != NULL)
+        cl_string_unref(item->type);
+
     if (item->object_id != NULL)
         cl_string_unref(item->object_id);
 
@@ -80,6 +83,18 @@ static void destroy_xante_item(const struct cl_ref_s *ref)
     if (item->default_value != NULL)
         cl_object_unref(item->default_value);
 
+    if (item->min != NULL)
+        cl_object_unref(item->min);
+
+    if (item->max != NULL)
+        cl_object_unref(item->max);
+
+    if (item->checklist_options != NULL)
+        cl_string_list_destroy(item->checklist_options);
+
+    if (item->value_spec != NULL)
+        cl_spec_destroy(item->value_spec);
+
     free(item);
 }
 
@@ -99,6 +114,21 @@ static void destroy_xante_menu(const struct cl_ref_s *ref)
     if (menu->items != NULL)
         cl_list_destroy(menu->items);
 
+    if (menu->type != NULL)
+        cl_string_unref(menu->type);
+
+    if (menu->dynamic_names != NULL)
+        cl_string_list_destroy(menu->dynamic_names);
+
+    if (menu->dynamic_block_prefix != NULL)
+        cl_string_unref(menu->dynamic_block_prefix);
+
+    if (menu->dynamic_origin_block != NULL)
+        cl_string_unref(menu->dynamic_origin_block);
+
+    if (menu->dynamic_origin_item != NULL)
+        cl_string_unref(menu->dynamic_origin_item);
+
     free(menu);
 }
 
@@ -115,26 +145,15 @@ static void __destroy_xante_menu(void *a)
     ui_xante_menu_unref(menu);
 }
 
-static void dialog_uninit(void)
+static int search_menu_by_object_id(cl_list_node_t *node, void *a)
 {
-    int dialog_return_value = DLG_EXIT_OK;
+    struct xante_menu *menu = cl_list_node_content(node);
+    char *object_id = (char *)a;
 
-    dlg_killall_bg(&dialog_return_value);
+    if (strcmp(cl_string_valueof(menu->object_id), object_id) == 0)
+        return 1;
 
-    if (dialog_state.screen_initialized) {
-        (void)refresh();
-        end_dialog();
-    }
-}
-
-static void dialog_init(bool temporarily)
-{
-    memset(&dialog_state, 0, sizeof(dialog_state));
-
-    if (temporarily == false)
-        memset(&dialog_vars, 0, sizeof(dialog_vars));
-
-    init_dialog(stdin, stdout);
+    return 0;
 }
 
 /*
@@ -260,6 +279,7 @@ struct xante_menu *ui_new_xante_menu(enum xante_menu_creator creator)
 
     menu->creator = creator;
     menu->move_to_be_released = false;
+    menu->copies = -1;
     menu->items = cl_list_create(__destroy_xante_item, NULL, NULL, NULL);
 
     /* Initialize reference count */
@@ -302,31 +322,181 @@ void ui_uninit(struct xante_app *xpp)
 }
 
 /**
+ * @name ui_adjusts_menu_info
+ * @brief Do some adjustments inside a menu after its informations is
+ *        completely loaded from the JTF file.
+ *
+ * @param [in,out] menu: Them menu to be adjusted.
+ */
+void ui_adjusts_menu_info(struct xante_menu *menu, void *copies)
+{
+    int i, t;
+    cl_json_t *node = NULL;
+    cl_string_t *value = NULL;
+
+    menu->menu_type = translate_string_menu_type((menu->type != NULL)
+                                                  ? cl_string_valueof(menu->type)
+                                                  : NULL);
+
+    if ((menu->menu_type == XANTE_UI_MENU_DYNAMIC) && (copies != NULL)) {
+        /* If we don't have a block_prefix, we handle @copies as an array */
+        if (NULL == menu->dynamic_block_prefix) {
+            t = cl_json_get_array_size(copies);
+            menu->dynamic_names = cl_string_list_create();
+
+            for (i = 0; i < t; i++) {
+                node = cl_json_get_array_item(copies, i);
+                value = cl_json_get_object_value(node);
+                cl_string_list_add(menu->dynamic_names, value);
+            }
+        } else
+            menu->copies = *(int *)&copies;
+    }
+}
+
+/**
  * @name ui_adjusts_item_info
  * @brief Do some adjustments inside an item after its informations is
- *        completely loaded.
+ *        completely loaded from the JTF file.
  *
  * For example, here we must split a checklist options into a cl_string_list_t
  * object.
  *
  * @param [in,out] item: The item to be adjusted.
+ * @param [in] default_value: A default value loaded from the JTF.
+ * @param [in] options: The options value loaded from the JTF.
+ * @param [in] max_range: The maximum range of an input item.
+ * @param [in] min_range: The minimum range of an input item.
  */
-void ui_adjusts_item_info(struct xante_item *item, cl_string_t *default_value)
+void ui_adjusts_item_info(struct xante_item *item, cl_string_t *default_value,
+    void *options, void *max_range, void *min_range)
 {
+    int i, t, i_max, i_min;
+    float f_max, f_min;
+    cl_json_t *node = NULL;
+    cl_string_t *value = NULL;
+
+    item->dialog_type =
+        translate_string_dialog_type(cl_string_valueof(item->type));
+
     if (default_value != NULL)
         item->default_value = cl_object_from_cstring(default_value);
 
-    switch (item->type) {
+    switch (item->dialog_type) {
         case XANTE_UI_DIALOG_RADIO_CHECKLIST:
         case XANTE_UI_DIALOG_CHECKLIST:
-            if (item->options != NULL)
-                item->checklist_options = cl_string_split(item->options, "|");
+            if (options != NULL) {
+                t = cl_json_get_array_size(options);
+                item->checklist_options = cl_string_list_create();
 
+                for (i = 0; i < t; i++) {
+                    node = cl_json_get_array_item(options, i);
+                    value = cl_json_get_object_value(node);
+                    cl_string_list_add(item->checklist_options, value);
+                }
+            }
+
+            item->dialog_checklist_type =
+                (item->dialog_type == XANTE_UI_DIALOG_CHECKLIST) ? FLAG_CHECK
+                                                                 : FLAG_RADIO;
+
+            break;
+
+        case XANTE_UI_DIALOG_INPUT_DATE:
+            item->string_length = DATE_MAX_INPUT_LENGTH;
+            break;
+
+        case XANTE_UI_DIALOG_INPUT_TIME:
+            item->string_length = TIME_MAX_INPUT_LENGTH;
+            break;
+
+        case XANTE_UI_DIALOG_INPUT_INT:
+            i_min = *(int *)&min_range;
+            i_max = *(int *)&max_range;
+            item->min = cl_object_create(CL_INT, i_min);
+            item->max = cl_object_create(CL_INT, i_max);
+            break;
+
+        case XANTE_UI_DIALOG_INPUT_FLOAT:
+            f_min = *(float *)&min_range;
+            f_max = *(float *)&max_range;
+            item->min = cl_object_create(CL_FLOAT, f_min);
+            item->max = cl_object_create(CL_FLOAT, f_max);
             break;
 
         default:
             break;
     }
+
+    if ((item->dialog_type != XANTE_UI_DIALOG_CHECKLIST) &&
+        (item->dialog_type != XANTE_UI_DIALOG_RADIO_CHECKLIST))
+    {
+        if (options != NULL)
+            item->options = options;
+    }
+
+    if (is_input_item(item->type) == true)
+        item->value_spec = cl_spec_create(CL_READABLE | CL_WRITABLE, item->min,
+                                          item->max, item->string_length);
+}
+
+/**
+ * @name ui_search_menu_by_object_id
+ * @brief Searches a xante_menu structure inside the main menu list which have
+ *        a specific object_id.
+ *
+ * @param [in] xpp: The main library object.
+ * @param [in] object_it_to_search: The menu object_id which will be used to
+ *                                  search.
+ *
+ * @return On success, i.e, the menu is found, returns a pointer to its
+ *         xante_menu structure or NULL otherwise.
+ */
+struct xante_menu *ui_search_menu_by_object_id(const struct xante_app *xpp,
+    const char *object_id_to_search)
+{
+    cl_list_node_t *node = NULL;
+    struct xante_menu *menu = NULL;
+
+    node = cl_list_map(xpp->ui.menus, search_menu_by_object_id,
+                       (void *)object_id_to_search);
+
+    if (NULL == node)
+        return NULL;
+
+    menu = cl_list_node_content(node);
+    cl_list_node_unref(node);
+
+    return menu;
+}
+
+// DEBUG
+static int print_item(cl_list_node_t *node, void *a __attribute__((unused)))
+{
+    struct xante_item *item= cl_list_node_content(node);
+
+    printf("\t'%s' -> '%s', '%s', '%s'\n", cl_string_valueof(item->name),
+            cl_string_valueof(item->object_id), cl_string_valueof(item->config_block),
+            cl_string_valueof(item->config_item));
+
+    return 0;
+}
+
+// DEBUG
+static int print_menu(cl_list_node_t *node, void *a __attribute__((unused)))
+{
+    struct xante_menu *menu = cl_list_node_content(node);
+
+    printf("'%s' -> '%s'\n", cl_string_valueof(menu->name), cl_string_valueof(menu->object_id));
+    cl_list_map(menu->items, print_item, NULL);
+
+    return 0;
+}
+
+// DEBUG
+void ui_print_menu_tree(struct xante_app *xpp)
+{
+    cl_list_map(xpp->ui.menus, print_menu, NULL);
 }
 
 /*
@@ -344,7 +514,7 @@ __PUB_API__ int xante_ui_run(xante_t *xpp)
     struct xante_app *x = (struct xante_app *)xpp;
     struct xante_menu *root = NULL;
     char *btn_cancel_label = NULL;
-    cl_list_node_t *root_node = NULL;
+    int ret_dialog;
 
     errno_clear();
 
@@ -356,17 +526,16 @@ __PUB_API__ int xante_ui_run(xante_t *xpp)
     xante_runtime_set_ui_active(xpp, true);
     dialog_init(false);
     xante_ui_set_backtitle(xpp);
-    /* TODO: Rename HELP button */
     btn_cancel_label = strdup(cl_tr(MAIN_MENU_CANCEL_LABEL));
-    root_node = cl_list_peek(x->ui.menus);
+    root = ui_search_menu_by_object_id(xpp,
+                                       cl_string_valueof(x->ui.main_menu_object_id));
 
-    if (NULL == root_node) {
+
+    if (NULL == root) {
         goto end_block;
     }
 
-    root = cl_list_node_content(root_node);
-    ui_dialog_menu(xpp, root, btn_cancel_label, false, NULL);
-    cl_list_node_unref(root_node);
+    ret_dialog = ui_dialog_menu(xpp, root, btn_cancel_label, false, NULL);
 
 end_block:
     if (btn_cancel_label != NULL)
@@ -376,7 +545,7 @@ end_block:
     dialog_uninit();
     xante_runtime_set_ui_active(xpp, false);
 
-    return 0;
+    return ret_dialog;
 }
 
 __PUB_API__ void xante_ui_suspend(void)

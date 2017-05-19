@@ -26,6 +26,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 
 #include "libxante.h"
 
@@ -53,24 +54,58 @@
 #define OBJECT_ID           "object_id"
 #define MODE                "mode"
 #define TYPE                "type"
-#define CONFIG_BLOCK        "config_block"
-#define CONFIG_ITEM         "config_item"
+#define BLOCK               "block"
+#define ITEM                "item"
 #define HELP                "help"
 #define ITEMS               "items"
 #define OPTIONS             "options"
 #define DEFAULT_VALUE       "default_value"
+#define INPUT_RANGES        "input_ranges"
+#define STRING_LENGTH       "string_length"
+#define MAX_RANGE           "max"
+#define MIN_RANGE           "min"
+#define CONFIG              "config"
+#define INTERNAL            "internal"
+#define APPLICATION         "application"
+#define COMPANY             "company"
+#define DYNAMIC             "dynamic"
+#define COPIES              "copies"
+#define BLOCK_PREFIX        "block_prefix"
+#define ORIGIN              "origin"
 
-static int fill_info(cl_json_t *node, const char *subnode_name, void **data)
+static int fill_info(cl_json_t *node, const char *subnode_name, ...)
 {
+    va_list ap;
     cl_json_t *subnode = NULL;
-    cl_string_t *value = NULL;
+    cl_string_t *value = NULL, *s = NULL;
     enum cl_json_type type;
+    bool *b, btrue = true, bfalse = false;
+    int *i, i_tmp;
+    float *f, f_tmp;
+    void **pp;
 
     subnode = cl_json_get_object_item(node, subnode_name);
 
     if (NULL == subnode) {
         errno_set(XANTE_ERROR_JTF_NO_INFO);
         return -1;
+    }
+
+    va_start(ap, NULL);
+    type = cl_json_get_object_type(subnode);
+
+    if (type == CL_JSON_TRUE) {
+        b = va_arg(ap, bool *);
+        memcpy(b, &btrue, sizeof(bool));
+        goto end_block;
+    } else if (type == CL_JSON_FALSE) {
+        b = va_arg(ap, bool *);
+        memcpy(b, &bfalse, sizeof(bool));
+        goto end_block;
+    } else if (type == CL_JSON_ARRAY) {
+        pp = va_arg(ap, void **);
+        *pp = subnode;
+        goto end_block;
     }
 
     value = cl_json_get_object_value(subnode);
@@ -80,23 +115,59 @@ static int fill_info(cl_json_t *node, const char *subnode_name, void **data)
         return -1;
     }
 
-    type = cl_json_get_object_type(subnode);
+    if (type == CL_JSON_STRING) {
+        pp = va_arg(ap, void **);
+        s = cl_string_ref(value);
+        *pp = s;
+    } else if (type == CL_JSON_NUMBER) {
+        i = va_arg(ap, int *);
+        i_tmp = cl_string_to_int(value);
+        memcpy(i, &i_tmp, sizeof(int));
+    } else if (type == CL_JSON_NUMBER_FLOAT) {
+        f = va_arg(ap, float *);
+        f_tmp = cl_string_to_float(value);
+        memcpy(f, &f_tmp, sizeof(float));
+    }
 
-    if (type == CL_JSON_STRING)
-        *data = cl_string_ref(value);
-    else if (type == CL_JSON_NUMBER)
-        *data = (void **)cl_string_to_int(value);
-    else if (type == CL_JSON_TRUE)
-        *data = (void **)true;
-    else if (type == CL_JSON_FALSE)
-        *data = (void **)false;
+end_block:
+    va_end(ap);
+
+    return 0;
+}
+
+static int parse_application_version(cl_json_t *internal,
+    struct xante_app *xpp)
+{
+    cl_json_t *app = NULL;
+
+    app = cl_json_get_object_item(internal, APPLICATION);
+
+    if (NULL == app) {
+        errno_set(XANTE_ERROR_JTF_NO_APPLICATION_OBJECT);
+        return -1;
+    }
+
+    fill_info(app, JTF_VERSION, (void **)&xpp->info.version);
+    fill_info(app, JTF_REVISION, (void **)&xpp->info.revision);
+    fill_info(app, JTF_BUILD, (void **)&xpp->info.build);
+    fill_info(app, JTF_BETA, (void **)&xpp->info.beta);
 
     return 0;
 }
 
 static int parse_jtf_info(cl_json_t *jtf, struct xante_app *xpp)
 {
-    cl_json_t *general = NULL;
+    cl_json_t *general = NULL, *internal = NULL;
+
+    internal = cl_json_get_object_item(jtf, INTERNAL);
+
+    if (NULL == internal) {
+        errno_set(XANTE_ERROR_JTF_NO_INTERNAL_OBJECT);
+        return -1;
+    }
+
+    if (parse_application_version(internal, xpp) < 0)
+        return -1;
 
     general = cl_json_get_object_item(jtf, GENERAL);
 
@@ -110,10 +181,52 @@ static int parse_jtf_info(cl_json_t *jtf, struct xante_app *xpp)
     fill_info(general, CONFIG_PATHNAME, (void **)&xpp->info.cfg_pathname);
     fill_info(general, LOG_PATHNAME, (void **)&xpp->info.log_pathname);
     fill_info(general, LOG_LEVEL, (void **)&xpp->info.log_level);
-    fill_info(general, JTF_VERSION, (void **)&xpp->info.version);
-    fill_info(general, JTF_REVISION, (void **)&xpp->info.revision);
-    fill_info(general, JTF_BUILD, (void **)&xpp->info.build);
-    fill_info(general, JTF_BETA, (void **)&xpp->info.beta);
+    fill_info(general, COMPANY, (void **)&xpp->info.company);
+
+    return 0;
+}
+
+static int parse_item_input_ranges(cl_json_t *item, struct xante_item *i,
+    void **max, void **min)
+{
+    cl_json_t *input_range = NULL;
+
+    /*
+     * Dont't need to parse if we're not an input item.
+     *
+     * XXX: We just need to remember that the 'type' object must be previously
+     *      loaded.
+     */
+    if (is_input_item(i->type) == false)
+        return 0;
+
+    input_range = cl_json_get_object_item(item, INPUT_RANGES);
+
+    if (NULL == input_range) {
+        errno_set(XANTE_ERROR_JTF_NO_INPUT_RANGES);
+        return -1;
+    }
+
+    fill_info(input_range, STRING_LENGTH, (void **)&i->string_length);
+    fill_info(input_range, MIN_RANGE, min);
+    fill_info(input_range, MAX_RANGE, max);
+
+    return 0;
+}
+
+static int parse_item_config(cl_json_t *item, struct xante_item *it)
+{
+    cl_json_t *config = NULL;
+
+    config = cl_json_get_object_item(item, CONFIG);
+
+    if (NULL == config) {
+        errno_set(XANTE_ERROR_JTF_NO_CONFIG_OBJECT);
+        return -1;
+    }
+
+    fill_info(config, BLOCK, (void **)&it->config_block);
+    fill_info(config, ITEM, (void **)&it->config_item);
 
     return 0;
 }
@@ -122,6 +235,7 @@ static int parse_menu_item(cl_json_t *item, struct xante_menu *menu)
 {
     struct xante_item *i;
     cl_string_t *default_value = NULL;
+    void *options = NULL, *max = NULL, *min = NULL;
 
     i = ui_new_xante_item();
 
@@ -132,12 +246,15 @@ static int parse_menu_item(cl_json_t *item, struct xante_menu *menu)
     fill_info(item, TYPE, (void **)&i->type);
     fill_info(item, MODE, (void **)&i->mode);
     fill_info(item, HELP, (void **)&i->help);
-    fill_info(item, OPTIONS, (void **)&i->options);
+    fill_info(item, OPTIONS, (void **)&options);
     fill_info(item, DEFAULT_VALUE, (void **)&default_value);
-    fill_info(item, CONFIG_BLOCK, (void **)&i->config_block);
-    fill_info(item, CONFIG_ITEM, (void **)&i->config_item);
+    fill_info(item, OBJECT_ID, (void **)&i->object_id);
+    parse_item_config(item, i);
 
-    ui_adjusts_item_info(i, default_value);
+    if (parse_item_input_ranges(item, i, &max, &min) < 0)
+        return -1;
+
+    ui_adjusts_item_info(i, default_value, options, max, min);
     cl_list_unshift(menu->items, i, -1);
 
     if (default_value != NULL)
@@ -146,11 +263,34 @@ static int parse_menu_item(cl_json_t *item, struct xante_menu *menu)
     return 0;
 }
 
+static void parse_menu_dynamic(cl_json_t *menu, struct xante_menu *m,
+    void **copies)
+{
+    cl_json_t *dynamic = NULL, *origin = NULL;
+
+    dynamic = cl_json_get_object_item(menu, DYNAMIC);
+
+    if (NULL == dynamic)
+        return;
+
+    fill_info(dynamic, BLOCK_PREFIX, (void **)&m->dynamic_block_prefix);
+    fill_info(dynamic, COPIES, copies);
+
+    origin = cl_json_get_object_item(dynamic, ORIGIN);
+
+    if (NULL == origin)
+        return;
+
+    fill_info(origin, BLOCK, (void **)&m->dynamic_origin_block);
+    fill_info(origin, ITEM, (void **)&m->dynamic_origin_item);
+}
+
 static int parse_ui_menu(cl_json_t *menu, struct xante_app *xpp)
 {
     cl_json_t *items;
     int i, t;
     struct xante_menu *m = NULL;
+    void *copies = NULL;
 
     m = ui_new_xante_menu(XANTE_MENU_CREATED_FROM_JTF);
 
@@ -160,6 +300,14 @@ static int parse_ui_menu(cl_json_t *menu, struct xante_app *xpp)
     fill_info(menu, NAME, (void **)&m->name);
     fill_info(menu, OBJECT_ID, (void **)&m->object_id);
     fill_info(menu, MODE, (void **)&m->mode);
+    fill_info(menu, TYPE, (void **)&m->type);
+    parse_menu_dynamic(menu, m, &copies);
+
+    /*
+     * We must adjust some internal menu informations before loading its
+     * items.
+     */
+    ui_adjusts_menu_info(m, copies);
     items = cl_json_get_object_item(menu, ITEMS);
 
     if (NULL == items) {
@@ -263,7 +411,7 @@ int jtf_parse(const char *pathname, struct xante_app *xpp)
 
     /*
      * FIXME: libcollections shares the same errno variable with us,
-     *        and it's cleaning it here. we must fix there.
+     *        and it's cleaning it here. We must fix there.
      */
     cl_json_delete(jtf);
 
@@ -298,5 +446,8 @@ void jtf_release_info(struct xante_app *xpp)
 
     if (xpp->info.version != NULL)
         cl_string_unref(xpp->info.version);
+
+    if (xpp->info.company != NULL)
+        cl_string_unref(xpp->info.company);
 }
 

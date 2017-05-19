@@ -13,59 +13,56 @@ it may reference an application skeleton.
 ```
 {
     "internal": {
-        "revision":,
-        "language":
+        "revision": int
+        "language": string
+        "application": {
+            "version": string
+            "revision": int
+            "build": int
+            "beta": bool
+        }
     },
     "general": {
-        "name":
-        "plugin":
-        "config_pathname":
-        "version":
-        "revision":
-        "build":
-        "beta":
+        "name": string
+        "plugin": string
+        "config_pathname": string
+        "log_pathname": string
+        "log_level": string
+        "company": string
     },
     "ui": {
-        "main_menu": "object_id",
+        "main_menu": string
         "menus": [
             {
-                "name": "Main",
-                "object_id": "",
-                "id": 9999,
-                "mode":,
-                "items": [
-                    {
-                        "mode":
-                        "default_value":,
-                        "config_block":,
-                        "config_name":,
-                        "type":
+                "name": string
+                "object_id": string
+                "mode": int
+                "type": string
+                "dynamic": {
+                    "copies": int/array of strings
+                    "block_prefix": string
+                    "origin": {
+                        "block": string
+                        "item": string
                     }
-                ]
-            },
-            {
-                "name": "Debug",
-                "object_id":
-                "id":
+                },
                 "items": [
                     {
-                        "default_value":,
-                        "config_block":,
-                        "config_name":,
-                        "type":
-                    }
-                ]
-            },
-            {
-                "name": "Help",
-                "object_id":
-                "id":
-                "items": [
-                    {
-                        "default_value":,
-                        "config_block":,
-                        "config_name":,
-                        "type":
+                        "mode": int
+                        "default_value": string
+                        "config": {
+                            "block": string
+                            "item": string
+                        },
+                        "type": string
+                        "options": string/array of strings
+                        "name": string,
+                        "help": string
+                        "input_ranges": {
+                            "string_length": int
+                            "max": int/float
+                            "min": int/float
+                        }
                     }
                 ]
             }

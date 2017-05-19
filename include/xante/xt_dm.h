@@ -1,9 +1,9 @@
 
 /*
- * Description: Functions to handle user access control inside an application.
+ * Description:
  *
  * Author: Rodrigo Freitas
- * Created at: Tue May  2 21:03:18 2017
+ * Created at: Thu May 18 00:13:49 2017
  * Project: libxante
  *
  * Copyright (C) 2017 Rodrigo Freitas
@@ -24,5 +24,19 @@
  * USA
  */
 
-#include "libxante.h"
+#ifndef _LIBXANTE_XT_DM_H
+#define _LIBXANTE_XT_DM_H          1
+
+#ifndef LIBXANTE_COMPILE
+# ifndef _LIBXANTE_H
+#  error "Never use <xt_dm.h> directly; include <libxante.h> instead."
+# endif
+#else
+
+/* Internal library declarations */
+void dm_init(struct xante_app *xpp, cl_cfg_file_t *cfg_file);
+
+#endif
+
+#endif
 

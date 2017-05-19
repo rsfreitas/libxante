@@ -15,8 +15,16 @@ This library is intended to build and run dialog based applications.
 
 ## Dependencies
 
-* libcollections
-* libdialog
+* [libcollections](https://github.com/rsfreitas/libcollections)
+* [libdialog](http://invisible-island.net/dialog/)
+
+### Alternative libdialog
+
+We may choose to use an alternative version of libdialog by setting the
+option **ALTERNATIVE\_DIALOG** in the make command.
+```
+make ALTERNATIVE_DIALOG=1
+```
 
 ## Bindings
 

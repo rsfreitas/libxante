@@ -37,6 +37,12 @@
 bool is_valid_config_file_status(enum xante_config_file_status status);
 bool is_valid_ui_dialog(enum xante_ui_dialog type);
 bool is_item_available(struct xante_item *item);
+enum xante_ui_menu translate_string_menu_type(const char *type);
+enum xante_ui_dialog translate_string_dialog_type(const char *type);
+bool is_input_item(const cl_string_t *type);
+bool is_menu_item(const cl_string_t *type);
+int idigits(int n);
+bool equals(const char *a, const char *b);
 
 #endif
 

@@ -3,7 +3,7 @@
  * Description:
  *
  * Author: Rodrigo Freitas
- * Created at: Tue May  2 21:07:38 2017
+ * Created at: Mon May  8 21:03:34 2017
  * Project: libxante
  *
  * Copyright (C) 2017 Rodrigo Freitas
@@ -24,14 +24,6 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_ACCESS_H
-#define _LIBXANTE_XT_ACCESS_H          1
-
-#ifndef LIBXANTE_COMPILE
-# ifndef _LIBXANTE_H
-#  error "Never use <xt_access.h> directly; include <libxante.h> instead."
-# endif
-#endif
-
-#endif
+#include "libxante.h"
+#include "addon_dialogs.h"
 

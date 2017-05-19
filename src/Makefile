@@ -42,15 +42,27 @@ ifeq ($(gccversion), 5)
 endif
 
 LIBDIR =
-LIBS = -lcollections -ldialog -lncursesw
+LIBS = -lcollections
+
+ifeq ($(ALTERNATIVE_DIALOG), 1)
+    ALTERNATIVE_DIALOG_INCLUDEDIR = /usr/
+    INCLUDEDIR +=
+    LIBDIR +=
+    LIBS +=
+    CFLAGS += -DALTERNATIVE_DIALOG
+else
+    LIBS += -ldialog -lncursesw
+endif
 
 VPATH = ../include:.
 
 C_FILES := $(wildcard *.c)
-UI_FILES = $(wildcard ui/*.c)
+UI_FILES := $(wildcard ui/*.c)
+DIALOG_FILES := $(wildcard dialog/*.c)
 OBJS = 		\
-	$(C_FILES:.c=.o)	\
-	$(UI_FILES:.c=.o)
+	$(DIALOG_FILES:.c=.o)	\
+	$(UI_FILES:.c=.o)	\
+	$(C_FILES:.c=.o)
 
 shared: outputdirs $(OBJS)
 	$(CC) -shared -Wl,-soname,$(SONAME),--version-script,$(PREFIX).sym -o $(TARGET_SHARED) $(OBJS) $(LIBDIR) $(LIBS)
