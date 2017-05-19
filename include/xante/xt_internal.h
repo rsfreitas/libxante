@@ -104,7 +104,6 @@ struct xante_item {
     /* Events */
 
     /* Input range */
-    /* TODO: use cl_spec_t for data ranges */
     cl_object_t             *min;
     cl_object_t             *max;
     int                     string_length;
@@ -145,6 +144,7 @@ struct xante_menu {
 /** UI informations */
 struct xante_ui {
     cl_list_t               *menus;
+    cl_list_t               *unreferenced_menus;
     cl_string_t             *main_menu_object_id;
 };
 

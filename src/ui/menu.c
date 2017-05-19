@@ -353,9 +353,17 @@ static void call_selected_item(struct xante_app *xpp,
             break;
     }
 
+    /*
+     * We'll need to search if the item that has been updated is pointed by a
+     * dynamic menu. If so, we're going to update its contents.
+     */
     if (update_internal_menus == true) {
-        /* TODO */
+        dm_update(xpp, selected_item);
+
+        /* TODO: Run updated event */
     }
+
+    /* TODO: Run return event */
 }
 
 /*

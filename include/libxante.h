@@ -93,13 +93,30 @@ enum xante_ui_menu {
     XANTE_UI_MENU_DYNAMIC
 };
 
+/** String keys of a supported dialog */
+#define XANTE_UI_STR_DIALOG_MENU                "menu"
+#define XANTE_UI_STR_DIALOG_INPUT_INT           "input_int"
+#define XANTE_UI_STR_DIALOG_INPUT_FLOAT         "input_float"
+#define XANTE_UI_STR_DIALOG_INPUT_DATE          "input_date"
+#define XANTE_UI_STR_DIALOG_INPUT_TIME          "input_time"
+#define XANTE_UI_STR_DIALOG_INPUT_STRING        "input_string"
+#define XANTE_UI_STR_DIALOG_INPUT_PASSWD        "input_passwd"
+#define XANTE_UI_STR_DIALOG_CALENDAR            "calendar"
+#define XANTE_UI_STR_DIALOG_TIMEBOX             "timebox"
+#define XANTE_UI_STR_DIALOG_RADIO_CHECKLIST     "radio_checklist"
+#define XANTE_UI_STR_DIALOG_CHECKLIST           "checklist"
+#define XANTE_UI_STR_DIALOG_YESNO               "yesno"
+#define XANTE_UI_STR_DIALOG_CUSTOM              "custom"
+#define XANTE_UI_STR_DIALOG_DYNAMIC_MENU        "dynamic_menu"
+#define XANTE_UI_STR_DIALOG_DELETE_DYNAMIC_MENU "delete_dynamic_menu"
+
 /** The library main object */
-typedef void                xante_t;
+typedef void                                    xante_t;
 
 #ifdef LIBXANTE_COMPILE
-# define MAJOR_VERSION      0
-# define MINOR_VERSION      1
-# define RELEASE            1
+# define MAJOR_VERSION                          0
+# define MINOR_VERSION                          1
+# define RELEASE                                1
 
 # include "xante/xt_internal.h"
 #endif

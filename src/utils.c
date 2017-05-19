@@ -144,35 +144,35 @@ enum xante_ui_dialog translate_string_dialog_type(const char *type)
 {
     enum xante_ui_dialog dialog = XANTE_UI_DIALOG_UNKNOWN;
 
-    if (strcmp(type, "menu") == 0)
+    if (strcmp(type, XANTE_UI_STR_DIALOG_MENU) == 0)
         dialog = XANTE_UI_DIALOG_MENU;
-    else if (strcmp(type, "input_int") == 0)
+    else if (strcmp(type, XANTE_UI_STR_DIALOG_INPUT_INT) == 0)
         dialog = XANTE_UI_DIALOG_INPUT_INT;
-    else if (strcmp(type, "input_float") == 0)
+    else if (strcmp(type, XANTE_UI_STR_DIALOG_INPUT_FLOAT) == 0)
         dialog = XANTE_UI_DIALOG_INPUT_FLOAT;
-    else if (strcmp(type, "input_date") == 0)
+    else if (strcmp(type, XANTE_UI_STR_DIALOG_INPUT_DATE) == 0)
         dialog = XANTE_UI_DIALOG_INPUT_DATE;
-    else if (strcmp(type, "input_string") == 0)
+    else if (strcmp(type, XANTE_UI_STR_DIALOG_INPUT_STRING) == 0)
         dialog = XANTE_UI_DIALOG_INPUT_STRING;
-    else if (strcmp(type, "input_passwd") == 0)
+    else if (strcmp(type, XANTE_UI_STR_DIALOG_INPUT_PASSWD) == 0)
         dialog = XANTE_UI_DIALOG_INPUT_PASSWD;
-    else if (strcmp(type, "input_time") == 0)
+    else if (strcmp(type, XANTE_UI_STR_DIALOG_INPUT_TIME) == 0)
         dialog = XANTE_UI_DIALOG_INPUT_TIME;
-    else if (strcmp(type, "calendar") == 0)
+    else if (strcmp(type, XANTE_UI_STR_DIALOG_CALENDAR) == 0)
         dialog = XANTE_UI_DIALOG_CALENDAR;
-    else if (strcmp(type, "timebox") == 0)
+    else if (strcmp(type, XANTE_UI_STR_DIALOG_TIMEBOX) == 0)
         dialog = XANTE_UI_DIALOG_TIMEBOX;
-    else if (strcmp(type, "radio_checklist") == 0)
+    else if (strcmp(type, XANTE_UI_STR_DIALOG_RADIO_CHECKLIST) == 0)
         dialog = XANTE_UI_DIALOG_RADIO_CHECKLIST;
-    else if (strcmp(type, "checklist") == 0)
+    else if (strcmp(type, XANTE_UI_STR_DIALOG_CHECKLIST) == 0)
         dialog = XANTE_UI_DIALOG_CHECKLIST;
-    else if (strcmp(type, "yesno") == 0)
+    else if (strcmp(type, XANTE_UI_STR_DIALOG_YESNO) == 0)
         dialog = XANTE_UI_DIALOG_YES_NO;
-    else if (strcmp(type, "custom") == 0)
+    else if (strcmp(type, XANTE_UI_STR_DIALOG_CUSTOM) == 0)
         dialog = XANTE_UI_DIALOG_CUSTOM;
-    else if (strcmp(type, "dynamic_menu") == 0)
+    else if (strcmp(type, XANTE_UI_STR_DIALOG_DYNAMIC_MENU) == 0)
         dialog = XANTE_UI_DIALOG_DYNAMIC_MENU;
-    else if (strcmp(type, "delete_dynamic_menu") == 0)
+    else if (strcmp(type, XANTE_UI_STR_DIALOG_DELETE_DYNAMIC_MENU) == 0)
         dialog = XANTE_UI_DIALOG_RM_DYNAMIC_MENU;
 
     return dialog;
