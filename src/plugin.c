@@ -38,3 +38,14 @@
  *
  */
 
+int plugin_init(struct xante_app *xpp)
+{
+    xpp->plugin.enabled = false;
+
+    return 0;
+}
+
+void plugin_uninit(struct xante_app *xpp)
+{
+}
+

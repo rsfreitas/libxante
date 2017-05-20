@@ -24,5 +24,27 @@
  * USA
  */
 
+#include <stdarg.h>
+
 #include "libxante.h"
+
+/*
+ *
+ * Internal functions
+ *
+ */
+
+/*
+ *
+ * Internal API
+ *
+ */
+
+int event_call(const char *event_name, struct xante_app *xpp, ...)
+{
+    if (xpp->plugin.enabled == false)
+        return 0;
+
+    return -1;
+}
 

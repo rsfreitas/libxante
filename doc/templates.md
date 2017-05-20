@@ -13,55 +13,66 @@ it may reference an application skeleton.
 ```
 {
     "internal": {
-        "revision": int
-        "language": string
+        "revision": int,
+        "language": string,
         "application": {
-            "version": string
-            "revision": int
-            "build": int
+            "version": string,
+            "revision": int,
+            "build": int,
             "beta": bool
         }
     },
     "general": {
-        "name": string
-        "plugin": string
-        "config_pathname": string
-        "log_pathname": string
-        "log_level": string
+        "name": string,
+        "description": string,
+        "plugin": string,
+        "config_pathname": string,
+        "log_pathname": string,
+        "log_level": string,
         "company": string
     },
     "ui": {
-        "main_menu": string
+        "main_menu": string,
         "menus": [
             {
-                "name": string
-                "object_id": string
-                "mode": int
-                "type": string
+                "name": string,
+                "object_id": string,
+                "mode": int,
+                "type": string,
                 "dynamic": {
-                    "copies": int/array of strings
-                    "block_prefix": string
+                    "copies": int/array of strings,
+                    "block_prefix": string,
                     "origin": {
-                        "block": string
-                        "item": string
+                        "block": string,
+                        "item": string,
                     }
+                },
+                "events": {
+                    "selected": string,
+                    "exit": string,
                 },
                 "items": [
                     {
-                        "mode": int
-                        "default_value": string
+                        "mode": int,
+                        "default_value": string,
                         "config": {
-                            "block": string
-                            "item": string
+                            "block": string,
+                            "item": string,
                         },
-                        "type": string
-                        "options": string/array of strings
+                        "type": string,
+                        "options": string/array of strings,
                         "name": string,
-                        "help": string
+                        "help": string,
                         "input_ranges": {
-                            "string_length": int
-                            "max": int/float
-                            "min": int/float
+                            "string_length": int,
+                            "max": int/float,
+                            "min": int/float,
+                        },
+                        "events": {
+                            "selected": string,
+                            "value_cofirmed": string,
+                            "value_changed": string,
+                            "exit": string
                         }
                     }
                 ]

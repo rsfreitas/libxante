@@ -72,6 +72,8 @@
 #define COPIES              "copies"
 #define BLOCK_PREFIX        "block_prefix"
 #define ORIGIN              "origin"
+#define EVENTS              "events"
+#define DESCRIPTION         "description"
 
 static int fill_info(cl_json_t *node, const char *subnode_name, ...)
 {
@@ -182,6 +184,7 @@ static int parse_jtf_info(cl_json_t *jtf, struct xante_app *xpp)
     fill_info(general, LOG_PATHNAME, (void **)&xpp->info.log_pathname);
     fill_info(general, LOG_LEVEL, (void **)&xpp->info.log_level);
     fill_info(general, COMPANY, (void **)&xpp->info.company);
+    fill_info(general, DESCRIPTION, (void **)&xpp->info.description);
 
     return 0;
 }
@@ -249,6 +252,7 @@ static int parse_menu_item(cl_json_t *item, struct xante_menu *menu)
     fill_info(item, OPTIONS, (void **)&options);
     fill_info(item, DEFAULT_VALUE, (void **)&default_value);
     fill_info(item, OBJECT_ID, (void **)&i->object_id);
+    i->events = cl_json_get_object_item(item, EVENTS);
     parse_item_config(item, i);
 
     if (parse_item_input_ranges(item, i, &max, &min) < 0)
@@ -302,6 +306,7 @@ static int parse_ui_menu(cl_json_t *menu, struct xante_app *xpp)
     fill_info(menu, MODE, (void **)&m->mode);
     fill_info(menu, TYPE, (void **)&m->type);
     parse_menu_dynamic(menu, m, &copies);
+    m->events = cl_json_get_object_item(menu, EVENTS);
 
     /*
      * We must adjust some internal menu informations before loading its
@@ -449,5 +454,8 @@ void jtf_release_info(struct xante_app *xpp)
 
     if (xpp->info.company != NULL)
         cl_string_unref(xpp->info.company);
+
+    if (xpp->info.description != NULL)
+        cl_string_unref(xpp->info.description);
 }
 

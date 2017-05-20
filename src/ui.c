@@ -95,6 +95,9 @@ static void destroy_xante_item(const struct cl_ref_s *ref)
     if (item->value_spec != NULL)
         cl_spec_destroy(item->value_spec);
 
+    if (item->events != NULL)
+        cl_json_delete(item->events);
+
     free(item);
 }
 
@@ -128,6 +131,9 @@ static void destroy_xante_menu(const struct cl_ref_s *ref)
 
     if (menu->dynamic_origin_item != NULL)
         cl_string_unref(menu->dynamic_origin_item);
+
+    if (menu->events != NULL)
+        cl_json_delete(menu->events);
 
     free(menu);
 }

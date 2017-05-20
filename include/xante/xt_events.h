@@ -31,6 +31,11 @@
 # ifndef _LIBXANTE_H
 #  error "Never use <xt_events.h> directly; include <libxante.h> instead."
 # endif
+#else
+
+/* Internal library declarations */
+int event_call(const char *event_name, struct xante_app *xpp, ...);
+
 #endif
 
 #endif

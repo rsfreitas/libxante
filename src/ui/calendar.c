@@ -68,13 +68,12 @@ static void split_item_value(struct xante_item *item, int *day, int *month,
 }
 
 static bool item_value_has_changed(struct xante_app *xpp,
-    struct xante_item *item)
+    struct xante_item *item, const char *result)
 {
     cl_object_t *value = NULL;
-    char *str_value = NULL, *result = NULL;
+    char *str_value = NULL;
     bool changed = false;
 
-    result = dialog_get_input_result();
     value = item_value(item);
     str_value = CL_OBJECT_AS_STRING(value);
 
@@ -90,7 +89,6 @@ static bool item_value_has_changed(struct xante_app *xpp,
     }
 
     free(str_value);
-    free(result);
 
     return changed;
 }
@@ -119,6 +117,7 @@ bool ui_dialog_calendar(struct xante_app *xpp, struct xante_item *item,
     bool value_changed = false, loop = true;
     cl_string_t *text = NULL;
     int ret_dialog = DLG_EXIT_OK, day = 0, month = 0, year = 0;
+    char *result = NULL;
 
     /* Prepare dialog */
     dialog_set_backtitle(xpp);
@@ -148,7 +147,16 @@ bool ui_dialog_calendar(struct xante_app *xpp, struct xante_item *item,
                 if (edit_value == false)
                     break;
                 else {
-                    if (item_value_has_changed(xpp, item)) {
+                    result = dialog_get_input_result();
+
+                    if (event_call(EV_ITEM_VALUE_CONFIRM, xpp, item,
+                                   result) < 0)
+                    {
+                        loop = true;
+                        break;
+                    }
+
+                    if (item_value_has_changed(xpp, item, result)) {
                         value_changed = true;
                         break;
                     }
@@ -168,6 +176,11 @@ bool ui_dialog_calendar(struct xante_app *xpp, struct xante_item *item,
 
                 dialog_vars.help_button = 1;
                 break;
+        }
+
+        if (result != NULL) {
+            free(result);
+            result = NULL;
         }
     } while (loop);
 

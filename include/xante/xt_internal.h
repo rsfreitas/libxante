@@ -53,6 +53,18 @@
 /** Timeout to close a dialog */
 #define UI_DIALOG_TIMEOUT                   120 /* seconds */
 
+/** Supported events */
+#define EV_INIT                             "xante-init"
+#define EV_UNINIT                           "xante-uninit"
+#define EV_CONFIG_LOAD                      "xante-config-load"
+#define EV_CONFIG_UNLOAD                    "xante-config-unload"
+#define EV_CHANGES_SAVED                    "xante-changes-saved"
+#define EV_ITEM_SELECTED                    "item-selected"
+#define EV_ITEM_VALUE_CONFIRM               "item-value-confirm"
+#define EV_ITEM_VALUE_UPDATED               "item-value-updated"
+#define EV_ITEM_EXIT                        "item-exit"
+#define EV_MENU_EXIT                        "menu-exit"
+
 /** Different ways of creating menus */
 enum xante_menu_creator {
     XANTE_MENU_CREATED_FROM_JTF,
@@ -68,6 +80,7 @@ struct xante_info {
     cl_string_t     *plugin_name;
     cl_string_t     *version;
     cl_string_t     *company;
+    cl_string_t     *description;
     int             revision;
     int             build;
     bool            beta;
@@ -100,8 +113,7 @@ struct xante_item {
     cl_string_t             *config_item;
     cl_string_t             *help;
     cl_object_t             *default_value;
-
-    /* Events */
+    cl_json_t               *events;
 
     /* Input range */
     cl_object_t             *min;
@@ -125,6 +137,7 @@ struct xante_menu {
     cl_string_t                 *object_id;
     cl_string_t                 *type;
     enum xante_access_mode      mode;
+    cl_json_t                   *events;
 
     /* Dynamic menu details */
     cl_string_list_t            *dynamic_names;
@@ -154,6 +167,7 @@ struct xante_log {
 
 struct xante_plugin {
     cl_plugin_t             *plugin;
+    bool                    enabled;
 };
 
 struct xante_config {

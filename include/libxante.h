@@ -114,8 +114,14 @@ enum xante_ui_menu {
 #define XANTE_UI_STR_DEFAULT_MENU               "default"
 #define XANTE_UI_STR_DYNAMIC_MENU               "dynamic"
 
-/** The library main object */
+/** Main library object */
 typedef void                                    xante_t;
+
+/** Item object */
+typedef void                                    xante_item_t;
+
+/** Plugin function argument */
+typedef void                                    xante_plugin_arg_t;
 
 #ifdef LIBXANTE_COMPILE
 # define MAJOR_VERSION                          0

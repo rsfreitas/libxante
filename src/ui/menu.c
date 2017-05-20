@@ -300,6 +300,9 @@ static void call_selected_item(struct xante_app *xpp,
         return;
     }
 
+    if (event_call(EV_ITEM_SELECTED, xpp, selected_item) < 0)
+        return;
+
     /* TODO: Verify input edit */
 
     switch (selected_item->dialog_type) {
@@ -359,11 +362,11 @@ static void call_selected_item(struct xante_app *xpp,
      */
     if (update_internal_menus == true) {
         dm_update(xpp, selected_item);
-
-        /* TODO: Run updated event */
+        event_call(EV_ITEM_VALUE_UPDATED, xpp, selected_item);
     }
 
     /* TODO: Run return event */
+    event_call(EV_ITEM_EXIT, xpp, selected_item);
 }
 
 /*
@@ -427,8 +430,10 @@ int ui_dialog_menu(struct xante_app *xpp, const struct xante_menu *menu,
                     {
                         loop = false;
                     }
-                } else
-                    loop = false;
+                } else {
+                    if (event_call(EV_MENU_EXIT, xpp, menu) == 0)
+                        loop = false;
+                }
 
                 break;
 

@@ -263,6 +263,12 @@ bool ui_dialog_checklist(struct xante_app *xpp, struct xante_item *item,
                     break;
                 }
 
+                if (event_call(EV_ITEM_VALUE_CONFIRM, xpp, item,
+                               selected_items) < 0)
+                {
+                    break;
+                }
+
                 if (item_value_has_changed(xpp, item, dlg_items,
                                            number_of_options, selected_items))
                 {

@@ -104,8 +104,7 @@ static int load_config(struct xante_app *xpp)
     cl_list_map(xpp->ui.menus, load_menu_config, cfg_file);
 
 ok_block:
-    /* TODO: Run the plugin event */
-
+    event_call(EV_CONFIG_LOAD, xpp, cfg_file);
     xante_runtime_set_config_file_status(xpp, XANTE_CFG_ST_LOADED);
     xpp->config.cfg_file = cfg_file;
 
@@ -204,16 +203,14 @@ static int write_config(struct xante_app *xpp, int ui_return_status)
         xpp->config.cfg_file = cl_cfg_create();
 
     cl_list_map(xpp->ui.menus, save_menu_config, xpp);
-
-    /* TODO: Run plugin config event */
+    event_call(EV_CONFIG_UNLOAD, xpp, xpp->config.cfg_file);
 
     cl_cfg_sync(xpp->config.cfg_file, xpp->config.filename);
-    xante_debug("%s", cl_strerror(cl_get_last_error()));
     xante_runtime_set_config_file_status(xpp, XANTE_CFG_ST_SAVED);
 
-    if (change_has_occourred(xpp) == true) {
-        /* TODO: Run plugin changes event */
-    }
+    /* TODO: Pass the list of changes to the event */
+    if (change_has_occourred(xpp) == true)
+        event_call(EV_CHANGES_SAVED, xpp, NULL);
 
 end_block:
     if (xpp->config.filename != NULL)

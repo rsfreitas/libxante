@@ -42,6 +42,7 @@ static void destroy_xante_app(const struct cl_ref_s *ref)
     if (NULL == xpp)
         return;
 
+    event_call(EV_UNINIT, xpp, NULL);
     xante_info(cl_tr("Finishing application"));
     change_uninit(xpp);
     ui_uninit(xpp);
@@ -117,6 +118,12 @@ __PUB_API__ xante_t *xante_init(const char *jtf_pathname, bool use_plugin,
     if (use_plugin == false)
         xante_runtime_set_execute_plugin(xpp, false);
     else {
+        if (event_call(EV_INIT, xpp, NULL) < 0) {
+            xante_messagebox(xpp, XANTE_MSGBOX_ERROR, 0, cl_tr("Error"),
+                             cl_tr("[EVENT] init error"));
+
+            return NULL;
+        }
     }
 
     xante_info(cl_tr("Initializing application - %s"),

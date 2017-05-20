@@ -77,6 +77,9 @@ bool ui_dialog_yesno(struct xante_app *xpp, struct xante_item *item)
 
         switch (ret_dialog) {
             case DLG_EXIT_OK:
+                if (event_call(EV_ITEM_VALUE_CONFIRM, xpp, item, !choide) < 0)
+                    break;
+
                 /* Selecting the "OK" button always changes the item value. */
                 loop = false;
                 value_changed = true;

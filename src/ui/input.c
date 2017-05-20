@@ -366,8 +366,11 @@ bool ui_dialog_input(struct xante_app *xpp, struct xante_item *item,
 
         switch (ret_dialog) {
             case DLG_EXIT_OK:
+                if (event_call(EV_ITEM_VALUE_CONFIRM, xpp, item, input) < 0)
+                    break;
+
                 if (validate_input_value(xpp, item, input) == false)
-                    continue;
+                    break;
 
                 if (item_value_has_changed(xpp, item, input) == true)
                     value_changed = true;
