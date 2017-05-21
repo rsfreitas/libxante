@@ -74,6 +74,7 @@
 #define ORIGIN              "origin"
 #define EVENTS              "events"
 #define DESCRIPTION         "description"
+#define BRIEF               "brief"
 
 static int fill_info(cl_json_t *node, const char *subnode_name, ...)
 {
@@ -234,11 +235,26 @@ static int parse_item_config(cl_json_t *item, struct xante_item *it)
     return 0;
 }
 
+static void parse_item_help(cl_json_t *item, struct xante_item *it,
+    void **brief_options_help)
+{
+    cl_json_t *help = NULL;
+
+    help = cl_json_get_object_item(item, HELP);
+
+    if (NULL == help)
+        return;
+
+    fill_info(help, BRIEF, (void **)&it->brief_help);
+    fill_info(help, DESCRIPTION, (void **)&it->descriptive_help);
+    fill_info(help, OPTIONS, brief_options_help);
+}
+
 static int parse_menu_item(cl_json_t *item, struct xante_menu *menu)
 {
     struct xante_item *i;
     cl_string_t *default_value = NULL;
-    void *options = NULL, *max = NULL, *min = NULL;
+    void *options = NULL, *max = NULL, *min = NULL, *brief_options_help = NULL;
 
     i = ui_new_xante_item();
 
@@ -248,17 +264,19 @@ static int parse_menu_item(cl_json_t *item, struct xante_menu *menu)
     fill_info(item, NAME, (void **)&i->name);
     fill_info(item, TYPE, (void **)&i->type);
     fill_info(item, MODE, (void **)&i->mode);
-    fill_info(item, HELP, (void **)&i->help);
     fill_info(item, OPTIONS, (void **)&options);
     fill_info(item, DEFAULT_VALUE, (void **)&default_value);
     fill_info(item, OBJECT_ID, (void **)&i->object_id);
     i->events = cl_json_get_object_item(item, EVENTS);
     parse_item_config(item, i);
+    parse_item_help(item, i, &brief_options_help);
 
     if (parse_item_input_ranges(item, i, &max, &min) < 0)
         return -1;
 
-    ui_adjusts_item_info(i, default_value, options, max, min);
+    ui_adjusts_item_info(i, default_value, options, max, min,
+                         brief_options_help);
+
     cl_list_unshift(menu->items, i, -1);
 
     if (default_value != NULL)

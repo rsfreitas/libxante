@@ -71,8 +71,11 @@ static void destroy_xante_item(const struct cl_ref_s *ref)
     if (item->config_item != NULL)
         cl_string_unref(item->config_item);
 
-    if (item->help != NULL)
-        cl_string_unref(item->help);
+    if (item->brief_help != NULL)
+        cl_string_unref(item->brief_help);
+
+    if (item->descriptive_help != NULL)
+        cl_string_unref(item->descriptive_help);
 
     if (item->options != NULL)
         cl_string_unref(item->options);
@@ -91,6 +94,9 @@ static void destroy_xante_item(const struct cl_ref_s *ref)
 
     if (item->checklist_options != NULL)
         cl_string_list_destroy(item->checklist_options);
+
+    if (item->checklist_brief_options != NULL)
+        cl_string_list_destroy(item->checklist_brief_options);
 
     if (item->value_spec != NULL)
         cl_spec_destroy(item->value_spec);
@@ -373,9 +379,11 @@ void ui_adjusts_menu_info(struct xante_menu *menu, void *copies)
  * @param [in] options: The options value loaded from the JTF.
  * @param [in] max_range: The maximum range of an input item.
  * @param [in] min_range: The minimum range of an input item.
+ * @param [in] brief_options_help: A JSON object with checklist options brief
+ *                                 help.
  */
 void ui_adjusts_item_info(struct xante_item *item, cl_string_t *default_value,
-    void *options, void *max_range, void *min_range)
+    void *options, void *max_range, void *min_range, void *brief_options_help)
 {
     int i, t, i_max, i_min;
     float f_max, f_min;
@@ -405,6 +413,17 @@ void ui_adjusts_item_info(struct xante_item *item, cl_string_t *default_value,
             item->dialog_checklist_type =
                 (item->dialog_type == XANTE_UI_DIALOG_CHECKLIST) ? FLAG_CHECK
                                                                  : FLAG_RADIO;
+
+            if (brief_options_help != NULL) {
+                t = cl_json_get_array_size(brief_options_help);
+                item->checklist_brief_options = cl_string_list_create();
+
+                for (i = 0; i < t; i++) {
+                    node = cl_json_get_array_item(brief_options_help, i);
+                    value = cl_json_get_object_value(node);
+                    cl_string_list_add(item->checklist_brief_options, value);
+                }
+            }
 
             break;
 

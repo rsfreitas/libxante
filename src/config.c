@@ -189,7 +189,7 @@ static int write_config(struct xante_app *xpp, int ui_return_status)
     if (xante_runtime_show_config_saving_question(xpp) == true) {
         if (dialog_question(xpp, cl_tr("Closing"),
                             cl_tr("Do you want to save all modifications?"),
-                            cl_tr("Yes"), cl_tr("No")) == false)
+                            cl_tr("Yes"), cl_tr("No"), NULL) == false)
         {
             xante_runtime_set_config_file_status(xpp, XANTE_CFG_ST_UNSAVED);
             xante_info(cl_tr("User chose not to save internal modifications"));

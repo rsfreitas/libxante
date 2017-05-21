@@ -64,6 +64,8 @@ int dlg_text_print(WINDOW *window, struct dlg_text *dlg_text, int point);
 void dlg_text_clear(WINDOW *window, struct dlg_text *dlg_text);
 int dlg_get_subtitle_lines(const char *s);
 int dlg_cleanup_result(int code, WINDOW *dialog);
+void dialog_put_statusbar(const char *text);
+void dialog_put_item_brief(const char *brief);
 
 /* simple gauge */
 int dlg_simple_gauge(const char *title, const char *cprompt, int height,

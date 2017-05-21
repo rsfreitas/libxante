@@ -29,7 +29,9 @@
 
 #include "libxante.h"
 #include "ui_dialogs.h"
-#include "../dialog/addon_dialogs.h"
+
+#define DEFAULT_STATUSBAR_TEXT              \
+    "[ESC] Cancel [Enter] Confirm a selected option [Tab/Left/Right] Select an option"
 
 /*
  *
@@ -335,6 +337,7 @@ bool ui_dialog_input(struct xante_app *xpp, struct xante_item *item,
     /* Prepare dialog */
     dialog_set_backtitle(xpp);
     dialog_update_cancel_button_label();
+    dialog_put_statusbar(DEFAULT_STATUSBAR_TEXT);
 
     /* Prepares dialog content */
     value = cl_object_to_cstring(item_value(item));
@@ -342,7 +345,7 @@ bool ui_dialog_input(struct xante_app *xpp, struct xante_item *item,
     cl_string_unref(value);
 
     /* Enables the help button */
-    if (item->help != NULL)
+    if (item->descriptive_help != NULL)
         dialog_vars.help_button = 1;
 
     /* Adjusts window width and height */
@@ -386,14 +389,14 @@ bool ui_dialog_input(struct xante_app *xpp, struct xante_item *item,
             case DLG_EXIT_HELP:
                 dialog_vars.help_button = 0;
                 xante_messagebox(xpp, XANTE_MSGBOX_INFO, 0, cl_tr("Help"),
-                                 cl_string_valueof(item->help));
+                                 cl_string_valueof(item->descriptive_help));
 
                 dialog_vars.help_button = 1;
                 break;
         }
     } while (loop);
 
-    if (item->help != NULL)
+    if (item->descriptive_help != NULL)
         dialog_vars.help_button = 0;
 
     return value_changed;

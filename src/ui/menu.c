@@ -27,6 +27,9 @@
 #include "libxante.h"
 #include "ui_dialogs.h"
 
+#define DEFAULT_STATUSBAR_TEXT          \
+    "[ESC] Exit [Enter] Select an option [Up/Down] Move [TAB/Left/Right] Choose option"
+
 /*
  *
  * Internal functions
@@ -201,6 +204,8 @@ static void prepare_dialog_look(struct xante_app *xpp,
 
     if (timeout > 0)
         dialog_vars.timeout_secs = timeout;
+
+    dialog_put_statusbar(DEFAULT_STATUSBAR_TEXT);
 }
 
 static void release_dialog_labels(void)
@@ -369,6 +374,29 @@ static void call_selected_item(struct xante_app *xpp,
     event_call(EV_ITEM_EXIT, xpp, selected_item);
 }
 
+static void update_menu_item_brief(int current_item, void *a)
+{
+    struct xante_menu *menu = (struct xante_menu *)a;
+    struct xante_item *item;
+    cl_list_node_t *node;
+    char *text = NULL;
+
+    node = cl_list_at(menu->items, current_item);
+
+    if (NULL == node)
+        return;
+
+    item = cl_list_node_content(node);
+    cl_list_node_unref(node);
+
+    if (NULL == item->brief_help)
+        text = " ";
+    else
+        text = (char *)cl_string_valueof(item->brief_help);
+
+    dialog_put_item_brief(text);
+}
+
 /*
  *
  * Internal API
@@ -408,9 +436,17 @@ int ui_dialog_menu(struct xante_app *xpp, const struct xante_menu *menu,
 
         dlg_items = prepare_dialog_content(menu, total_items);
         prepare_dialog_look(xpp, cancel_label);
+
+#ifdef ALTERNATIVE_DIALOG
         ret_dialog = dlg_menu(cl_string_valueof(menu->name), "", dlg_lines,
                               dlg_width, items_to_select, total_items,
-                              dlg_items, &selected_index, NULL);
+                              dlg_items, &selected_index, NULL,
+                              update_menu_item_brief, (void *)menu);
+#else
+        ret_dialog = dlg_menu(cl_string_valueof(menu->name), "", dlg_lines,
+                              dlg_width, items_to_select, total_items,
+                              dlg_items, &selected_index, NULL)
+#endif
 
         switch (ret_dialog) {
             case DLG_EXIT_OK:
@@ -426,7 +462,7 @@ int ui_dialog_menu(struct xante_app *xpp, const struct xante_menu *menu,
                 if (strcmp(cancel_label, MAIN_MENU_CANCEL_LABEL) == 0) {
                     if (dialog_question(xpp, cl_tr("Closing"),
                                         cl_tr("Do you really want to quit?"),
-                                        cl_tr("Yes"), cl_tr("No")) == true)
+                                        cl_tr("Yes"), cl_tr("No"), NULL) == true)
                     {
                         loop = false;
                     }

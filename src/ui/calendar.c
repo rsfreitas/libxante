@@ -27,6 +27,9 @@
 #include "libxante.h"
 #include "ui_dialogs.h"
 
+#define DEFAULT_STATUSBAR_TEXT          \
+    "[ESC] Cancel [TAB] Select an option [Enter] Confirm [Arrows] Change selected date"
+
 /*
  *
  * Internal functions
@@ -123,6 +126,7 @@ bool ui_dialog_calendar(struct xante_app *xpp, struct xante_item *item,
     dialog_set_backtitle(xpp);
     dialog_update_cancel_button_label();
     dialog_alloc_input(64);
+    dialog_put_statusbar(DEFAULT_STATUSBAR_TEXT);
 
     /* Adjusts the dialog content using the item content */
     split_item_value(item, &day, &month, &year);
@@ -132,7 +136,7 @@ bool ui_dialog_calendar(struct xante_app *xpp, struct xante_item *item,
     cl_string_rplchr(text, XANTE_STR_LINE_BREAK, '\n');
 
     /* Enables the help button */
-    if (item->help != NULL)
+    if (item->descriptive_help != NULL)
         dialog_vars.help_button = 1;
 
     do {
@@ -172,7 +176,7 @@ bool ui_dialog_calendar(struct xante_app *xpp, struct xante_item *item,
             case DLG_EXIT_HELP:
                 dialog_vars.help_button = 0;
                 xante_messagebox(xpp, XANTE_MSGBOX_INFO, 0, cl_tr("Help"),
-                                 cl_string_valueof(item->help));
+                                 cl_string_valueof(item->descriptive_help));
 
                 dialog_vars.help_button = 1;
                 break;
@@ -184,7 +188,7 @@ bool ui_dialog_calendar(struct xante_app *xpp, struct xante_item *item,
         }
     } while (loop);
 
-    if (item->help != NULL)
+    if (item->descriptive_help != NULL)
         dialog_vars.help_button = 0;
 
     if (text != NULL)

@@ -111,7 +111,8 @@ struct xante_item {
     cl_string_t             *object_id;
     cl_string_t             *config_block;
     cl_string_t             *config_item;
-    cl_string_t             *help;
+    cl_string_t             *brief_help;
+    cl_string_t             *descriptive_help;
     cl_object_t             *default_value;
     cl_json_t               *events;
 
@@ -125,6 +126,7 @@ struct xante_item {
     cl_string_t             *options;
     cl_object_t             *value;
     cl_string_list_t        *checklist_options;
+    cl_string_list_t        *checklist_brief_options;
     int                     dialog_checklist_type;
     enum xante_ui_dialog    dialog_type;
     struct cl_ref_s         ref;
@@ -156,9 +158,12 @@ struct xante_menu {
 
 /** UI informations */
 struct xante_ui {
+    /* From JTF */
+    cl_string_t             *main_menu_object_id;
+
+    /* Internal */
     cl_list_t               *menus;
     cl_list_t               *unreferenced_menus;
-    cl_string_t             *main_menu_object_id;
 };
 
 struct xante_log {

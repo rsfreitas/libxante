@@ -27,6 +27,9 @@
 #include "libxante.h"
 #include "ui_dialogs.h"
 
+#define DEFAULT_STATUSBAR_TEXT          \
+    "[ESC] Cancel [TAB] Select an option [Enter] Confirm [Arrows] Change selected time"
+
 /*
  *
  * Internal functions
@@ -117,11 +120,13 @@ bool ui_dialog_timebox(struct xante_app *xpp, struct xante_item *item,
     bool value_changed = false, loop = true;
     cl_string_t *text = NULL;
     int ret_dialog = DLG_EXIT_OK, hour = 0, minutes = 0, seconds = 0;
+    char *result = NULL;
 
     /* Prepare dialog */
     dialog_set_backtitle(xpp);
     dialog_update_cancel_button_label();
     dialog_alloc_input(64);
+    dialog_put_statusbar(DEFAULT_STATUSBAR_TEXT);
 
     /* Adjusts the dialog content using the item content */
     split_item_value(item, &hour, &minutes, &seconds);
@@ -131,7 +136,7 @@ bool ui_dialog_timebox(struct xante_app *xpp, struct xante_item *item,
     cl_string_rplchr(text, XANTE_STR_LINE_BREAK, '\n');
 
     /* Enables the help button */
-    if (item->help != NULL)
+    if (item->descriptive_help != NULL)
         dialog_vars.help_button = 1;
 
     do {
@@ -155,7 +160,7 @@ bool ui_dialog_timebox(struct xante_app *xpp, struct xante_item *item,
                         break;
                     }
 
-                    if (item_value_has_changed(xpp, item)) {
+                    if (item_value_has_changed(xpp, item, result)) {
                         value_changed = true;
                         break;
                     }
@@ -171,7 +176,7 @@ bool ui_dialog_timebox(struct xante_app *xpp, struct xante_item *item,
             case DLG_EXIT_HELP:
                 dialog_vars.help_button = 0;
                 xante_messagebox(xpp, XANTE_MSGBOX_INFO, 0, cl_tr("Help"),
-                                 cl_string_valueof(item->help));
+                                 cl_string_valueof(item->descriptive_help));
 
                 dialog_vars.help_button = 1;
                 break;
@@ -183,7 +188,7 @@ bool ui_dialog_timebox(struct xante_app *xpp, struct xante_item *item,
         }
     } while (loop);
 
-    if (item->help != NULL)
+    if (item->descriptive_help != NULL)
         dialog_vars.help_button = 0;
 
     if (text != NULL)

@@ -62,7 +62,11 @@ it may reference an application skeleton.
                         "type": string,
                         "options": string/array of strings,
                         "name": string,
-                        "help": string,
+                        "help": {
+                            "brief": string,
+                            "description": string,
+                            "options": array of strings
+                        },
                         "input_ranges": {
                             "string_length": int,
                             "max": int/float,

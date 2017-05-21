@@ -179,7 +179,8 @@ static struct xante_item *dup_item(struct xante_menu *menu, int item_index,
     /* Duplicate all item informations */
     d_item->name = cl_string_dup(item->name);
     d_item->type = cl_string_dup(item->type);
-    d_item->help = cl_string_dup(item->help);
+    d_item->descriptive_help = cl_string_dup(item->descriptive_help);
+    d_item->brief_help = cl_string_dup(item->brief_help);
     d_item->options = cl_string_dup(item->options);
     d_item->object_id = cl_string_dup(item->object_id);
     cl_string_cat(d_item->object_id, "_%d", menu_index);
