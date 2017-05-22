@@ -24,7 +24,12 @@
  * USA
  */
 
+#include <pthread.h>
+
 #include "libxante.h"
+
+static pthread_key_t    __xante_errno_key;
+static pthread_once_t   __xante_errno_once = PTHREAD_ONCE_INIT;
 
 static const char *__description[] = {
     cl_tr_noop("Ok"),
@@ -51,7 +56,46 @@ static const char *__description[] = {
 };
 
 static const char *__unknown_error = cl_tr_noop("Unknown error");
-#define __errno     (*cl_errno_storage())
+
+/*
+ *
+ * Internal functions
+ *
+ */
+
+static void errno_free(void *ptr)
+{
+    if (ptr != NULL)
+        free(ptr);
+}
+
+static void errno_init(void)
+{
+    pthread_key_create(&__xante_errno_key, errno_free);
+}
+
+static int *errno_storage(void)
+{
+    int *error = NULL;
+
+    pthread_once(&__xante_errno_once, errno_init);
+    error = pthread_getspecific(__xante_errno_key);
+
+    if (NULL == error) {
+        error = malloc(sizeof(*error));
+        pthread_setspecific(__xante_errno_key, error);
+    }
+
+    return error;
+}
+
+#define __errno     (*errno_storage())
+
+/*
+ *
+ * Internal API
+ *
+ */
 
 /**
  * @name errno_clear
@@ -72,6 +116,12 @@ void errno_set(enum xante_error_code code)
 {
     __errno = code;
 }
+
+/*
+ *
+ * API
+ *
+ */
 
 __PUB_API__ enum xante_error_code xante_get_last_error(void)
 {
