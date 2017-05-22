@@ -24,14 +24,33 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_PLUGIN_H
-#define _LIBXANTE_XT_PLUGIN_H          1
+#ifndef _LIBXANTE_XT_EVENT_H
+#define _LIBXANTE_XT_EVENT_H          1
 
 #ifndef LIBXANTE_COMPILE
 # ifndef _LIBXANTE_H
-#  error "Never use <xt_plugin.h> directly; include <libxante.h> instead."
+#  error "Never use <xt_event.h> directly; include <libxante.h> instead."
 # endif
+#else
+
+/* Internal library declarations */
+int event_init(struct xante_app *xpp, bool use_event);
+void event_uninit(struct xante_app *xpp);
+int event_call(const char *event_name, struct xante_app *xpp, ...);
+
 #endif
+
+/**
+ * @name xante_event_argument
+ * @brief Gets an event argument real value.
+ *
+ * @param [in] arg: The event argument.
+ * @param [in] data_type: The event argument required field.
+ *
+ * @return On success returns the required event argument real value or NULL
+ *         otherwise.
+ */
+void *xante_event_argument(xante_event_arg_t *arg, const char *data_type);
 
 #endif
 

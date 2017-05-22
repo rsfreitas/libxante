@@ -38,6 +38,7 @@ LIBXANTE_0.1 {
         xante_load_config;
         xante_write_config;
         xante_messagebox;
+        xante_event_argument;
     local:
         *;
 };

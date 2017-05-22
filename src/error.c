@@ -42,7 +42,12 @@ static const char *__description[] = {
     cl_tr_noop("JTF file has no 'input_ranges' object"),
     cl_tr_noop("JTF file has no 'config' object"),
     cl_tr_noop("JTF file has no 'internal' object"),
-    cl_tr_noop("JTF file has no 'application' object")
+    cl_tr_noop("JTF file has no 'application' object"),
+    cl_tr_noop("Plugin initialization failed"),
+    cl_tr_noop("Plugin without internal info"),
+    cl_tr_noop("Plugin without internal API"),
+    cl_tr_noop("Plugin without mandatory function"),
+    cl_tr_noop("Plugin EV_INIT error")
 };
 
 static const char *__unknown_error = cl_tr_noop("Unknown error");

@@ -172,7 +172,8 @@ struct xante_log {
 
 struct xante_plugin {
     cl_plugin_t             *plugin;
-    bool                    enabled;
+    cl_plugin_info_t        *info;
+    cl_string_list_t        *functions;
 };
 
 struct xante_config {

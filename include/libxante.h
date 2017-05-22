@@ -114,14 +114,21 @@ enum xante_ui_menu {
 #define XANTE_UI_STR_DEFAULT_MENU               "default"
 #define XANTE_UI_STR_DYNAMIC_MENU               "dynamic"
 
+/** Event arguments */
+#define XANTE_EVT_DATA_XANTE_T                  "xante_t"
+#define XANTE_EVT_DATA_XANTE_MENU_T             "xante_menu_t"
+#define XANTE_EVT_DATA_XANTE_ITEM_T             "xante_item_t"
+#define XANTE_EVT_DATA_XANTE_ITEM_VALUE         "xante_item_value"
+#define XANTE_EVT_DATA_XANTE_CONFIG             "xante_config"
+
 /** Main library object */
 typedef void                                    xante_t;
 
 /** Item object */
 typedef void                                    xante_item_t;
 
-/** Plugin function argument */
-typedef void                                    xante_plugin_arg_t;
+/** Event function argument */
+typedef void                                    xante_event_arg_t;
 
 #ifdef LIBXANTE_COMPILE
 # define MAJOR_VERSION                          0
@@ -137,11 +144,10 @@ typedef void                                    xante_plugin_arg_t;
 #include "xante/xt_dialogs.h"
 #include "xante/xt_dm.h"
 #include "xante/xt_error.h"
-#include "xante/xt_events.h"
+#include "xante/xt_event.h"
 #include "xante/xt_init.h"
 #include "xante/xt_jtf.h"
 #include "xante/xt_log.h"
-#include "xante/xt_plugin.h"
 #include "xante/xt_runtime.h"
 #include "xante/xt_theme.h"
 #include "xante/xt_translation.h"
