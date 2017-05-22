@@ -37,8 +37,10 @@ LIBXANTE_0.1 {
         xante_theme_set;
         xante_load_config;
         xante_write_config;
-        xante_messagebox;
         xante_event_argument;
+        xante_dlg_messagebox;
+        xante_dlg_clear_backtitle;
+        xante_dlg_set_backtitle;
     local:
         *;
 };

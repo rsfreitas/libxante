@@ -36,7 +36,7 @@
  *
  */
 
-static int xante_dlg_messagebox(int width, int height,
+static int __xante_dlg_messagebox(int width, int height,
     enum xante_msgbox_type type, const char *title, const char *text)
 {
     int pause_opt = 1, ret_dialog = DLG_EXIT_OK;
@@ -88,7 +88,7 @@ static int xante_dlg_messagebox(int width, int height,
  *
  */
 
-__PUB_API__ int xante_ui_set_backtitle(xante_t *xpp)
+__PUB_API__ int xante_dlg_set_backtitle(xante_t *xpp)
 {
     struct xante_app *x = (struct xante_app *)xpp;
     cl_string_t *title = NULL, *left = NULL, *format = NULL, *right = NULL;
@@ -156,7 +156,7 @@ __PUB_API__ int xante_ui_set_backtitle(xante_t *xpp)
     return 0;
 }
 
-__PUB_API__ int xante_ui_clear_backtitle(xante_t *xpp)
+__PUB_API__ int xante_dlg_clear_backtitle(xante_t *xpp)
 {
     errno_clear();
 
@@ -179,7 +179,7 @@ __PUB_API__ int xante_ui_clear_backtitle(xante_t *xpp)
 /*
  * TODO: Show buttons which was set in @buttons.
  */
-__PUB_API__ int xante_messagebox(struct xante_app *xpp,
+__PUB_API__ int xante_dlg_messagebox(struct xante_app *xpp,
     enum xante_msgbox_type type, enum xante_buttons buttons __attribute__((unused)),
     const char *title, const char *message, ...)
 {
@@ -206,8 +206,8 @@ __PUB_API__ int xante_messagebox(struct xante_app *xpp,
     if (xpp != NULL)
         xante_info("MSGBOX: %s", msg);
 
-    ret_dialog = xante_dlg_messagebox(MINIMUM_WIDTH, height, type, title,
-                                      cl_string_valueof(real_msg));
+    ret_dialog = __xante_dlg_messagebox(MINIMUM_WIDTH, height, type, title,
+                                        cl_string_valueof(real_msg));
 
     if (dialog_needs_close == true)
         dialog_uninit();

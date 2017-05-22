@@ -33,9 +33,29 @@
 # endif
 #endif
 
+/**
+ * @name xante_init
+ * @brief Initialize a libxante application.
+ *
+ * @param [in] jtf_pathname: The JTF file.
+ * @param [in] use_plugin: A boolean true/false to load or not the application
+ *                         plugin.
+ * @param [in] username: The username to access the application.
+ * @param [in] password: The username's password.
+ *
+ * @return On success returns a xante_t object or NULL otherwise.
+ */
 xante_t *xante_init(const char *jtf_pathname, bool use_plugin,
                     const char *username, const char *password);
 
+/**
+ * @name xante_uninit
+ * @brief Ends a libxante application.
+ *
+ * @param [in,out] xpp: The library main object.
+ *
+ * @return On success returns 0 or -1 otherwise.
+ */
 int xante_uninit(xante_t *xpp);
 
 #endif

@@ -55,11 +55,11 @@ void ui_print_menu_tree(struct xante_app *xpp);
 
 /**
  * @name xante_ui_run
- * @brief
+ * @brief Puts a libxante application to run.
  *
- * @param [in,out] xpp:
+ * @param [in,out] xpp: The library main object.
  *
- * @return
+ * @return On success returns 0 or -1 otherwise.
  */
 int xante_ui_run(xante_t *xpp);
 

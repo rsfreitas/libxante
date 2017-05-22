@@ -28,18 +28,6 @@
 
 /*
  *
- * Internal functions
- *
- */
-
-/*
- *
- * Internal API
- *
- */
-
-/*
- *
  * API
  *
  */

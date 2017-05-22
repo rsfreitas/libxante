@@ -279,8 +279,9 @@ bool ui_dialog_checklist(struct xante_app *xpp, struct xante_item *item,
                                                               item->dialog_checklist_type);
 
                 if (selected_items < 0 ) {
-                    xante_messagebox(xpp, XANTE_MSGBOX_ERROR, 0, cl_tr("Error"),
-                                     cl_tr("No option was selected."));
+                    xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, 0,
+                                         cl_tr("Error"),
+                                         cl_tr("No option was selected."));
 
                     break;
                 }
@@ -307,8 +308,8 @@ bool ui_dialog_checklist(struct xante_app *xpp, struct xante_item *item,
 
             case DLG_EXIT_HELP:
                 dialog_vars.help_button = 0;
-                xante_messagebox(xpp, XANTE_MSGBOX_INFO, 0, cl_tr("Help"),
-                                 cl_string_valueof(item->descriptive_help));
+                xante_dlg_messagebox(xpp, XANTE_MSGBOX_INFO, 0, cl_tr("Help"),
+                                     cl_string_valueof(item->descriptive_help));
 
                 dialog_vars.help_button = 1;
                 break;
