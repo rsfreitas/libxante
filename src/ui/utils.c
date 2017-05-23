@@ -94,7 +94,7 @@ void dialog_init(bool temporarily)
 void dialog_set_backtitle(struct xante_app *xpp)
 {
     dlg_clear();
-    xante_ui_set_backtitle(xpp);
+    xante_dlg_set_backtitle(xpp);
     dlg_put_backtitle();
 }
 

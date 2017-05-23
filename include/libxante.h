@@ -120,20 +120,28 @@ enum xante_ui_menu {
 #define XANTE_EVT_DATA_XANTE_ITEM_T             "xante_item_t"
 #define XANTE_EVT_DATA_XANTE_ITEM_VALUE         "xante_item_value"
 #define XANTE_EVT_DATA_XANTE_CONFIG             "xante_config"
+#define XANTE_EVT_DATA_XANTE_CHANGES_LIST       "xante_changes"
 
 /** Main library object */
-typedef void                                    xante_t;
+typedef void    xante_t;
 
 /** Item object */
-typedef void                                    xante_item_t;
+typedef void    xante_item_t;
 
 /** Event function argument */
-typedef void                                    xante_event_arg_t;
+typedef void    xante_event_arg_t;
+
+/** A internal configuration modification entry */
+struct xante_change_entry {
+    char    *item_name;
+    char    *old_value;
+    char    *new_value;
+};
 
 #ifdef LIBXANTE_COMPILE
-# define MAJOR_VERSION                          0
-# define MINOR_VERSION                          1
-# define RELEASE                                1
+# define MAJOR_VERSION  0
+# define MINOR_VERSION  1
+# define RELEASE        1
 
 # include "xante/xt_internal.h"
 #endif

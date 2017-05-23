@@ -43,7 +43,6 @@ static int __xante_dlg_messagebox(int width, int height,
     chtype dlg_color, dialog_attr_b, border_attr_b, title_attr_b,
            border2_attr_b;
 
-    /* TODO: Change here to make theme compatible */
     switch (type) {
         case XANTE_MSGBOX_INFO:
             dlg_color = dlg_color_pair(COLOR_BLACK, COLOR_GREEN);
@@ -240,5 +239,30 @@ __PUB_API__ int xante_dlg_messagebox(struct xante_app *xpp,
     }
 
     return key;
+}
+
+__PUB_API__ char *xante_dlg_application_version(xante_t *xpp)
+{
+    struct xante_app *x = (struct xante_app *)xpp;
+    char *str_version = NULL;
+    cl_string_t *version = NULL;
+
+    errno_clear();
+
+    if (NULL == xpp) {
+        errno_set(XANTE_ERROR_NULL_ARG);
+        return NULL;
+    }
+
+    version = cl_string_create(cl_tr("%s - Version %s.%d Build %d %s"),
+                               cl_string_valueof(x->info.application_name),
+                               cl_string_valueof(x->info.version),
+                               x->info.revision, x->info.build,
+                               (x->info.beta == true) ? "BETA" : "");
+
+    str_version = strdup(cl_string_valueof(version));
+    cl_string_unref(version);
+
+    return str_version;
 }
 

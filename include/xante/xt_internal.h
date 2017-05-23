@@ -54,11 +54,11 @@
 #define UI_DIALOG_TIMEOUT                   120 /* seconds */
 
 /** Supported events */
-#define EV_INIT                             "xante-init"
-#define EV_UNINIT                           "xante-uninit"
-#define EV_CONFIG_LOAD                      "xante-config-load"
-#define EV_CONFIG_UNLOAD                    "xante-config-unload"
-#define EV_CHANGES_SAVED                    "xante-changes-saved"
+#define EV_INIT                             "xapl_init"
+#define EV_UNINIT                           "xapl_uninit"
+#define EV_CONFIG_LOAD                      "xapl_config_load"
+#define EV_CONFIG_UNLOAD                    "xapl_config_unload"
+#define EV_CHANGES_SAVED                    "xapl_changes_saved"
 #define EV_ITEM_SELECTED                    "item-selected"
 #define EV_ITEM_VALUE_CONFIRM               "item-value-confirm"
 #define EV_ITEM_VALUE_UPDATED               "item-value-updated"

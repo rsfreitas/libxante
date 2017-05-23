@@ -169,10 +169,6 @@ static int add_item_content(unsigned int index, cl_list_node_t *node, void *a)
     listitem->help = strdup("");
     listitem->state = 0;
 
-    /* XXX: This is from our libdialog fork */
-//    listitem->custom_highlight = 0;
-//    listitem->idx_highlight = 0;
-
     return 0;
 }
 
@@ -350,6 +346,8 @@ static void call_selected_item(struct xante_app *xpp,
             if (edit_item_value == true)
                update_internal_menus = call_yesno_dialog(xpp, selected_item);
             else {
+                xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, 0, cl_tr("Error"),
+                                     cl_tr("Cannot change edit this item!"));
             }
 
             break;
@@ -370,7 +368,7 @@ static void call_selected_item(struct xante_app *xpp,
         event_call(EV_ITEM_VALUE_UPDATED, xpp, selected_item);
     }
 
-    /* TODO: Run return event */
+    /* Run return event */
     event_call(EV_ITEM_EXIT, xpp, selected_item);
 }
 

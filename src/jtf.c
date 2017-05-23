@@ -267,7 +267,7 @@ static int parse_menu_item(cl_json_t *item, struct xante_menu *menu)
     fill_info(item, OPTIONS, (void **)&options);
     fill_info(item, DEFAULT_VALUE, (void **)&default_value);
     fill_info(item, OBJECT_ID, (void **)&i->object_id);
-    i->events = cl_json_get_object_item(item, EVENTS);
+    i->events = cl_json_dup(cl_json_get_object_item(item, EVENTS));
     parse_item_config(item, i);
     parse_item_help(item, i, &brief_options_help);
 
@@ -324,7 +324,7 @@ static int parse_ui_menu(cl_json_t *menu, struct xante_app *xpp)
     fill_info(menu, MODE, (void **)&m->mode);
     fill_info(menu, TYPE, (void **)&m->type);
     parse_menu_dynamic(menu, m, &copies);
-    m->events = cl_json_get_object_item(menu, EVENTS);
+    m->events = cl_json_dup(cl_json_get_object_item(menu, EVENTS));
 
     /*
      * We must adjust some internal menu informations before loading its
@@ -431,11 +431,6 @@ int jtf_parse(const char *pathname, struct xante_app *xpp)
 
     /* Translate the JSON format to our menus and its items */
     ret = parse_jtf_json(jtf, xpp);
-
-    /*
-     * FIXME: libcollections shares the same errno variable with us,
-     *        and it's cleaning it here. We must fix there.
-     */
     cl_json_delete(jtf);
 
     return ret;

@@ -136,7 +136,7 @@ static bool need_to_write_config_file(struct xante_app *xpp,
         return false;
     }
 
-    /* TODO: Do we have any internal modification? */
+    /* Do we have any internal modification? */
     if ((change_has_occourred(xpp) == false) &&
         xante_runtime_force_config_file_saving(xpp) == false)
     {
@@ -156,8 +156,6 @@ static int save_item_config(cl_list_node_t *node, void *a)
     cl_string_t *value = NULL;
 
     /* TODO: Checks if we can save the item */
-
-    /* TODO: If we're saving a float value replace a possivle , by a . */
 
     value = cl_object_to_cstring(item_value(item));
     cl_cfg_set_value(xpp->config.cfg_file,
@@ -203,16 +201,16 @@ static int write_config(struct xante_app *xpp, int ui_return_status)
         xpp->config.cfg_file = cl_cfg_create();
 
     cl_list_map(xpp->ui.menus, save_menu_config, xpp);
-    event_call(EV_CONFIG_UNLOAD, xpp, xpp->config.cfg_file);
 
     cl_cfg_sync(xpp->config.cfg_file, xpp->config.filename);
     xante_runtime_set_config_file_status(xpp, XANTE_CFG_ST_SAVED);
 
-    /* TODO: Pass the list of changes to the event */
     if (change_has_occourred(xpp) == true)
         event_call(EV_CHANGES_SAVED, xpp, NULL);
 
 end_block:
+    event_call(EV_CONFIG_UNLOAD, xpp, xpp->config.cfg_file);
+
     if (xpp->config.filename != NULL)
         free(xpp->config.filename);
 

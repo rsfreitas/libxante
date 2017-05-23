@@ -34,6 +34,7 @@ struct xante_event_argument {
     struct xante_item       *item;
     cl_cfg_file_t           *cfg_file;
     cl_object_t             *value;
+    cl_list_t               *changes;
 };
 
 static const char *__mandatory_functions[] = {
@@ -100,6 +101,7 @@ static int ev_void(struct xante_app *xpp, const char *event_name)
         .item = NULL,
         .value = NULL,
         .cfg_file = NULL,
+        .changes = NULL,
     };
 
     ret = cl_plugin_call(xpp->plugin.plugin, event_name, "xpp_arg", &arg, NULL);
@@ -121,6 +123,7 @@ static void ev_config(struct xante_app *xpp, const char *event_name, va_list ap)
         .menu = NULL,
         .item = NULL,
         .value = NULL,
+        .changes = NULL,
     };
 
     cfg_file = va_arg(ap, void *);
@@ -161,6 +164,7 @@ static int ev_item(struct xante_app *xpp, const char *event_name, va_list ap)
         .item = NULL,
         .value = NULL,
         .cfg_file = NULL,
+        .changes = NULL,
     };
 
     item = va_arg(ap, void *);
@@ -194,6 +198,7 @@ static int ev_menu(struct xante_app *xpp, const char *event_name, va_list ap)
         .item = NULL,
         .value = NULL,
         .cfg_file = NULL,
+        .changes = NULL,
     };
 
     menu = va_arg(ap, void *);
@@ -225,6 +230,7 @@ static int ev_item_value(struct xante_app *xpp, const char *event_name, va_list 
         .item = NULL,
         .value = NULL,
         .cfg_file = NULL,
+        .changes = NULL,
     };
 
     item = va_arg(ap, void *);
@@ -275,6 +281,26 @@ static int ev_item_value(struct xante_app *xpp, const char *event_name, va_list 
     return event_return;
 }
 
+static int ev_changes(struct xante_app *xpp)
+{
+    cl_object_t *ret = NULL;
+    int event_return = 0;
+    struct xante_event_argument arg = {
+        .xpp = xpp,
+        .menu = NULL,
+        .item = NULL,
+        .value = NULL,
+        .cfg_file = NULL,
+        .changes = xpp->changes.user_changes,
+    };
+
+    ret = cl_plugin_call(xpp->plugin.plugin, EV_CHANGES_SAVED, "xpp_arg", &arg, NULL);
+    event_return = CL_OBJECT_AS_INT(ret);
+    cl_object_unref(ret);
+
+    return event_return;
+}
+
 static int call(const char *event_name, struct xante_app *xpp, va_list ap)
 {
     int ret = 0;
@@ -296,10 +322,8 @@ static int call(const char *event_name, struct xante_app *xpp, va_list ap)
         ret = ev_menu(xpp, event_name, ap);
     else if (strcmp(event_name, EV_ITEM_VALUE_CONFIRM) == 0)
         ret = ev_item_value(xpp, event_name, ap);
-    /*else if (strcmp(event_name, EV_CHANGES_SAVED) == 0) { // TODO
-        ret = ev_changes_saved(xpp, ap);
-    else
-        return -1;*/
+    else if (strcmp(event_name, EV_CHANGES_SAVED) == 0)
+        ret = ev_changes(xpp);
 
     return ret;
 }
@@ -356,6 +380,8 @@ int event_init(struct xante_app *xpp, bool use_plugin)
     xpp->plugin.plugin = cl_plugin_load(cl_string_valueof(xpp->info.plugin_name));
 
     if (NULL == xpp->plugin.plugin) {
+        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, 0, "ERROR",
+                "%s", cl_strerror(cl_get_last_error()));
         errno_set(XANTE_ERROR_PLUGIN_LOAD_ERROR);
         return -1;
     }
@@ -435,6 +461,8 @@ __PUB_API__ void *xante_event_argument(xante_event_arg_t *arg,
         return evt_arg->value;
     else if (strcmp(data_type, XANTE_EVT_DATA_XANTE_CONFIG) == 0)
         return evt_arg->cfg_file;
+    else if (strcmp(data_type, XANTE_EVT_DATA_XANTE_CHANGES_LIST) == 0)
+        return evt_arg->changes;
 
     return NULL;
 }
