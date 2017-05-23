@@ -114,7 +114,7 @@
                     },
                     {
                         "name": "Input int",
-                        "mode": 1,
+                        "mode": 2,
                         "type": "input_int",
                         "default_value": "5",
                         "options": "Just a simple text to show...",
