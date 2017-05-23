@@ -79,7 +79,7 @@
                     },
                     {
                         "name": "Radio checklist option",
-                        "mode": 1,
+                        "mode": 2,
                         "type": "radio_checklist",
                         "options": [ "Option 1", "Option 2", "Option 3" ],
                         "default_value": "0",

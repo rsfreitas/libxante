@@ -220,12 +220,6 @@ end_block:
 
 /*
  *
- * Internal API
- *
- */
-
-/*
- *
  * External API
  *
  */

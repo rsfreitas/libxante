@@ -30,6 +30,9 @@
 #define DEFAULT_STATUSBAR_TEXT          \
     "[ESC] Cancel [TAB] Select an option [Enter] Confirm [Arrows] Change selected time"
 
+#define DEFAULT_NOT_EDIT_STATUSBAR_TEXT \
+    "[ESC] Cancel [TAB/Arrows] Select an option [Enter] Confirm"
+
 /*
  *
  * Internal functions
@@ -126,7 +129,8 @@ bool ui_dialog_timebox(struct xante_app *xpp, struct xante_item *item,
     dialog_set_backtitle(xpp);
     dialog_update_cancel_button_label();
     dialog_alloc_input(64);
-    dialog_put_statusbar(DEFAULT_STATUSBAR_TEXT);
+    dialog_put_statusbar((edit_value == true) ? DEFAULT_STATUSBAR_TEXT
+                                              : DEFAULT_NOT_EDIT_STATUSBAR_TEXT);
 
     /* Adjusts the dialog content using the item content */
     split_item_value(item, &hour, &minutes, &seconds);
@@ -140,9 +144,16 @@ bool ui_dialog_timebox(struct xante_app *xpp, struct xante_item *item,
         dialog_vars.help_button = 1;
 
     do {
+#ifdef ALTERNATIVE_DIALOG
+        ret_dialog = dialog_timebox(cl_string_valueof(item->name),
+                                    cl_string_valueof(text), 3,
+                                    MINIMUM_WIDTH, hour, minutes, seconds,
+                                    edit_value);
+#else
         ret_dialog = dialog_timebox(cl_string_valueof(item->name),
                                     cl_string_valueof(text), 3,
                                     MINIMUM_WIDTH, hour, minutes, seconds);
+#endif
 
         switch (ret_dialog) {
             case DLG_EXIT_OK:

@@ -304,7 +304,9 @@ static void call_selected_item(struct xante_app *xpp,
     if (event_call(EV_ITEM_SELECTED, xpp, selected_item) < 0)
         return;
 
-    /* TODO: Verify input edit */
+    /* Verify input edit */
+    if (!(selected_item->mode & XANTE_ACCESS_EDIT))
+        edit_item_value = false;
 
     switch (selected_item->dialog_type) {
         case XANTE_UI_DIALOG_MENU:
@@ -347,7 +349,7 @@ static void call_selected_item(struct xante_app *xpp,
                update_internal_menus = call_yesno_dialog(xpp, selected_item);
             else {
                 xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, 0, cl_tr("Error"),
-                                     cl_tr("Cannot change edit this item!"));
+                                     cl_tr("Cannot change the value of this item!"));
             }
 
             break;

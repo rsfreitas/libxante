@@ -30,6 +30,9 @@
 #define DEFAULT_STATUSBAR_TEXT          \
     "[ESC] Cancel [Enter] Confirm a selection [Up/Down] Move [TAB/Left/Right] Choose option [Spacebar] Select option"
 
+#define DEFAULT_NOT_EDIT_STATUSBAR_TEXT \
+    "[ESC] Cancel [Enter] Confirm a selection [Up/Down] Move [TAB/Left/Right] Choose option"
+
 /*
  *
  * Internal functions
@@ -251,7 +254,8 @@ bool ui_dialog_checklist(struct xante_app *xpp, struct xante_item *item,
     /* Prepare dialog */
     dialog_set_backtitle(xpp);
     dialog_update_cancel_button_label();
-    dialog_put_statusbar(DEFAULT_STATUSBAR_TEXT);
+    dialog_put_statusbar((edit_value == true) ? DEFAULT_STATUSBAR_TEXT
+                                              : DEFAULT_NOT_EDIT_STATUSBAR_TEXT);
 
     /* Prepares dialog content */
     calc_checklist_limits(item, &number_of_options, &height,
@@ -264,6 +268,16 @@ bool ui_dialog_checklist(struct xante_app *xpp, struct xante_item *item,
         dialog_vars.help_button = 1;
 
     do {
+#ifdef ALTERNATIVE_DIALOG
+        ret_dialog = dlg_checklist(cl_string_valueof(item->name),
+                                   cl_tr("Choose an option"), height,
+                                   MINIMUM_WIDTH, list_options_height,
+                                   number_of_options, dlg_items, " X",
+                                   item->dialog_checklist_type,
+                                   &selected_index,
+                                   update_item_brief, item,
+                                   edit_value);
+#else
         ret_dialog = dlg_checklist(cl_string_valueof(item->name),
                                    cl_tr("Choose an option"), height,
                                    MINIMUM_WIDTH, list_options_height,
@@ -271,6 +285,7 @@ bool ui_dialog_checklist(struct xante_app *xpp, struct xante_item *item,
                                    item->dialog_checklist_type,
                                    &selected_index,
                                    update_item_brief, item);
+#endif
 
         switch (ret_dialog) {
             case DLG_EXIT_OK:
