@@ -55,13 +55,14 @@ it may reference an application skeleton.
                     {
                         "mode": int,
                         "default_value": string,
+                        "type": string,
+                        "options": string/array of strings,
+                        "name": string,
+                        "menu_id": string,
                         "config": {
                             "block": string,
                             "item": string,
                         },
-                        "type": string,
-                        "options": string/array of strings,
-                        "name": string,
                         "help": {
                             "brief": string,
                             "description": string,

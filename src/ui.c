@@ -65,6 +65,9 @@ static void destroy_xante_item(const struct cl_ref_s *ref)
     if (item->object_id != NULL)
         cl_string_unref(item->object_id);
 
+    if (item->menu_id != NULL)
+        cl_string_unref(item->menu_id);
+
     if (item->config_block != NULL)
         cl_string_unref(item->config_block);
 
@@ -469,6 +472,9 @@ void ui_adjusts_item_info(struct xante_item *item, cl_string_t *default_value,
  * @name ui_search_menu_by_object_id
  * @brief Searches a xante_menu structure inside the main menu list which have
  *        a specific object_id.
+ *
+ * Remember, when searching a menu pointed by an item, its object_id is located
+ * inside the menu_id.
  *
  * @param [in] xpp: The main library object.
  * @param [in] object_it_to_search: The menu object_id which will be used to

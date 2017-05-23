@@ -95,7 +95,7 @@ static int load_config(struct xante_app *xpp)
     }
 
     /*
-     * If we have a dynamic menu we'll need to replicate it an its submenus and
+     * If we have a dynamic menu we'll need to replicate it, its submenus and
      * items.
      */
     dm_init(xpp, cfg_file);

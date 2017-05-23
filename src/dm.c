@@ -184,6 +184,8 @@ static struct xante_item *dup_item(struct xante_menu *menu, int item_index,
     d_item->options = cl_string_dup(item->options);
     d_item->object_id = cl_string_dup(item->object_id);
     cl_string_cat(d_item->object_id, "_%d", menu_index);
+    d_item->menu_id = cl_string_dup(item->menu_id);
+    cl_string_cat(d_item->menu_id, "_%d", menu_index);
 
     d_item->mode = item->mode;
     d_item->dialog_type = item->dialog_type;
@@ -266,7 +268,7 @@ static int find_submenu_to_replicate(cl_list_node_t *a, void *b)
     /* Is this a submenu? */
     if (item->dialog_type == XANTE_UI_DIALOG_MENU) {
         menu = ui_search_menu_by_object_id(ld->xpp,
-                                           cl_string_valueof(item->object_id));
+                                           cl_string_valueof(item->menu_id));
 
         if (dm_replicate(ld->xpp, menu, ld->number_of_copies,
                          ld->first_copy_index) < 0)
@@ -323,6 +325,7 @@ static struct xante_item *create_rme_item(struct xante_menu *menu,
                                        cl_string_valueof(menu->object_id),
                                        item_index);
 
+    item->menu_id = cl_string_dup(item->object_id);
     item->type = cl_string_create(XANTE_UI_STR_DIALOG_MENU);
     item->mode = XANTE_ACCESS_VIEW;
     item->dialog_type = XANTE_UI_DIALOG_MENU;
@@ -503,9 +506,10 @@ void dm_update(struct xante_app *xpp, struct xante_item *selected_item)
     expected_copies = CL_OBJECT_AS_INT(item_value(selected_item));
     dm_menu = get_item_dm(xpp, selected_item);
 
-    if (NULL == dm_menu)
+    if (NULL == dm_menu) {
         // error msg
         return;
+    }
 
     rme_menu =
         ui_search_menu_by_object_id(xpp,

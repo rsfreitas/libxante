@@ -75,6 +75,7 @@
 #define EVENTS              "events"
 #define DESCRIPTION         "description"
 #define BRIEF               "brief"
+#define MENU_ID             "menu_id"
 
 static int fill_info(cl_json_t *node, const char *subnode_name, ...)
 {
@@ -267,6 +268,7 @@ static int parse_menu_item(cl_json_t *item, struct xante_menu *menu)
     fill_info(item, OPTIONS, (void **)&options);
     fill_info(item, DEFAULT_VALUE, (void **)&default_value);
     fill_info(item, OBJECT_ID, (void **)&i->object_id);
+    fill_info(item, MENU_ID, (void **)&i->menu_id);
     i->events = cl_json_dup(cl_json_get_object_item(item, EVENTS));
     parse_item_config(item, i);
     parse_item_help(item, i, &brief_options_help);

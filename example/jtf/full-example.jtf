@@ -30,18 +30,21 @@
                         "name": "Dynamic menu",
                         "mode": 1,
                         "type": "menu",
+                        "menu_id": "2",
                         "object_id": "2"
                     },
                     {
                         "name": "Dynamic second menu",
                         "mode": 1,
                         "type": "menu",
+                        "menu_id": "4",
                         "object_id": "4"
                     },
                     {
                         "name": "Weekdays",
                         "mode": 1,
                         "type": "menu",
+                        "menu_id": "3",
                         "object_id": "3"
                     },
                     {
@@ -233,6 +236,7 @@
                         "name": "Second menu",
                         "mode": 1,
                         "type": "menu",
+                        "menu_id": "1",
                         "object_id": "1"
                     }
                 ]
@@ -451,6 +455,7 @@
                         "name": "Submenu from dynamic",
                         "mode": 1,
                         "type": "menu",
+                        "menu_id": "5",
                         "object_id": "5"
                     }
                 ]
@@ -479,6 +484,7 @@
                         "name": "Subsubmenu from dynamic",
                         "mode": 1,
                         "type": "menu",
+                        "menu_id": "6",
                         "object_id": "6"
                     }
                 ]
@@ -512,6 +518,7 @@
                         "name": "Sububsubmenu from dynamic",
                         "mode": 1,
                         "type": "menu",
+                        "menu_id": "7",
                         "object_id": "7"
                     }
                 ]

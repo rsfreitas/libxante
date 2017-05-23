@@ -113,6 +113,7 @@ struct xante_item {
     cl_string_t             *config_item;
     cl_string_t             *brief_help;
     cl_string_t             *descriptive_help;
+    cl_string_t             *menu_id;
     cl_object_t             *default_value;
     cl_json_t               *events;
 

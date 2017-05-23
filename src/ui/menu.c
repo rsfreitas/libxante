@@ -232,7 +232,7 @@ static void call_menu_dialog(struct xante_app *xpp,
     char *btn_cancel_label = NULL;
 
     menu = ui_search_menu_by_object_id(xpp,
-                                       cl_string_valueof(selected_item->object_id));
+                                       cl_string_valueof(selected_item->menu_id));
 
     if (NULL == menu) {
         xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, 0, cl_tr("Error"),

@@ -13,7 +13,7 @@
         "name": "config-test",
         "description": "Test of configurations",
         "plugin": "/usr/local/lib/test.so",
-        "config_pathname": "/tmp,
+        "config_pathname": "/tmp",
         "log_pathname": "/tmp",
         "log_level": "debug",
         "company": "Company"
@@ -30,7 +30,8 @@
                         "name": "Weekdays",
                         "mode": 1,
                         "type": "menu",
-                        "object_id": "3"
+                        "object_id": "3",
+                        "menu_id": "3"
                     },
                     {
                         "name": "Yes no option",
