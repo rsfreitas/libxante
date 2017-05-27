@@ -1,4 +1,4 @@
-# JSON template files
+# JTF - JSON template files
 
 This document describe the specifications of a JSON Template File (JTF),
 used by **libxante** to build an application.

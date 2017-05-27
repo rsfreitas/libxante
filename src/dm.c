@@ -495,6 +495,12 @@ void dm_init(struct xante_app *xpp, cl_cfg_file_t *cfg_file)
     unreference_menus(xpp);
 }
 
+void dm_uninit(struct xante_app *xpp)
+{
+    if (xpp->ui.unreferenced_menus != NULL)
+        cl_list_destroy(xpp->ui.unreferenced_menus);
+}
+
 void dm_update(struct xante_app *xpp, struct xante_item *selected_item)
 {
     struct xante_menu *dm_menu = NULL, *rme_menu = NULL;

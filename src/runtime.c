@@ -58,6 +58,7 @@ void runtime_start(struct xante_app *xpp)
     xante_runtime_set_exit_value(xpp, 0);
     xante_runtime_set_close_ui(xpp, false);
     xante_runtime_set_ui_active(xpp, false);
+    xante_runtime_set_user_authentication(xpp, true);
 }
 
 /*
@@ -438,5 +439,35 @@ __PUB_API__ bool xante_runtime_ui_active(xante_t *xpp)
     }
 
     return x->runtime.ui_active;
+}
+
+__PUB_API__ int xante_runtime_set_user_authentication(xante_t *xpp, bool auth)
+{
+    struct xante_app *x = (struct xante_app *)xpp;
+
+    errno_clear();
+
+    if (NULL == xpp) {
+        errno_set(XANTE_ERROR_NULL_ARG);
+        return -1;
+    }
+
+    x->runtime.user_authentication = auth;
+
+    return 0;
+}
+
+__PUB_API__ bool xante_runtime_user_authentication(xante_t *xpp)
+{
+    struct xante_app *x = (struct xante_app *)xpp;
+
+    errno_clear();
+
+    if (NULL == xpp) {
+        errno_set(XANTE_ERROR_NULL_ARG);
+        return false;
+    }
+
+    return x->runtime.user_authentication;
 }
 

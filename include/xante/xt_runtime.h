@@ -303,5 +303,27 @@ int xante_runtime_set_ui_active(xante_t *xpp, bool ui_active);
  */
 bool xante_runtime_ui_active(xante_t *xpp);
 
+/**
+ * @name xante_runtime_set_user_authentication
+ * @brief Sets/Unsets if the application is going to use internal user access
+ *        authentication.
+ *
+ * @param [in] xpp: The library main object.
+ * @param [in] auth: The boolean flag to set/unset the authentication.
+ *
+ * @return On success returns 0 or -1 otherwise.
+ */
+int xante_runtime_set_user_authentication(xante_t *xpp, bool auth);
+
+/**
+ * @name xante_runtime_user_authentication
+ * @brief Retrieves if the application is using access authentication.
+ *
+ * @param [in] xpp: The library main object.
+ *
+ * @return Returns true/false if it is using.
+ */
+bool xante_runtime_user_authentication(xante_t *xpp);
+
 #endif
 

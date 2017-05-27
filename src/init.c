@@ -79,13 +79,13 @@ static struct xante_app *new_xante_app(void)
  */
 
 __PUB_API__ xante_t *xante_init(const char *jtf_pathname, bool use_plugin,
-    const char *username, const char *password)
+    bool use_auth, const char *username, const char *password)
 {
     struct xante_app *xpp = NULL;
 
     errno_clear();
 
-    if ((NULL == jtf_pathname) || (NULL == username) || (NULL == password)) {
+    if (NULL == jtf_pathname) {
         errno_set(XANTE_ERROR_NULL_ARG);
         return NULL;
     }
@@ -98,14 +98,14 @@ __PUB_API__ xante_t *xante_init(const char *jtf_pathname, bool use_plugin,
     /* Set runtime flags */
     runtime_start(xpp);
 
-    /* Start user access control */
-    if (auth_init(xpp, username, password) < 0)
-        goto error_block;
-
     /* Start translation environment */
 
     /* Parse the JTF file */
     if (jtf_parse(jtf_pathname, xpp) < 0)
+        goto error_block;
+
+    /* Start user access control */
+    if (auth_init(xpp, use_auth, username, password) < 0)
         goto error_block;
 
     /* Start user modifications monitoring */

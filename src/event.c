@@ -429,6 +429,7 @@ void event_uninit(struct xante_app *xpp)
     if (xpp->plugin.plugin != NULL) {
         event_call(EV_UNINIT, xpp, NULL);
         cl_plugin_info_unref(xpp->plugin.info);
+        cl_string_list_destroy(xpp->plugin.functions);
         cl_plugin_unload(xpp->plugin.plugin);
     }
 }

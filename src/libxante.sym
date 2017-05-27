@@ -32,6 +32,8 @@ LIBXANTE_0.1 {
         xante_runtime_close_ui;
         xante_runtime_set_ui_active;
         xante_runtime_ui_active;
+        xante_runtime_set_user_authentication;
+        xante_runtime_user_authentication;
         xante_ui_run;
         xante_ui_suspend;
         xante_ui_continue;
@@ -43,6 +45,9 @@ LIBXANTE_0.1 {
         xante_dlg_clear_backtitle;
         xante_dlg_set_backtitle;
         xante_dlg_application_version;
+        xante_auth_set_path;
+        xante_auth_create_database;
+        xante_auth_export_jxdbi;
     local:
         *;
 };

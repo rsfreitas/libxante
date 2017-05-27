@@ -17,6 +17,7 @@ This library is intended to build and run dialog based applications.
 
 * [libcollections](https://github.com/rsfreitas/libcollections)
 * [libdialog](http://invisible-island.net/dialog/)
+* [sqlite](http://www.sqlite.org)
 
 ### Alternative libdialog
 

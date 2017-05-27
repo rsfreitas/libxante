@@ -52,7 +52,17 @@ static const char *__description[] = {
     cl_tr_noop("Plugin without internal info"),
     cl_tr_noop("Plugin without internal API"),
     cl_tr_noop("Plugin without mandatory function"),
-    cl_tr_noop("Plugin EV_INIT error")
+    cl_tr_noop("Plugin EV_INIT error"),
+    cl_tr_noop("No environment database variable found"),
+    cl_tr_noop("Unable to access database file"),
+    cl_tr_noop("Unable to save JXDBI file"),
+    cl_tr_noop("Unable to open database file"),
+    cl_tr_noop("User not found in the database"),
+    cl_tr_noop("Group not found in the database"),
+    cl_tr_noop("Application not found in the database"),
+    cl_tr_noop("Multiple user entries found in the database"),
+    cl_tr_noop("Multiple group entries found in the database"),
+    cl_tr_noop("Multiple application entries found in the database")
 };
 
 static const char *__unknown_error = cl_tr_noop("Unknown error");

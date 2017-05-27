@@ -35,6 +35,10 @@
 # include <dlg_keys.h>
 #endif
 
+#ifndef _SQLITE3_H_
+# include <sqlite3.h>
+#endif
+
 /*
  * An internal representation of a public function. It does not affect the code
  * or the function visibility. Its objective is only to let clear what is and
@@ -97,6 +101,7 @@ struct xante_runtime {
     bool                            accent_characters;
     bool                            close_ui;
     bool                            ui_active;
+    bool                            user_authentication;
     int                             ui_dialog_timeout;          /** seconds */
     int                             exit_value;
     enum xante_config_file_status   config_file_status;
@@ -189,6 +194,10 @@ struct xante_changes {
 struct xante_auth {
     cl_string_t         *username;
     cl_string_t         *password;
+    cl_string_t         *name;
+    sqlite3             *db;
+    int                 id_application;
+    int                 id_group;
 };
 
 /** Library main structure */

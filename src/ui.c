@@ -334,6 +334,8 @@ void ui_uninit(struct xante_app *xpp)
 
     if (xpp->ui.menus != NULL)
         cl_list_destroy(xpp->ui.menus);
+
+    dm_uninit(xpp);
 }
 
 /**
