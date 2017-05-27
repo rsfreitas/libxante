@@ -24,7 +24,12 @@
  * USA
  */
 
+#include <pthread.h>
+
 #include "libxante.h"
+
+static pthread_key_t    __xante_errno_key;
+static pthread_once_t   __xante_errno_once = PTHREAD_ONCE_INIT;
 
 static const char *__description[] = {
     cl_tr_noop("Ok"),
@@ -42,11 +47,65 @@ static const char *__description[] = {
     cl_tr_noop("JTF file has no 'input_ranges' object"),
     cl_tr_noop("JTF file has no 'config' object"),
     cl_tr_noop("JTF file has no 'internal' object"),
-    cl_tr_noop("JTF file has no 'application' object")
+    cl_tr_noop("JTF file has no 'application' object"),
+    cl_tr_noop("Plugin initialization failed"),
+    cl_tr_noop("Plugin without internal info"),
+    cl_tr_noop("Plugin without internal API"),
+    cl_tr_noop("Plugin without mandatory function"),
+    cl_tr_noop("Plugin EV_INIT error"),
+    cl_tr_noop("No environment database variable found"),
+    cl_tr_noop("Unable to access database file"),
+    cl_tr_noop("Unable to save JXDBI file"),
+    cl_tr_noop("Unable to open database file"),
+    cl_tr_noop("User not found in the database"),
+    cl_tr_noop("Group not found in the database"),
+    cl_tr_noop("Application not found in the database"),
+    cl_tr_noop("Multiple user entries found in the database"),
+    cl_tr_noop("Multiple group entries found in the database"),
+    cl_tr_noop("Multiple application entries found in the database")
 };
 
 static const char *__unknown_error = cl_tr_noop("Unknown error");
-#define __errno     (*cl_errno_storage())
+
+/*
+ *
+ * Internal functions
+ *
+ */
+
+static void errno_free(void *ptr)
+{
+    if (ptr != NULL)
+        free(ptr);
+}
+
+static void errno_init(void)
+{
+    pthread_key_create(&__xante_errno_key, errno_free);
+}
+
+static int *errno_storage(void)
+{
+    int *error = NULL;
+
+    pthread_once(&__xante_errno_once, errno_init);
+    error = pthread_getspecific(__xante_errno_key);
+
+    if (NULL == error) {
+        error = malloc(sizeof(*error));
+        pthread_setspecific(__xante_errno_key, error);
+    }
+
+    return error;
+}
+
+#define __errno     (*errno_storage())
+
+/*
+ *
+ * Internal API
+ *
+ */
 
 /**
  * @name errno_clear
@@ -67,6 +126,12 @@ void errno_set(enum xante_error_code code)
 {
     __errno = code;
 }
+
+/*
+ *
+ * API
+ *
+ */
 
 __PUB_API__ enum xante_error_code xante_get_last_error(void)
 {

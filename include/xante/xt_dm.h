@@ -35,6 +35,8 @@
 
 /* Internal library declarations */
 void dm_init(struct xante_app *xpp, cl_cfg_file_t *cfg_file);
+void dm_uninit(struct xante_app *xpp);
+void dm_update(struct xante_app *xpp, struct xante_item *selected_item);
 
 #endif
 

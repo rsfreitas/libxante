@@ -72,6 +72,10 @@
 #define COPIES              "copies"
 #define BLOCK_PREFIX        "block_prefix"
 #define ORIGIN              "origin"
+#define EVENTS              "events"
+#define DESCRIPTION         "description"
+#define BRIEF               "brief"
+#define MENU_ID             "menu_id"
 
 static int fill_info(cl_json_t *node, const char *subnode_name, ...)
 {
@@ -182,6 +186,7 @@ static int parse_jtf_info(cl_json_t *jtf, struct xante_app *xpp)
     fill_info(general, LOG_PATHNAME, (void **)&xpp->info.log_pathname);
     fill_info(general, LOG_LEVEL, (void **)&xpp->info.log_level);
     fill_info(general, COMPANY, (void **)&xpp->info.company);
+    fill_info(general, DESCRIPTION, (void **)&xpp->info.description);
 
     return 0;
 }
@@ -231,11 +236,26 @@ static int parse_item_config(cl_json_t *item, struct xante_item *it)
     return 0;
 }
 
+static void parse_item_help(cl_json_t *item, struct xante_item *it,
+    void **brief_options_help)
+{
+    cl_json_t *help = NULL;
+
+    help = cl_json_get_object_item(item, HELP);
+
+    if (NULL == help)
+        return;
+
+    fill_info(help, BRIEF, (void **)&it->brief_help);
+    fill_info(help, DESCRIPTION, (void **)&it->descriptive_help);
+    fill_info(help, OPTIONS, brief_options_help);
+}
+
 static int parse_menu_item(cl_json_t *item, struct xante_menu *menu)
 {
     struct xante_item *i;
     cl_string_t *default_value = NULL;
-    void *options = NULL, *max = NULL, *min = NULL;
+    void *options = NULL, *max = NULL, *min = NULL, *brief_options_help = NULL;
 
     i = ui_new_xante_item();
 
@@ -245,16 +265,20 @@ static int parse_menu_item(cl_json_t *item, struct xante_menu *menu)
     fill_info(item, NAME, (void **)&i->name);
     fill_info(item, TYPE, (void **)&i->type);
     fill_info(item, MODE, (void **)&i->mode);
-    fill_info(item, HELP, (void **)&i->help);
     fill_info(item, OPTIONS, (void **)&options);
     fill_info(item, DEFAULT_VALUE, (void **)&default_value);
     fill_info(item, OBJECT_ID, (void **)&i->object_id);
+    fill_info(item, MENU_ID, (void **)&i->menu_id);
+    i->events = cl_json_dup(cl_json_get_object_item(item, EVENTS));
     parse_item_config(item, i);
+    parse_item_help(item, i, &brief_options_help);
 
     if (parse_item_input_ranges(item, i, &max, &min) < 0)
         return -1;
 
-    ui_adjusts_item_info(i, default_value, options, max, min);
+    ui_adjusts_item_info(i, default_value, options, max, min,
+                         brief_options_help);
+
     cl_list_unshift(menu->items, i, -1);
 
     if (default_value != NULL)
@@ -302,6 +326,7 @@ static int parse_ui_menu(cl_json_t *menu, struct xante_app *xpp)
     fill_info(menu, MODE, (void **)&m->mode);
     fill_info(menu, TYPE, (void **)&m->type);
     parse_menu_dynamic(menu, m, &copies);
+    m->events = cl_json_dup(cl_json_get_object_item(menu, EVENTS));
 
     /*
      * We must adjust some internal menu informations before loading its
@@ -408,11 +433,6 @@ int jtf_parse(const char *pathname, struct xante_app *xpp)
 
     /* Translate the JSON format to our menus and its items */
     ret = parse_jtf_json(jtf, xpp);
-
-    /*
-     * FIXME: libcollections shares the same errno variable with us,
-     *        and it's cleaning it here. We must fix there.
-     */
     cl_json_delete(jtf);
 
     return ret;
@@ -449,5 +469,8 @@ void jtf_release_info(struct xante_app *xpp)
 
     if (xpp->info.company != NULL)
         cl_string_unref(xpp->info.company);
+
+    if (xpp->info.description != NULL)
+        cl_string_unref(xpp->info.description);
 }
 

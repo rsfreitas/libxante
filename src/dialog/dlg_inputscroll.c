@@ -41,7 +41,7 @@
 
 /*
  * Number of discarded columns both inside the text window and outsize the
- * input editint window.
+ * input editing window.
  */
 #define INTERNAL_H_MARGIN                   6
 

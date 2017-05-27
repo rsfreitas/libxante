@@ -3,7 +3,7 @@
  * Description: Functions to handle the dynamic menus from an application.
  *
  *              A dynamic menu is a special menu in which it may be internally
- *              replicated _N_ times. This _N_ times must be of three diffrente
+ *              replicated _N_ times. This _N_ times must be of three different
  *              ways:
  *
  *                  1 - From an array of strings (object copies inside the JTF
@@ -37,12 +37,14 @@
  */
 
 #include "libxante.h"
+#include "ui/ui_dialogs.h"
 
 struct list_data {
     struct xante_app    *xpp;
     cl_cfg_file_t       *cfg_file;
     struct xante_menu   *menu;
     int                 number_of_copies;
+    int                 first_copy_index;
 };
 
 /*
@@ -53,7 +55,7 @@ struct list_data {
  */
 
 static int dm_replicate(struct xante_app *xpp, struct xante_menu *menu,
-                        int copies);
+                        int copies, int first_copy_index);
 
 static int find_item(cl_list_node_t *a, void *b)
 {
@@ -177,10 +179,13 @@ static struct xante_item *dup_item(struct xante_menu *menu, int item_index,
     /* Duplicate all item informations */
     d_item->name = cl_string_dup(item->name);
     d_item->type = cl_string_dup(item->type);
-    d_item->help = cl_string_dup(item->help);
+    d_item->descriptive_help = cl_string_dup(item->descriptive_help);
+    d_item->brief_help = cl_string_dup(item->brief_help);
     d_item->options = cl_string_dup(item->options);
     d_item->object_id = cl_string_dup(item->object_id);
     cl_string_cat(d_item->object_id, "_%d", menu_index);
+    d_item->menu_id = cl_string_dup(item->menu_id);
+    cl_string_cat(d_item->menu_id, "_%d", menu_index);
 
     d_item->mode = item->mode;
     d_item->dialog_type = item->dialog_type;
@@ -231,14 +236,14 @@ static struct xante_menu *dup_menu(struct xante_menu *menu, int copy_index)
 }
 
 static int replicate(struct xante_app *xpp, struct xante_menu *menu,
-    int copies)
+    int copies, int first_copy_index)
 {
-    int i;
+    int i, j;
     struct xante_menu *d_menu = NULL;
 
     /* Replicate the menu _N_ times */
-    for (i = 0; i < copies; i++) {
-        d_menu = dup_menu(menu, i);
+    for (i = 0, j = first_copy_index; i < copies; i++, j++) {
+        d_menu = dup_menu(menu, j);
 
         /*
          * XXX: Insert the new menu at the of the list, so it does not
@@ -263,21 +268,25 @@ static int find_submenu_to_replicate(cl_list_node_t *a, void *b)
     /* Is this a submenu? */
     if (item->dialog_type == XANTE_UI_DIALOG_MENU) {
         menu = ui_search_menu_by_object_id(ld->xpp,
-                                           cl_string_valueof(item->object_id));
+                                           cl_string_valueof(item->menu_id));
 
-        if (dm_replicate(ld->xpp, menu, ld->number_of_copies) < 0)
+        if (dm_replicate(ld->xpp, menu, ld->number_of_copies,
+                         ld->first_copy_index) < 0)
+        {
             return -1;
+        }
     }
 
     return 0;
 }
 
 static int dm_replicate(struct xante_app *xpp, struct xante_menu *menu,
-    int copies)
+    int copies, int first_copy_index)
 {
     cl_list_node_t *node;
     struct list_data ld = {
         .xpp = xpp,
+        .first_copy_index = first_copy_index,
         .number_of_copies = copies,
         .menu = menu,
     };
@@ -285,7 +294,7 @@ static int dm_replicate(struct xante_app *xpp, struct xante_menu *menu,
     node = cl_list_map(menu->items, find_submenu_to_replicate, &ld);
 
     if (NULL == node) {
-        if (replicate(xpp, menu, copies) < 0)
+        if (replicate(xpp, menu, copies, first_copy_index) < 0)
             return -1;
 
         return 0; /* ok */
@@ -294,6 +303,34 @@ static int dm_replicate(struct xante_app *xpp, struct xante_menu *menu,
     cl_list_node_unref(node);
 
     return -1;
+}
+
+static struct xante_item *create_rme_item(struct xante_menu *menu,
+    int item_index)
+{
+    struct xante_item *item = NULL;
+
+    item = ui_new_xante_item();
+
+    /* Create the required item's informations */
+    if (menu->dynamic_names != NULL)
+        item->name = cl_string_list_get(menu->dynamic_names, item_index);
+    else {
+        item->name = cl_string_create("%s (%d)",
+                                      cl_string_valueof(menu->name),
+                                      item_index + 1);
+    }
+
+    item->object_id = cl_string_create("%s_%d",
+                                       cl_string_valueof(menu->object_id),
+                                       item_index);
+
+    item->menu_id = cl_string_dup(item->object_id);
+    item->type = cl_string_create(XANTE_UI_STR_DIALOG_MENU);
+    item->mode = XANTE_ACCESS_VIEW;
+    item->dialog_type = XANTE_UI_DIALOG_MENU;
+
+    return item;
 }
 
 static void rme_create(struct xante_app *xpp, struct xante_menu *menu,
@@ -313,25 +350,7 @@ static void rme_create(struct xante_app *xpp, struct xante_menu *menu,
 
     /* Create items to point at every previously created (sub)menu */
     for (i = 0; i < copies; i++) {
-        rme_item = ui_new_xante_item();
-
-        /* Create the required item's informations */
-        if (menu->dynamic_names != NULL)
-            rme_item->name = cl_string_list_get(menu->dynamic_names, i);
-        else {
-            rme_item->name = cl_string_create("%s (%d)",
-                                              cl_string_valueof(menu->name),
-                                              i + 1);
-        }
-
-        rme_item->object_id = cl_string_create("%s_%d",
-                                               cl_string_valueof(menu->object_id),
-                                               i);
-
-        rme_item->type = cl_string_create("menu");
-        rme_item->mode = XANTE_ACCESS_VIEW;
-        rme_item->dialog_type = XANTE_UI_DIALOG_MENU;
-
+        rme_item = create_rme_item(menu, i);
         cl_list_unshift(rme->items, rme_item, -1);
     }
 
@@ -360,7 +379,7 @@ static int dm_push_menu(cl_list_node_t *a, void *b)
     copies = dm_find_number_of_copies(xpp, cfg_file, menu);
 
     /* Replicate menus (submenus and items) */
-    if (dm_replicate(xpp, menu, copies) < 0)
+    if (dm_replicate(xpp, menu, copies, 0) < 0)
         return -1;
 
     /* Create the reference menu entry (RME) */
@@ -380,10 +399,83 @@ static int detect_unreferenced_menu(cl_list_node_t *node,
     return 0;
 }
 
-static void remove_unreferenced_menus(struct xante_app *xpp)
+static void unreference_menus(struct xante_app *xpp)
 {
     cl_list_set_filter(xpp->ui.menus, detect_unreferenced_menu);
-    cl_list_delete(xpp->ui.menus, NULL);
+    xpp->ui.unreferenced_menus = cl_list_filter(xpp->ui.menus, NULL);
+}
+
+static int find_dm(cl_list_node_t *node, void *a)
+{
+    struct xante_menu *menu = cl_list_node_content(node);
+    struct xante_item *item = (struct xante_item *)a;
+
+    if (menu->menu_type == XANTE_UI_MENU_DEFAULT)
+        return 0;
+
+    if (menu->dynamic_names != NULL)
+        return 0;
+
+    if (menu->copies != -1)
+        return 0;
+
+    if ((cl_string_cmp(menu->dynamic_origin_block, item->config_block) == 0) &&
+        (cl_string_cmp(menu->dynamic_origin_item, item->config_item) == 0))
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
+static struct xante_menu *get_item_dm(struct xante_app *xpp,
+    struct xante_item *item)
+{
+    cl_list_node_t *node;
+    struct xante_menu *menu;
+
+    node = cl_list_map(xpp->ui.unreferenced_menus, find_dm, item);
+
+    if (NULL == node)
+        return NULL;
+
+    menu = cl_list_node_content(node);
+    cl_list_node_unref(node);
+
+    return menu;
+}
+
+static void dm_remove(struct xante_menu *rme, int entries_to_remove)
+{
+    int i;
+    cl_list_node_t *node;
+
+    for (i = 0; i < entries_to_remove; i++) {
+        node = cl_list_shift(rme->items);
+        cl_list_node_unref(node);
+    }
+}
+
+static void dm_add(struct xante_app *xpp, struct xante_menu *rme,
+    struct xante_menu *unreferenced_menu, int entries_to_add)
+{
+    int i, current_copies;
+    struct xante_item *rme_item = NULL;
+
+    current_copies = cl_list_size(rme->items);
+
+    /* Replicate the unreferenced_menu */
+    if (dm_replicate(xpp, unreferenced_menu, entries_to_add,
+                     current_copies) < 0)
+    {
+        return;
+    }
+
+    /* Add entries to the RME menu */
+    for (i = 0; i < entries_to_add; i++) {
+        rme_item = create_rme_item(unreferenced_menu, i + current_copies);
+        cl_list_unshift(rme->items, rme_item, -1);
+    }
 }
 
 /*
@@ -400,7 +492,48 @@ void dm_init(struct xante_app *xpp, cl_cfg_file_t *cfg_file)
     };
 
     cl_list_map(xpp->ui.menus, dm_push_menu, &ld);
-    remove_unreferenced_menus(xpp);
-    ui_print_menu_tree(xpp);
+    unreference_menus(xpp);
+}
+
+void dm_uninit(struct xante_app *xpp)
+{
+    if (xpp->ui.unreferenced_menus != NULL)
+        cl_list_destroy(xpp->ui.unreferenced_menus);
+}
+
+void dm_update(struct xante_app *xpp, struct xante_item *selected_item)
+{
+    struct xante_menu *dm_menu = NULL, *rme_menu = NULL;
+    int expected_copies = -1, current_copies = -1;
+
+    if (selected_item->dialog_type != XANTE_UI_DIALOG_INPUT_INT)
+        return;
+
+    expected_copies = CL_OBJECT_AS_INT(item_value(selected_item));
+    dm_menu = get_item_dm(xpp, selected_item);
+
+    if (NULL == dm_menu) {
+        // error msg
+        return;
+    }
+
+    rme_menu =
+        ui_search_menu_by_object_id(xpp,
+                                    cl_string_valueof(dm_menu->object_id));
+
+    if (NULL == rme_menu) {
+        // error msg
+        return;
+    }
+
+    current_copies = cl_list_size(rme_menu->items);
+
+    if (expected_copies == current_copies)
+        return;
+
+    if (expected_copies > current_copies)
+        dm_add(xpp, rme_menu, dm_menu, abs(expected_copies - current_copies));
+    else
+        dm_remove(rme_menu, abs(expected_copies - current_copies));
 }
 

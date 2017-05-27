@@ -27,12 +27,6 @@
 
 #include "libxante.h"
 
-struct change {
-    char        *item_name;
-    char        *old_value;
-    char        *new_value;
-};
-
 /*
  *
  * Internal functions
@@ -41,7 +35,7 @@ struct change {
 
 static void destroy_change(void *a)
 {
-    struct change *c = (struct change *)a;
+    struct xante_change_entry *c = (struct xante_change_entry *)a;
 
     if (NULL == c)
         return;
@@ -58,11 +52,11 @@ static void destroy_change(void *a)
     free(c);
 }
 
-static struct change *new_change(void)
+static struct xante_change_entry *new_change(void)
 {
-    struct change *c = NULL;
+    struct xante_change_entry *c = NULL;
 
-    c = calloc(1, sizeof(struct change));
+    c = calloc(1, sizeof(struct xante_change_entry));
 
     if (NULL == c) {
         errno_set(XANTE_ERROR_NO_MEMORY);
@@ -131,7 +125,7 @@ void change_uninit(struct xante_app *xpp)
 int change_add(struct xante_app *xpp, const char *item_name,
     const char *old_value, const char *new_value)
 {
-    struct change *c = NULL;
+    struct xante_change_entry *c = NULL;
 
     if ((NULL == xpp) || (NULL == item_name) || (NULL == old_value) ||
         (NULL == new_value))

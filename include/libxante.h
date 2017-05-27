@@ -93,13 +93,55 @@ enum xante_ui_menu {
     XANTE_UI_MENU_DYNAMIC
 };
 
-/** The library main object */
-typedef void                xante_t;
+/** String keys of a supported dialog */
+#define XANTE_UI_STR_DIALOG_MENU                "menu"
+#define XANTE_UI_STR_DIALOG_INPUT_INT           "input_int"
+#define XANTE_UI_STR_DIALOG_INPUT_FLOAT         "input_float"
+#define XANTE_UI_STR_DIALOG_INPUT_DATE          "input_date"
+#define XANTE_UI_STR_DIALOG_INPUT_TIME          "input_time"
+#define XANTE_UI_STR_DIALOG_INPUT_STRING        "input_string"
+#define XANTE_UI_STR_DIALOG_INPUT_PASSWD        "input_passwd"
+#define XANTE_UI_STR_DIALOG_CALENDAR            "calendar"
+#define XANTE_UI_STR_DIALOG_TIMEBOX             "timebox"
+#define XANTE_UI_STR_DIALOG_RADIO_CHECKLIST     "radio_checklist"
+#define XANTE_UI_STR_DIALOG_CHECKLIST           "checklist"
+#define XANTE_UI_STR_DIALOG_YESNO               "yesno"
+#define XANTE_UI_STR_DIALOG_CUSTOM              "custom"
+#define XANTE_UI_STR_DIALOG_DYNAMIC_MENU        "dynamic_menu"
+#define XANTE_UI_STR_DIALOG_DELETE_DYNAMIC_MENU "delete_dynamic_menu"
+
+/** String keys of supported menus */
+#define XANTE_UI_STR_DEFAULT_MENU               "default"
+#define XANTE_UI_STR_DYNAMIC_MENU               "dynamic"
+
+/** Event arguments */
+#define XANTE_EVT_DATA_XANTE_T                  "xante_t"
+#define XANTE_EVT_DATA_XANTE_MENU_T             "xante_menu_t"
+#define XANTE_EVT_DATA_XANTE_ITEM_T             "xante_item_t"
+#define XANTE_EVT_DATA_XANTE_ITEM_VALUE         "xante_item_value"
+#define XANTE_EVT_DATA_XANTE_CONFIG             "xante_config"
+#define XANTE_EVT_DATA_XANTE_CHANGES_LIST       "xante_changes"
+
+/** Main library object */
+typedef void    xante_t;
+
+/** Item object */
+typedef void    xante_item_t;
+
+/** Event function argument */
+typedef void    xante_event_arg_t;
+
+/** A internal configuration modification entry */
+struct xante_change_entry {
+    char    *item_name;
+    char    *old_value;
+    char    *new_value;
+};
 
 #ifdef LIBXANTE_COMPILE
-# define MAJOR_VERSION      0
-# define MINOR_VERSION      1
-# define RELEASE            1
+# define MAJOR_VERSION  0
+# define MINOR_VERSION  1
+# define RELEASE        1
 
 # include "xante/xt_internal.h"
 #endif
@@ -110,11 +152,10 @@ typedef void                xante_t;
 #include "xante/xt_dialogs.h"
 #include "xante/xt_dm.h"
 #include "xante/xt_error.h"
-#include "xante/xt_events.h"
+#include "xante/xt_event.h"
 #include "xante/xt_init.h"
 #include "xante/xt_jtf.h"
 #include "xante/xt_log.h"
-#include "xante/xt_plugin.h"
 #include "xante/xt_runtime.h"
 #include "xante/xt_theme.h"
 #include "xante/xt_translation.h"

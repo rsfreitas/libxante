@@ -317,3 +317,60 @@ int dlg_get_subtitle_lines(const char *s)
     return c;
 }
 
+/**
+ * @name dlg_put_statusbar
+ * @brief Draws a statusbar inside a window.
+ *
+ * @param [in] text: The text to be displayed.
+ */
+void dialog_put_statusbar(const char *text)
+{
+    int i;
+#ifdef ALTERNATIVE_DIALOG
+    chtype attr = statusbar_attr;
+#else
+    chtype attr = A_NORMAL;
+#endif
+    int backwidth = dlg_count_columns(text);
+
+    (void)wattrset(stdscr, screen_attr);
+    (void)wmove(stdscr, getmaxy(stdscr) - 1, 1);
+    dlg_print_text(stdscr, text, COLS - 2, &attr);
+
+    for (i = 0; i < COLS - backwidth; i++)
+        (void)waddch(stdscr, ' ');
+
+    (void)wmove(stdscr, getmaxy(stdscr) - 2, 1);
+
+    for (i = 0; i < COLS - 2; i++)
+        (void)waddch(stdscr, dlg_boxchar(ACS_HLINE));
+
+    (void)wnoutrefresh(stdscr);
+}
+
+/**
+ * @name dialog_put_item_brief
+ * @brief Writes an item brief help text onto the screen.
+ *
+ * @param [in] brief: The text.
+ */
+void dialog_put_item_brief(const char *brief)
+{
+    int i;
+#ifdef ALTERNATIVE_DIALOG
+    chtype attr = brief_help_attr;
+#else
+    chtype attr = A_NORMAL;
+#endif
+    int backwidth = dlg_count_columns(brief);
+
+    (void)wattrset(stdscr, screen_attr);
+    (void)wmove(stdscr, getmaxy(stdscr) - 3, 1);
+    dlg_print_text(stdscr, brief, COLS - 2, &attr);
+
+    for (i = 0; i < COLS - backwidth; i++)
+        (void)waddch(stdscr, ' ');
+
+    (void)wnoutrefresh(stdscr);
+}
+

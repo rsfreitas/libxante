@@ -27,6 +27,12 @@
 #include "libxante.h"
 #include "ui_dialogs.h"
 
+#define DEFAULT_STATUSBAR_TEXT          \
+    "[ESC] Cancel [TAB] Select an option [Enter] Confirm [Arrows] Change selected date"
+
+#define DEFAULT_NOT_EDIT_STATUSBAR_TEXT \
+    "[ESC] Cancel [TAB] Select an option [Enter] Confirm"
+
 /*
  *
  * Internal functions
@@ -68,13 +74,12 @@ static void split_item_value(struct xante_item *item, int *day, int *month,
 }
 
 static bool item_value_has_changed(struct xante_app *xpp,
-    struct xante_item *item)
+    struct xante_item *item, const char *result)
 {
     cl_object_t *value = NULL;
-    char *str_value = NULL, *result = NULL;
+    char *str_value = NULL;
     bool changed = false;
 
-    result = dialog_get_input_result();
     value = item_value(item);
     str_value = CL_OBJECT_AS_STRING(value);
 
@@ -90,7 +95,6 @@ static bool item_value_has_changed(struct xante_app *xpp,
     }
 
     free(str_value);
-    free(result);
 
     return changed;
 }
@@ -119,11 +123,14 @@ bool ui_dialog_calendar(struct xante_app *xpp, struct xante_item *item,
     bool value_changed = false, loop = true;
     cl_string_t *text = NULL;
     int ret_dialog = DLG_EXIT_OK, day = 0, month = 0, year = 0;
+    char *result = NULL;
 
     /* Prepare dialog */
     dialog_set_backtitle(xpp);
     dialog_update_cancel_button_label();
     dialog_alloc_input(64);
+    dialog_put_statusbar((edit_value == true) ? DEFAULT_STATUSBAR_TEXT
+                                              : DEFAULT_NOT_EDIT_STATUSBAR_TEXT);
 
     /* Adjusts the dialog content using the item content */
     split_item_value(item, &day, &month, &year);
@@ -133,13 +140,20 @@ bool ui_dialog_calendar(struct xante_app *xpp, struct xante_item *item,
     cl_string_rplchr(text, XANTE_STR_LINE_BREAK, '\n');
 
     /* Enables the help button */
-    if (item->help != NULL)
+    if (item->descriptive_help != NULL)
         dialog_vars.help_button = 1;
 
     do {
+#ifdef ALTERNATIVE_DIALOG
+        ret_dialog = dialog_calendar(cl_string_valueof(item->name),
+                                     cl_string_valueof(text), 3,
+                                     MINIMUM_WIDTH, day, month, year,
+                                     edit_value);
+#else
         ret_dialog = dialog_calendar(cl_string_valueof(item->name),
                                      cl_string_valueof(text), 3,
                                      MINIMUM_WIDTH, day, month, year);
+#endif
 
         switch (ret_dialog) {
             case DLG_EXIT_OK:
@@ -148,7 +162,16 @@ bool ui_dialog_calendar(struct xante_app *xpp, struct xante_item *item,
                 if (edit_value == false)
                     break;
                 else {
-                    if (item_value_has_changed(xpp, item)) {
+                    result = dialog_get_input_result();
+
+                    if (event_call(EV_ITEM_VALUE_CONFIRM, xpp, item,
+                                   result) < 0)
+                    {
+                        loop = true;
+                        break;
+                    }
+
+                    if (item_value_has_changed(xpp, item, result)) {
                         value_changed = true;
                         break;
                     }
@@ -163,15 +186,20 @@ bool ui_dialog_calendar(struct xante_app *xpp, struct xante_item *item,
 
             case DLG_EXIT_HELP:
                 dialog_vars.help_button = 0;
-                xante_messagebox(xpp, XANTE_MSGBOX_INFO, 0, cl_tr("Help"),
-                                 cl_string_valueof(item->help));
+                xante_dlg_messagebox(xpp, XANTE_MSGBOX_INFO, 0, cl_tr("Help"),
+                                     cl_string_valueof(item->descriptive_help));
 
                 dialog_vars.help_button = 1;
                 break;
         }
+
+        if (result != NULL) {
+            free(result);
+            result = NULL;
+        }
     } while (loop);
 
-    if (item->help != NULL)
+    if (item->descriptive_help != NULL)
         dialog_vars.help_button = 0;
 
     if (text != NULL)

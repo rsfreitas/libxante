@@ -27,6 +27,9 @@
 #include "libxante.h"
 #include "ui_dialogs.h"
 
+#define DEFAULT_STATUSBAR_TEXT              \
+    "[ESC] Cancel [Enter] Confirm a selected option [Tab/Left/Right] Select an option"
+
 /*
  *
  * Internal functions
@@ -91,7 +94,7 @@ void dialog_init(bool temporarily)
 void dialog_set_backtitle(struct xante_app *xpp)
 {
     dlg_clear();
-    xante_ui_set_backtitle(xpp);
+    xante_dlg_set_backtitle(xpp);
     dlg_put_backtitle();
 }
 
@@ -166,11 +169,13 @@ char *dialog_get_item_value_as_text(const struct xante_item *item)
  * @param [in] msg: The dialog message to be displayed.
  * @param [in] button1_label: A label for the first button.
  * @param [in] button2_label: A label fot the second button.
+ * @param [in] statusbar_text: An alternative statusbar text.
  *
  * @return Returns true if the first button is selected or false otherwise.
  */
 bool dialog_question(struct xante_app *xpp, const char *title, const char *msg,
-    const char *button1_label, const char *button2_label)
+    const char *button1_label, const char *button2_label,
+    const char *statusbar_text)
 {
     cl_string_t *form_msg = NULL;
     int width = 45, lines = 0;
@@ -188,6 +193,8 @@ bool dialog_question(struct xante_app *xpp, const char *title, const char *msg,
     lines = dialog_count_lines(msg, width);
     form_msg = cl_string_create("%s", msg);
     cl_string_rplchr(form_msg, XANTE_STR_LINE_BREAK, '\n');
+    dialog_put_statusbar((statusbar_text != NULL) ? statusbar_text
+                                                  : DEFAULT_STATUSBAR_TEXT);
 
     if (dialog_yesno(title, cl_string_valueof(form_msg), lines,
                                               width) == DLG_EXIT_OK)

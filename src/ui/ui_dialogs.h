@@ -33,6 +33,8 @@
 # endif
 #endif
 
+#include "../dialog/addon_dialogs.h"
+
 /* Main cancel button label */
 #define MAIN_MENU_CANCEL_LABEL      "Exit"
 
@@ -82,7 +84,8 @@ char *dialog_get_item_value_as_text(const struct xante_item *item);
 int dialog_count_lines_by_delimiters(const char *text);
 int dialog_count_lines(const char *text, int width);
 bool dialog_question(struct xante_app *xpp, const char *title, const char *msg,
-                     const char *button1_label, const char *button2_label);
+                     const char *button1_label, const char *button2_label,
+                     const char *statusbar_text);
 
 void dialog_update_cancel_button_label(void);
 void dialog_free_input(void);

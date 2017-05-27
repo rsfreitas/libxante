@@ -65,14 +65,20 @@ static void destroy_xante_item(const struct cl_ref_s *ref)
     if (item->object_id != NULL)
         cl_string_unref(item->object_id);
 
+    if (item->menu_id != NULL)
+        cl_string_unref(item->menu_id);
+
     if (item->config_block != NULL)
         cl_string_unref(item->config_block);
 
     if (item->config_item != NULL)
         cl_string_unref(item->config_item);
 
-    if (item->help != NULL)
-        cl_string_unref(item->help);
+    if (item->brief_help != NULL)
+        cl_string_unref(item->brief_help);
+
+    if (item->descriptive_help != NULL)
+        cl_string_unref(item->descriptive_help);
 
     if (item->options != NULL)
         cl_string_unref(item->options);
@@ -92,8 +98,14 @@ static void destroy_xante_item(const struct cl_ref_s *ref)
     if (item->checklist_options != NULL)
         cl_string_list_destroy(item->checklist_options);
 
+    if (item->checklist_brief_options != NULL)
+        cl_string_list_destroy(item->checklist_brief_options);
+
     if (item->value_spec != NULL)
         cl_spec_destroy(item->value_spec);
+
+    if (item->events != NULL)
+        cl_json_delete(item->events);
 
     free(item);
 }
@@ -128,6 +140,9 @@ static void destroy_xante_menu(const struct cl_ref_s *ref)
 
     if (menu->dynamic_origin_item != NULL)
         cl_string_unref(menu->dynamic_origin_item);
+
+    if (menu->events != NULL)
+        cl_json_delete(menu->events);
 
     free(menu);
 }
@@ -319,6 +334,8 @@ void ui_uninit(struct xante_app *xpp)
 
     if (xpp->ui.menus != NULL)
         cl_list_destroy(xpp->ui.menus);
+
+    dm_uninit(xpp);
 }
 
 /**
@@ -367,9 +384,11 @@ void ui_adjusts_menu_info(struct xante_menu *menu, void *copies)
  * @param [in] options: The options value loaded from the JTF.
  * @param [in] max_range: The maximum range of an input item.
  * @param [in] min_range: The minimum range of an input item.
+ * @param [in] brief_options_help: A JSON object with checklist options brief
+ *                                 help.
  */
 void ui_adjusts_item_info(struct xante_item *item, cl_string_t *default_value,
-    void *options, void *max_range, void *min_range)
+    void *options, void *max_range, void *min_range, void *brief_options_help)
 {
     int i, t, i_max, i_min;
     float f_max, f_min;
@@ -399,6 +418,17 @@ void ui_adjusts_item_info(struct xante_item *item, cl_string_t *default_value,
             item->dialog_checklist_type =
                 (item->dialog_type == XANTE_UI_DIALOG_CHECKLIST) ? FLAG_CHECK
                                                                  : FLAG_RADIO;
+
+            if (brief_options_help != NULL) {
+                t = cl_json_get_array_size(brief_options_help);
+                item->checklist_brief_options = cl_string_list_create();
+
+                for (i = 0; i < t; i++) {
+                    node = cl_json_get_array_item(brief_options_help, i);
+                    value = cl_json_get_object_value(node);
+                    cl_string_list_add(item->checklist_brief_options, value);
+                }
+            }
 
             break;
 
@@ -444,6 +474,9 @@ void ui_adjusts_item_info(struct xante_item *item, cl_string_t *default_value,
  * @name ui_search_menu_by_object_id
  * @brief Searches a xante_menu structure inside the main menu list which have
  *        a specific object_id.
+ *
+ * Remember, when searching a menu pointed by an item, its object_id is located
+ * inside the menu_id.
  *
  * @param [in] xpp: The main library object.
  * @param [in] object_it_to_search: The menu object_id which will be used to
@@ -525,7 +558,7 @@ __PUB_API__ int xante_ui_run(xante_t *xpp)
 
     xante_runtime_set_ui_active(xpp, true);
     dialog_init(false);
-    xante_ui_set_backtitle(xpp);
+    xante_dlg_set_backtitle(xpp);
     btn_cancel_label = strdup(cl_tr(MAIN_MENU_CANCEL_LABEL));
     root = ui_search_menu_by_object_id(xpp,
                                        cl_string_valueof(x->ui.main_menu_object_id));
@@ -541,7 +574,7 @@ end_block:
     if (btn_cancel_label != NULL)
         free(btn_cancel_label);
 
-    xante_ui_clear_backtitle(xpp);
+    xante_dlg_clear_backtitle(xpp);
     dialog_uninit();
     xante_runtime_set_ui_active(xpp, false);
 

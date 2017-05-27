@@ -35,6 +35,10 @@
 # include <dlg_keys.h>
 #endif
 
+#ifndef _SQLITE3_H_
+# include <sqlite3.h>
+#endif
+
 /*
  * An internal representation of a public function. It does not affect the code
  * or the function visibility. Its objective is only to let clear what is and
@@ -53,6 +57,18 @@
 /** Timeout to close a dialog */
 #define UI_DIALOG_TIMEOUT                   120 /* seconds */
 
+/** Supported events */
+#define EV_INIT                             "xapl_init"
+#define EV_UNINIT                           "xapl_uninit"
+#define EV_CONFIG_LOAD                      "xapl_config_load"
+#define EV_CONFIG_UNLOAD                    "xapl_config_unload"
+#define EV_CHANGES_SAVED                    "xapl_changes_saved"
+#define EV_ITEM_SELECTED                    "item-selected"
+#define EV_ITEM_VALUE_CONFIRM               "item-value-confirm"
+#define EV_ITEM_VALUE_UPDATED               "item-value-updated"
+#define EV_ITEM_EXIT                        "item-exit"
+#define EV_MENU_EXIT                        "menu-exit"
+
 /** Different ways of creating menus */
 enum xante_menu_creator {
     XANTE_MENU_CREATED_FROM_JTF,
@@ -68,6 +84,7 @@ struct xante_info {
     cl_string_t     *plugin_name;
     cl_string_t     *version;
     cl_string_t     *company;
+    cl_string_t     *description;
     int             revision;
     int             build;
     bool            beta;
@@ -84,6 +101,7 @@ struct xante_runtime {
     bool                            accent_characters;
     bool                            close_ui;
     bool                            ui_active;
+    bool                            user_authentication;
     int                             ui_dialog_timeout;          /** seconds */
     int                             exit_value;
     enum xante_config_file_status   config_file_status;
@@ -98,13 +116,13 @@ struct xante_item {
     cl_string_t             *object_id;
     cl_string_t             *config_block;
     cl_string_t             *config_item;
-    cl_string_t             *help;
+    cl_string_t             *brief_help;
+    cl_string_t             *descriptive_help;
+    cl_string_t             *menu_id;
     cl_object_t             *default_value;
-
-    /* Events */
+    cl_json_t               *events;
 
     /* Input range */
-    /* TODO: use cl_spec_t for data ranges */
     cl_object_t             *min;
     cl_object_t             *max;
     int                     string_length;
@@ -114,6 +132,7 @@ struct xante_item {
     cl_string_t             *options;
     cl_object_t             *value;
     cl_string_list_t        *checklist_options;
+    cl_string_list_t        *checklist_brief_options;
     int                     dialog_checklist_type;
     enum xante_ui_dialog    dialog_type;
     struct cl_ref_s         ref;
@@ -126,6 +145,7 @@ struct xante_menu {
     cl_string_t                 *object_id;
     cl_string_t                 *type;
     enum xante_access_mode      mode;
+    cl_json_t                   *events;
 
     /* Dynamic menu details */
     cl_string_list_t            *dynamic_names;
@@ -144,8 +164,12 @@ struct xante_menu {
 
 /** UI informations */
 struct xante_ui {
-    cl_list_t               *menus;
+    /* From JTF */
     cl_string_t             *main_menu_object_id;
+
+    /* Internal */
+    cl_list_t               *menus;
+    cl_list_t               *unreferenced_menus;
 };
 
 struct xante_log {
@@ -154,6 +178,8 @@ struct xante_log {
 
 struct xante_plugin {
     cl_plugin_t             *plugin;
+    cl_plugin_info_t        *info;
+    cl_string_list_t        *functions;
 };
 
 struct xante_config {
@@ -168,6 +194,10 @@ struct xante_changes {
 struct xante_auth {
     cl_string_t         *username;
     cl_string_t         *password;
+    cl_string_t         *name;
+    sqlite3             *db;
+    int                 id_application;
+    int                 id_group;
 };
 
 /** Library main structure */

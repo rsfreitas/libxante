@@ -27,6 +27,12 @@
 #include "libxante.h"
 #include "ui_dialogs.h"
 
+#define DEFAULT_STATUSBAR_TEXT          \
+    "[ESC] Cancel [Enter] Confirm a selection [Up/Down] Move [TAB/Left/Right] Choose option [Spacebar] Select option"
+
+#define DEFAULT_NOT_EDIT_STATUSBAR_TEXT \
+    "[ESC] Cancel [Enter] Confirm a selection [Up/Down] Move [TAB/Left/Right] Choose option"
+
 /*
  *
  * Internal functions
@@ -198,6 +204,23 @@ static bool item_value_has_changed(struct xante_app *xpp, struct xante_item *ite
     return changed;
 }
 
+static void update_item_brief(int current_index, void *a)
+{
+    struct xante_item *item = (struct xante_item *)a;
+    cl_string_t *brief = NULL;
+
+    if (NULL == item->checklist_brief_options)
+        return;
+
+    brief = cl_string_list_get(item->checklist_brief_options, current_index);
+
+    if (NULL == brief)
+        return;
+
+    dialog_put_item_brief(cl_string_valueof(brief));
+    cl_string_unref(brief);
+}
+
 /*
  *
  * Internal API
@@ -231,6 +254,8 @@ bool ui_dialog_checklist(struct xante_app *xpp, struct xante_item *item,
     /* Prepare dialog */
     dialog_set_backtitle(xpp);
     dialog_update_cancel_button_label();
+    dialog_put_statusbar((edit_value == true) ? DEFAULT_STATUSBAR_TEXT
+                                              : DEFAULT_NOT_EDIT_STATUSBAR_TEXT);
 
     /* Prepares dialog content */
     calc_checklist_limits(item, &number_of_options, &height,
@@ -239,16 +264,28 @@ bool ui_dialog_checklist(struct xante_app *xpp, struct xante_item *item,
     dlg_items = prepare_dialog_content(item, list_options_height);
 
     /* Enables the help button */
-    if (item->help != NULL)
+    if (item->descriptive_help != NULL)
         dialog_vars.help_button = 1;
 
     do {
+#ifdef ALTERNATIVE_DIALOG
         ret_dialog = dlg_checklist(cl_string_valueof(item->name),
                                    cl_tr("Choose an option"), height,
                                    MINIMUM_WIDTH, list_options_height,
                                    number_of_options, dlg_items, " X",
                                    item->dialog_checklist_type,
-                                   &selected_index);
+                                   &selected_index,
+                                   update_item_brief, item,
+                                   edit_value);
+#else
+        ret_dialog = dlg_checklist(cl_string_valueof(item->name),
+                                   cl_tr("Choose an option"), height,
+                                   MINIMUM_WIDTH, list_options_height,
+                                   number_of_options, dlg_items, " X",
+                                   item->dialog_checklist_type,
+                                   &selected_index,
+                                   update_item_brief, item);
+#endif
 
         switch (ret_dialog) {
             case DLG_EXIT_OK:
@@ -257,9 +294,16 @@ bool ui_dialog_checklist(struct xante_app *xpp, struct xante_item *item,
                                                               item->dialog_checklist_type);
 
                 if (selected_items < 0 ) {
-                    xante_messagebox(xpp, XANTE_MSGBOX_ERROR, 0, cl_tr("Error"),
-                                     cl_tr("No option was selected."));
+                    xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, 0,
+                                         cl_tr("Error"),
+                                         cl_tr("No option was selected."));
 
+                    break;
+                }
+
+                if (event_call(EV_ITEM_VALUE_CONFIRM, xpp, item,
+                               selected_items) < 0)
+                {
                     break;
                 }
 
@@ -279,15 +323,15 @@ bool ui_dialog_checklist(struct xante_app *xpp, struct xante_item *item,
 
             case DLG_EXIT_HELP:
                 dialog_vars.help_button = 0;
-                xante_messagebox(xpp, XANTE_MSGBOX_INFO, 0, cl_tr("Help"),
-                                 cl_string_valueof(item->help));
+                xante_dlg_messagebox(xpp, XANTE_MSGBOX_INFO, 0, cl_tr("Help"),
+                                     cl_string_valueof(item->descriptive_help));
 
                 dialog_vars.help_button = 1;
                 break;
         }
     } while (loop);
 
-    if (item->help != NULL)
+    if (item->descriptive_help != NULL)
         dialog_vars.help_button = 0;
 
     release_dialog_content(dlg_items, list_options_height);

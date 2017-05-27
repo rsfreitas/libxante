@@ -90,11 +90,12 @@ static int load_config(struct xante_app *xpp)
          * application.
          */
         xante_runtime_set_force_config_file_saving(xpp, true);
+        dm_init(xpp, NULL);
         goto ok_block;
     }
 
     /*
-     * If we have a dynamic menu we'll need to replicate it an its submenus and
+     * If we have a dynamic menu we'll need to replicate it, its submenus and
      * items.
      */
     dm_init(xpp, cfg_file);
@@ -103,8 +104,7 @@ static int load_config(struct xante_app *xpp)
     cl_list_map(xpp->ui.menus, load_menu_config, cfg_file);
 
 ok_block:
-    /* TODO: Run the plugin event */
-
+    event_call(EV_CONFIG_LOAD, xpp, cfg_file);
     xante_runtime_set_config_file_status(xpp, XANTE_CFG_ST_LOADED);
     xpp->config.cfg_file = cfg_file;
 
@@ -136,7 +136,7 @@ static bool need_to_write_config_file(struct xante_app *xpp,
         return false;
     }
 
-    /* TODO: Do we have any internal modification? */
+    /* Do we have any internal modification? */
     if ((change_has_occourred(xpp) == false) &&
         xante_runtime_force_config_file_saving(xpp) == false)
     {
@@ -156,8 +156,6 @@ static int save_item_config(cl_list_node_t *node, void *a)
     cl_string_t *value = NULL;
 
     /* TODO: Checks if we can save the item */
-
-    /* TODO: If we're saving a float value replace a possivle , by a . */
 
     value = cl_object_to_cstring(item_value(item));
     cl_cfg_set_value(xpp->config.cfg_file,
@@ -189,7 +187,7 @@ static int write_config(struct xante_app *xpp, int ui_return_status)
     if (xante_runtime_show_config_saving_question(xpp) == true) {
         if (dialog_question(xpp, cl_tr("Closing"),
                             cl_tr("Do you want to save all modifications?"),
-                            cl_tr("Yes"), cl_tr("No")) == false)
+                            cl_tr("Yes"), cl_tr("No"), NULL) == false)
         {
             xante_runtime_set_config_file_status(xpp, XANTE_CFG_ST_UNSAVED);
             xante_info(cl_tr("User chose not to save internal modifications"));
@@ -204,29 +202,21 @@ static int write_config(struct xante_app *xpp, int ui_return_status)
 
     cl_list_map(xpp->ui.menus, save_menu_config, xpp);
 
-    /* TODO: Run plugin config event */
-
     cl_cfg_sync(xpp->config.cfg_file, xpp->config.filename);
-    xante_debug("%s", cl_strerror(cl_get_last_error()));
     xante_runtime_set_config_file_status(xpp, XANTE_CFG_ST_SAVED);
 
-    if (change_has_occourred(xpp) == true) {
-        /* TODO: Run plugin changes event */
-    }
+    if (change_has_occourred(xpp) == true)
+        event_call(EV_CHANGES_SAVED, xpp, NULL);
 
 end_block:
+    event_call(EV_CONFIG_UNLOAD, xpp, xpp->config.cfg_file);
+
     if (xpp->config.filename != NULL)
         free(xpp->config.filename);
 
     cl_cfg_unload(xpp->config.cfg_file);
     return 0;
 }
-
-/*
- *
- * Internal API
- *
- */
 
 /*
  *
