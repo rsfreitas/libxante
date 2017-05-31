@@ -108,13 +108,13 @@ __PUB_API__ int xante_dlg_set_backtitle(xante_t *xpp)
     if (change_has_occourred(xpp)) {
         right = cl_string_create("[%s*] %s",
                                  (x->auth.name != NULL)
-                                    ? cl_string_valueof(x->auth.name)
+                                    ? cl_string_valueof(x->auth.login_and_source)
                                     : "",
                                  cl_string_valueof(x->info.company));
     } else
         right = cl_string_create("[%s] %s",
                                  (x->auth.name != NULL)
-                                    ? cl_string_valueof(x->auth.name)
+                                    ? cl_string_valueof(x->auth.login_and_source)
                                     : "",
                                  cl_string_valueof(x->info.company));
 

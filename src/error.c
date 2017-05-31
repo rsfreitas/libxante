@@ -62,7 +62,9 @@ static const char *__description[] = {
     cl_tr_noop("Application not found in the database"),
     cl_tr_noop("Multiple user entries found in the database"),
     cl_tr_noop("Multiple group entries found in the database"),
-    cl_tr_noop("Multiple application entries found in the database")
+    cl_tr_noop("Multiple application entries found in the database"),
+    cl_tr_noop("Unable to retrieve login information"),
+    cl_tr_noop("Database already exists")
 };
 
 static const char *__unknown_error = cl_tr_noop("Unknown error");

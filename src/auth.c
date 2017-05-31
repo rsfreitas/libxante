@@ -24,6 +24,9 @@
  * USA
  */
 
+#include <unistd.h>
+#include <utmp.h>
+
 #include <sqlite3.h>
 #include <openssl/sha.h>
 
@@ -41,6 +44,19 @@
 #define ITEMS                       "items"
 #define OBJECT_ID                   "object_id"
 #define TYPE                        "type"
+
+struct column {
+    char    *name;
+    char    *type;
+    bool    null;
+    bool    primary_key;
+};
+
+struct table {
+    char    *name;
+    void    *columns;
+    int     total_columns;
+};
 
 /*
  *
@@ -97,152 +113,223 @@ static cl_list_t *db_query(sqlite3 *db, const char *query)
     return query_data;
 }
 
-static void create_user_table(sqlite3 *db)
+static void db_create_table(sqlite3 *db, const struct table *table)
 {
-    char *query = NULL;
+    cl_string_t *query = NULL;
+    struct column *column = NULL, *columns;
+    int i;
 
-    asprintf(&query, "CREATE TABLE IF NOT EXISTS 'user' ("
-                     "'id' INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
-                     "'login' CHAR(128) NOT NULL, "
-                     "'name' CHAR(128) NOT NULL, "
-                     "'password' CHAR(256) NOT NULL)");
+    query = cl_string_create("CREATE TABLE IF NOT EXISTS '%s' (", table->name);
 
-    db_query(db, query);
-    free(query);
+    for (i = 0; i < table->total_columns; i++) {
+        columns = (struct column *)table->columns;
+        column = &columns[i];
+        cl_string_cat(query, "'%s' %s %s %s", column->name, column->type,
+                      (column->primary_key == true) ? "PRIMARY KEY AUTOINCREMENT"
+                                                    : "",
+                      (column->null == false) ? "NOT NULL" : "");
+
+        if (i < (table->total_columns - 1))
+            cl_string_cat(query, ",");
+    }
+
+    cl_string_cat(query, ")");
+    db_query(db, cl_string_valueof(query));
+    cl_string_unref(query);
 }
 
-static void create_group_table(sqlite3 *db)
+static void insert_auth_data(sqlite3 *db)
 {
-    char *query = NULL;
+    struct column_data {
+        char    *name;
+        int     id;
+    };
 
-    asprintf(&query, "CREATE TABLE IF NOT EXISTS 'group' ("
-                     "'id' INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
-                     "'name' CHAR(128) NOT NULL)");
+    cl_string_t *query = NULL;
+    int i, j, t;
+    struct column_data *column, *columns, tools[] = {
+        { "web-central", 1 },
+        { "xante-auth", 2  }
+    }, sources[] = {
+        { "localhost", XANTE_SESSION_LOCALHOST },
+        { "ssh-session", XANTE_SESSION_SSH }
+    }, session_type[] = {
+        { "continuous", XANTE_SESSION_CONTINUOUS },
+        { "single", XANTE_SESSION_SINGLE }
+    };
 
-    db_query(db, query);
-    free(query);
-}
+    struct table tables[] = {
+        {
+            .name = "tool",
+            .columns = tools,
+            .total_columns = sizeof(tools) / sizeof(tools[0])
+        },
 
-static void create_group_user_table(sqlite3 *db)
-{
-    char *query = NULL;
+        {
+            .name = "source",
+            .columns = sources,
+            .total_columns = sizeof(sources) / sizeof(sources[0])
+        },
 
-    asprintf(&query, "CREATE TABLE IF NOT EXISTS 'group_user_rel' ("
-                     "'id_user' INTEGER NOT NULL, "
-                     "'id_group' INTEGER NOT NULL)");
+        {
+            .name = "session_type",
+            .columns = session_type,
+            .total_columns = sizeof(session_type) / sizeof(session_type[0])
+        }
+    };
 
-    db_query(db, query);
-    free(query);
-}
-
-static void create_application_table(sqlite3 *db)
-{
-    char *query = NULL;
-
-    asprintf(&query, "CREATE TABLE IF NOT EXISTS 'application' ("
-                     "'id' INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
-                     "'name' CHAR(128) NOT NULL)");
-
-    db_query(db, query);
-    free(query);
-}
-
-static void create_tool_table(sqlite3 *db)
-{
-    char *query = NULL, *tools[] = { "web-central", "xante-auth" };
-    int i, t;
-
-    asprintf(&query, "CREATE TABLE IF NOT EXISTS 'tool' ("
-                     "'id' INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
-                     "'name' CHAR(256) NOT NULL)");
-
-    db_query(db, query);
-    free(query);
-    t = sizeof(tools) / sizeof(tools[0]);
+    t = sizeof(tables) / sizeof(tables[0]);
 
     for (i = 0; i < t; i++) {
-        asprintf(&query, "INSERT INTO 'tool' (name) VALUES ('%s')",
-                 tools[i]);
+        for (j = 0; j < tables[i].total_columns; j++) {
+            columns = (struct column_data *)tables[i].columns;
+            column = &columns[j];
+            query = cl_string_create("INSERT INTO '%s' (id, name) VALUES "
+                                     "(%d, '%s')", tables[i].name, column->id,
+                                     column->name);
 
-        db_query(db, query);
-        free(query);
+            db_query(db, cl_string_valueof(query));
+            cl_string_unref(query);
+        }
     }
-}
-
-static void create_origin_table(sqlite3 *db)
-{
-    char *query = NULL, *origins[] = { "local", "ssh-session" };
-    int i, t;
-
-    asprintf(&query, "CREATE TABLE IF NOT EXISTS 'origin' ("
-                     "'id' INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
-                     "'name' CHAR(256) NOT NULL)");
-
-    db_query(db, query);
-    free(query);
-    t = sizeof(origins) / sizeof(origins[0]);
-
-    for (i = 0; i < t; i++) {
-        asprintf(&query, "INSERT INTO 'origin' (name) VALUES ('%s')",
-                 origins[i]);
-
-        db_query(db, query);
-        free(query);
-    }
-}
-
-static void create_internal_tables(sqlite3 *db)
-{
-    char *query = NULL;
-
-    /* Create tables with content */
-    create_tool_table(db);
-    create_origin_table(db);
-
-    /* The database update history */
-    asprintf(&query, "CREATE TABLE IF NOT EXISTS 'update_history' ("
-                     "'id' INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
-                     "'update' DATETIME NOT NULL, "
-                     "'id_tool' INTEGER NOT NULL)");
-
-    db_query(db, query);
-    free(query);
-
-    /* The JXDBI files used to populate the database */
-    asprintf(&query, "CREATE TABLE IF NOT EXISTS 'jxdbi_source' ("
-                     "'id' INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
-                     "'version' INTEGER NOT NULL, "
-                     "'filename' CHAR(256) NOT NULL, "
-                     "'id_application' INTEGER NOT NULL)");
-
-    db_query(db, query);
-    free(query);
-
-    /* Login history */
-    asprintf(&query, "CREATE TABLE IF NOT EXISTS 'login_history' ("
-                     "'id' INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
-                     "'id_user' INTEGER NOT NULL, "
-                     "'id_origin' INTEGER NOT NULL, "
-                     "'login' DATETIME NOT NULL, "
-                     "'logout' DATETIME)");
-
-    db_query(db, query);
-    free(query);
-
-    /* Active login */
-    asprintf(&query, "CREATE TABLE IF NOT EXISTS 'active_login' ("
-                     "'id_user' INTEGER NOT NULL, "
-                     "'id_origin' INTEGER NOT NULL, "
-                     "'login' DATETIME NOT NULL, "
-                     "'logout' DATETIME)");
-
-    db_query(db, query);
-    free(query);
 }
 
 static int create_auth_tables(cl_string_t *db_filename)
 {
     sqlite3 *db = NULL;
+    int i, t;
+
+    struct column user[] = {
+        { "id", "INTEGER", false, true },
+        { "login", "CHAR(128)", false, false },
+        { "name", "CHAR(128)", false, false },
+        { "password", "CHAR(256)", false, false }
+    };
+
+    struct column common_pk[] = {
+        { "id", "INTEGER", false, true },
+        { "name", "CHAR(256)", false, false }
+    };
+
+    struct column common[] = {
+        { "id", "INTEGER", false, false},
+        { "name", "CHAR(256)", false, false }
+    };
+
+    struct column group_user[] = {
+        { "id_user", "INTEGER", false, false },
+        { "id_group", "INTEGER", false, false }
+    };
+
+    struct column jxdbi_source[] = {
+        { "id", "INTEGER", false, true },
+        { "version", "INTEGER", false, false },
+        { "id_application", "INTEGER", false, false },
+        { "filename", "CHAR(256)", false, false }
+    };
+
+    struct column update_history[] = {
+        { "id", "INTEGER", false, true },
+        { "id_tool", "INTEGER", false, false },
+        { "update", "DATETIME", false, false }
+    };
+
+    struct column session_history[] = {
+        { "id", "INTEGER", false, true },
+        { "id_user", "INTEGER", false, false },
+        { "id_source", "INTEGER", false, false },
+        { "id_session_type", "INTEGER", false, false },
+        { "login", "DATETIME", false, false },
+        { "logout", "DATETIME", false, false }
+    };
+
+    struct column session[] = {
+        { "id", "INTEGER", false, true },
+        { "id_user", "INTEGER", false, false },
+        { "id_source", "INTEGER", false, false },
+        { "id_session_type", "INTEGER", false, false },
+        { "login", "DATETIME", false, false },
+        { "pid", "INTEGER", false, false }
+    };
+
+    struct table tables[] = {
+        /* user */
+        {
+            .name = "user",
+            .columns = user,
+            .total_columns = sizeof(user) / sizeof(user[0])
+        },
+
+        /* group */
+        {
+            .name = "group",
+            .columns = common_pk,
+            .total_columns = sizeof(common_pk) / sizeof(common_pk[0])
+        },
+
+        /* group_user_rel */
+        {
+            .name = "group_user_rel",
+            .columns = group_user,
+            .total_columns = sizeof(group_user) / sizeof(group_user[0])
+        },
+
+        /* application */
+        {
+            .name = "application",
+            .columns = common_pk,
+            .total_columns = sizeof(common_pk) / sizeof(common_pk[0])
+        },
+
+        /* tool */
+        {
+            .name = "tool",
+            .columns = common,
+            .total_columns = sizeof(common) / sizeof(common[0])
+        },
+
+        /* source */
+        {
+            .name = "source",
+            .columns = common,
+            .total_columns = sizeof(common) / sizeof(common[0])
+        },
+
+        /* session_type */
+        {
+            .name = "session_type",
+            .columns = common,
+            .total_columns = sizeof(common) / sizeof(common[0])
+        },
+
+        /* update_history */
+        {
+            .name = "update_history",
+            .columns = update_history,
+            .total_columns = sizeof(update_history) / sizeof(update_history[0])
+        },
+
+        /* jxdbi_source */
+        {
+            .name = "jxdbi_source",
+            .columns = jxdbi_source,
+            .total_columns = sizeof(jxdbi_source) / sizeof(jxdbi_source[0])
+        },
+
+        /* session_history */
+        {
+            .name = "session_history",
+            .columns = session_history,
+            .total_columns = sizeof(session_history) / sizeof(session_history[0])
+        },
+
+        /* session */
+        {
+            .name = "session",
+            .columns = session,
+            .total_columns = sizeof(session) / sizeof(session[0])
+        }
+    };
 
     if (sqlite3_open_v2(cl_string_valueof(db_filename), &db,
                         SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE,
@@ -254,20 +341,13 @@ static int create_auth_tables(cl_string_t *db_filename)
     if (NULL == db)
         return -1;
 
-    /* user */
-    create_user_table(db);
+    /* create tables */
+    t = sizeof(tables) / sizeof(tables[0]);
 
-    /* group */
-    create_group_table(db);
+    for (i = 0; i < t; i++)
+        db_create_table(db, &tables[i]);
 
-    /* group_user */
-    create_group_user_table(db);
-
-    /* application */
-    create_application_table(db);
-
-    /* internals */
-    create_internal_tables(db);
+    insert_auth_data(db);
 
     if (db != NULL)
         sqlite3_close(db);
@@ -479,7 +559,7 @@ static int validate_user_access(struct xante_app *xpp)
     cl_list_node_t *node = NULL;
     cl_string_list_t *row = NULL;
     cl_string_t *s = NULL;
-    int id_user = -1, ret = -1;
+    int ret = -1;
 
     db_password = password_to_db_password(cl_string_valueof(xpp->auth.password));
     asprintf(&query, "SELECT name, id FROM 'user' WHERE login = '%s' AND "
@@ -512,12 +592,12 @@ static int validate_user_access(struct xante_app *xpp)
 
         /* -- id */
         s = cl_string_list_get(row, 1);
-        id_user = cl_string_to_int(s);
+        xpp->auth.id_user = cl_string_to_int(s);
         cl_string_unref(s);
         cl_list_node_unref(node);
 
         /* Get groupd ID */
-        if (get_group_id(xpp, id_user) == 0)
+        if (get_group_id(xpp, xpp->auth.id_user) == 0)
             ret = 0; /* Ok */
     } else
         errno_set(XANTE_ERROR_DB_MULTIPLE_USER_ENTRIES);
@@ -566,6 +646,188 @@ static int validate_application_access_control(struct xante_app *xpp)
     return ret;
 }
 
+static int get_session_source(struct xante_app *xpp)
+{
+    char login[32] = {0}, tty[128] = {0}, *tmp;
+    struct utmp *u = NULL;
+
+    xpp->auth.session_pid = -1;
+    getlogin_r(login, sizeof(login) - 1);
+
+    if (ttyname_r(STDIN_FILENO, tty, sizeof(tty) - 1) != 0)
+        return -1;
+
+    tmp = tty + strlen("/dev/");
+    setutent();
+    u = getutent();
+
+    while (u != NULL) {
+        if ((u->ut_type == USER_PROCESS) &&
+            (strcmp(u->ut_user, login) == 0) &&
+            (strcmp(u->ut_line, tmp) == 0))
+        {
+            xpp->auth.session_pid = u->ut_pid;
+
+            if (strlen(u->ut_host) > 2) {
+                xpp->auth.session_source = XANTE_SESSION_SSH;
+                xpp->auth.source_description = cl_string_create("%s",
+                                                                u->ut_host);
+            } else {
+                xpp->auth.session_source = XANTE_SESSION_LOCALHOST;
+                xpp->auth.source_description = cl_string_create("localhost");
+            }
+
+            break;
+        }
+
+        u = getutent();
+    }
+
+    endutent();
+
+    return 0;
+}
+
+static cl_list_t *get_active_session(struct xante_app *xpp,
+    enum xante_session type)
+{
+    char *query = NULL;
+    cl_list_t *session = NULL;
+
+    asprintf(&query, "SELECT id, login FROM 'session' WHERE id_user = %d AND "
+                     "id_session_type = %d", xpp->auth.id_user, type);
+
+    session = db_query(xpp->auth.db, query);
+    free(query);
+
+    return session;
+}
+
+static void close_session(struct xante_app *xpp, cl_list_t *session)
+{
+    cl_list_node_t *node = NULL;
+    cl_string_list_t *row = NULL;
+    cl_datetime_t *dt = NULL;
+    cl_string_t *dt_str, *data = NULL;
+    char *query = NULL;
+
+    if ((NULL == session) || (cl_list_size(session) > 1))
+        return;
+
+    node = cl_list_at(session, 0);
+    row = cl_list_node_content(node);
+    data = cl_string_list_get(row, 1);
+    dt = cl_dt_localtime();
+    dt_str = cl_dt_to_cstring(dt, "%F %T");
+    asprintf(&query, "INSERT INTO 'session_history' (id_user, id_session_type, "
+                     "id_source, login, logout) VALUES (%d, %d, %d, '%s', '%s')",
+                     xpp->auth.id_user, xpp->auth.session_type,
+                     xpp->auth.session_source, cl_string_valueof(data),
+                     cl_string_valueof(dt_str));
+
+    db_query(xpp->auth.db, query);
+    cl_string_unref(data);
+    free(query);
+
+    data = cl_string_list_get(row, 0);
+    asprintf(&query, "DELETE FROM 'session' WHERE id = %d",
+             cl_string_to_int(data));
+
+    db_query(xpp->auth.db, query);
+    cl_string_unref(data);
+    free(query);
+
+    cl_string_unref(dt_str);
+    cl_dt_destroy(dt);
+    cl_list_node_unref(node);
+}
+
+static void add_active_session(struct xante_app *xpp, enum xante_session type)
+{
+    cl_datetime_t *dt = NULL;
+    cl_string_t *dt_str = NULL;
+    char *query = NULL;
+
+    dt = cl_dt_localtime();
+    dt_str = cl_dt_to_cstring(dt, "%F %T");
+    asprintf(&query, "INSERT INTO 'session' (id_user, id_session_type, "
+                     "id_source, login, pid) VALUES (%d, %d, %d, '%s', %d)",
+                     xpp->auth.id_user, type, xpp->auth.session_source,
+                     cl_string_valueof(dt_str), xpp->auth.session_pid);
+
+    db_query(xpp->auth.db, query);
+    free(query);
+    cl_string_unref(dt_str);
+    cl_dt_destroy(dt);
+}
+
+static void continuous_login(struct xante_app *xpp)
+{
+    cl_list_t *val = NULL;
+
+    val = get_active_session(xpp, XANTE_SESSION_CONTINUOUS);
+
+    if (NULL == val) {
+        /* We don't have an active session. Create one... */
+        add_active_session(xpp, XANTE_SESSION_CONTINUOUS);
+        return;
+    }
+
+    /* We do have an active session. Life goes on... */
+    cl_list_destroy(val);
+}
+
+static void single_login(struct xante_app *xpp)
+{
+    cl_list_t *session;
+
+    session = get_active_session(xpp, XANTE_SESSION_SINGLE);
+
+    if (session != NULL) {
+        close_session(xpp, session);
+        cl_list_destroy(session);
+    }
+
+    /* Add a new session */
+    add_active_session(xpp, XANTE_SESSION_SINGLE);
+}
+
+static int auth_login(struct xante_app *xpp)
+{
+    if (get_session_source(xpp) < 0) {
+        errno_set(XANTE_ERROR_UNABLE_TO_RETRIEVE_LOGIN_INFO);
+        return -1;
+    }
+
+    switch (xpp->auth.session_type) {
+        case XANTE_SESSION_CONTINUOUS:
+            continuous_login(xpp);
+            break;
+
+        case XANTE_SESSION_SINGLE:
+            single_login(xpp);
+            break;
+    }
+
+    xpp->auth.login_and_source =
+            cl_string_create("%s@%s", cl_string_valueof(xpp->auth.username),
+                             cl_string_valueof(xpp->auth.source_description));
+
+    return 0;
+}
+
+static void auth_logout(struct xante_app *xpp)
+{
+    cl_list_t *session;
+
+    session = get_active_session(xpp, xpp->auth.session_type);
+
+    if (session != NULL) {
+        close_session(xpp, session);
+        cl_list_destroy(session);
+    }
+}
+
 /*
  *
  * Internal API
@@ -579,13 +841,14 @@ static int validate_application_access_control(struct xante_app *xpp)
  * @param [in,out] xpp: The main library object.
  * @param [in] use_auth: A boolean flag to indicate if we're going to use
  *                       user authentication or not.
+ * @param [in] session: The session type.
  * @param [in] username: The username.
  * @param [in] password: The username password.
  *
  * @return On succcess returns 0 or -1 otherwise.
  */
-int auth_init(struct xante_app *xpp, bool use_auth, const char *username,
-    const char *password)
+int auth_init(struct xante_app *xpp, bool use_auth, enum xante_session session,
+    const char *username, const char *password)
 {
     cl_string_t *db_filename = NULL;
     int ret = -1;
@@ -600,6 +863,7 @@ int auth_init(struct xante_app *xpp, bool use_auth, const char *username,
     }
 
     xpp->auth.db = NULL;
+    xpp->auth.session_type = session;
     xpp->auth.username = cl_string_create("%s", username);
     xpp->auth.password = cl_string_create("%s", password);
     db_filename = auth_build_db_filename(NULL);
@@ -612,7 +876,7 @@ int auth_init(struct xante_app *xpp, bool use_auth, const char *username,
         return -1;
 
     if (sqlite3_open_v2(cl_string_valueof(db_filename), &xpp->auth.db,
-                        SQLITE_OPEN_READONLY, NULL) != SQLITE_OK)
+                        SQLITE_OPEN_READWRITE, NULL) != SQLITE_OK)
     {
         errno_set(XANTE_ERROR_DB_OPEN);
         goto end_block;
@@ -631,7 +895,8 @@ int auth_init(struct xante_app *xpp, bool use_auth, const char *username,
     if (validate_application_access_control(xpp) < 0)
         goto end_block;
 
-    /* TODO: Add login information */
+    if (auth_login(xpp) < 0)
+        goto end_block;
 
     ret = 0;
 
@@ -653,8 +918,7 @@ end_block:
  */
 void auth_uninit(struct xante_app *xpp)
 {
-    /* TODO: Add logout information */
-    /* TODO: Add history login information */
+    auth_logout(xpp);
 
     if (xpp->auth.password != NULL)
         cl_string_unref(xpp->auth.password);
@@ -665,6 +929,9 @@ void auth_uninit(struct xante_app *xpp)
     if (xpp->auth.name != NULL)
         cl_string_unref(xpp->auth.name);
 
+    if (xpp->auth.source_description != NULL)
+        cl_string_unref(xpp->auth.source_description);
+
     if (xpp->auth.db != NULL)
         sqlite3_close(xpp->auth.db);
 }
@@ -674,6 +941,8 @@ void auth_check_item_access(const struct xante_app *xpp,
 {
     if (xante_runtime_user_authentication((struct xante_app *)xpp) == false)
         return;
+
+    // TODO
 }
 
 /*
@@ -714,8 +983,13 @@ __PUB_API__ int xante_auth_create_database(const char *pathname,
     if (NULL == db_filename)
         return -1;
 
-    if ((overwrite == true) && auth_db_exists(db_filename)) {
-        /* TODO */
+    if (auth_db_exists(db_filename)) {
+        if (overwrite == false) {
+            errno_set(XANTE_ERROR_DB_EXISTS);
+            return -1;
+        }
+
+        remove(cl_string_valueof(db_filename));
     }
 
     /* Create the database */

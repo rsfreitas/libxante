@@ -34,8 +34,8 @@
 #else
 
 /* Internal library declarations */
-int auth_init(struct xante_app *xpp, bool use_auth, const char *username,
-              const char *password);
+int auth_init(struct xante_app *xpp, bool use_auth, enum xante_session session,
+              const char *username, const char *password);
 
 void auth_uninit(struct xante_app *xpp);
 

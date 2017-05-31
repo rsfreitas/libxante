@@ -79,7 +79,8 @@ static struct xante_app *new_xante_app(void)
  */
 
 __PUB_API__ xante_t *xante_init(const char *jtf_pathname, bool use_plugin,
-    bool use_auth, const char *username, const char *password)
+    bool use_auth, enum xante_session session, const char *username,
+    const char *password)
 {
     struct xante_app *xpp = NULL;
 
@@ -105,7 +106,7 @@ __PUB_API__ xante_t *xante_init(const char *jtf_pathname, bool use_plugin,
         goto error_block;
 
     /* Start user access control */
-    if (auth_init(xpp, use_auth, username, password) < 0)
+    if (auth_init(xpp, use_auth, session, username, password) < 0)
         goto error_block;
 
     /* Start user modifications monitoring */

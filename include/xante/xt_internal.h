@@ -192,12 +192,18 @@ struct xante_changes {
 };
 
 struct xante_auth {
-    cl_string_t         *username;
-    cl_string_t         *password;
-    cl_string_t         *name;
-    sqlite3             *db;
-    int                 id_application;
-    int                 id_group;
+    cl_string_t                 *username;
+    cl_string_t                 *password;
+    cl_string_t                 *name;
+    cl_string_t                 *login_and_source;
+    int                         id_application;
+    int                         id_group;
+    int                         id_user;
+    int                         session_pid;
+    enum xante_session          session_type;
+    enum xante_session_source   session_source;
+    cl_string_t                 *source_description;
+    sqlite3                     *db;
 };
 
 /** Library main structure */

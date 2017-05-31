@@ -45,14 +45,21 @@ Sqlite is the database format used.
 
 | Column name | Type |
 | :---------- | :--- |
-| id | int (primary key) |
+| id | int |
 | name | char (128) |
 
-* origin
+* source
 
 | Column name | Type |
 | :---------- | :--- |
-| id | int (primary key) |
+| id | int |
+| name | char (128) |
+
+* session\_type
+
+| Column name | Type |
+| :---------- | :--- |
+| id | int |
 | name | char (128) |
 
 * update\_history
@@ -72,22 +79,24 @@ Sqlite is the database format used.
 | filename | char (256) |
 | id\_application | int |
 
-* login\_history
+* session\_history
 
 | Column name | Type |
 | :---------- | :--- |
 | id | int (primary key) |
 | id\_user | int |
-| id\_origin | int |
+| id\_source | int |
+| id\_session\_type | int |
 | login | datetime |
 | logout | datetime |
 
-* active\_login
+* session
 
 | Column name | Type |
 | :---------- | :--- |
+| id | int (primary key) |
 | id\_user | int |
-| id\_origin | int |
+| id\_source | int |
+| id\_session\_type | int |
 | login | datetime |
-| logout | datetime |
 

@@ -93,6 +93,18 @@ enum xante_ui_menu {
     XANTE_UI_MENU_DYNAMIC
 };
 
+/** Session formats */
+enum xante_session {
+    XANTE_SESSION_CONTINUOUS = 1,
+    XANTE_SESSION_SINGLE
+};
+
+/** Session sources */
+enum xante_session_source {
+    XANTE_SESSION_LOCALHOST = 1,
+    XANTE_SESSION_SSH
+};
+
 /** String keys of a supported dialog */
 #define XANTE_UI_STR_DIALOG_MENU                "menu"
 #define XANTE_UI_STR_DIALOG_INPUT_INT           "input_int"
@@ -154,8 +166,10 @@ struct xante_change_entry {
 #include "xante/xt_error.h"
 #include "xante/xt_event.h"
 #include "xante/xt_init.h"
+#include "xante/xt_item.h"
 #include "xante/xt_jtf.h"
 #include "xante/xt_log.h"
+#include "xante/xt_menu.h"
 #include "xante/xt_runtime.h"
 #include "xante/xt_theme.h"
 #include "xante/xt_translation.h"
