@@ -27,3 +27,25 @@
 
 #include "libxante.h"
 
+/*
+ *
+ * Internal functions
+ *
+ */
+
+/*
+ *
+ * API
+ *
+ */
+
+__PUB_API__ xante_menu_t *xante_menu_create(cl_json_t *menu)
+{
+    return NULL;
+}
+
+__PUB_API__ xante_menu_t *xante_menu_create_from_string(const char *menu)
+{
+    return NULL;
+}
+

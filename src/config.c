@@ -231,6 +231,14 @@ end_block:
  *
  */
 
+/**
+ * @name xante_config_load
+ * @brief Loads the configuration file from the application.
+ *
+ * @param [in,out] xpp: The main library object.
+ *
+ * @return On success returns 0 or -1 otherwise.
+ */
 __PUB_API__ int xante_config_load(xante_t *xpp)
 {
     errno_clear();
@@ -243,6 +251,17 @@ __PUB_API__ int xante_config_load(xante_t *xpp)
     return load_config(xpp);
 }
 
+/**
+ * @name xante_config_write
+ * @brief Unloads and save the configuration file from the application.
+ *
+ * The saving is made when needed.
+ *
+ * @param [in,out] xpp: The main library object.
+ * @param [in] ui_return_status: The UI return value.
+ *
+ * @return On sucess returns 0 or -1 otherwise.
+ */
 __PUB_API__ int xante_config_write(xante_t *xpp, int ui_return_status)
 {
     errno_clear();

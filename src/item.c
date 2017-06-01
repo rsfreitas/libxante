@@ -67,3 +67,13 @@ __PUB_API__ void xante_item_checklist_type(void)
 {
 }
 
+__PUB_API__ xante_item_t *xante_item_create(cl_json_t *item)
+{
+    return NULL;
+}
+
+__PUB_API__ xante_item_t *xante_item_create_from_string(const char *item)
+{
+    return NULL;
+}
+

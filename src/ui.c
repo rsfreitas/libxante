@@ -542,6 +542,14 @@ void ui_print_menu_tree(struct xante_app *xpp)
  * XXX: Remember once we call this function we only leave it when closing the
  *      application from the UI.
  */
+/**
+ * @name xante_ui_run
+ * @brief Puts a libxante application to run.
+ *
+ * @param [in,out] xpp: The library main object.
+ *
+ * @return On success returns 0 or -1 otherwise.
+ */
 __PUB_API__ int xante_ui_run(xante_t *xpp)
 {
     struct xante_app *x = (struct xante_app *)xpp;

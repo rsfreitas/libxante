@@ -135,11 +135,25 @@ void errno_set(enum xante_error_code code)
  *
  */
 
+/**
+ * @name xante_get_last_error
+ * @brief Gets the current library internal error code.
+ *
+ * @return Returns the current error code.
+ */
 __PUB_API__ enum xante_error_code xante_get_last_error(void)
 {
     return __errno;
 }
 
+/**
+ * @name xante_strerror
+ * @brief Gives a description message about an error code.
+ *
+ * @param [in] code: The error code to be translated.
+ *
+ * @return Returns the descriptive string of the error.
+ */
 __PUB_API__ const char *xante_strerror(enum xante_error_code code)
 {
     if (code >= XANTE_MAX_ERROR_CODE)

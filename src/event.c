@@ -440,6 +440,16 @@ void event_uninit(struct xante_app *xpp)
  *
  */
 
+/**
+ * @name xante_event_argument
+ * @brief Gets an event argument real value.
+ *
+ * @param [in] arg: The event argument.
+ * @param [in] data_type: The event argument required field.
+ *
+ * @return On success returns the required event argument real value or NULL
+ *         otherwise.
+ */
 __PUB_API__ void *xante_event_argument(xante_event_arg_t *arg,
     const char *data_type)
 {

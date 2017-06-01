@@ -87,6 +87,14 @@ static int __xante_dlg_messagebox(int width, int height,
  *
  */
 
+/**
+ * @name xante_dlg_set_backtitle
+ * @brief Sets the application backtitle to its default value.
+ *
+ * @param [in,out] xpp: The library main object.
+ *
+ * @return On success returns 0 or -1 otherwise.
+ */
 __PUB_API__ int xante_dlg_set_backtitle(xante_t *xpp)
 {
     struct xante_app *x = (struct xante_app *)xpp;
@@ -159,6 +167,14 @@ __PUB_API__ int xante_dlg_set_backtitle(xante_t *xpp)
     return 0;
 }
 
+/**
+ * @name xante_dlg_clear_backtitle
+ * @brief Clears the application backtitle content.
+ *
+ * @param [in,out] xpp: The library main object.
+ *
+ * @return On success returns 0 or -1 otherwise.
+ */
 __PUB_API__ int xante_dlg_clear_backtitle(xante_t *xpp)
 {
     errno_clear();
@@ -181,6 +197,19 @@ __PUB_API__ int xante_dlg_clear_backtitle(xante_t *xpp)
 
 /*
  * TODO: Show buttons which was set in @buttons.
+ */
+/**
+ * @name xante_dlg_messagebox
+ * @brief Creates a message box dialog.
+ *
+ * @param [in] xpp: The library main object.
+ * @param [in] type: The message box type (info, error, warning).
+ * @param [in] buttons: The dialog buttons.
+ * @param [in] title: The dialog title.
+ * @param [in] message: The dialog message format.
+ * @param [in] ...: The dialog message content.
+ *
+ * @return On success returns the button selected or -1 otherwise.
  */
 __PUB_API__ int xante_dlg_messagebox(struct xante_app *xpp,
     enum xante_msgbox_type type, enum xante_buttons buttons __attribute__((unused)),
@@ -245,6 +274,15 @@ __PUB_API__ int xante_dlg_messagebox(struct xante_app *xpp,
     return key;
 }
 
+/**
+ * @name xante_dlg_application_version
+ * @brief Gets a string with the application version information.
+ *
+ * @param [in] xpp: The library main object.
+ *
+ * @return On success returns a buffer with the application version or NULL
+ *         otherwise.
+ */
 __PUB_API__ char *xante_dlg_application_version(xante_t *xpp)
 {
     struct xante_app *x = (struct xante_app *)xpp;
