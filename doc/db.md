@@ -39,6 +39,23 @@ Sqlite is the database format used.
 | id | int (primary key) |
 | name | char (128) |
 
+* application items'
+
+| Column name | Type |
+| :---------- | :--- |
+| id | int (primary key) |
+| name | char (256) |
+| object\_id | char (256) |
+| type | int |
+
+* profile
+
+| Column name | Type |
+| :---------- | :--- |
+| id\_group | int |
+| id\_item\_application | int |
+| id\_level | int |
+
 ## Internal tables
 
 * tool
@@ -99,4 +116,11 @@ Sqlite is the database format used.
 | id\_source | int |
 | id\_session\_type | int |
 | login | datetime |
+
+* level
+
+| Column name | Type |
+| :---------- | :--- |
+| id | int |
+| name | char (128) |
 

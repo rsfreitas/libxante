@@ -101,12 +101,16 @@ __PUB_API__ xante_t *xante_init(const char *jtf_pathname, bool use_plugin,
 
     /* Start translation environment */
 
+    /* Start user access control */
+    if (auth_init(xpp, use_auth, session, username, password) < 0)
+        goto error_block;
+
     /* Parse the JTF file */
     if (jtf_parse(jtf_pathname, xpp) < 0)
         goto error_block;
 
-    /* Start user access control */
-    if (auth_init(xpp, use_auth, session, username, password) < 0)
+    /* Starts application authentication */
+    if (auth_application_init(xpp) < 0)
         goto error_block;
 
     /* Start user modifications monitoring */

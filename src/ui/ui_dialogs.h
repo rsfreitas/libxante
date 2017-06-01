@@ -94,8 +94,7 @@ char *dialog_get_input_result(void);
 
 /* menu */
 int ui_dialog_menu(struct xante_app *xpp, const struct xante_menu *menu,
-                   const char *cancel_label, bool remove_item_from_menu,
-                   struct xante_item *selected_item);
+                   const char *cancel_label, bool remove_item_from_menu);
 
 /* yesno */
 bool ui_dialog_yesno(struct xante_app *xpp, struct xante_item *item);

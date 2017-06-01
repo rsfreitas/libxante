@@ -225,7 +225,6 @@ static struct xante_menu *dup_menu(struct xante_menu *menu, int copy_index)
     d_menu->name = create_menu_name(menu, copy_index);
     d_menu->object_id = create_object_id(menu, copy_index);
     d_menu->menu_type = menu->menu_type;
-    d_menu->mode = menu->mode;
 
     for (i = 0; i < total_items; i++) {
         d_item = dup_item(menu, i, copy_index);
@@ -346,7 +345,6 @@ static void rme_create(struct xante_app *xpp, struct xante_menu *menu,
     rme->name = cl_string_dup(menu->name);
     rme->object_id = cl_string_dup(menu->object_id);
     rme->menu_type = XANTE_UI_MENU_DEFAULT;
-    rme->mode = menu->mode;
 
     /* Create items to point at every previously created (sub)menu */
     for (i = 0; i < copies; i++) {

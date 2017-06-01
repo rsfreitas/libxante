@@ -38,6 +38,12 @@ int auth_init(struct xante_app *xpp, bool use_auth, enum xante_session session,
               const char *username, const char *password);
 
 void auth_uninit(struct xante_app *xpp);
+int auth_application_init(struct xante_app *xpp);
+enum xante_access_mode auth_get_access_level(const struct xante_app *xpp,
+                                              const struct xante_item *item);
+
+bool auth_check_item_access(const struct xante_app *xpp,
+                            const struct xante_item *item);
 
 #endif
 

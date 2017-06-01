@@ -144,7 +144,6 @@ struct xante_menu {
     cl_string_t                 *name;
     cl_string_t                 *object_id;
     cl_string_t                 *type;
-    enum xante_access_mode      mode;
     cl_json_t                   *events;
 
     /* Dynamic menu details */

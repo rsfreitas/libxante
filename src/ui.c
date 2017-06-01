@@ -568,7 +568,7 @@ __PUB_API__ int xante_ui_run(xante_t *xpp)
         goto end_block;
     }
 
-    ret_dialog = ui_dialog_menu(xpp, root, btn_cancel_label, false, NULL);
+    ret_dialog = ui_dialog_menu(xpp, root, btn_cancel_label, false);
 
 end_block:
     if (btn_cancel_label != NULL)

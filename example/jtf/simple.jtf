@@ -28,10 +28,11 @@
                 "items": [
                     {
                         "name": "Yes no option",
-                        "mode": 1,
+                        "mode": 2,
                         "type": "yesno",
                         "options": "Is this a valid question?",
                         "default_value": "1",
+                        "object_id": "1",
                         "help": {
                             "brief": "This is a help description yesno.",
                             "description": "This is a help description."
@@ -49,10 +50,11 @@
                     },
                     {
                         "name": "Calendar option",
-                        "mode": 1,
+                        "mode": 2,
                         "type": "calendar",
                         "default_value": "08/05/2017",
                         "options": "Select a date",
+                        "object_id": "2",
                         "help": {
                             "brief": "This is a help description calendar.",
                             "description": "This is a help description."
@@ -64,10 +66,11 @@
                     },
                     {
                         "name": "Timebox option",
-                        "mode": 1,
+                        "mode": 2,
                         "type": "timebox",
                         "default_value": "22:03:44",
                         "options": "Select a time inside the box",
+                        "object_id": "3",
                         "help": {
                             "brief": "This is a help description timebox.",
                             "description": "This is a help description."
@@ -83,6 +86,7 @@
                         "type": "radio_checklist",
                         "options": [ "Option 1", "Option 2", "Option 3" ],
                         "default_value": "0",
+                        "object_id": "4",
                         "help": {
                             "brief": "This is a help description radio.",
                             "description": "This is a help description."

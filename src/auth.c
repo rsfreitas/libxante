@@ -156,6 +156,10 @@ static void insert_auth_data(sqlite3 *db)
     }, session_type[] = {
         { "continuous", XANTE_SESSION_CONTINUOUS },
         { "single", XANTE_SESSION_SINGLE }
+    }, levels[] = {
+        { "editable", XANTE_ACCESS_EDIT },
+        { "view-only", XANTE_ACCESS_VIEW },
+        { "blocked", XANTE_ACCESS_HIDDEN }
     };
 
     struct table tables[] = {
@@ -175,6 +179,12 @@ static void insert_auth_data(sqlite3 *db)
             .name = "session_type",
             .columns = session_type,
             .total_columns = sizeof(session_type) / sizeof(session_type[0])
+        },
+
+        {
+            .name = "level",
+            .columns = levels,
+            .total_columns = sizeof(levels) / sizeof(levels[0])
         }
     };
 
@@ -250,6 +260,20 @@ static int create_auth_tables(cl_string_t *db_filename)
         { "id_session_type", "INTEGER", false, false },
         { "login", "DATETIME", false, false },
         { "pid", "INTEGER", false, false }
+    };
+
+    struct column item_application[] = {
+        { "id", "INTEGER", false, true },
+        { "id_application", "INTEGER", false, false },
+        { "name", "CHAR(256)", false, false },
+        { "object_id", "CHAR(256)", false, false },
+        { "type", "INTEGER", false, false }
+    };
+
+    struct column profile[] = {
+        { "id_group", "INTEGER", false, false },
+        { "id_item_application", "INTEGER", false, false },
+        { "id_level", "INTEGER", false, false },
     };
 
     struct table tables[] = {
@@ -328,6 +352,27 @@ static int create_auth_tables(cl_string_t *db_filename)
             .name = "session",
             .columns = session,
             .total_columns = sizeof(session) / sizeof(session[0])
+        },
+
+        /* level */
+        {
+            .name = "level",
+            .columns = common,
+            .total_columns = sizeof(common) / sizeof(common[0])
+        },
+
+        /* application items */
+        {
+            .name = "item_application",
+            .columns = item_application,
+            .total_columns = sizeof(item_application) / sizeof(item_application[0])
+        },
+
+        /* profile */
+        {
+            .name = "profile",
+            .columns = profile,
+            .total_columns = sizeof(profile) / sizeof(profile[0])
         }
     };
 
@@ -828,6 +873,45 @@ static void auth_logout(struct xante_app *xpp)
     }
 }
 
+static int get_item_access_level(const struct xante_app *xpp,
+    const struct xante_item *item)
+{
+    char *query = NULL;
+    cl_list_t *val = NULL;
+    cl_list_node_t *node = NULL;
+    cl_string_list_t *row = NULL;
+    cl_string_t *db_level = NULL;
+    int level = XANTE_ACCESS_EDIT;
+
+    if (NULL == item->object_id)
+        return level;
+
+    asprintf(&query, "SELECT id_level FROM 'profile' WHERE id_group = %d AND "
+                     "id_item_application IN (SELECT id FROM item_application "
+                     "WHERE id_application = %d AND object_id = '%s')",
+                     xpp->auth.id_group, xpp->auth.id_application,
+                     cl_string_valueof(item->object_id));
+
+    val = db_query(xpp->auth.db, query);
+    free(query);
+
+    if ((NULL == val) || (cl_list_size(val) > 1))
+        goto end_block;
+
+    node = cl_list_at(val, 0);
+    row = cl_list_node_content(node);
+    db_level = cl_string_list_get(row, 0);
+    level = cl_string_to_int(db_level);
+    cl_string_unref(db_level);
+    cl_list_node_unref(node);
+
+end_block:
+    if (val != NULL)
+        cl_list_destroy(val);
+
+    return level;
+}
+
 /*
  *
  * Internal API
@@ -891,10 +975,6 @@ int auth_init(struct xante_app *xpp, bool use_auth, enum xante_session session,
     if (validate_user_access(xpp) < 0)
         goto end_block;
 
-    /* Checks if this application has access control */
-    if (validate_application_access_control(xpp) < 0)
-        goto end_block;
-
     if (auth_login(xpp) < 0)
         goto end_block;
 
@@ -932,17 +1012,105 @@ void auth_uninit(struct xante_app *xpp)
     if (xpp->auth.source_description != NULL)
         cl_string_unref(xpp->auth.source_description);
 
+    if (xpp->auth.login_and_source != NULL)
+        cl_string_unref(xpp->auth.login_and_source);
+
     if (xpp->auth.db != NULL)
         sqlite3_close(xpp->auth.db);
 }
 
-void auth_check_item_access(const struct xante_app *xpp,
-    struct xante_item *item)
+static int update_item_access(cl_list_node_t *node, void *a)
 {
-    if (xante_runtime_user_authentication((struct xante_app *)xpp) == false)
-        return;
+    struct xante_item *item = cl_list_node_content(node);
+    struct xante_app *xpp = (struct xante_app *)a;
 
-    // TODO
+    item->mode = auth_get_access_level(xpp, item);
+
+    return 0;
+}
+
+static int update_menu_access(cl_list_node_t *node, void *a)
+{
+    struct xante_menu *menu = cl_list_node_content(node);
+
+    cl_list_map(menu->items, update_item_access, a);
+
+    return 0;
+}
+
+/**
+ * @name auth_application_init
+ * @brief Checks if the current application has database access control.
+ *
+ * If the application have access control, every item has its access mode
+ * updated.
+ *
+ * @param [in,out] xpp: The library main object.
+ *
+ * @return On success returns 0 or -1 otherwise.
+ */
+int auth_application_init(struct xante_app *xpp)
+{
+    /* We're running without authentication */
+    if (xante_runtime_user_authentication(xpp) == false)
+        return 0;
+
+    /* Checks if this application has access control */
+    if (validate_application_access_control(xpp) < 0)
+        return -1;
+
+    cl_list_map(xpp->ui.menus, update_menu_access, xpp);
+
+    return 0;
+}
+
+/**
+ * @name auth_get_access_level
+ * @brief Gets the current user level access to a specific UI item.
+ *
+ * @param [in] xpp: The library main object.
+ * @param [in] item: The item to be validated.
+ *
+ * @returns Returns the access level.
+ */
+enum xante_access_mode auth_get_access_level(const struct xante_app *xpp,
+    const struct xante_item *item)
+{
+    int mode = -1;
+
+    /* We're running without authentication */
+    if (xante_runtime_user_authentication((struct xante_app *)xpp) == false)
+        return XANTE_ACCESS_EDIT;
+
+    mode = get_item_access_level(xpp, item);
+
+    if (mode < 0)
+        mode = XANTE_ACCESS_EDIT;
+
+    return mode;
+}
+
+/**
+ * @name auth_check_item_access
+ * @brief Checks if the current user access to a specific UI item.
+ *
+ * @param [in] xpp: The library main object.
+ * @param [in] item: The item to be validated.
+ *
+ * @returns Returns true if the current user can access (view/edit) the item or
+ *          false if the item is blocked.
+ */
+bool auth_check_item_access(const struct xante_app *xpp,
+    const struct xante_item *item)
+{
+    enum xante_access_mode mode;
+
+    mode = auth_get_access_level(xpp, item);
+
+    if (mode == XANTE_ACCESS_HIDDEN)
+        return false;
+
+    return true;
 }
 
 /*

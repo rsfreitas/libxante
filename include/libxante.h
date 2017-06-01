@@ -137,7 +137,8 @@ enum xante_session_source {
 /** Main library object */
 typedef void    xante_t;
 
-/** Item object */
+/** UI objects */
+typedef void    xante_menu_t;
 typedef void    xante_item_t;
 
 /** Event function argument */
