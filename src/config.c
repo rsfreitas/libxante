@@ -37,10 +37,17 @@
 static cl_cfg_file_t *load_cfg_file(struct xante_app *xpp)
 {
     cl_cfg_file_t *cfg = NULL;
+    char *pathname = NULL;
 
-    asprintf(&xpp->config.filename, "%s/%s.cfg",
-             cl_string_valueof(xpp->info.cfg_pathname),
+    pathname = xante_env_cfg_path();
+
+    if (NULL == pathname)
+        pathname = strdup(cl_string_valueof(xpp->info.cfg_pathname));
+
+    asprintf(&xpp->config.filename, "%s/%s.cfg", pathname,
              cl_string_valueof(xpp->info.application_name));
+
+    free(pathname);
 
     if (access(xpp->config.filename, 0x00) == -1)
         return NULL;
@@ -224,7 +231,7 @@ end_block:
  *
  */
 
-__PUB_API__ int xante_load_config(xante_t *xpp)
+__PUB_API__ int xante_config_load(xante_t *xpp)
 {
     errno_clear();
 
@@ -236,7 +243,7 @@ __PUB_API__ int xante_load_config(xante_t *xpp)
     return load_config(xpp);
 }
 
-__PUB_API__ int xante_write_config(xante_t *xpp, int ui_return_status)
+__PUB_API__ int xante_config_write(xante_t *xpp, int ui_return_status)
 {
     errno_clear();
 

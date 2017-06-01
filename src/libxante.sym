@@ -5,9 +5,8 @@ LIBXANTE_0.1 {
         xante_get_last_error;
         xante_init;
         xante_uninit;
-        xante_load_config;
-        xante_unload_config;
-        xante_write_config;
+        xante_config_load;
+        xante_config_write;
         xante_runtime_set_discard_changes;
         xante_runtime_discard_changes;
         xante_runtime_set_discard_changes_on_timeout;
@@ -37,7 +36,6 @@ LIBXANTE_0.1 {
         xante_ui_run;
         xante_ui_suspend;
         xante_ui_continue;
-        xante_theme_set;
         xante_load_config;
         xante_write_config;
         xante_event_argument;
@@ -48,6 +46,12 @@ LIBXANTE_0.1 {
         xante_auth_set_path;
         xante_auth_create_database;
         xante_auth_export_jxdbi;
+        xante_env_set_theme;
+        xante_env_theme;
+        xante_env_set_auth_path;
+        xante_env_auth_path;
+        xante_env_set_cfg_path;
+        xante_env_cfg_path;
     local:
         *;
 };

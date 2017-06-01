@@ -32,7 +32,6 @@
 
 #include "libxante.h"
 
-#define ENV_XANTE_DB_PATH           "XANTE_DB_PATH"
 #define XANTE_DB_FILENAME           "auth.xdb"
 
 /* JSON objects */
@@ -1118,20 +1117,6 @@ bool auth_check_item_access(const struct xante_app *xpp,
  * External API
  *
  */
-
-__PUB_API__ int xante_auth_set_path(const char *pathname)
-{
-    errno_clear();
-
-    if (NULL == pathname) {
-        errno_set(XANTE_ERROR_NULL_ARG);
-        return -1;
-    }
-
-    setenv(ENV_XANTE_DB_PATH, pathname, 1);
-
-    return 0;
-}
 
 __PUB_API__ int xante_auth_create_database(const char *pathname,
     bool overwrite)

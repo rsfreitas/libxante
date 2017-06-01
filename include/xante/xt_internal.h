@@ -69,6 +69,10 @@
 #define EV_ITEM_EXIT                        "item-exit"
 #define EV_MENU_EXIT                        "menu-exit"
 
+/** Environment variables */
+#define ENV_XANTE_DB_PATH                   "XANTE_DB_PATH"
+#define ENV_XANTE_CFG_PATH                  "XANTE_CFG_PATH"
+
 /** Different ways of creating menus */
 enum xante_menu_creator {
     XANTE_MENU_CREATED_FROM_JTF,

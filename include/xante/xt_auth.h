@@ -48,16 +48,6 @@ bool auth_check_item_access(const struct xante_app *xpp,
 #endif
 
 /**
- * @name xante_auth_set_path
- * @brief Sets the internal path to the database file.
- *
- * @param [in] pathname: The path.
- *
- * @return On success returns 0 or -1 otherwise.
- */
-int xante_auth_set_path(const char *pathname);
-
-/**
  * @name xante_auth_create_database
  * @brief Creates an empty default database to applications.
  *
