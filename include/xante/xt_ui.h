@@ -50,6 +50,9 @@ void ui_adjusts_menu_info(struct xante_menu *menu, void *copies);
 struct xante_menu *ui_search_menu_by_object_id(const struct xante_app *xpp,
                                                const char *object_id_to_search);
 
+struct xante_menu *ui_search_unref_menu_by_object_id(const struct xante_app *xpp,
+                                                     const char *object_id_to_search);
+
 void ui_print_menu_tree(struct xante_app *xpp);
 #endif
 

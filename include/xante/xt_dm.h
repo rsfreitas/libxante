@@ -37,6 +37,9 @@
 void dm_init(struct xante_app *xpp, cl_cfg_file_t *cfg_file);
 void dm_uninit(struct xante_app *xpp);
 void dm_update(struct xante_app *xpp, struct xante_item *selected_item);
+void dm_delete(struct xante_menu *rme_menu, int position);
+void dm_insert(struct xante_app *xpp, struct xante_item *item,
+               const char *new_entry_name);
 
 #endif
 

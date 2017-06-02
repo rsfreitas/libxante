@@ -72,50 +72,6 @@ static int get_input_length(const struct xante_item *item)
     return l;
 }
 
-static int get_longest_line_length(cl_string_t *text)
-{
-    cl_string_t *s = cl_string_dup(text), *tmp;
-    cl_string_list_t *list = NULL;
-    int length = 0, i, total;
-
-    cl_string_rplchr(s, XANTE_STR_LINE_BREAK, '\n');
-    list = cl_string_split(s, "^");
-    total = cl_string_list_size(list);
-
-    for (i = 0; i < total; i++) {
-        tmp = cl_string_list_get(list, i);
-
-        if (cl_string_length(tmp) > length)
-            length = cl_string_length(tmp);
-
-        cl_string_unref(tmp);
-    }
-
-    if (list != NULL)
-        cl_string_list_destroy(list);
-
-    cl_string_unref(s);
-
-    return length;
-}
-
-static int get_window_width(const struct xante_item *item)
-{
-    int w = 0;
-
-    if (dialog_count_lines_by_delimiters(cl_string_valueof(item->options)) > 1)
-        return get_longest_line_length(item->options) + WINDOW_COLUMNS;
-
-    w = cl_string_length(item->options);
-
-    if (w < MINIMUM_WIDTH)
-        w = MINIMUM_WIDTH;
-    else
-        w += WINDOW_COLUMNS;
-
-    return w;
-}
-
 static bool item_value_has_changed(struct xante_app *xpp,
     struct xante_item *item, const char *new_value)
 {
@@ -352,7 +308,7 @@ bool ui_dialog_input(struct xante_app *xpp, struct xante_item *item,
     /* Adjusts window width and height */
     text = cl_string_dup(item->options);
     cl_string_rplchr(text, XANTE_STR_LINE_BREAK, '\n');
-    width = get_window_width(item);
+    width = dialog_get_input_window_width(item);
     height = dialog_count_lines_by_delimiters(cl_string_valueof(text)) +
         FORM_HEIGHT_WITHOUT_TEXT;
 

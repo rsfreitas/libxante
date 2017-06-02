@@ -87,7 +87,7 @@
                     {
                         "name": "Radio checklist option",
                         "mode": 1,
-                        "type": "radio_checklist",
+                        "type": "radio-checklist",
                         "options": [ "Option 1", "Option 2", "Option 3" ],
                         "default_value": "0",
                         "help": {
@@ -122,7 +122,7 @@
                     {
                         "name": "Input int",
                         "mode": 1,
-                        "type": "input_int",
+                        "type": "input-int",
                         "default_value": "5",
                         "options": "Just a simple text to show...",
                         "help": {
@@ -141,7 +141,7 @@
                     {
                         "name": "Input float",
                         "mode": 1,
-                        "type": "input_float",
+                        "type": "input-float",
                         "default_value": "125.25",
                         "help": {
                             "brief": "This is a help description float.",
@@ -159,7 +159,7 @@
                     {
                         "name": "Input password",
                         "mode": 1,
-                        "type": "input_passwd",
+                        "type": "input-passwd",
                         "default_value": "test",
                         "help": {
                             "brief": "This is a help description passwd.",
@@ -176,7 +176,7 @@
                     {
                         "name": "Input string",
                         "mode": 1,
-                        "type": "input_string",
+                        "type": "input-string",
                         "default_value": "",
                         "help": {
                             "brief": "This is a help description string.",
@@ -193,7 +193,7 @@
                     {
                         "name": "Input date",
                         "mode": 1,
-                        "type": "input_date",
+                        "type": "input-date",
                         "default_value": "12/02/2017",
                         "help": {
                             "brief": "This is a help description date.",
@@ -207,7 +207,7 @@
                     {
                         "name": "Input time",
                         "mode": 1,
-                        "type": "input_time",
+                        "type": "input-time",
                         "default_value": "12:32:22",
                         "help": {
                             "brief": "This is a help description time.",
@@ -217,6 +217,20 @@
                             "block": "Main",
                             "item": "input_time"
                         }
+                    },
+                    {
+                        "name": "Remove weekday",
+                        "mode": 2,
+                        "type": "delete-dynamic-menu",
+                        "options": "Select a day to be removed",
+                        "menu_id": "3"
+                    },
+                    {
+                        "name": "Add weekday?",
+                        "mode": 2,
+                        "type": "add-dynamic-menu",
+                        "options": "Insert the day name to be added:",
+                        "menu_id": "3"
                     }
                 ]
             },
@@ -232,7 +246,7 @@
                     {
                         "name": "Input string",
                         "mode": 1,
-                        "type": "input_string",
+                        "type": "input-string",
                         "default_value": "",
                         "input_ranges": {
                             "string_length": 32
@@ -244,7 +258,7 @@
                     {
                         "name": "Input string",
                         "mode": 1,
-                        "type": "input_string",
+                        "type": "input-string",
                         "default_value": "",
                         "input_ranges": {
                             "string_length": 32

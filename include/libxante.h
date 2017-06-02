@@ -49,10 +49,10 @@ enum xante_ui_dialog {
     XANTE_UI_DIALOG_RADIO_CHECKLIST,
     XANTE_UI_DIALOG_CHECKLIST,
     XANTE_UI_DIALOG_YES_NO,
-    XANTE_UI_DIALOG_CUSTOM,
     XANTE_UI_DIALOG_DYNAMIC_MENU,
-    XANTE_UI_DIALOG_RM_DYNAMIC_MENU_ITEM,
-    XANTE_UI_DIALOG_ADD_DYNAMIC_MENY_ITEM
+    XANTE_UI_DIALOG_DELETE_DYNAMIC_MENU_ITEM,
+    XANTE_UI_DIALOG_ADD_DYNAMIC_MENU_ITEM
+//    XANTE_UI_DIALOG_CUSTOM,
 //    XANTE_UI_DIALOG_RANGE,
 //    XANTE_UI_DIALOG_FORM
 };
@@ -108,32 +108,33 @@ enum xante_session_source {
 
 /** String keys of a supported dialog */
 #define XANTE_UI_STR_DIALOG_MENU                "menu"
-#define XANTE_UI_STR_DIALOG_INPUT_INT           "input_int"
-#define XANTE_UI_STR_DIALOG_INPUT_FLOAT         "input_float"
-#define XANTE_UI_STR_DIALOG_INPUT_DATE          "input_date"
-#define XANTE_UI_STR_DIALOG_INPUT_TIME          "input_time"
-#define XANTE_UI_STR_DIALOG_INPUT_STRING        "input_string"
-#define XANTE_UI_STR_DIALOG_INPUT_PASSWD        "input_passwd"
+#define XANTE_UI_STR_DIALOG_INPUT_INT           "input-int"
+#define XANTE_UI_STR_DIALOG_INPUT_FLOAT         "input-float"
+#define XANTE_UI_STR_DIALOG_INPUT_DATE          "input-date"
+#define XANTE_UI_STR_DIALOG_INPUT_TIME          "input-time"
+#define XANTE_UI_STR_DIALOG_INPUT_STRING        "input-string"
+#define XANTE_UI_STR_DIALOG_INPUT_PASSWD        "input-passwd"
 #define XANTE_UI_STR_DIALOG_CALENDAR            "calendar"
 #define XANTE_UI_STR_DIALOG_TIMEBOX             "timebox"
-#define XANTE_UI_STR_DIALOG_RADIO_CHECKLIST     "radio_checklist"
+#define XANTE_UI_STR_DIALOG_RADIO_CHECKLIST     "radio-checklist"
 #define XANTE_UI_STR_DIALOG_CHECKLIST           "checklist"
 #define XANTE_UI_STR_DIALOG_YESNO               "yesno"
-#define XANTE_UI_STR_DIALOG_CUSTOM              "custom"
-#define XANTE_UI_STR_DIALOG_DYNAMIC_MENU        "dynamic_menu"
-#define XANTE_UI_STR_DIALOG_DELETE_DYNAMIC_MENU "delete_dynamic_menu"
+#define XANTE_UI_STR_DIALOG_DYNAMIC_MENU        "dynamic-menu"
+#define XANTE_UI_STR_DIALOG_DELETE_DYNAMIC_MENU "delete-dynamic-menu"
+#define XANTE_UI_STR_DIALOG_ADD_DYNAMIC_MENU    "add-dynamic-menu"
+//#define XANTE_UI_STR_DIALOG_CUSTOM              "custom"
 
 /** String keys of supported menus */
 #define XANTE_UI_STR_DEFAULT_MENU               "default"
 #define XANTE_UI_STR_DYNAMIC_MENU               "dynamic"
 
 /** Event arguments */
-#define XANTE_EVT_DATA_XANTE_T                  "xante_t"
-#define XANTE_EVT_DATA_XANTE_MENU_T             "xante_menu_t"
-#define XANTE_EVT_DATA_XANTE_ITEM_T             "xante_item_t"
-#define XANTE_EVT_DATA_XANTE_ITEM_VALUE         "xante_item_value"
-#define XANTE_EVT_DATA_XANTE_CONFIG             "xante_config"
-#define XANTE_EVT_DATA_XANTE_CHANGES_LIST       "xante_changes"
+#define XANTE_EVT_DATA_XANTE_T                  "xante-t"
+#define XANTE_EVT_DATA_XANTE_MENU_T             "xante-menu-t"
+#define XANTE_EVT_DATA_XANTE_ITEM_T             "xante-item-t"
+#define XANTE_EVT_DATA_XANTE_ITEM_VALUE         "xante-item-value"
+#define XANTE_EVT_DATA_XANTE_CONFIG             "xante-config"
+#define XANTE_EVT_DATA_XANTE_CHANGES_LIST       "xante-changes"
 
 /** Main library object */
 typedef void    xante_t;
