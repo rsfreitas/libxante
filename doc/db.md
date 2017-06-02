@@ -39,20 +39,44 @@ Sqlite is the database format used.
 | id | int (primary key) |
 | name | char (128) |
 
+* application items'
+
+| Column name | Type |
+| :---------- | :--- |
+| id | int (primary key) |
+| name | char (256) |
+| object\_id | char (256) |
+| type | int |
+
+* profile
+
+| Column name | Type |
+| :---------- | :--- |
+| id\_group | int |
+| id\_item\_application | int |
+| id\_level | int |
+
 ## Internal tables
 
 * tool
 
 | Column name | Type |
 | :---------- | :--- |
-| id | int (primary key) |
+| id | int |
 | name | char (128) |
 
-* origin
+* source
 
 | Column name | Type |
 | :---------- | :--- |
-| id | int (primary key) |
+| id | int |
+| name | char (128) |
+
+* session\_type
+
+| Column name | Type |
+| :---------- | :--- |
+| id | int |
 | name | char (128) |
 
 * update\_history
@@ -72,22 +96,31 @@ Sqlite is the database format used.
 | filename | char (256) |
 | id\_application | int |
 
-* login\_history
+* session\_history
 
 | Column name | Type |
 | :---------- | :--- |
 | id | int (primary key) |
 | id\_user | int |
-| id\_origin | int |
+| id\_source | int |
+| id\_session\_type | int |
 | login | datetime |
 | logout | datetime |
 
-* active\_login
+* session
 
 | Column name | Type |
 | :---------- | :--- |
+| id | int (primary key) |
 | id\_user | int |
-| id\_origin | int |
+| id\_source | int |
+| id\_session\_type | int |
 | login | datetime |
-| logout | datetime |
+
+* level
+
+| Column name | Type |
+| :---------- | :--- |
+| id | int |
+| name | char (128) |
 

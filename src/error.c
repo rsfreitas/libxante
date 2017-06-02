@@ -62,7 +62,9 @@ static const char *__description[] = {
     cl_tr_noop("Application not found in the database"),
     cl_tr_noop("Multiple user entries found in the database"),
     cl_tr_noop("Multiple group entries found in the database"),
-    cl_tr_noop("Multiple application entries found in the database")
+    cl_tr_noop("Multiple application entries found in the database"),
+    cl_tr_noop("Unable to retrieve login information"),
+    cl_tr_noop("Database already exists")
 };
 
 static const char *__unknown_error = cl_tr_noop("Unknown error");
@@ -133,11 +135,25 @@ void errno_set(enum xante_error_code code)
  *
  */
 
+/**
+ * @name xante_get_last_error
+ * @brief Gets the current library internal error code.
+ *
+ * @return Returns the current error code.
+ */
 __PUB_API__ enum xante_error_code xante_get_last_error(void)
 {
     return __errno;
 }
 
+/**
+ * @name xante_strerror
+ * @brief Gives a description message about an error code.
+ *
+ * @param [in] code: The error code to be translated.
+ *
+ * @return Returns the descriptive string of the error.
+ */
 __PUB_API__ const char *xante_strerror(enum xante_error_code code)
 {
     if (code >= XANTE_MAX_ERROR_CODE)

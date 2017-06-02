@@ -28,10 +28,11 @@
                 "items": [
                     {
                         "name": "Yes no option",
-                        "mode": 1,
+                        "mode": 2,
                         "type": "yesno",
                         "options": "Is this a valid question?",
                         "default_value": "1",
+                        "object_id": "1",
                         "help": {
                             "brief": "This is a help description yesno.",
                             "description": "This is a help description."
@@ -49,10 +50,11 @@
                     },
                     {
                         "name": "Calendar option",
-                        "mode": 1,
+                        "mode": 2,
                         "type": "calendar",
                         "default_value": "08/05/2017",
                         "options": "Select a date",
+                        "object_id": "2",
                         "help": {
                             "brief": "This is a help description calendar.",
                             "description": "This is a help description."
@@ -64,10 +66,11 @@
                     },
                     {
                         "name": "Timebox option",
-                        "mode": 1,
+                        "mode": 2,
                         "type": "timebox",
                         "default_value": "22:03:44",
                         "options": "Select a time inside the box",
+                        "object_id": "3",
                         "help": {
                             "brief": "This is a help description timebox.",
                             "description": "This is a help description."
@@ -80,9 +83,10 @@
                     {
                         "name": "Radio checklist option",
                         "mode": 2,
-                        "type": "radio_checklist",
+                        "type": "radio-checklist",
                         "options": [ "Option 1", "Option 2", "Option 3" ],
                         "default_value": "0",
+                        "object_id": "4",
                         "help": {
                             "brief": "This is a help description radio.",
                             "description": "This is a help description."
@@ -115,7 +119,7 @@
                     {
                         "name": "Input int",
                         "mode": 2,
-                        "type": "input_int",
+                        "type": "input-int",
                         "default_value": "5",
                         "options": "Just a simple text to show...",
                         "help": {
@@ -134,7 +138,7 @@
                     {
                         "name": "Input float",
                         "mode": 1,
-                        "type": "input_float",
+                        "type": "input-float",
                         "default_value": "125.25",
                         "help": {
                             "brief": "This is a help description float.",
@@ -152,7 +156,7 @@
                     {
                         "name": "Input password",
                         "mode": 1,
-                        "type": "input_passwd",
+                        "type": "input-passwd",
                         "default_value": "test",
                         "help": {
                             "brief": "This is a help description passwd.",
@@ -169,7 +173,7 @@
                     {
                         "name": "Input string",
                         "mode": 1,
-                        "type": "input_string",
+                        "type": "input-string",
                         "default_value": "",
                         "help": {
                             "brief": "This is a help description string.",
@@ -186,7 +190,7 @@
                     {
                         "name": "Input date",
                         "mode": 1,
-                        "type": "input_date",
+                        "type": "input-date",
                         "default_value": "12/02/2017",
                         "help": {
                             "brief": "This is a help description date.",
@@ -200,7 +204,7 @@
                     {
                         "name": "Input time",
                         "mode": 1,
-                        "type": "input_time",
+                        "type": "input-time",
                         "default_value": "12:32:22",
                         "help": {
                             "brief": "This is a help description time.",

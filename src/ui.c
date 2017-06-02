@@ -160,7 +160,7 @@ static void __destroy_xante_menu(void *a)
     ui_xante_menu_unref(menu);
 }
 
-static int search_menu_by_object_id(cl_list_node_t *node, void *a)
+static int __search_menu_by_object_id(cl_list_node_t *node, void *a)
 {
     struct xante_menu *menu = cl_list_node_content(node);
     char *object_id = (char *)a;
@@ -470,6 +470,24 @@ void ui_adjusts_item_info(struct xante_item *item, cl_string_t *default_value,
                                           item->max, item->string_length);
 }
 
+static struct xante_menu *search_menu_by_object_id(const cl_list_t *menus,
+    const char *object_id_to_search)
+{
+    cl_list_node_t *node = NULL;
+    struct xante_menu *menu = NULL;
+
+    node = cl_list_map(menus, __search_menu_by_object_id,
+                       (void *)object_id_to_search);
+
+    if (NULL == node)
+        return NULL;
+
+    menu = cl_list_node_content(node);
+    cl_list_node_unref(node);
+
+    return menu;
+}
+
 /**
  * @name ui_search_menu_by_object_id
  * @brief Searches a xante_menu structure inside the main menu list which have
@@ -488,19 +506,29 @@ void ui_adjusts_item_info(struct xante_item *item, cl_string_t *default_value,
 struct xante_menu *ui_search_menu_by_object_id(const struct xante_app *xpp,
     const char *object_id_to_search)
 {
-    cl_list_node_t *node = NULL;
-    struct xante_menu *menu = NULL;
+    return search_menu_by_object_id(xpp->ui.menus, object_id_to_search);
+}
 
-    node = cl_list_map(xpp->ui.menus, search_menu_by_object_id,
-                       (void *)object_id_to_search);
-
-    if (NULL == node)
-        return NULL;
-
-    menu = cl_list_node_content(node);
-    cl_list_node_unref(node);
-
-    return menu;
+/**
+ * @name ui_search_unref_menu_by_object_id
+ * @brief Searches a xante_menu structure inside the unreferenced menus list
+ *        which have a specific object_id.
+ *
+ * Remember, when searching a menu pointed by an item, its object_id is located
+ * inside the menu_id.
+ *
+ * @param [in] xpp: The main library object.
+ * @param [in] object_it_to_search: The menu object_id which will be used to
+ *                                  search.
+ *
+ * @return On success, i.e, the menu is found, returns a pointer to its
+ *         xante_menu structure or NULL otherwise.
+ */
+struct xante_menu *ui_search_unref_menu_by_object_id(const struct xante_app *xpp,
+    const char *object_id_to_search)
+{
+    return search_menu_by_object_id(xpp->ui.unreferenced_menus,
+                                    object_id_to_search);
 }
 
 // DEBUG
@@ -542,6 +570,14 @@ void ui_print_menu_tree(struct xante_app *xpp)
  * XXX: Remember once we call this function we only leave it when closing the
  *      application from the UI.
  */
+/**
+ * @name xante_ui_run
+ * @brief Puts a libxante application to run.
+ *
+ * @param [in,out] xpp: The library main object.
+ *
+ * @return On success returns 0 or -1 otherwise.
+ */
 __PUB_API__ int xante_ui_run(xante_t *xpp)
 {
     struct xante_app *x = (struct xante_app *)xpp;
@@ -568,7 +604,7 @@ __PUB_API__ int xante_ui_run(xante_t *xpp)
         goto end_block;
     }
 
-    ret_dialog = ui_dialog_menu(xpp, root, btn_cancel_label, false, NULL);
+    ret_dialog = ui_dialog_menu(xpp, root, btn_cancel_label);
 
 end_block:
     if (btn_cancel_label != NULL)

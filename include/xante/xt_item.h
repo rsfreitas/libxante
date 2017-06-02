@@ -3,7 +3,7 @@
  * Description:
  *
  * Author: Rodrigo Freitas
- * Created at: Wed May  3 11:19:39 2017
+ * Created at: Sat May 27 20:36:27 2017
  * Project: libxante
  *
  * Copyright (C) 2017 Rodrigo Freitas
@@ -24,27 +24,17 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_THEME_H
-#define _LIBXANTE_XT_THEME_H          1
+#ifndef _LIBXANTE_XT_ITEM_H
+#define _LIBXANTE_XT_ITEM_H          1
 
 #ifndef LIBXANTE_COMPILE
 # ifndef _LIBXANTE_H
-#  error "Never use <xt_theme.h> directly; include <libxante.h> instead."
+#  error "Never use <xt_item.h> directly; include <libxante.h> instead."
 # endif
-#endif
+#else
 
-/**
- * @name xante_set_theme
- * @brief Sets the UI color theme.
- *
- * This function receives a \a pathname with a dialog's RC file to be used as
- * the UI color theme.
- *
- * @param [in] pathname: The dialog's RC file pathname.
- *
- * @return On success returns 0 or -1 otherwise.
- */
-int xante_theme_set(const char *pathname);
+/* Internal library declarations */
+#endif
 
 #endif
 

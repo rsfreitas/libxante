@@ -3,7 +3,7 @@
  * Description:
  *
  * Author: Rodrigo Freitas
- * Created at: Wed May  3 11:19:24 2017
+ * Created at: Wed May 31 10:35:06 2017
  * Project: libxante
  *
  * Copyright (C) 2017 Rodrigo Freitas
@@ -24,25 +24,17 @@
  * USA
  */
 
-#include "libxante.h"
+#ifndef _LIBXANTE_XT_MENU_H
+#define _LIBXANTE_XT_MENU_H          1
 
-/*
- *
- * API
- *
- */
+#ifndef LIBXANTE_COMPILE
+# ifndef _LIBXANTE_H
+#  error "Never use <xt_menu.h> directly; include <libxante.h> instead."
+# endif
+#else
 
-__PUB_API__ int xante_theme_set(const char *pathname)
-{
-    errno_clear();
+/* Internal library declarations */
+#endif
 
-    if (NULL == pathname) {
-        errno_set(XANTE_ERROR_NULL_ARG);
-        return -1;
-    }
-
-    setenv("DIALOGRC", pathname, 1);
-
-    return 0;
-}
+#endif
 

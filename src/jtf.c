@@ -323,7 +323,6 @@ static int parse_ui_menu(cl_json_t *menu, struct xante_app *xpp)
 
     fill_info(menu, NAME, (void **)&m->name);
     fill_info(menu, OBJECT_ID, (void **)&m->object_id);
-    fill_info(menu, MODE, (void **)&m->mode);
     fill_info(menu, TYPE, (void **)&m->type);
     parse_menu_dynamic(menu, m, &copies);
     m->events = cl_json_dup(cl_json_get_object_item(menu, EVENTS));

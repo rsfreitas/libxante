@@ -69,6 +69,12 @@
 #define EV_ITEM_EXIT                        "item-exit"
 #define EV_MENU_EXIT                        "menu-exit"
 
+/** Environment variables */
+#define ENV_XANTE_DB_PATH                   "XANTE_DB_PATH"
+#define ENV_XANTE_CFG_PATH                  "XANTE_CFG_PATH"
+
+#define max(a,b)                            ((a) > (b) ? (a) : (b))
+
 /** Different ways of creating menus */
 enum xante_menu_creator {
     XANTE_MENU_CREATED_FROM_JTF,
@@ -144,7 +150,6 @@ struct xante_menu {
     cl_string_t                 *name;
     cl_string_t                 *object_id;
     cl_string_t                 *type;
-    enum xante_access_mode      mode;
     cl_json_t                   *events;
 
     /* Dynamic menu details */
@@ -192,12 +197,18 @@ struct xante_changes {
 };
 
 struct xante_auth {
-    cl_string_t         *username;
-    cl_string_t         *password;
-    cl_string_t         *name;
-    sqlite3             *db;
-    int                 id_application;
-    int                 id_group;
+    cl_string_t                 *username;
+    cl_string_t                 *password;
+    cl_string_t                 *name;
+    cl_string_t                 *login_and_source;
+    int                         id_application;
+    int                         id_group;
+    int                         id_user;
+    int                         session_pid;
+    enum xante_session          session_type;
+    enum xante_session_source   session_source;
+    cl_string_t                 *source_description;
+    sqlite3                     *db;
 };
 
 /** Library main structure */

@@ -107,6 +107,16 @@ void log_uninit(struct xante_app *xpp)
  *
  */
 
+/**
+ * @name xante_log
+ * @brief Logs a string into the log file.
+ *
+ * @param [in] level: The message level inside the file.
+ * @param [in] function: The function name which is calling the log function.
+ * @param [in] line: The line number which the function is been called.
+ * @param [in] fmt: The message format.
+ * @param [in] ...: The message content.
+ */
 __PUB_API__ void xante_log(enum cl_log_level level, const char *function,
     int line, const char *fmt, ...)
 {

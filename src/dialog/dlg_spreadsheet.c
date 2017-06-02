@@ -55,7 +55,6 @@
 #define MAX_CELL_SIZE                       25
 #define CELL_HEIGHT                         3
 
-#define max(a,b)                            ((a) > (b) ? (a) : (b))
 #define spreadsheet_draw_box(data, s)       (data)->box_draw(data, s)
 
 static struct __line_st *line_st_init(const char *text)

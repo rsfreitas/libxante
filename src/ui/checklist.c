@@ -247,9 +247,8 @@ bool ui_dialog_checklist(struct xante_app *xpp, struct xante_item *item,
 {
     bool loop = true, value_changed = false;
     int ret_dialog = DLG_EXIT_OK, list_options_height = 0, height = 0,
-        number_of_options = 0, selected_index = -1;
+        number_of_options = 0, selected_index = -1, selected_items;
     DIALOG_LISTITEM *dlg_items = NULL;
-    int selected_items;
 
     /* Prepare dialog */
     dialog_set_backtitle(xpp);

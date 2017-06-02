@@ -98,6 +98,9 @@ static int check_item_width(cl_list_node_t *node, void *a)
     int length = 0;
     char *s = NULL;
 
+    if (is_item_available(item) == false)
+        return 0;
+
     length = cl_string_length(item->name);
 
     if (length > ld->name_size)
@@ -153,8 +156,9 @@ static int add_item_content(unsigned int index, cl_list_node_t *node, void *a)
     DIALOG_LISTITEM *listitem = NULL;
     char *value = NULL;
 
+    /* Ignore this item (and the index does not get incremented) */
     if (is_item_available(item) == false)
-        return 0;
+        return 1;
 
     /* Fills litems[index] with item content */
     listitem = &litems[index];
@@ -226,7 +230,7 @@ static void release_dialog_content(DIALOG_LISTITEM *listitem, int total_items)
 }
 
 static void call_menu_dialog(struct xante_app *xpp,
-    struct xante_item *selected_item, bool remove_item_from_menu)
+    struct xante_item *selected_item)
 {
     struct xante_menu *menu = NULL;
     char *btn_cancel_label = NULL;
@@ -243,9 +247,7 @@ static void call_menu_dialog(struct xante_app *xpp,
     }
 
     btn_cancel_label = strdup(cl_tr("Back"));
-    ui_dialog_menu(xpp, menu, btn_cancel_label, remove_item_from_menu,
-                   selected_item);
-
+    ui_dialog_menu(xpp, menu, btn_cancel_label);
     free(btn_cancel_label);
 }
 
@@ -279,27 +281,33 @@ static bool call_yesno_dialog(struct xante_app *xpp,
     return ui_dialog_yesno(xpp, selected_item);
 }
 
+static void call_delete_dm(struct xante_app *xpp,
+    struct xante_item *selected_item, bool edit_value)
+{
+    ui_dialog_delete_dm(xpp, selected_item, edit_value);
+}
+
+static void call_add_dm(struct xante_app *xpp,
+    struct xante_item *selected_item)
+{
+    ui_dialog_add_dm(xpp, selected_item);
+}
+
 static void call_selected_item(struct xante_app *xpp,
-    const struct xante_menu *menu, cl_list_node_t *selected_item_node,
-    bool remove_item_from_menu)
+    struct xante_item *selected_item)
 {
     bool update_internal_menus = false, edit_item_value = true;
-    struct xante_item *selected_item = cl_list_node_content(selected_item_node);
-
-    cl_list_node_unref(selected_item_node);
 
     if (NULL == selected_item) {
+        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, 0, cl_tr("Error"),
+                             cl_tr("No item was selected!"));
+
         return;
     }
 
     /* Are we leaving? */
     if (xante_runtime_close_ui(xpp) == true)
         return;
-
-    if (remove_item_from_menu == true) {
-        /* TODO: Future */
-        return;
-    }
 
     if (event_call(EV_ITEM_SELECTED, xpp, selected_item) < 0)
         return;
@@ -311,7 +319,7 @@ static void call_selected_item(struct xante_app *xpp,
     switch (selected_item->dialog_type) {
         case XANTE_UI_DIALOG_MENU:
         case XANTE_UI_DIALOG_DYNAMIC_MENU:
-            call_menu_dialog(xpp, selected_item, remove_item_from_menu);
+            call_menu_dialog(xpp, selected_item);
             break;
 
         case XANTE_UI_DIALOG_INPUT_INT:
@@ -354,7 +362,18 @@ static void call_selected_item(struct xante_app *xpp,
 
             break;
 
-        case XANTE_UI_DIALOG_RM_DYNAMIC_MENU:
+        case XANTE_UI_DIALOG_DELETE_DYNAMIC_MENU_ITEM:
+            call_delete_dm(xpp, selected_item, edit_item_value);
+            break;
+
+        case XANTE_UI_DIALOG_ADD_DYNAMIC_MENU_ITEM:
+            if (edit_item_value == true)
+                call_add_dm(xpp, selected_item);
+            else {
+                xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, 0, cl_tr("Error"),
+                                     cl_tr("Cannot add item!"));
+            }
+
             break;
 
         default:
@@ -374,22 +393,47 @@ static void call_selected_item(struct xante_app *xpp,
     event_call(EV_ITEM_EXIT, xpp, selected_item);
 }
 
-static void update_menu_item_brief(int current_item, void *a)
+static int item_at(unsigned int index, cl_list_node_t *node, void *a)
 {
-    struct xante_menu *menu = (struct xante_menu *)a;
-    struct xante_item *item;
-    cl_list_node_t *node;
-    char *text = NULL;
+    struct xante_item *item = cl_list_node_content(node);
+    int searched_index = *(int *)a;
 
-    node = cl_list_at(menu->items, current_item);
+    /* Ignore this item (and the index does not get incremented) */
+    if (is_item_available(item) == false)
+        return 1;
+
+    /* Item found */
+    if ((int)index == searched_index)
+        return -1;
+
+    return 0;
+}
+
+static struct xante_item *get_item_at(cl_list_t *list, int index)
+{
+    cl_list_node_t *node = NULL;
+    struct xante_item *item = NULL;
+
+    node = cl_list_map_indexed(list, item_at, &index);
 
     if (NULL == node)
-        return;
+        return NULL;
 
     item = cl_list_node_content(node);
     cl_list_node_unref(node);
 
-    if (NULL == item->brief_help)
+    return item;
+}
+
+static void update_menu_item_brief(int current_item, void *a)
+{
+    struct xante_menu *menu = (struct xante_menu *)a;
+    struct xante_item *item;
+    char *text = NULL;
+
+    item = get_item_at(menu->items, current_item);
+
+    if ((NULL == item) || (NULL == item->brief_help))
         text = " ";
     else
         text = (char *)cl_string_valueof(item->brief_help);
@@ -410,15 +454,11 @@ static void update_menu_item_brief(int current_item, void *a)
  * @param [in,out] xpp: The main library object.
  * @param [in] menu: The menu data to be used as content to the dialog.
  * @param [in] cancel_label: A string label of the cancel button.
- * @param [in] remove_item_from_menu: A boolean flag used when removing
- *                                    item from a dynamic menu.
- * @param [in] selected_item: The previously selected item.
  *
  * @return Returns the libdialog type of return value.
  */
 int ui_dialog_menu(struct xante_app *xpp, const struct xante_menu *menu,
-    const char *cancel_label, bool remove_item_from_menu,
-    struct xante_item *selected_item)
+    const char *cancel_label)
 {
     DIALOG_LISTITEM *dlg_items = NULL;
     bool loop = true;
@@ -445,14 +485,13 @@ int ui_dialog_menu(struct xante_app *xpp, const struct xante_menu *menu,
 #else
         ret_dialog = dlg_menu(cl_string_valueof(menu->name), "", dlg_lines,
                               dlg_width, items_to_select, total_items,
-                              dlg_items, &selected_index, NULL)
+                              dlg_items, &selected_index, NULL);
 #endif
 
         switch (ret_dialog) {
             case DLG_EXIT_OK:
-                call_selected_item(xpp, menu,
-                                   cl_list_at(menu->items, selected_index),
-                                   remove_item_from_menu);
+                call_selected_item(xpp,
+                                   get_item_at(menu->items, selected_index));
 
                 break;
 

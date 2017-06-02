@@ -46,6 +46,33 @@ static int count_lines_by_maximum_column(const char *text, int width)
             ((l % (width - DIALOG_COLUMNS)) ? 1 : 0);
 }
 
+static int get_longest_line_length(cl_string_t *text)
+{
+    cl_string_t *s = cl_string_dup(text), *tmp;
+    cl_string_list_t *list = NULL;
+    int length = 0, i, total;
+
+    cl_string_rplchr(s, XANTE_STR_LINE_BREAK, '\n');
+    list = cl_string_split(s, "^");
+    total = cl_string_list_size(list);
+
+    for (i = 0; i < total; i++) {
+        tmp = cl_string_list_get(list, i);
+
+        if (cl_string_length(tmp) > length)
+            length = cl_string_length(tmp);
+
+        cl_string_unref(tmp);
+    }
+
+    if (list != NULL)
+        cl_string_list_destroy(list);
+
+    cl_string_unref(s);
+
+    return length;
+}
+
 /*
  *
  * Internal API
@@ -332,5 +359,32 @@ char *dialog_get_input_result(void)
             strlen(dialog_vars.input_result) - 1);
 
     return result;
+}
+
+/**
+ * @name dialog_get_input_window_width
+ * @brief Gets the width of an input dialog.
+ *
+ * Function to be used to calculate an input window width.
+ *
+ * @param [in] item: The input item object.
+ *
+ * @return Returns the window width.
+ */
+int dialog_get_input_window_width(const struct xante_item *item)
+{
+    int w = 0;
+
+    if (dialog_count_lines_by_delimiters(cl_string_valueof(item->options)) > 1)
+        return get_longest_line_length(item->options) + WINDOW_COLUMNS;
+
+    w = cl_string_length(item->options);
+
+    if (w < MINIMUM_WIDTH)
+        w = MINIMUM_WIDTH;
+    else
+        w += WINDOW_COLUMNS;
+
+    return w;
 }
 

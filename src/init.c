@@ -78,8 +78,24 @@ static struct xante_app *new_xante_app(void)
  *
  */
 
+/**
+ * @name xante_init
+ * @brief Initialize a libxante application.
+ *
+ * @param [in] jtf_pathname: The JTF file.
+ * @param [in] use_plugin: A boolean true/false to load or not the application
+ *                         plugin.
+ * @param [in] use_auth: A boolean true/false to use an internal user
+ *                       authentication.
+ * @param [in] session: The session type.
+ * @param [in] username: The username to access the application.
+ * @param [in] password: The username's password.
+ *
+ * @return On success returns a xante_t object or NULL otherwise.
+ */
 __PUB_API__ xante_t *xante_init(const char *jtf_pathname, bool use_plugin,
-    bool use_auth, const char *username, const char *password)
+    bool use_auth, enum xante_session session, const char *username,
+    const char *password)
 {
     struct xante_app *xpp = NULL;
 
@@ -100,12 +116,16 @@ __PUB_API__ xante_t *xante_init(const char *jtf_pathname, bool use_plugin,
 
     /* Start translation environment */
 
+    /* Start user access control */
+    if (auth_init(xpp, use_auth, session, username, password) < 0)
+        goto error_block;
+
     /* Parse the JTF file */
     if (jtf_parse(jtf_pathname, xpp) < 0)
         goto error_block;
 
-    /* Start user access control */
-    if (auth_init(xpp, use_auth, username, password) < 0)
+    /* Starts application authentication */
+    if (auth_application_init(xpp) < 0)
         goto error_block;
 
     /* Start user modifications monitoring */
@@ -127,6 +147,14 @@ error_block:
     return NULL;
 }
 
+/**
+ * @name xante_uninit
+ * @brief Ends a libxante application.
+ *
+ * @param [in,out] xpp: The library main object.
+ *
+ * @return On success returns 0 or -1 otherwise.
+ */
 __PUB_API__ int xante_uninit(xante_t *xpp)
 {
     struct xante_app *x = (struct xante_app *)xpp;
