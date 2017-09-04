@@ -65,19 +65,19 @@ struct table {
 
 static void release_row_data(void *a)
 {
-    cl_string_list_t *row = (cl_string_list_t *)a;
+    cl_stringlist_t *row = (cl_stringlist_t *)a;
 
     if (NULL == row)
         return;
 
-    cl_string_list_destroy(row);
+    cl_stringlist_destroy(row);
 }
 
 static cl_list_t *db_query(sqlite3 *db, const char *query)
 {
     sqlite3_stmt *stmt = NULL;
     cl_list_t *query_data = NULL;
-    cl_string_list_t *row_data = NULL;
+    cl_stringlist_t *row_data = NULL;
     cl_string_t *data = NULL;
     const unsigned char *db_data;
     int i;
@@ -88,12 +88,12 @@ static cl_list_t *db_query(sqlite3 *db, const char *query)
     query_data = cl_list_create(release_row_data, NULL, NULL, NULL);
 
     while (sqlite3_step(stmt) == SQLITE_ROW) {
-        row_data = cl_string_list_create();
+        row_data = cl_stringlist_create();
         i = 0;
 
         while ((db_data = sqlite3_column_text(stmt, i)) != NULL) {
             data = cl_string_create("%s", db_data);
-            cl_string_list_add(row_data, data);
+            cl_stringlist_add(row_data, data);
             cl_string_unref(data);
             i++;
         }
@@ -564,7 +564,7 @@ static int get_group_id(struct xante_app *xpp, int id_user)
     int ret = -1;
     cl_list_t *db_data = NULL;
     cl_list_node_t *node = NULL;
-    cl_string_list_t *row = NULL;
+    cl_stringlist_t *row = NULL;
     cl_string_t *s = NULL;
 
     asprintf(&query, "SELECT id_group FROM 'group_user_rel' WHERE id_user = %d",
@@ -581,7 +581,7 @@ static int get_group_id(struct xante_app *xpp, int id_user)
     if (cl_list_size(db_data) == 1) {
        node = cl_list_at(db_data, 0);
        row = cl_list_node_content(node);
-       s = cl_string_list_get(row, 0);
+       s = cl_stringlist_get(row, 0);
        xpp->auth.id_group = cl_string_to_int(s);
        cl_string_unref(s);
        cl_list_node_unref(node);
@@ -601,7 +601,7 @@ static int validate_user_access(struct xante_app *xpp)
     char *query = NULL, *db_password = NULL;
     cl_list_t *db_data = NULL;
     cl_list_node_t *node = NULL;
-    cl_string_list_t *row = NULL;
+    cl_stringlist_t *row = NULL;
     cl_string_t *s = NULL;
     int ret = -1;
 
@@ -628,14 +628,14 @@ static int validate_user_access(struct xante_app *xpp)
     if (cl_list_size(db_data) == 1) {
         node = cl_list_at(db_data, 0);
         row = cl_list_node_content(node);
-        s = cl_string_list_get(row, 0);
+        s = cl_stringlist_get(row, 0);
 
         /* -- name */
         xpp->auth.name = cl_string_dup(s);
         cl_string_unref(s);
 
         /* -- id */
-        s = cl_string_list_get(row, 1);
+        s = cl_stringlist_get(row, 1);
         xpp->auth.id_user = cl_string_to_int(s);
         cl_string_unref(s);
         cl_list_node_unref(node);
@@ -656,7 +656,7 @@ static int validate_application_access_control(struct xante_app *xpp)
     char *query = NULL;
     cl_list_t *db_data = NULL;
     cl_list_node_t *node = NULL;
-    cl_string_list_t *row = NULL;
+    cl_stringlist_t *row = NULL;
     cl_string_t *name = NULL;
     int ret = -1;
 
@@ -674,7 +674,7 @@ static int validate_application_access_control(struct xante_app *xpp)
     if (cl_list_size(db_data) == 1) {
         node = cl_list_at(db_data, 0);
         row = cl_list_node_content(node);
-        name = cl_string_list_get(row, 0);
+        name = cl_stringlist_get(row, 0);
 
         /* Stores the application database ID */
         xpp->auth.id_application = cl_string_to_int(name);
@@ -750,7 +750,7 @@ static cl_list_t *get_active_session(struct xante_app *xpp,
 static void close_session(struct xante_app *xpp, cl_list_t *session)
 {
     cl_list_node_t *node = NULL;
-    cl_string_list_t *row = NULL;
+    cl_stringlist_t *row = NULL;
     cl_datetime_t *dt = NULL;
     cl_string_t *dt_str, *data = NULL;
     char *query = NULL;
@@ -760,7 +760,7 @@ static void close_session(struct xante_app *xpp, cl_list_t *session)
 
     node = cl_list_at(session, 0);
     row = cl_list_node_content(node);
-    data = cl_string_list_get(row, 1);
+    data = cl_stringlist_get(row, 1);
     dt = cl_dt_localtime();
     dt_str = cl_dt_to_cstring(dt, "%F %T");
     asprintf(&query, "INSERT INTO 'session_history' (id_user, id_session_type, "
@@ -773,7 +773,7 @@ static void close_session(struct xante_app *xpp, cl_list_t *session)
     cl_string_unref(data);
     free(query);
 
-    data = cl_string_list_get(row, 0);
+    data = cl_stringlist_get(row, 0);
     asprintf(&query, "DELETE FROM 'session' WHERE id = %d",
              cl_string_to_int(data));
 
@@ -878,7 +878,7 @@ static int get_item_access_level(const struct xante_app *xpp,
     char *query = NULL;
     cl_list_t *val = NULL;
     cl_list_node_t *node = NULL;
-    cl_string_list_t *row = NULL;
+    cl_stringlist_t *row = NULL;
     cl_string_t *db_level = NULL;
     int level = XANTE_ACCESS_EDIT;
 
@@ -899,7 +899,7 @@ static int get_item_access_level(const struct xante_app *xpp,
 
     node = cl_list_at(val, 0);
     row = cl_list_node_content(node);
-    db_level = cl_string_list_get(row, 0);
+    db_level = cl_stringlist_get(row, 0);
     level = cl_string_to_int(db_level);
     cl_string_unref(db_level);
     cl_list_node_unref(node);

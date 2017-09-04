@@ -54,16 +54,16 @@ static const char *__mandatory_functions[] = {
  *
  */
 
-static bool find_function(cl_string_list_t *functions, const char *name)
+static bool find_function(cl_stringlist_t *functions, const char *name)
 {
     int i, t, ret;
     cl_string_t *f;
     bool found = false;
 
-    t = cl_string_list_size(functions);
+    t = cl_stringlist_size(functions);
 
     for (i = 0; i < t; i++) {
-        f = cl_string_list_get(functions, i);
+        f = cl_stringlist_get(functions, i);
         ret = strcmp(cl_string_valueof(f), name);
         cl_string_unref(f);
 
@@ -429,7 +429,7 @@ void event_uninit(struct xante_app *xpp)
     if (xpp->plugin.plugin != NULL) {
         event_call(EV_UNINIT, xpp, NULL);
         cl_plugin_info_unref(xpp->plugin.info);
-        cl_string_list_destroy(xpp->plugin.functions);
+        cl_stringlist_destroy(xpp->plugin.functions);
         cl_plugin_unload(xpp->plugin.plugin);
     }
 }

@@ -61,16 +61,16 @@ static int load_item_config(cl_list_node_t *node, void *a)
 {
     struct xante_item *item = cl_list_node_content(node);
     cl_cfg_file_t *cfg_file = (cl_cfg_file_t *)a;
-    cl_cfg_key_t *key = NULL;
+    cl_cfg_entry_t *key = NULL;
 
-    key = cl_cfg_get_key(cfg_file, cl_string_valueof(item->config_block),
-                         cl_string_valueof(item->config_item));
+    key = cl_cfg_entry(cfg_file, cl_string_valueof(item->config_block),
+                       cl_string_valueof(item->config_item));
 
     /* Work with the item's default value */
     if (NULL == key)
         return 0;
 
-    item->value = cl_cfg_key_value(key);
+    item->value = cl_cfg_entry_value(key);
 
     return 0;
 }

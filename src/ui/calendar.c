@@ -44,7 +44,7 @@ static void split_item_value(struct xante_item *item, int *day, int *month,
 {
     cl_object_t *value = NULL;
     cl_string_t *tmp = NULL;
-    cl_string_list_t *date = NULL;
+    cl_stringlist_t *date = NULL;
     char *str_value = NULL;
 
     value = item_value(item);
@@ -56,21 +56,21 @@ static void split_item_value(struct xante_item *item, int *day, int *month,
     cl_string_unref(tmp);
 
     /* DAY */
-    tmp = cl_string_list_get(date, 0);
+    tmp = cl_stringlist_get(date, 0);
     *day = cl_string_to_int(tmp);
     cl_string_unref(tmp);
 
     /* MONTH */
-    tmp = cl_string_list_get(date, 1);
+    tmp = cl_stringlist_get(date, 1);
     *month = cl_string_to_int(tmp);
     cl_string_unref(tmp);
 
     /* YEAR */
-    tmp = cl_string_list_get(date, 2);
+    tmp = cl_stringlist_get(date, 2);
     *year = cl_string_to_int(tmp);
     cl_string_unref(tmp);
 
-    cl_string_list_destroy(date);
+    cl_stringlist_destroy(date);
 }
 
 static bool item_value_has_changed(struct xante_app *xpp,

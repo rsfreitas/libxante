@@ -72,8 +72,8 @@ static struct __line_st *line_st_init(const char *text)
     t->s = cl_string_split(line, TOKEN_STRING);
     cl_string_unref(line);
 
-    for (i = 0; i < cl_string_list_size(t->s); i++) {
-        tmp = cl_string_list_get(t->s, i);
+    for (i = 0; i < cl_stringlist_size(t->s); i++) {
+        tmp = cl_stringlist_get(t->s, i);
         length = cl_string_length(tmp);
 
         if (length > l)
@@ -94,7 +94,7 @@ static struct __line_st *line_st_init(const char *text)
 
 static void line_st_destroy(struct __line_st *line)
 {
-    cl_string_list_destroy(line->s);
+    cl_stringlist_destroy(line->s);
     free(line);
 }
 
@@ -150,7 +150,7 @@ static int calc_dlg_width(const char *title, const char *subtitle,
     l_s = strlen(subtitle);
     width = max(l_t, l_s);
 
-    if ((cl_string_list_size(col->s) == 1) &&
+    if ((cl_stringlist_size(col->s) == 1) &&
         (width > (col->max_len + 1 + row->max_len + 1)))
     {
         return width;
@@ -162,14 +162,14 @@ static int calc_dlg_width(const char *title, const char *subtitle,
      */
 
     return INTERNAL_H_MARGIN + (row->max_len + 1) +
-            (cl_string_list_size(col->s) * (col->max_len + 3));
+            (cl_stringlist_size(col->s) * (col->max_len + 3));
 }
 
 static int calc_dlg_height(struct __line_st *row, int labels)
 {
     int h=0;
 
-    h = (cl_string_list_size(row->s) * CELL_HEIGHT) +
+    h = (cl_stringlist_size(row->s) * CELL_HEIGHT) +
         7 /* Additional window rows */ +
         labels;
 
@@ -190,8 +190,8 @@ static void __dlg_draw_col_labels(WINDOW *dialog, struct dlg_spreadsheet_st *she
 
     col_title = cl_string_create_empty(0);
 
-    for (i = 0; i < cl_string_list_size(sheet->col_st->s); i++) {
-        text = cl_string_list_get(sheet->col_st->s, i);
+    for (i = 0; i < cl_stringlist_size(sheet->col_st->s); i++) {
+        text = cl_stringlist_get(sheet->col_st->s, i);
 
         memset(fmt, 0, sizeof(fmt));
         sprintf(fmt, "%%-%ds ", sheet->col_st->max_len + 2);
@@ -230,7 +230,7 @@ static int __dlg_draw_spreadsheet_cells(WINDOW *dlg_grid, struct dlg_spreadsheet
     w = sheet->col_st->max_len;
 
     for (i = 0; i < sheet->cells; i++) {
-        if (i && !(i % cl_string_list_size(sheet->col_st->s))) {
+        if (i && !(i % cl_stringlist_size(sheet->col_st->s))) {
             pos_x = (sheet->row_st->max_len + 2);
             pos_y += (h + 2);
         }
@@ -247,7 +247,7 @@ static int __dlg_draw_spreadsheet_cells(WINDOW *dlg_grid, struct dlg_spreadsheet
          */
         last_cell++;
 
-        if (!(i % cl_string_list_size(sheet->col_st->s)) && sheet->row_labels) {
+        if (!(i % cl_stringlist_size(sheet->col_st->s)) && sheet->row_labels) {
             chtype text_attr;
             char fmt[8];
 
@@ -256,7 +256,7 @@ static int __dlg_draw_spreadsheet_cells(WINDOW *dlg_grid, struct dlg_spreadsheet
 
             text_attr = dlg_color_pair(4, 7);
             wattrset(dlg_grid, text_attr);
-            text = cl_string_list_get(sheet->row_st->s, j);
+            text = cl_stringlist_get(sheet->row_st->s, j);
             (void)mvwprintw(dlg_grid, pos_y, 0, fmt, cl_string_valueof(text));
             cl_string_unref(text);
             j++;
@@ -292,7 +292,7 @@ struct dlg_spreadsheet_st *spreadsheet_st_init(const char *row_text,
     if (NULL == t->col_st)
         goto col_error_block;
     else {
-        text = cl_string_list_get(t->col_st->s, 0);
+        text = cl_stringlist_get(t->col_st->s, 0);
 
         if (cl_string_length(text) > 0)
             t->col_labels = 1;
@@ -305,7 +305,7 @@ struct dlg_spreadsheet_st *spreadsheet_st_init(const char *row_text,
     if (NULL == t->row_st)
         goto row_error_block;
     else {
-        text = cl_string_list_get(t->row_st->s, 0);
+        text = cl_stringlist_get(t->row_st->s, 0);
 
         if (cl_string_length(text) <= 0)
             t->row_st->max_len = 1;
@@ -315,8 +315,8 @@ struct dlg_spreadsheet_st *spreadsheet_st_init(const char *row_text,
         cl_string_unref(text);
     }
 
-    t->row = cl_string_list_size(t->row_st->s);
-    t->col = cl_string_list_size(t->col_st->s);
+    t->row = cl_stringlist_size(t->row_st->s);
+    t->col = cl_stringlist_size(t->col_st->s);
     t->cells = (t->row * t->col);
     t->cell = malloc(sizeof(spreadsheet_box) * t->cells);
 

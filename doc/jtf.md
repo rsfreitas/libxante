@@ -53,12 +53,13 @@ it may reference an application skeleton.
                 },
                 "items": [
                     {
-                        "mode": int,
-                        "default_value": string,
-                        "type": string,
-                        "options": string/array of strings,
                         "name": string,
+                        "object_id": string,
+                        "type": string,
+                        "mode": int,
                         "menu_id": string,
+                        "default_value": string,
+                        "options": string/array of strings,
                         "config": {
                             "block": string,
                             "item": string,
@@ -75,7 +76,7 @@ it may reference an application skeleton.
                         },
                         "events": {
                             "selected": string,
-                            "value_cofirmed": string,
+                            "value_confirmed": string,
                             "value_changed": string,
                             "exit": string
                         }

@@ -59,7 +59,7 @@ typedef struct __spreadsheet_box {
 } spreadsheet_box;
 
 struct __line_st {
-    cl_string_list_t    *s;
+    cl_stringlist_t     *s;
     int                 max_len;
 };
 

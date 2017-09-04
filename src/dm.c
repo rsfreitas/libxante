@@ -101,7 +101,7 @@ static int find_number_of_copies(struct xante_app *xpp,
 static int dm_find_number_of_copies(struct xante_app *xpp,
     cl_cfg_file_t *cfg_file, struct xante_menu *menu)
 {
-    cl_cfg_key_t *key = NULL;
+    cl_cfg_entry_t *key = NULL;
     cl_object_t *value = NULL;
     int copies = -1;
 
@@ -111,12 +111,12 @@ static int dm_find_number_of_copies(struct xante_app *xpp,
 
     /* Also fixed but from an array of names */
     if (menu->dynamic_names != NULL)
-        return cl_string_list_size(menu->dynamic_names);
+        return cl_stringlist_size(menu->dynamic_names);
 
     /* Search into the configuration file */
-    key = cl_cfg_get_key(cfg_file,
-                         cl_string_valueof(menu->dynamic_origin_block),
-                         cl_string_valueof(menu->dynamic_origin_item));
+    key = cl_cfg_entry(cfg_file,
+                       cl_string_valueof(menu->dynamic_origin_block),
+                       cl_string_valueof(menu->dynamic_origin_item));
 
     if (NULL == key) {
         /*
@@ -125,7 +125,7 @@ static int dm_find_number_of_copies(struct xante_app *xpp,
          */
         copies = find_number_of_copies(xpp, menu);
     } else {
-        value = cl_cfg_key_value(key);
+        value = cl_cfg_entry_value(key);
         copies = CL_OBJECT_AS_INT(value);
         cl_object_unref(value);
     }
@@ -147,7 +147,7 @@ static cl_string_t *create_menu_name(struct xante_menu *menu, int copy_index,
         return cl_string_create("%s", input_name);
 
     if (menu->dynamic_names != NULL)
-        return cl_string_list_get(menu->dynamic_names, copy_index);
+        return cl_stringlist_get(menu->dynamic_names, copy_index);
 
     return cl_string_create("%s (%d)", cl_string_valueof(menu->name),
                             copy_index + 1);
@@ -164,7 +164,7 @@ static cl_string_t *create_item_config_block(struct xante_menu *menu,
     int menu_index, struct xante_item *item)
 {
     if (menu->dynamic_names != NULL)
-        return cl_string_list_get(menu->dynamic_names, menu_index);
+        return cl_stringlist_get(menu->dynamic_names, menu_index);
 
     if (menu->dynamic_block_prefix != NULL)
         return cl_string_create("%s_%d",
@@ -205,7 +205,7 @@ static struct xante_item *dup_item(struct xante_menu *menu, int item_index,
     d_item->dialog_checklist_type = item->dialog_checklist_type;
     d_item->string_length = item->string_length;
 
-    d_item->checklist_options = cl_string_list_dup(item->checklist_options);
+    d_item->checklist_options = cl_stringlist_dup(item->checklist_options);
     d_item->default_value = cl_object_dup(item->default_value);
     d_item->min = cl_object_dup(item->min);
     d_item->max = cl_object_dup(item->max);
@@ -333,7 +333,7 @@ static struct xante_item *create_rme_item(struct xante_menu *menu,
     if (input_name != NULL)
         item->name = cl_string_create("%s", input_name);
     else if (menu->dynamic_names != NULL)
-        item->name = cl_string_list_get(menu->dynamic_names, item_index);
+        item->name = cl_stringlist_get(menu->dynamic_names, item_index);
     else {
         item->name = cl_string_create("%s (%d)",
                                       cl_string_valueof(menu->name),
