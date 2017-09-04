@@ -137,8 +137,8 @@ struct xante_item {
     /* Internal */
     cl_string_t             *options;
     cl_object_t             *value;
-    cl_string_list_t        *checklist_options;
-    cl_string_list_t        *checklist_brief_options;
+    cl_stringlist_t         *checklist_options;
+    cl_stringlist_t         *checklist_brief_options;
     int                     dialog_checklist_type;
     enum xante_ui_dialog    dialog_type;
     struct cl_ref_s         ref;
@@ -153,7 +153,7 @@ struct xante_menu {
     cl_json_t                   *events;
 
     /* Dynamic menu details */
-    cl_string_list_t            *dynamic_names;
+    cl_stringlist_t             *dynamic_names;
     cl_string_t                 *dynamic_block_prefix;
     int                         copies;
     cl_string_t                 *dynamic_origin_block;
@@ -184,7 +184,7 @@ struct xante_log {
 struct xante_plugin {
     cl_plugin_t             *plugin;
     cl_plugin_info_t        *info;
-    cl_string_list_t        *functions;
+    cl_stringlist_t         *functions;
 };
 
 struct xante_config {

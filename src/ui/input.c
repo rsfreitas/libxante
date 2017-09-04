@@ -111,7 +111,7 @@ static bool item_value_has_changed(struct xante_app *xpp,
 
 static bool validate_date(struct xante_app *xpp, cl_string_t *value)
 {
-    cl_string_list_t *date = NULL;
+    cl_stringlist_t *date = NULL;
     cl_string_t *tmp = NULL;
     int day, month, year;
 
@@ -125,21 +125,21 @@ static bool validate_date(struct xante_app *xpp, cl_string_t *value)
     date = cl_string_split(value, "/");
 
     /* DAY */
-    tmp = cl_string_list_get(date, 0);
+    tmp = cl_stringlist_get(date, 0);
     day = cl_string_to_int(tmp);
     cl_string_unref(tmp);
 
     /* MONTH */
-    tmp = cl_string_list_get(date, 1);
+    tmp = cl_stringlist_get(date, 1);
     month = cl_string_to_int(tmp);
     cl_string_unref(tmp);
 
     /* YEAR */
-    tmp = cl_string_list_get(date, 2);
+    tmp = cl_stringlist_get(date, 2);
     year = cl_string_to_int(tmp);
     cl_string_unref(tmp);
 
-    cl_string_list_destroy(date);
+    cl_stringlist_destroy(date);
 
     if ((day <= 0) || (day > 31)) {
         xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, 0, cl_tr("Error"),
@@ -167,7 +167,7 @@ static bool validate_date(struct xante_app *xpp, cl_string_t *value)
 
 static bool validate_time(struct xante_app *xpp, cl_string_t *value)
 {
-    cl_string_list_t *time = NULL;
+    cl_stringlist_t *time = NULL;
     cl_string_t *tmp = NULL;
     int hour, minute, second;
 
@@ -181,21 +181,21 @@ static bool validate_time(struct xante_app *xpp, cl_string_t *value)
     time = cl_string_split(value, ":");
 
     /* HOUR */
-    tmp = cl_string_list_get(time, 0);
+    tmp = cl_stringlist_get(time, 0);
     hour = cl_string_to_int(tmp);
     cl_string_unref(tmp);
 
     /* MINUTE */
-    tmp = cl_string_list_get(time, 1);
+    tmp = cl_stringlist_get(time, 1);
     minute = cl_string_to_int(tmp);
     cl_string_unref(tmp);
 
     /* SECOND */
-    tmp = cl_string_list_get(time, 2);
+    tmp = cl_stringlist_get(time, 2);
     second = cl_string_to_int(tmp);
     cl_string_unref(tmp);
 
-    cl_string_list_destroy(time);
+    cl_stringlist_destroy(time);
 
     if ((hour < 0) || (hour > 23)) {
         xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, 0, cl_tr("Error"),

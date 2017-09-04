@@ -96,10 +96,10 @@ static void destroy_xante_item(const struct cl_ref_s *ref)
         cl_object_unref(item->max);
 
     if (item->checklist_options != NULL)
-        cl_string_list_destroy(item->checklist_options);
+        cl_stringlist_destroy(item->checklist_options);
 
     if (item->checklist_brief_options != NULL)
-        cl_string_list_destroy(item->checklist_brief_options);
+        cl_stringlist_destroy(item->checklist_brief_options);
 
     if (item->value_spec != NULL)
         cl_spec_destroy(item->value_spec);
@@ -130,7 +130,7 @@ static void destroy_xante_menu(const struct cl_ref_s *ref)
         cl_string_unref(menu->type);
 
     if (menu->dynamic_names != NULL)
-        cl_string_list_destroy(menu->dynamic_names);
+        cl_stringlist_destroy(menu->dynamic_names);
 
     if (menu->dynamic_block_prefix != NULL)
         cl_string_unref(menu->dynamic_block_prefix);
@@ -359,12 +359,12 @@ void ui_adjusts_menu_info(struct xante_menu *menu, void *copies)
         /* If we don't have a block_prefix, we handle @copies as an array */
         if (NULL == menu->dynamic_block_prefix) {
             t = cl_json_get_array_size(copies);
-            menu->dynamic_names = cl_string_list_create();
+            menu->dynamic_names = cl_stringlist_create();
 
             for (i = 0; i < t; i++) {
                 node = cl_json_get_array_item(copies, i);
                 value = cl_json_get_object_value(node);
-                cl_string_list_add(menu->dynamic_names, value);
+                cl_stringlist_add(menu->dynamic_names, value);
             }
         } else
             menu->copies = *(int *)&copies;
@@ -376,7 +376,7 @@ void ui_adjusts_menu_info(struct xante_menu *menu, void *copies)
  * @brief Do some adjustments inside an item after its informations is
  *        completely loaded from the JTF file.
  *
- * For example, here we must split a checklist options into a cl_string_list_t
+ * For example, here we must split a checklist options into a cl_stringlist_t
  * object.
  *
  * @param [in,out] item: The item to be adjusted.
@@ -406,12 +406,12 @@ void ui_adjusts_item_info(struct xante_item *item, cl_string_t *default_value,
         case XANTE_UI_DIALOG_CHECKLIST:
             if (options != NULL) {
                 t = cl_json_get_array_size(options);
-                item->checklist_options = cl_string_list_create();
+                item->checklist_options = cl_stringlist_create();
 
                 for (i = 0; i < t; i++) {
                     node = cl_json_get_array_item(options, i);
                     value = cl_json_get_object_value(node);
-                    cl_string_list_add(item->checklist_options, value);
+                    cl_stringlist_add(item->checklist_options, value);
                 }
             }
 
@@ -421,12 +421,12 @@ void ui_adjusts_item_info(struct xante_item *item, cl_string_t *default_value,
 
             if (brief_options_help != NULL) {
                 t = cl_json_get_array_size(brief_options_help);
-                item->checklist_brief_options = cl_string_list_create();
+                item->checklist_brief_options = cl_stringlist_create();
 
                 for (i = 0; i < t; i++) {
                     node = cl_json_get_array_item(brief_options_help, i);
                     value = cl_json_get_object_value(node);
-                    cl_string_list_add(item->checklist_brief_options, value);
+                    cl_stringlist_add(item->checklist_brief_options, value);
                 }
             }
 

@@ -54,11 +54,11 @@ static DIALOG_LISTITEM *prepare_dialog_content(struct xante_item *item,
     }
 
     current_value = CL_OBJECT_AS_INT(item_value(item));
-    total = cl_string_list_size(item->checklist_options);
+    total = cl_stringlist_size(item->checklist_options);
 
     for (index = 0; index < total; index++) {
         listitem = &litems[index];
-        option = cl_string_list_get(item->checklist_options, index);
+        option = cl_stringlist_get(item->checklist_options, index);
 
         listitem->name = strdup("");
         listitem->help = strdup("");
@@ -95,34 +95,34 @@ static void release_dialog_content(DIALOG_LISTITEM *listitem, int total_items)
 static void calc_checklist_limits(const struct xante_item *item, int *options,
     int *height, int *list_height)
 {
-    *list_height = cl_string_list_size(item->checklist_options);
+    *list_height = cl_stringlist_size(item->checklist_options);
     *options = dialog_get_dlg_items(*list_height);
 
     /* XXX: This 1 is from the dialog text message. */
     *height = *options + DIALOG_HEIGHT_WITHOUT_TEXT + 1;
 }
 
-static cl_string_list_t *get_checklist_entries(DIALOG_LISTITEM *dlg_items,
+static cl_stringlist_t *get_checklist_entries(DIALOG_LISTITEM *dlg_items,
     int total_items, int checklist_type, int selected_option)
 {
-    cl_string_list_t *selected_entries = NULL;
+    cl_stringlist_t *selected_entries = NULL;
     cl_string_t *option = NULL;
     int i;
 
-    selected_entries = cl_string_list_create();
+    selected_entries = cl_stringlist_create();
 
     if (NULL == selected_entries)
         return NULL;
 
     if (checklist_type == FLAG_RADIO) {
         option = cl_string_create("%s", dlg_items[selected_option].text);
-        cl_string_list_add(selected_entries, option);
+        cl_stringlist_add(selected_entries, option);
         cl_string_unref(option);
     } else {
         for (i = 0; i < total_items; i++) {
             if ((int)pow(2, i) & selected_option) {
                 option = cl_string_create("%s", dlg_items[i].text);
-                cl_string_list_add(selected_entries, option);
+                cl_stringlist_add(selected_entries, option);
                 cl_string_unref(option);
             }
         }
@@ -151,7 +151,7 @@ static void add_internal_change(struct xante_app *xpp, struct xante_item *item,
     DIALOG_LISTITEM *dlg_items, int total_items, int current_value,
     int selected_value)
 {
-    cl_string_list_t *current_entries = NULL, *selected_entries = NULL;
+    cl_stringlist_t *current_entries = NULL, *selected_entries = NULL;
     cl_string_t *current = NULL, *selected = NULL;
 
     current_entries = get_checklist_entries(dlg_items, total_items,
@@ -162,8 +162,8 @@ static void add_internal_change(struct xante_app *xpp, struct xante_item *item,
                                              item->dialog_checklist_type,
                                              selected_value);
 
-    current = cl_string_list_flat(current_entries, ',');
-    selected = cl_string_list_flat(selected_entries, ',');
+    current = cl_stringlist_flat(current_entries, ',');
+    selected = cl_stringlist_flat(selected_entries, ',');
     change_add(xpp, cl_string_valueof(item->name), cl_string_valueof(current),
                cl_string_valueof(selected));
 
@@ -174,10 +174,10 @@ static void add_internal_change(struct xante_app *xpp, struct xante_item *item,
         cl_string_unref(selected);
 
     if (current_entries != NULL)
-        cl_string_list_destroy(current_entries);
+        cl_stringlist_destroy(current_entries);
 
     if (selected_entries != NULL)
-        cl_string_list_destroy(selected_entries);
+        cl_stringlist_destroy(selected_entries);
 }
 
 static bool item_value_has_changed(struct xante_app *xpp, struct xante_item *item,
@@ -212,7 +212,7 @@ static void update_item_brief(int current_index, void *a)
     if (NULL == item->checklist_brief_options)
         return;
 
-    brief = cl_string_list_get(item->checklist_brief_options, current_index);
+    brief = cl_stringlist_get(item->checklist_brief_options, current_index);
 
     if (NULL == brief)
         return;

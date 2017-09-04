@@ -44,7 +44,7 @@ static void split_item_value(struct xante_item *item, int *hour, int *minutes,
 {
     cl_object_t *value = NULL;
     cl_string_t *tmp = NULL;
-    cl_string_list_t *time = NULL;
+    cl_stringlist_t *time = NULL;
     char *str_value = NULL;
 
     value = item_value(item);
@@ -56,21 +56,21 @@ static void split_item_value(struct xante_item *item, int *hour, int *minutes,
     cl_string_unref(tmp);
 
     /* HOUR */
-    tmp = cl_string_list_get(time, 0);
+    tmp = cl_stringlist_get(time, 0);
     *hour = cl_string_to_int(tmp);
     cl_string_unref(tmp);
 
     /* MINUTES */
-    tmp = cl_string_list_get(time, 1);
+    tmp = cl_stringlist_get(time, 1);
     *minutes = cl_string_to_int(tmp);
     cl_string_unref(tmp);
 
     /* SECONDS */
-    tmp = cl_string_list_get(time, 2);
+    tmp = cl_stringlist_get(time, 2);
     *seconds = cl_string_to_int(tmp);
     cl_string_unref(tmp);
 
-    cl_string_list_destroy(time);
+    cl_stringlist_destroy(time);
 }
 
 static bool item_value_has_changed(struct xante_app *xpp,

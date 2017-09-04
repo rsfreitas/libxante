@@ -49,15 +49,15 @@ static int count_lines_by_maximum_column(const char *text, int width)
 static int get_longest_line_length(cl_string_t *text)
 {
     cl_string_t *s = cl_string_dup(text), *tmp;
-    cl_string_list_t *list = NULL;
+    cl_stringlist_t *list = NULL;
     int length = 0, i, total;
 
     cl_string_rplchr(s, XANTE_STR_LINE_BREAK, '\n');
     list = cl_string_split(s, "^");
-    total = cl_string_list_size(list);
+    total = cl_stringlist_size(list);
 
     for (i = 0; i < total; i++) {
-        tmp = cl_string_list_get(list, i);
+        tmp = cl_stringlist_get(list, i);
 
         if (cl_string_length(tmp) > length)
             length = cl_string_length(tmp);
@@ -66,7 +66,7 @@ static int get_longest_line_length(cl_string_t *text)
     }
 
     if (list != NULL)
-        cl_string_list_destroy(list);
+        cl_stringlist_destroy(list);
 
     cl_string_unref(s);
 
@@ -160,7 +160,7 @@ char *dialog_get_item_value_as_text(const struct xante_item *item)
 
         case XANTE_UI_DIALOG_RADIO_CHECKLIST:
             index = CL_OBJECT_AS_INT(item_value(item));
-            value = cl_string_list_get(item->checklist_options, index);
+            value = cl_stringlist_get(item->checklist_options, index);
 
             if (value != NULL)
                 text = strdup(cl_string_valueof(value));
