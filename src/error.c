@@ -191,7 +191,7 @@ __PUB_API__ const char *xante_strerror(enum xante_error_code code)
         strcpy(ste->message, __description[code]);
 
         for (i = 0; i < ste->additional_content; i++) {
-            strcat(ste->message, ":");
+            strcat(ste->message, ": ");
             strcat(ste->message, ste->content[i]);
         }
 
