@@ -380,6 +380,7 @@ int event_init(struct xante_app *xpp, bool use_plugin)
     xpp->plugin.plugin = cl_plugin_load(cl_string_valueof(xpp->info.plugin_name));
 
     if (NULL == xpp->plugin.plugin) {
+        // DEBUG
         xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, 0, "ERROR",
                 "%s", cl_strerror(cl_get_last_error()));
         errno_set(XANTE_ERROR_PLUGIN_LOAD_ERROR);

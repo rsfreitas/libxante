@@ -102,6 +102,7 @@
                         "type": "checklist",
                         "options": [ "Option 1", "Option 2", "Option 3" ],
                         "default_value": "6",
+                        "object_id": "5",
                         "help": {
                             "brief": "This is a help description checklist.",
                             "description": "This is a help description.",
@@ -122,6 +123,7 @@
                         "type": "input-int",
                         "default_value": "5",
                         "options": "Just a simple text to show...",
+                        "object_id": "6",
                         "help": {
                             "brief": "This is a help description input.",
                             "description": "This is a help description."
@@ -140,6 +142,7 @@
                         "mode": 1,
                         "type": "input-float",
                         "default_value": "125.25",
+                        "object_id": "7",
                         "help": {
                             "brief": "This is a help description float.",
                             "description": "This is a help description."
@@ -158,6 +161,7 @@
                         "mode": 1,
                         "type": "input-passwd",
                         "default_value": "test",
+                        "object_id": "8",
                         "help": {
                             "brief": "This is a help description passwd.",
                             "description": "This is a help description."
@@ -175,6 +179,7 @@
                         "mode": 1,
                         "type": "input-string",
                         "default_value": "",
+                        "object_id": "9",
                         "help": {
                             "brief": "This is a help description string.",
                             "description": "This is a help description."
@@ -192,6 +197,7 @@
                         "mode": 1,
                         "type": "input-date",
                         "default_value": "12/02/2017",
+                        "object_id": "10",
                         "help": {
                             "brief": "This is a help description date.",
                             "description": "This is a help description."
@@ -206,6 +212,7 @@
                         "mode": 1,
                         "type": "input-time",
                         "default_value": "12:32:22",
+                        "object_id": "11",
                         "help": {
                             "brief": "This is a help description time.",
                             "description": "This is a help description."

@@ -33,6 +33,11 @@
 # endif
 #endif
 
+/**
+ * The main library internal error codes.
+ *
+ * Codes with an asterisk (*) have a secondary error code to be checked.
+ */
 enum xante_error_code {
     XANTE_NO_ERROR,
 
@@ -41,8 +46,8 @@ enum xante_error_code {
     XANTE_ERROR_INVALID_ARG,
     XANTE_ERROR_WRONG_JTF_FORMAT,
     XANTE_ERROR_JTF_NO_GENERAL_OBJECT,
-    XANTE_ERROR_JTF_NO_INFO,
-    XANTE_ERROR_JTF_INFO_WITHOUT_VALUE,
+    XANTE_ERROR_JTF_NO_INFO,                        //*
+    XANTE_ERROR_JTF_INFO_WITHOUT_VALUE,             //*
     XANTE_ERROR_JTF_NO_ITEMS_OBJECT,
     XANTE_ERROR_JTF_NO_MENUS_OBJECT,
     XANTE_ERROR_JTF_NO_UI_OBJECT,
@@ -68,6 +73,9 @@ enum xante_error_code {
     XANTE_ERROR_DB_MULTIPLE_APPLICATION_ENTRIES,
     XANTE_ERROR_UNABLE_TO_RETRIEVE_LOGIN_INFO,
     XANTE_ERROR_DB_EXISTS,
+    XANTE_ERROR_JTF_NO_DYNAMIC_OBJECT,
+    XANTE_ERROR_JTF_NO_ORIGIN_OBJECT,
+    XANTE_ERROR_JTF_WRONG_OBJECT_TYPE,              //*
 
     XANTE_MAX_ERROR_CODE
 };
@@ -76,6 +84,7 @@ enum xante_error_code {
 
 void errno_clear(void);
 void errno_set(enum xante_error_code code);
+void errno_store_additional_content(const char *content);
 
 #endif
 

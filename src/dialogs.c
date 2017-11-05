@@ -28,7 +28,6 @@
 #include <stdarg.h>
 
 #include "libxante.h"
-#include "ui/ui_dialogs.h"
 
 /*
  *

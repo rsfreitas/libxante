@@ -37,16 +37,8 @@
 void ui_xante_item_ref(struct xante_item *item);
 void ui_xante_item_unref(struct xante_item *item);
 struct xante_item *ui_new_xante_item(void);
-void ui_xante_menu_ref(struct xante_menu *menu);
-void ui_xante_menu_unref(struct xante_menu *menu);
-struct xante_menu *ui_new_xante_menu(enum xante_menu_creator creator);
 void ui_init(struct xante_app *xpp);
 void ui_uninit(struct xante_app *xpp);
-void ui_adjusts_item_info(struct xante_item *item, cl_string_t *default_value,
-                          void *options, void *max_range, void *min_range,
-                          void *brief_options_help);
-
-void ui_adjusts_menu_info(struct xante_menu *menu, void *copies);
 struct xante_menu *ui_search_menu_by_object_id(const struct xante_app *xpp,
                                                const char *object_id_to_search);
 
