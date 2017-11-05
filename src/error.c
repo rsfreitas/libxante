@@ -95,9 +95,7 @@ static const char *__description[] = {
 static const char *__unknown_error = cl_tr_noop("Unknown error");
 
 cl_error_storage_declare(__storage__, sizeof(struct xante_storage_error))
-#define __errno     (cl_errno_storage(&__storage__, \
-                                      sizeof(struct xante_storage_error)))
-
+#define __errno     (cl_errno_storage(&__storage__))
 /*
  *
  * Internal API
