@@ -104,7 +104,8 @@ static int ev_void(struct xante_app *xpp, const char *event_name)
         .changes = NULL,
     };
 
-    ret = cl_plugin_call(xpp->plugin.plugin, event_name, "xpp_arg", &arg, NULL);
+    ret = cl_plugin_call(xpp->plugin.plugin, event_name, "xpp_arg", &arg,
+                         NULL);
 
     if (strcmp(event_name, EV_INIT) == 0)
         event_return = CL_OBJECT_AS_INT(ret);
@@ -174,8 +175,9 @@ static int ev_item(struct xante_app *xpp, const char *event_name, va_list ap)
     if (NULL == function_name)
         return 0; /* Should we return an error? */
 
-    ret = cl_plugin_call(xpp->plugin.plugin, function_name, "xpp_arg", &arg,
-                         NULL);
+    ret = cl_plugin_foreign_call(xpp->plugin.plugin, event_name, CL_INT,
+                                 CL_PLUGIN_ARGS_COMMON, "xpp_arg", CL_POINTER,
+                                 &arg, NULL);
 
     if (strcmp(event_name, EV_ITEM_SELECTED) == 0)
         event_return = CL_OBJECT_AS_INT(ret);
@@ -208,7 +210,9 @@ static int ev_menu(struct xante_app *xpp, const char *event_name, va_list ap)
     if (NULL == function_name)
         return 0; /* Should we return an error? */
 
-    ret = cl_plugin_call(xpp->plugin.plugin, event_name, "xpp_arg", &arg, NULL);
+    ret = cl_plugin_foreign_call(xpp->plugin.plugin, event_name, CL_INT,
+                                 CL_PLUGIN_ARGS_COMMON, "xpp_arg", CL_POINTER,
+                                 &arg, NULL);
 
     if (strcmp(event_name, EV_MENU_EXIT) == 0)
         event_return = CL_OBJECT_AS_INT(ret);
@@ -266,8 +270,9 @@ static int ev_item_value(struct xante_app *xpp, const char *event_name, va_list 
             break;
     }
 
-    ret = cl_plugin_call(xpp->plugin.plugin, function_name, "xpp_arg", &arg,
-                         NULL);
+    ret = cl_plugin_foreign_call(xpp->plugin.plugin, event_name, CL_INT,
+                                 CL_PLUGIN_ARGS_COMMON, "xpp_arg", CL_POINTER,
+                                 &arg, NULL);
 
     if (strcmp(event_name, EV_ITEM_VALUE_CONFIRM) == 0)
         event_return = CL_OBJECT_AS_INT(ret);
