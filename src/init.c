@@ -93,8 +93,8 @@ static struct xante_app *new_xante_app(void)
  *
  * @return On success returns a xante_t object or NULL otherwise.
  */
-__PUB_API__ xante_t *xante_init(const char *jtf_pathname, bool use_plugin,
-    bool use_auth, enum xante_session session, const char *username,
+__PUB_API__ xante_t *xante_init(const char *jtf_pathname,
+    enum xante_init_flags flags, enum xante_session session, const char *username,
     const char *password)
 {
     struct xante_app *xpp = NULL;
@@ -117,7 +117,7 @@ __PUB_API__ xante_t *xante_init(const char *jtf_pathname, bool use_plugin,
     /* Start translation environment */
 
     /* Start user access control */
-    if (auth_init(xpp, use_auth, session, username, password) < 0)
+    if (auth_init(xpp, bit_test(flags, XANTE_USE_AUTH), session, username, password) < 0)
         goto error_block;
 
     /* Parse the JTF file */
@@ -135,7 +135,7 @@ __PUB_API__ xante_t *xante_init(const char *jtf_pathname, bool use_plugin,
     log_init(xpp);
 
     /* Call the plugin initialization function or disable its using */
-    if (event_init(xpp, use_plugin) < 0)
+    if (event_init(xpp, bit_test(flags, XANTE_USE_PLUGIN)) < 0)
         goto error_block;
 
     xante_info(cl_tr("Initializing application - %s"),

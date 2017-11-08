@@ -73,9 +73,6 @@
 #define ENV_XANTE_DB_PATH                   "XANTE_DB_PATH"
 #define ENV_XANTE_CFG_PATH                  "XANTE_CFG_PATH"
 
-#define max(a,b)                            ((a) > (b) ? (a) : (b))
-#define min(a,b)                            ((a) < (b) ? (a) : (b))
-
 /** Different ways of creating menus */
 enum xante_menu_creator {
     XANTE_MENU_CREATED_FROM_JTF,
@@ -235,6 +232,14 @@ struct xante_app {
 
 /* Exclusive internal library headers */
 #include "ui_dialogs.h"
+
+/*
+ * Internal macros
+ */
+
+#define max(a,b)                            ((a) > (b) ? (a) : (b))
+#define min(a,b)                            ((a) < (b) ? (a) : (b))
+#define bit_test(data, bit)                 (((data) & (bit)) == (bit)) ? true : false
 
 #endif
 

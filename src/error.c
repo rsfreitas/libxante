@@ -163,9 +163,6 @@ __PUB_API__ enum xante_error_code xante_get_last_error(void)
 {
     struct xante_storage_error *ste = (struct xante_storage_error *)__errno;
 
-    if (ste->code >= XANTE_MAX_ERROR_CODE)
-        return ste->code & 0xFFFF;
-
     return ste->code;
 }
 
