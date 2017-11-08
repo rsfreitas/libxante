@@ -28,7 +28,6 @@
 #include <stdarg.h>
 
 #include "libxante.h"
-#include "ui/ui_dialogs.h"
 
 /*
  *
@@ -99,7 +98,7 @@ __PUB_API__ int xante_dlg_set_backtitle(xante_t *xpp)
 {
     struct xante_app *x = (struct xante_app *)xpp;
     cl_string_t *title = NULL, *left = NULL, *format = NULL, *right = NULL;
-    unsigned int screen_width = 0;
+    unsigned int screen_width = dlg_box_x_ordinate(0) * 2;
 
     errno_clear();
 
@@ -131,9 +130,6 @@ __PUB_API__ int xante_dlg_set_backtitle(xante_t *xpp)
                             cl_string_valueof(x->info.version),
                             x->info.revision, x->info.build,
                             (x->info.beta == true) ? "BETA" : "");
-
-    if ((screen_width = dlg_box_x_ordinate(0) * 2) > 256)
-        screen_width = 128;
 
     if (screen_width  > (unsigned int)(cl_string_length(left) +
                                        cl_string_length(right)))

@@ -73,8 +73,6 @@
 #define ENV_XANTE_DB_PATH                   "XANTE_DB_PATH"
 #define ENV_XANTE_CFG_PATH                  "XANTE_CFG_PATH"
 
-#define max(a,b)                            ((a) > (b) ? (a) : (b))
-
 /** Different ways of creating menus */
 enum xante_menu_creator {
     XANTE_MENU_CREATED_FROM_JTF,
@@ -113,6 +111,13 @@ struct xante_runtime {
     enum xante_config_file_status   config_file_status;
 };
 
+/** XanteItem's flag to be validated when parsed from a JTF file */
+struct flag_parser {
+    bool    options;
+    bool    menu_id;
+    bool    config;
+};
+
 /** UI Menu Item informations */
 struct xante_item {
     /* JTF objects */
@@ -141,6 +146,7 @@ struct xante_item {
     cl_stringlist_t         *checklist_brief_options;
     int                     dialog_checklist_type;
     enum xante_ui_dialog    dialog_type;
+    struct flag_parser      flags;
     struct cl_ref_s         ref;
 };
 
@@ -223,6 +229,17 @@ struct xante_app {
     struct xante_auth       auth;
     struct cl_ref_s         ref;
 };
+
+/* Exclusive internal library headers */
+#include "ui_dialogs.h"
+
+/*
+ * Internal macros
+ */
+
+#define max(a,b)                            ((a) > (b) ? (a) : (b))
+#define min(a,b)                            ((a) < (b) ? (a) : (b))
+#define bit_test(data, bit)                 (((data) & (bit)) == (bit)) ? true : false
 
 #endif
 

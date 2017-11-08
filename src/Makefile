@@ -34,6 +34,7 @@ TARGET_SHARED := $(OUTPUTDIR)/$(SHARED_LIBNAME)
 TARGET_STATIC := $(OUTPUTDIR)/$(STATIC_LIBNAME)
 
 INCLUDEDIR = -I../include
+INCLUDEDIR += -Iui
 CFLAGS = -Wall -Wextra -fPIC -ggdb -O0 -g3 \
         -DLIBXANTE_COMPILE -D_GNU_SOURCE $(INCLUDEDIR)
 
@@ -42,13 +43,12 @@ ifeq ($(gccversion), 5)
 endif
 
 LIBDIR =
-LIBS = -lcollections
+LIBS = -lcollections -lsqlite3 -lcrypto
 
 ifeq ($(ALTERNATIVE_DIALOG), 1)
-    ALTERNATIVE_DIALOG_INCLUDEDIR = /usr/
-    INCLUDEDIR +=
-    LIBDIR +=
-    LIBS +=
+    INCLUDEDIR += -I/usr/local/include/dialog
+    LIBDIR += -L/usr/local/lib
+    LIBS += -ldialog -lncursesw
     CFLAGS += -DALTERNATIVE_DIALOG
 else
     LIBS += -ldialog -lncursesw

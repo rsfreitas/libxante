@@ -209,16 +209,12 @@ bool is_menu_item(const cl_string_t *type)
  * @name is_input_item
  * @brief Checks if an item is of an input kind.
  *
- * @param [in] type: The item type, in a cl_string_t format.
+ * @param [in] type: The item type.
  *
  * @return Returns true is is an input kind or false if not.
  */
-bool is_input_item(const cl_string_t *type)
+bool is_input_item(enum xante_ui_dialog dlg_type)
 {
-    enum xante_ui_dialog dlg_type;
-
-    dlg_type = translate_string_dialog_type(cl_string_valueof(type));
-
     switch (dlg_type) {
         case XANTE_UI_DIALOG_INPUT_INT:
         case XANTE_UI_DIALOG_INPUT_FLOAT:

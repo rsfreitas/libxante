@@ -26,7 +26,6 @@
  */
 
 #include "libxante.h"
-#include "ui/ui_dialogs.h"
 
 /*
  *
@@ -162,7 +161,9 @@ static int save_item_config(cl_list_node_t *node, void *a)
     struct xante_app *xpp = (struct xante_app *)a;
     cl_string_t *value = NULL;
 
-    /* TODO: Checks if we can save the item */
+    /* Checks if we can save the item */
+    if (item->flags.config == false)
+        return 0;
 
     value = cl_object_to_cstring(item_value(item));
     cl_cfg_set_value(xpp->config.cfg_file,

@@ -37,7 +37,6 @@
  */
 
 #include "libxante.h"
-#include "ui/ui_dialogs.h"
 
 struct list_data {
     struct xante_app    *xpp;
@@ -187,7 +186,7 @@ static struct xante_item *dup_item(struct xante_menu *menu, int item_index,
         return NULL;
 
     item = cl_list_node_content(node);
-    d_item = ui_new_xante_item();
+    d_item = xante_item_create();
 
     /* Duplicate all item informations */
     d_item->name = cl_string_dup(item->name);
@@ -215,7 +214,7 @@ static struct xante_item *dup_item(struct xante_menu *menu, int item_index,
         d_item->config_block = create_item_config_block(menu, menu_index, item);
     }
 
-    if (is_input_item(d_item->type) == true)
+    if (is_input_item(d_item->dialog_type) == true)
         d_item->value_spec = cl_spec_create(CL_READABLE | CL_WRITABLE,
                                             d_item->min, d_item->max,
                                             d_item->string_length);
@@ -232,7 +231,7 @@ static struct xante_menu *dup_menu(struct xante_menu *menu, int copy_index,
     struct xante_item *d_item = NULL;
     struct xante_menu *d_menu = NULL;
 
-    d_menu = ui_new_xante_menu(XANTE_MENU_CREATED_INTERNALLY);
+    d_menu = xante_menu_create(XANTE_MENU_CREATED_INTERNALLY);
     total_items = cl_list_size(menu->items);
 
     /* Duplicate all menu information */
@@ -326,7 +325,7 @@ static struct xante_item *create_rme_item(struct xante_menu *menu,
 {
     struct xante_item *item = NULL;
 
-    item = ui_new_xante_item();
+    item = xante_item_create();
 
     /* Create the required item's informations */
 
@@ -359,7 +358,7 @@ static void rme_create(struct xante_app *xpp, struct xante_menu *menu,
     struct xante_item *rme_item = NULL;
     int i;
 
-    rme = ui_new_xante_menu(XANTE_MENU_CREATED_INTERNALLY);
+    rme = xante_menu_create(XANTE_MENU_CREATED_INTERNALLY);
 
     /* Create some required menu's information */
     rme->name = cl_string_dup(menu->name);
@@ -627,14 +626,14 @@ void dm_insert(struct xante_app *xpp, struct xante_item *item,
     unref_menu = ui_search_unref_menu_by_object_id(xpp, menu_id);
 
     if (NULL == unref_menu) {
-        // error msg
+        // TODO error msg
         return;
     }
 
     rme_menu = ui_search_menu_by_object_id(xpp, menu_id);
 
     if (NULL == rme_menu) {
-        // error msg
+        // TODO error msg
         return;
     }
 

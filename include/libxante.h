@@ -106,6 +106,12 @@ enum xante_session_source {
     XANTE_SESSION_SSH
 };
 
+/** Libxante initialization flags */
+enum xante_init_flags {
+    XANTE_USE_PLUGIN        = (1 << 0), // Enable/Disable plugin calls
+    XANTE_USE_AUTH          = (1 << 1)  // Enable/Disable database authentication
+};
+
 /** String keys of a supported dialog */
 #define XANTE_UI_STR_DIALOG_MENU                "menu"
 #define XANTE_UI_STR_DIALOG_INPUT_INT           "input-int"
@@ -156,7 +162,7 @@ struct xante_change_entry {
 #ifdef LIBXANTE_COMPILE
 # define MAJOR_VERSION  0
 # define MINOR_VERSION  1
-# define RELEASE        2
+# define RELEASE        3
 
 # include "xante/xt_internal.h"
 #endif

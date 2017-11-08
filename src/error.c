@@ -28,18 +28,40 @@
 
 #include "libxante.h"
 
-static pthread_key_t    __xante_errno_key;
-static pthread_once_t   __xante_errno_once = PTHREAD_ONCE_INIT;
+#define MAX_ADDITIONAL_CONTENT          8
+#define MAX_CONTENT_SIZE                32
 
+/*
+ * We use a struct to hold the library internal error code and a buffer to
+ * store an error message in case the current error code has a secondary one.
+ */
+struct xante_storage_error {
+    int     code;
+    char    message[512];
+
+    /*
+     * These are used to add more information into a descriptive error message.
+     *
+     * @additional_content stores the number of contents to be concatenated.
+     * @content stores the content.
+     */
+    int     additional_content;
+    char    content[MAX_ADDITIONAL_CONTENT][MAX_CONTENT_SIZE];
+};
+
+/*
+ * Messages with an asterisk has one or more contents to be concatenated with
+ * it.
+ */
 static const char *__description[] = {
     cl_tr_noop("Ok"),
     cl_tr_noop("No internal memory available"),
     cl_tr_noop("A NULL argument was passed"),
     cl_tr_noop("An invalid argument was passed"),
-    cl_tr_noop("Unable to parse JTF file"),
+    cl_tr_noop("Unable to parse JTF file. Wrong format."),
     cl_tr_noop("JTF file has no 'general' object"),
-    cl_tr_noop("JTF object was not found"),
-    cl_tr_noop("JTF object has no value"),
+    cl_tr_noop("JTF object was not found"),                             //*
+    cl_tr_noop("JTF object has no value"),                              //*
     cl_tr_noop("JTF file has no 'items' object"),
     cl_tr_noop("JTF file has no 'menu' object"),
     cl_tr_noop("JTF file has no 'ui' object"),
@@ -64,45 +86,16 @@ static const char *__description[] = {
     cl_tr_noop("Multiple group entries found in the database"),
     cl_tr_noop("Multiple application entries found in the database"),
     cl_tr_noop("Unable to retrieve login information"),
-    cl_tr_noop("Database already exists")
+    cl_tr_noop("Database already exists"),
+    cl_tr_noop("JTF menu has no 'dynamic' object"),
+    cl_tr_noop("JTF menu has no 'origin' object"),
+    cl_tr_noop("Wrong JTF object type")                                 //*
 };
 
 static const char *__unknown_error = cl_tr_noop("Unknown error");
 
-/*
- *
- * Internal functions
- *
- */
-
-static void errno_free(void *ptr)
-{
-    if (ptr != NULL)
-        free(ptr);
-}
-
-static void errno_init(void)
-{
-    pthread_key_create(&__xante_errno_key, errno_free);
-}
-
-static int *errno_storage(void)
-{
-    int *error = NULL;
-
-    pthread_once(&__xante_errno_once, errno_init);
-    error = pthread_getspecific(__xante_errno_key);
-
-    if (NULL == error) {
-        error = malloc(sizeof(*error));
-        pthread_setspecific(__xante_errno_key, error);
-    }
-
-    return error;
-}
-
-#define __errno     (*errno_storage())
-
+cl_error_storage_declare(__storage__, sizeof(struct xante_storage_error))
+#define __errno     (cl_errno_storage(&__storage__))
 /*
  *
  * Internal API
@@ -115,18 +108,43 @@ static int *errno_storage(void)
  */
 void errno_clear(void)
 {
-    __errno = XANTE_NO_ERROR;
+    struct xante_storage_error *ste = (struct xante_storage_error *)__errno;
+
+    ste->code = XANTE_NO_ERROR;
+    ste->additional_content = 0;
 }
 
 /**
  * @name errno_set
  * @brief Sets the current value of the library internal error code.
  *
- * @param [in] code: The new erro code.
+ * @param [in] code: The new errorcode.
  */
 void errno_set(enum xante_error_code code)
 {
-    __errno = code;
+    struct xante_storage_error *ste = (struct xante_storage_error *)__errno;
+
+    ste->code = code;
+}
+
+/**
+ * @name errno_store_additional_content
+ * @brief Adds a content to be concatenated into the error message.
+ *
+ * @param [in] content: The additional content.
+ */
+void errno_store_additional_content(const char *content)
+{
+    struct xante_storage_error *ste = (struct xante_storage_error *)__errno;
+    char *ptr = ste->content[ste->additional_content];
+
+    /* We reached the limit */
+    if (ste->additional_content == (MAX_ADDITIONAL_CONTENT - 1))
+        return;
+
+    memset(ptr, 0, MAX_CONTENT_SIZE);
+    strncpy(ptr, content, min(strlen(content), MAX_CONTENT_SIZE));
+    ste->additional_content++;
 }
 
 /*
@@ -143,7 +161,9 @@ void errno_set(enum xante_error_code code)
  */
 __PUB_API__ enum xante_error_code xante_get_last_error(void)
 {
-    return __errno;
+    struct xante_storage_error *ste = (struct xante_storage_error *)__errno;
+
+    return ste->code;
 }
 
 /**
@@ -156,8 +176,24 @@ __PUB_API__ enum xante_error_code xante_get_last_error(void)
  */
 __PUB_API__ const char *xante_strerror(enum xante_error_code code)
 {
+    struct xante_storage_error *ste = (struct xante_storage_error *)__errno;
+    int i;
+
     if (code >= XANTE_MAX_ERROR_CODE)
         return __unknown_error;
+
+    if (ste->additional_content > 0) {
+        /* We use the storage error struct to hold the message */
+        memset(ste->message, 0, sizeof(ste->message));
+        strcpy(ste->message, __description[code]);
+
+        for (i = 0; i < ste->additional_content; i++) {
+            strcat(ste->message, ": ");
+            strcat(ste->message, ste->content[i]);
+        }
+
+        return ste->message;
+    }
 
     return __description[code];
 }

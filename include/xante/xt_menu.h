@@ -34,6 +34,11 @@
 #else
 
 /* Internal library declarations */
+void xante_menu_ref(struct xante_menu *menu);
+void xante_menu_unref(struct xante_menu *menu);
+void xante_menu_destroy(void *a);
+struct xante_menu *xante_menu_create(enum xante_menu_creator creator);
+
 #endif
 
 #endif
