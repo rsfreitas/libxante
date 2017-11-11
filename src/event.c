@@ -457,29 +457,41 @@ void event_uninit(struct xante_app *xpp)
  *         otherwise.
  */
 __PUB_API__ void *xante_event_argument(xante_event_arg_t *arg,
-    const char *data_type)
+    enum xante_event_argument_type data_type)
 {
     struct xante_event_argument *evt_arg = (struct xante_event_argument *)arg;
 
     errno_clear();
 
-    if ((NULL == arg) || (NULL == data_type)) {
+    if (NULL == arg) {
         errno_set(XANTE_ERROR_NULL_ARG);
         return NULL;
     }
 
-    if (strcmp(data_type, XANTE_EVT_DATA_XANTE_T) == 0)
-        return evt_arg->xpp;
-    else if (strcmp(data_type, XANTE_EVT_DATA_XANTE_MENU_T) == 0)
-        return evt_arg->menu;
-    else if (strcmp(data_type, XANTE_EVT_DATA_XANTE_ITEM_T) == 0)
-        return evt_arg->item;
-    else if (strcmp(data_type, XANTE_EVT_DATA_XANTE_ITEM_VALUE) == 0)
-        return evt_arg->value;
-    else if (strcmp(data_type, XANTE_EVT_DATA_XANTE_CONFIG) == 0)
-        return evt_arg->cfg_file;
-    else if (strcmp(data_type, XANTE_EVT_DATA_XANTE_CHANGES_LIST) == 0)
-        return evt_arg->changes;
+    switch (data_type) {
+        case XANTE_EVENT_DATA_XANTE_T:
+            return evt_arg->xpp;
+
+        case XANTE_EVENT_DATA_XANTE_MENU_T:
+            return evt_arg->menu;
+
+        case XANTE_EVENT_DATA_XANTE_ITEM_T:
+            return evt_arg->item;
+
+        case XANTE_EVENT_DATA_XANTE_ITEM_VALUE:
+            return evt_arg->value;
+
+        case XANTE_EVENT_DATA_XANTE_CONFIG:
+            return evt_arg->cfg_file;
+
+        case XANTE_EVENT_DATA_XANTE_CHANGES_LIST:
+            return evt_arg->changes;
+
+        default:
+            break;
+    }
+
+    errno_set(XANTE_ERROR_UNKNOWN_EVENT_DATA_TYPE);
 
     return NULL;
 }

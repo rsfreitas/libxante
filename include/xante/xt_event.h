@@ -50,7 +50,8 @@ int event_call(const char *event_name, struct xante_app *xpp, ...);
  * @return On success returns the required event argument real value or NULL
  *         otherwise.
  */
-void *xante_event_argument(xante_event_arg_t *arg, const char *data_type);
+void *xante_event_argument(xante_event_arg_t *arg,
+                           enum xante_event_argument_type data_type);
 
 #endif
 

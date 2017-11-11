@@ -89,7 +89,8 @@ static const char *__description[] = {
     cl_tr_noop("Database already exists"),
     cl_tr_noop("JTF menu has no 'dynamic' object"),
     cl_tr_noop("JTF menu has no 'origin' object"),
-    cl_tr_noop("Wrong JTF object type")                                 //*
+    cl_tr_noop("Wrong JTF object type"),                                //*
+    cl_tr_noop("Unknown event data type")
 };
 
 static const char *__unknown_error = cl_tr_noop("Unknown error");

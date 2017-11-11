@@ -135,12 +135,15 @@ enum xante_init_flags {
 #define XANTE_UI_STR_DYNAMIC_MENU               "dynamic"
 
 /** Event arguments */
-#define XANTE_EVT_DATA_XANTE_T                  "xante-t"
-#define XANTE_EVT_DATA_XANTE_MENU_T             "xante-menu-t"
-#define XANTE_EVT_DATA_XANTE_ITEM_T             "xante-item-t"
-#define XANTE_EVT_DATA_XANTE_ITEM_VALUE         "xante-item-value"
-#define XANTE_EVT_DATA_XANTE_CONFIG             "xante-config"
-#define XANTE_EVT_DATA_XANTE_CHANGES_LIST       "xante-changes"
+enum xante_event_argument_type {
+    XANTE_EVENT_DATA_UNKNOWN = -1,
+    XANTE_EVENT_DATA_XANTE_T,
+    XANTE_EVENT_DATA_XANTE_MENU_T,
+    XANTE_EVENT_DATA_XANTE_ITEM_T,
+    XANTE_EVENT_DATA_XANTE_ITEM_VALUE,
+    XANTE_EVENT_DATA_XANTE_CONFIG,
+    XANTE_EVENT_DATA_XANTE_CHANGES_LIST
+};
 
 /** Main library object */
 typedef void    xante_t;
