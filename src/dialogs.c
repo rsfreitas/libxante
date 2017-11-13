@@ -270,37 +270,3 @@ __PUB_API__ int xante_dlg_messagebox(struct xante_app *xpp,
     return key;
 }
 
-/**
- * @name xante_dlg_application_version
- * @brief Gets a string with the application version information.
- *
- * @param [in] xpp: The library main object.
- *
- * @return On success returns a buffer with the application version or NULL
- *         otherwise.
- */
-__PUB_API__ char *xante_dlg_application_version(xante_t *xpp)
-{
-    struct xante_app *x = (struct xante_app *)xpp;
-    char *str_version = NULL;
-    cl_string_t *version = NULL;
-
-    errno_clear();
-
-    if (NULL == xpp) {
-        errno_set(XANTE_ERROR_NULL_ARG);
-        return NULL;
-    }
-
-    version = cl_string_create(cl_tr("%s - Version %s.%d Build %d %s"),
-                               cl_string_valueof(x->info.application_name),
-                               cl_string_valueof(x->info.version),
-                               x->info.revision, x->info.build,
-                               (x->info.beta == true) ? "BETA" : "");
-
-    str_version = strdup(cl_string_valueof(version));
-    cl_string_unref(version);
-
-    return str_version;
-}
-
