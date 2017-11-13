@@ -142,10 +142,10 @@ bool ui_dialog_delete_dm(struct xante_app *xpp, struct xante_item *item,
     }
 
     /* Prepare dialog */
-    dialog_set_backtitle(xpp);
-    dialog_update_cancel_button_label();
-    dialog_put_statusbar((edit_value == true) ? DEFAULT_STATUSBAR_TEXT
-                                              : DEFAULT_NOT_EDIT_STATUSBAR_TEXT);
+    dlgx_set_backtitle(xpp);
+    dlgx_update_cancel_button_label();
+    dlgx_put_statusbar((edit_value == true) ? DEFAULT_STATUSBAR_TEXT
+                                            : DEFAULT_NOT_EDIT_STATUSBAR_TEXT);
 
     /* Prepare dialog content */
     calc_checklist_limits(dm_menu, &number_of_options, &height,

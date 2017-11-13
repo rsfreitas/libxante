@@ -55,9 +55,9 @@ bool ui_dialog_yesno(struct xante_app *xpp, struct xante_item *item)
     int choice = -1, height, ret_dialog = DLG_EXIT_OK;
 
     /* Prepare dialog */
-    dialog_set_backtitle(xpp);
-    dialog_update_cancel_button_label();
-    dialog_put_statusbar(DEFAULT_STATUSBAR_TEXT);
+    dlgx_set_backtitle(xpp);
+    dlgx_update_cancel_button_label();
+    dlgx_put_statusbar(DEFAULT_STATUSBAR_TEXT);
 
     /* Sets the button labels using the item value */
     value = item_value(item);
@@ -67,7 +67,7 @@ bool ui_dialog_yesno(struct xante_app *xpp, struct xante_item *item)
 
     /* Adjusts the window message */
     text = cl_string_dup(item->options);
-    height = dialog_count_lines(cl_string_valueof(text), MINIMUM_WIDTH);
+    height = dlgx_count_lines(cl_string_valueof(text), MINIMUM_WIDTH);
     cl_string_rplchr(text, XANTE_STR_LINE_BREAK, '\n');
 
     /* Enables the help button */

@@ -108,7 +108,7 @@ static int check_item_width(cl_list_node_t *node, void *a)
 
     /* We only check items that may have values */
     if (item_may_have_value(item) == true) {
-        s = dialog_get_item_value_as_text(item);
+        s = dlgx_get_item_value_as_text(item);
 
         if (NULL == s)
             return 0;
@@ -162,7 +162,7 @@ static int add_item_content(unsigned int index, cl_list_node_t *node, void *a)
 
     /* Fills litems[index] with item content */
     listitem = &litems[index];
-    value = dialog_get_item_value_as_text(item);
+    value = dlgx_get_item_value_as_text(item);
 
     if (NULL == value)
         listitem->text = strdup("");
@@ -198,14 +198,14 @@ static void prepare_dialog_look(struct xante_app *xpp,
 {
     int timeout = -1;
 
-    dialog_set_backtitle(xpp);
+    dlgx_set_backtitle(xpp);
     dialog_vars.cancel_label = strdup(cancel_label);
     timeout = xante_runtime_ui_dialog_timeout(xpp);
 
     if (timeout > 0)
         dialog_vars.timeout_secs = timeout;
 
-    dialog_put_statusbar(DEFAULT_STATUSBAR_TEXT);
+    dlgx_put_statusbar(DEFAULT_STATUSBAR_TEXT);
 }
 
 static void release_dialog_labels(void)
@@ -438,7 +438,7 @@ static void update_menu_item_brief(int current_item, void *a)
     else
         text = (char *)cl_string_valueof(item->brief_help);
 
-    dialog_put_item_brief(text);
+    dlgx_put_item_brief(text);
 }
 
 /*
@@ -499,9 +499,9 @@ int ui_dialog_menu(struct xante_app *xpp, const struct xante_menu *menu,
             case DLG_EXIT_CANCEL:
                 /* Are we leaving the application? */
                 if (strcmp(cancel_label, MAIN_MENU_CANCEL_LABEL) == 0) {
-                    if (dialog_question(xpp, cl_tr("Closing"),
-                                        cl_tr("Do you really want to quit?"),
-                                        cl_tr("Yes"), cl_tr("No"), NULL) == true)
+                    if (dlgx_question(xpp, cl_tr("Closing"),
+                                      cl_tr("Do you really want to quit?"),
+                                      cl_tr("Yes"), cl_tr("No"), NULL) == true)
                     {
                         loop = false;
                     }

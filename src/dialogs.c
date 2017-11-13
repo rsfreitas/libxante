@@ -223,13 +223,13 @@ __PUB_API__ int xante_dlg_messagebox(struct xante_app *xpp,
     va_end(ap);
 
     if ((NULL == xpp) || (xante_runtime_ui_active(xpp) == false)) {
-        dialog_init(true);
+        dlgx_init(true);
         dialog_needs_close = true;
     }
 
     real_msg = cl_string_create("%s", msg);
     cl_string_rplchr(real_msg, XANTE_STR_LINE_BREAK, '\n');
-    height = dialog_count_lines(msg, MINIMUM_WIDTH);
+    height = dlgx_count_lines(msg, MINIMUM_WIDTH);
 
     if (xpp != NULL)
         xante_info("MSGBOX: %s", msg);
@@ -238,7 +238,7 @@ __PUB_API__ int xante_dlg_messagebox(struct xante_app *xpp,
                                         cl_string_valueof(real_msg));
 
     if (dialog_needs_close == true)
-        dialog_uninit();
+        dlgx_uninit();
 
     if (real_msg != NULL)
         cl_string_unref(real_msg);
@@ -268,39 +268,5 @@ __PUB_API__ int xante_dlg_messagebox(struct xante_app *xpp,
     }
 
     return key;
-}
-
-/**
- * @name xante_dlg_application_version
- * @brief Gets a string with the application version information.
- *
- * @param [in] xpp: The library main object.
- *
- * @return On success returns a buffer with the application version or NULL
- *         otherwise.
- */
-__PUB_API__ char *xante_dlg_application_version(xante_t *xpp)
-{
-    struct xante_app *x = (struct xante_app *)xpp;
-    char *str_version = NULL;
-    cl_string_t *version = NULL;
-
-    errno_clear();
-
-    if (NULL == xpp) {
-        errno_set(XANTE_ERROR_NULL_ARG);
-        return NULL;
-    }
-
-    version = cl_string_create(cl_tr("%s - Version %s.%d Build %d %s"),
-                               cl_string_valueof(x->info.application_name),
-                               cl_string_valueof(x->info.version),
-                               x->info.revision, x->info.build,
-                               (x->info.beta == true) ? "BETA" : "");
-
-    str_version = strdup(cl_string_valueof(version));
-    cl_string_unref(version);
-
-    return str_version;
 }
 

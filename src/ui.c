@@ -209,7 +209,7 @@ __PUB_API__ int xante_ui_run(xante_t *xpp)
     }
 
     xante_runtime_set_ui_active(xpp, true);
-    dialog_init(false);
+    dlgx_init(false);
     xante_dlg_set_backtitle(xpp);
     btn_cancel_label = strdup(cl_tr(MAIN_MENU_CANCEL_LABEL));
     root = ui_search_menu_by_object_id(xpp,
@@ -227,7 +227,7 @@ end_block:
         free(btn_cancel_label);
 
     xante_dlg_clear_backtitle(xpp);
-    dialog_uninit();
+    dlgx_uninit();
     xante_runtime_set_ui_active(xpp, false);
 
     return ret_dialog;

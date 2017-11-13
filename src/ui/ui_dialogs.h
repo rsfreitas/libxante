@@ -76,23 +76,6 @@
 #define DATE_MAX_INPUT_LENGTH       10
 #define TIME_MAX_INPUT_LENGTH       8
 
-/* utils.c */
-void dialog_uninit(void);
-void dialog_init(bool temporarily);
-void dialog_set_backtitle(struct xante_app *xpp);
-char *dialog_get_item_value_as_text(const struct xante_item *item);
-int dialog_count_lines_by_delimiters(const char *text);
-int dialog_count_lines(const char *text, int width);
-bool dialog_question(struct xante_app *xpp, const char *title, const char *msg,
-                     const char *button1_label, const char *button2_label,
-                     const char *statusbar_text);
-
-void dialog_update_cancel_button_label(void);
-void dialog_free_input(void);
-void dialog_alloc_input(unsigned int bytes);
-char *dialog_get_input_result(void);
-int dialog_get_input_window_width(const struct xante_item *item);
-
 /* menu */
 int ui_dialog_menu(struct xante_app *xpp, const struct xante_menu *menu,
                    const char *cancel_label);

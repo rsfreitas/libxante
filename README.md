@@ -3,6 +3,10 @@
 A library to build (dialog based) applications using JSON templates and
 plugins.
 
+## License
+
+LGPLv2
+
 ## Overview
 
 This library is intended to build and run dialog based applications.
@@ -28,4 +32,9 @@ make ALTERNATIVE_DIALOG=1
 ```
 
 ## Bindings
+
+## Recomendations
+
+- Every internal libdialog based function must start, i.e., must have the
+same prefix **dlgx\_**.
 

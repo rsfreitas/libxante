@@ -74,16 +74,5 @@ int xante_dlg_messagebox(struct xante_app *xpp, enum xante_msgbox_type type,
                          enum xante_buttons buttons, const char *title,
                          const char *message, ...);
 
-/**
- * @name xante_dlg_application_version
- * @brief Gets a string with the application version information.
- *
- * @param [in] xpp: The library main object.
- *
- * @return On success returns a buffer with the application version or NULL
- *         otherwise.
- */
-char *xante_dlg_application_version(xante_t *xpp);
-
 #endif
 
