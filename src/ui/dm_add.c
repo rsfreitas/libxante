@@ -88,10 +88,11 @@ bool ui_dialog_add_dm(struct xante_app *xpp, struct xante_item *item)
                      * internal change, so it will ask the user to save into
                      * the configuration file.
                      */
-                    dm_insert(xpp, item, input);
-                    change_add(xpp, "New dynamic menu entry", "EMPTY", input);
-                    added = true;
-                    loop = false;
+                    if (dm_insert(xpp, item, input)) {
+                        change_add(xpp, "New dynamic menu entry", "EMPTY", input);
+                        added = true;
+                        loop = false;
+                    }
                 } else
                     xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, 0,
                                          cl_tr("Error"),

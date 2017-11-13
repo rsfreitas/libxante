@@ -25,15 +25,13 @@
  */
 
 #ifndef _LIBXANTE_UI_DIALOGS_H
-#define _LIBXANTE_UI_DIALOGS_H          1
+#define _LIBXANTE_UI_DIALOGS_H      1
 
 #ifndef LIBXANTE_COMPILE
 # ifndef _LIBXANTE_H
 #  error "Never use <ui_dialogs.h> directly; include <libxante.h> instead."
 # endif
 #endif
-
-#include "../dialog/addon_dialogs.h"
 
 /* Main cancel button label */
 #define MAIN_MENU_CANCEL_LABEL      "Exit"
@@ -53,9 +51,6 @@
 /* Maximum number of items of a dialog */
 #define MAX_DLG_ITEMS               15
 
-#define dialog_get_dlg_items(a)     \
-    ((a) > MAX_DLG_ITEMS ? MAX_DLG_ITEMS : (a))
-
 /* Window border size */
 #define WINDOW_BORDER_SIZE          10
 
@@ -64,10 +59,6 @@
 
 /* Columns of a dialog with an internal dialog */
 #define WINDOW_COLUMNS              (DIALOG_COLUMNS + 2)
-
-/* Just gives us the right item value */
-#define item_value(item)            \
-    ((item->value != NULL) ? item->value : item->default_value)
 
 /* Maximum number of characters that a user may type */
 #define MAX_INPUT_VALUE             1024

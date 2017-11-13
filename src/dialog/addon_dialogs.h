@@ -35,6 +35,13 @@
 
 #define MAX_CELL_DATA                       512
 
+/* Gets the number of items from a dialog */
+#define dialog_get_dlg_items(a)     ((a) > MAX_DLG_ITEMS ? MAX_DLG_ITEMS : (a))
+
+/* Just gives us the right item value */
+#define item_value(item)            \
+    ((item->value != NULL) ? item->value : item->default_value)
+
 enum dlgx_text_print_position {
     PRINT_FIRST,
     PRINT_UP,

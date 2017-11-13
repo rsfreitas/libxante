@@ -177,9 +177,9 @@ static int calc_dlg_height(struct __line_st *row, int labels)
 }
 
 /*
- * TODO: This function needs work. It needs to show in a flexible way the
- *       labels. Allowing breaking the titles in several lines, certifying
- *       that it will be centralized.
+ * XXX: This function needs work. It needs to show in a flexible way the
+ *      labels. Allowing breaking the titles in several lines, certifying
+ *      that it will be centralized.
  */
 static void __dlg_draw_col_labels(WINDOW *dialog, struct dlgx_spreadsheet_st *sheet)
 {

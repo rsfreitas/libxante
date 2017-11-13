@@ -25,7 +25,7 @@
  */
 
 #ifndef _LIBXANTE_XT_INTERNAL_H
-#define _LIBXANTE_XT_INTERNAL_H             1
+#define _LIBXANTE_XT_INTERNAL_H                 1
 
 #ifndef DIALOG_H_included
 # include <dialog.h>
@@ -55,23 +55,45 @@
 #define __PUB_API__
 
 /** Timeout to close a dialog */
-#define UI_DIALOG_TIMEOUT                   120 /* seconds */
+#define UI_DIALOG_TIMEOUT                       120 /* seconds */
 
 /** Supported events */
-#define EV_INIT                             "xapl_init"
-#define EV_UNINIT                           "xapl_uninit"
-#define EV_CONFIG_LOAD                      "xapl_config_load"
-#define EV_CONFIG_UNLOAD                    "xapl_config_unload"
-#define EV_CHANGES_SAVED                    "xapl_changes_saved"
-#define EV_ITEM_SELECTED                    "item-selected"
-#define EV_ITEM_VALUE_CONFIRM               "item-value-confirm"
-#define EV_ITEM_VALUE_UPDATED               "item-value-updated"
-#define EV_ITEM_EXIT                        "item-exit"
-#define EV_MENU_EXIT                        "menu-exit"
+#define EV_INIT                                 "xapl_init"
+#define EV_UNINIT                               "xapl_uninit"
+#define EV_CONFIG_LOAD                          "xapl_config_load"
+#define EV_CONFIG_UNLOAD                        "xapl_config_unload"
+#define EV_CHANGES_SAVED                        "xapl_changes_saved"
+#define EV_ITEM_SELECTED                        "item-selected"
+#define EV_ITEM_VALUE_CONFIRM                   "item-value-confirm"
+#define EV_ITEM_VALUE_UPDATED                   "item-value-updated"
+#define EV_ITEM_EXIT                            "item-exit"
+#define EV_MENU_EXIT                            "menu-exit"
 
 /** Environment variables */
-#define ENV_XANTE_DB_PATH                   "XANTE_DB_PATH"
-#define ENV_XANTE_CFG_PATH                  "XANTE_CFG_PATH"
+#define ENV_XANTE_DB_PATH                       "XANTE_DB_PATH"
+#define ENV_XANTE_CFG_PATH                      "XANTE_CFG_PATH"
+
+/** String keys of a supported dialog */
+#define XANTE_UI_STR_DIALOG_MENU                "menu"
+#define XANTE_UI_STR_DIALOG_INPUT_INT           "input-int"
+#define XANTE_UI_STR_DIALOG_INPUT_FLOAT         "input-float"
+#define XANTE_UI_STR_DIALOG_INPUT_DATE          "input-date"
+#define XANTE_UI_STR_DIALOG_INPUT_TIME          "input-time"
+#define XANTE_UI_STR_DIALOG_INPUT_STRING        "input-string"
+#define XANTE_UI_STR_DIALOG_INPUT_PASSWD        "input-passwd"
+#define XANTE_UI_STR_DIALOG_CALENDAR            "calendar"
+#define XANTE_UI_STR_DIALOG_TIMEBOX             "timebox"
+#define XANTE_UI_STR_DIALOG_RADIO_CHECKLIST     "radio-checklist"
+#define XANTE_UI_STR_DIALOG_CHECKLIST           "checklist"
+#define XANTE_UI_STR_DIALOG_YESNO               "yesno"
+#define XANTE_UI_STR_DIALOG_DYNAMIC_MENU        "dynamic-menu"
+#define XANTE_UI_STR_DIALOG_DELETE_DYNAMIC_MENU "delete-dynamic-menu"
+#define XANTE_UI_STR_DIALOG_ADD_DYNAMIC_MENU    "add-dynamic-menu"
+//#define XANTE_UI_STR_DIALOG_CUSTOM              "custom"
+
+/** String keys of supported menus */
+#define XANTE_UI_STR_DEFAULT_MENU               "default"
+#define XANTE_UI_STR_DYNAMIC_MENU               "dynamic"
 
 /** Different ways of creating menus */
 enum xante_menu_creator {
@@ -232,6 +254,7 @@ struct xante_app {
 
 /* Exclusive internal library headers */
 #include "ui_dialogs.h"
+#include "addon_dialogs.h"
 
 /*
  * Internal macros

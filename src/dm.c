@@ -616,8 +616,11 @@ void dm_delete(struct xante_menu *rme_menu, int position)
  * @param [in,out] xpp: The main library object.
  * @param [in] item: The item to be used as a source to find the dynamic menu.
  * @param [in] new_entry_name: The name of the new entry inside the menu.
+ *
+ * @return Returns true if the item was successfully inserted or false
+ *         otherwise.
  */
-void dm_insert(struct xante_app *xpp, struct xante_item *item,
+bool dm_insert(struct xante_app *xpp, struct xante_item *item,
     const char *new_entry_name)
 {
     struct xante_menu *unref_menu = NULL, *rme_menu = NULL;
@@ -626,17 +629,27 @@ void dm_insert(struct xante_app *xpp, struct xante_item *item,
     unref_menu = ui_search_unref_menu_by_object_id(xpp, menu_id);
 
     if (NULL == unref_menu) {
-        // TODO error msg
-        return;
+        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, XANTE_BTN_OK,
+                             cl_tr("Error"),
+                             cl_tr("The menu '%s' was not found!"),
+                             menu_id);
+
+        return false;
     }
 
     rme_menu = ui_search_menu_by_object_id(xpp, menu_id);
 
     if (NULL == rme_menu) {
-        // TODO error msg
-        return;
+        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, XANTE_BTN_OK,
+                             cl_tr("Error"),
+                             cl_tr("A reference for the menu '%s' was not found!"),
+                             menu_id);
+
+        return false;
     }
 
     dm_add(xpp, rme_menu, unref_menu, 1, new_entry_name);
+
+    return true;
 }
 

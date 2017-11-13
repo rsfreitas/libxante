@@ -192,7 +192,7 @@ __PUB_API__ int xante_dlg_clear_backtitle(xante_t *xpp)
 }
 
 /*
- * TODO: Show buttons which was set in @buttons.
+ * TODO: Only show buttons which was set in @buttons.
  */
 /**
  * @name xante_dlg_messagebox
