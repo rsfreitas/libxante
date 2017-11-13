@@ -217,7 +217,7 @@ static void update_item_brief(int current_index, void *a)
     if (NULL == brief)
         return;
 
-    dialog_put_item_brief(cl_string_valueof(brief));
+    dlgx_put_item_brief(cl_string_valueof(brief));
     cl_string_unref(brief);
 }
 
@@ -251,10 +251,10 @@ bool ui_dialog_checklist(struct xante_app *xpp, struct xante_item *item,
     DIALOG_LISTITEM *dlg_items = NULL;
 
     /* Prepare dialog */
-    dialog_set_backtitle(xpp);
-    dialog_update_cancel_button_label();
-    dialog_put_statusbar((edit_value == true) ? DEFAULT_STATUSBAR_TEXT
-                                              : DEFAULT_NOT_EDIT_STATUSBAR_TEXT);
+    dlgx_set_backtitle(xpp);
+    dlgx_update_cancel_button_label();
+    dlgx_put_statusbar((edit_value == true) ? DEFAULT_STATUSBAR_TEXT
+                                            : DEFAULT_NOT_EDIT_STATUSBAR_TEXT);
 
     /* Prepares dialog content */
     calc_checklist_limits(item, &number_of_options, &height,

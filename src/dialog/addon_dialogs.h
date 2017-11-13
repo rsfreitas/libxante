@@ -35,7 +35,7 @@
 
 #define MAX_CELL_DATA                       512
 
-enum dlg_text_print_position {
+enum dlgx_text_print_position {
     PRINT_FIRST,
     PRINT_UP,
     PRINT_DOWN
@@ -63,7 +63,7 @@ struct __line_st {
     int                 max_len;
 };
 
-struct dlg_spreadsheet_st {
+struct dlgx_spreadsheet_st {
     /* dialog size */
     int                 row;
     int                 col;
@@ -82,7 +82,7 @@ struct dlg_spreadsheet_st {
 };
 
 /** Text to use inside inputbox dialog */
-struct dlg_text {
+struct dlgx_text {
     int     total_lines;
     int     current_line_start_index;
     int     current_line_final_index;
@@ -99,48 +99,64 @@ struct dlg_text {
 };
 
 /* utils */
-int dlg_text_init(WINDOW *window, struct dlg_text *dlg_text, int height,
-                  int width, const char *text);
+int dlgx_text_init(WINDOW *window, struct dlgx_text *dlg_text, int height,
+                   int width, const char *text);
 
-void dlg_text_destroy(struct dlg_text *dlg_text);
-int dlg_text_print(WINDOW *window, struct dlg_text *dlg_text, int point);
-void dlg_text_clear(WINDOW *window, struct dlg_text *dlg_text);
-int dlg_get_subtitle_lines(const char *s);
-int dlg_cleanup_result(int code, WINDOW *dialog);
-void dialog_put_statusbar(const char *text);
-void dialog_put_item_brief(const char *brief);
+void dlgx_text_destroy(struct dlgx_text *dlg_text);
+int dlgx_text_print(WINDOW *window, struct dlgx_text *dlg_text, int point);
+void dlgx_text_clear(WINDOW *window, struct dlgx_text *dlg_text);
+int dlgx_get_subtitle_lines(const char *s);
+int dlgx_cleanup_result(int code, WINDOW *dialog);
+void dlgx_put_statusbar(const char *text);
+void dlgx_put_item_brief(const char *brief);
+
+void dlgx_uninit(void);
+void dlgx_init(bool temporarily);
+void dlgx_set_backtitle(struct xante_app *xpp);
+char *dlgx_get_item_value_as_text(const struct xante_item *item);
+int dlgx_count_lines_by_delimiters(const char *text);
+int dlgx_count_lines(const char *text, int width);
+bool dlgx_question(struct xante_app *xpp, const char *title, const char *msg,
+                     const char *button1_label, const char *button2_label,
+                     const char *statusbar_text);
+
+void dlgx_update_cancel_button_label(void);
+void dlgx_free_input(void);
+void dlgx_alloc_input(unsigned int bytes);
+char *dlgx_get_input_result(void);
+int dlgx_get_input_window_width(const struct xante_item *item);
 
 /* simple gauge */
-int dlg_simple_gauge(const char *title, const char *cprompt, int height,
-                     int width, int percent);
+int dlgx_simple_gauge(const char *title, const char *cprompt, int height,
+                      int width, int percent);
 
 /* scrolltext */
-int dlg_scrolltext(int width, int height, const char *title,
-                   const char *subtitle, const char *text);
+int dlgx_scrolltext(int width, int height, const char *title,
+                    const char *subtitle, const char *text);
 
 /* inputbox */
-int dlg_inputbox(int width, int height, const char *title,
-                 const char *subtitle, const char *input_title,
-                 const char *text, unsigned int max_len, char *input_s,
-                 bool edit, int (*input_len)(const char *),
-                 int (*input_check)(const char *));
+int dlgx_inputbox(int width, int height, const char *title,
+                  const char *subtitle, const char *input_title,
+                  const char *text, unsigned int max_len, char *input_s,
+                  bool edit, int (*input_len)(const char *),
+                  int (*input_check)(const char *));
 
 /* spreadsheet */
-struct dlg_spreadsheet_st *spreadsheet_st_init(const char *row_text,
-                                               const char *col_text);
+struct dlgx_spreadsheet_st *spreadsheet_st_init(const char *row_text,
+                                                const char *col_text);
 
-void spreadsheet_st_destroy(struct dlg_spreadsheet_st *table);
-int spreadsheet_st_add_data(struct dlg_spreadsheet_st *table, int pos,
+void spreadsheet_st_destroy(struct dlgx_spreadsheet_st *table);
+int spreadsheet_st_add_data(struct dlgx_spreadsheet_st *table, int pos,
                             const char *fmt, ...);
 
-int dlg_spreadsheet(const char *title, const char *subtitle,
-                    struct dlg_spreadsheet_st *table);
+int dlgx_spreadsheet(const char *title, const char *subtitle,
+                     struct dlgx_spreadsheet_st *table);
 
 /* update object */
-int dlg_update_object(int width, int height, const char *title,
-                      const char *subtitle, int update_interval,
-                      char *(*update_routine)(void *, int *), void *arg,
-                      int *status);
+int dlgx_update_object(int width, int height, const char *title,
+                       const char *subtitle, int update_interval,
+                       char *(*update_routine)(void *, int *), void *arg,
+                       int *status);
 
 #endif
 

@@ -223,13 +223,13 @@ __PUB_API__ int xante_dlg_messagebox(struct xante_app *xpp,
     va_end(ap);
 
     if ((NULL == xpp) || (xante_runtime_ui_active(xpp) == false)) {
-        dialog_init(true);
+        dlgx_init(true);
         dialog_needs_close = true;
     }
 
     real_msg = cl_string_create("%s", msg);
     cl_string_rplchr(real_msg, XANTE_STR_LINE_BREAK, '\n');
-    height = dialog_count_lines(msg, MINIMUM_WIDTH);
+    height = dlgx_count_lines(msg, MINIMUM_WIDTH);
 
     if (xpp != NULL)
         xante_info("MSGBOX: %s", msg);
@@ -238,7 +238,7 @@ __PUB_API__ int xante_dlg_messagebox(struct xante_app *xpp,
                                         cl_string_valueof(real_msg));
 
     if (dialog_needs_close == true)
-        dialog_uninit();
+        dlgx_uninit();
 
     if (real_msg != NULL)
         cl_string_unref(real_msg);

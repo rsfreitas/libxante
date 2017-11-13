@@ -48,7 +48,7 @@
  *
  */
 
-static void draw_scrollbar(WINDOW *dialog, struct dlg_text *t, int width,
+static void draw_scrollbar(WINDOW *dialog, struct dlgx_text *t, int width,
     int height, int sublines)
 {
     int first_data=0;
@@ -102,12 +102,12 @@ int dlg_scrolltext(int width, int height, const char *title,
     const char **buttons_str = dlg_ok_label();
     int selected_btn=0, result=DLG_EXIT_UNKNOWN, key=0, fkey=0, dlg_x, dlg_y,
         cur_x, cur_y, show_buttons=TRUE, first=FALSE, sublines=0;
-    struct dlg_text t;
+    struct dlgx_text t;
 
     selected_btn = dialog_vars.defaultno;
     dlg_y = dlg_box_y_ordinate(height);
     dlg_x = dlg_box_x_ordinate(width);
-    sublines = dlg_get_subtitle_lines(subtitle);
+    sublines = dlgx_get_subtitle_lines(subtitle);
 
     /* main window */
     dialog = dlg_new_window(height, width, dlg_y, dlg_x);
@@ -131,13 +131,13 @@ int dlg_scrolltext(int width, int height, const char *title,
                           width - INTERNAL_H_MARGIN,  /* width */
                           dlg_y + cur_y + 2, dlg_x + 3);
 
-    if (dlg_text_init(view, &t, height - (6 + sublines),
-                      width - INTERNAL_H_MARGIN, text) < 0)
+    if (dlgx_text_init(view, &t, height - (6 + sublines),
+                       width - INTERNAL_H_MARGIN, text) < 0)
     {
         return -1;
     }
 
-    dlg_text_print(view, &t, PRINT_FIRST);
+    dlgx_text_print(view, &t, PRINT_FIRST);
     dlg_register_window(view, "dlg_scrolltext", view_b);
     draw_scrollbar(dialog, &t, width, height, sublines);
 
@@ -178,8 +178,8 @@ int dlg_scrolltext(int width, int height, const char *title,
 
                 case DLGK_GRID_UP:
                 case DLGK_GRID_DOWN:
-                    if (dlg_text_print(view, &t,
-                                       (key == DLGK_GRID_UP) ? PRINT_UP : PRINT_DOWN))
+                    if (dlgx_text_print(view, &t,
+                                        (key == DLGK_GRID_UP) ? PRINT_UP : PRINT_DOWN))
                     {
                         draw_scrollbar(dialog, &t, width, height, sublines);
                         wrefresh(dialog);
@@ -194,8 +194,8 @@ int dlg_scrolltext(int width, int height, const char *title,
 
     dlg_unregister_window(view);
     dlg_del_window(view);
-    dlg_text_destroy(&t);
+    dlgx_text_destroy(&t);
 
-    return dlg_cleanup_result(result, dialog);
+    return dlgx_cleanup_result(result, dialog);
 }
 
