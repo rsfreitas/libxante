@@ -35,6 +35,21 @@
  *
  */
 
+static void libcollections_init(const struct xante_app *xpp)
+{
+    char *arg = NULL;
+
+    /* we must tell libcollections who we are and then translation will work. */
+    asprintf(&arg, "{\"package\":\"%s\"}", xpp->info.application_name);
+    cl_init(arg);
+    free(arg);
+}
+
+static void libcollections_uninit(void)
+{
+    cl_uninit();
+}
+
 static void destroy_xante_app(const struct cl_ref_s *ref)
 {
     struct xante_app *xpp = cl_container_of(ref, struct xante_app, ref);
@@ -49,6 +64,7 @@ static void destroy_xante_app(const struct cl_ref_s *ref)
     jtf_release_info(xpp);
     log_uninit(xpp);
     auth_uninit(xpp);
+    libcollections_uninit();
     free(xpp);
 }
 
@@ -111,17 +127,38 @@ __PUB_API__ xante_t *xante_init(const char *jtf_pathname,
     if (NULL == xpp)
         return NULL;
 
+    /*
+     * The JTF parsing must be divided and the first is done here since we need
+     * to have some relevant informations to keep going through this function
+     * and initialize/check everything else.
+     */
+    if (jtf_parse_application_info(jtf_pathname, xpp) < 0)
+        goto error_block;
+
+    /* Initialize libcollections from here */
+    libcollections_init(xpp);
+
+    /* Start log file */
+    log_init(xpp);
+
+    /* We check if we can run */
+    if (instance_init(xpp, bit_test(flags, XANTE_SINGLE_INSTANCE)) < 0)
+        goto error_block;
+
     /* Set runtime flags */
     runtime_start(xpp);
 
     /* Start translation environment */
 
     /* Start user access control */
-    if (auth_init(xpp, bit_test(flags, XANTE_USE_AUTH), session, username, password) < 0)
+    if (auth_init(xpp, bit_test(flags, XANTE_USE_AUTH), session, username,
+                  password) < 0)
+    {
         goto error_block;
+    }
 
-    /* Parse the JTF file */
-    if (jtf_parse(jtf_pathname, xpp) < 0)
+    /* Parse the rest of the JTF file */
+    if (jtf_parse_application(jtf_pathname, xpp) < 0)
         goto error_block;
 
     /* Starts application authentication */
@@ -131,15 +168,12 @@ __PUB_API__ xante_t *xante_init(const char *jtf_pathname,
     /* Start user modifications monitoring */
     change_init(xpp);
 
-    /* Start log file */
-    log_init(xpp);
-
     /* Call the plugin initialization function or disable its using */
     if (event_init(xpp, bit_test(flags, XANTE_USE_PLUGIN)) < 0)
         goto error_block;
 
     xante_info(cl_tr("Initializing application - %s"),
-               cl_string_valueof(xpp->info.application_name));
+               xpp->info.application_name);
 
     return xpp;
 

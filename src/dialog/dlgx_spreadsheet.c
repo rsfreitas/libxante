@@ -177,11 +177,11 @@ static int calc_dlg_height(struct __line_st *row, int labels)
 }
 
 /*
- * TODO: This function needs work. It needs to show in a flexible way the
- *       labels. Allowing breaking the titles in several lines, certifying
- *       that it will be centralized.
+ * XXX: This function needs work. It needs to show in a flexible way the
+ *      labels. Allowing breaking the titles in several lines, certifying
+ *      that it will be centralized.
  */
-static void __dlg_draw_col_labels(WINDOW *dialog, struct dlg_spreadsheet_st *sheet)
+static void __dlg_draw_col_labels(WINDOW *dialog, struct dlgx_spreadsheet_st *sheet)
 {
     char fmt[8];
     int i;
@@ -213,7 +213,7 @@ static void __dlg_draw_col_labels(WINDOW *dialog, struct dlg_spreadsheet_st *she
 /*
  * Draws the cells (and row labels).
  */
-static int __dlg_draw_spreadsheet_cells(WINDOW *dlg_grid, struct dlg_spreadsheet_st *sheet)
+static int __dlg_draw_spreadsheet_cells(WINDOW *dlg_grid, struct dlgx_spreadsheet_st *sheet)
 {
     static DLG_KEYS_BINDING cell_b[] = {
         INPUTSTR_BINDINGS,
@@ -274,13 +274,13 @@ static int __dlg_draw_spreadsheet_cells(WINDOW *dlg_grid, struct dlg_spreadsheet
  *
  */
 
-struct dlg_spreadsheet_st *spreadsheet_st_init(const char *row_text,
+struct dlgx_spreadsheet_st *spreadsheet_st_init(const char *row_text,
     const char *col_text)
 {
-    struct dlg_spreadsheet_st *t;
+    struct dlgx_spreadsheet_st *t;
     cl_string_t *text = NULL;
 
-    t = malloc(sizeof(struct dlg_spreadsheet_st));
+    t = malloc(sizeof(struct dlgx_spreadsheet_st));
 
     if (NULL == t)
         return NULL;
@@ -340,7 +340,7 @@ col_error_block:
     return NULL;
 }
 
-void spreadsheet_st_destroy(struct dlg_spreadsheet_st *sheet)
+void spreadsheet_st_destroy(struct dlgx_spreadsheet_st *sheet)
 {
     line_st_destroy(sheet->row_st);
     line_st_destroy(sheet->col_st);
@@ -351,7 +351,7 @@ void spreadsheet_st_destroy(struct dlg_spreadsheet_st *sheet)
     free(sheet);
 }
 
-int spreadsheet_st_add_data(struct dlg_spreadsheet_st *sheet, int pos,
+int spreadsheet_st_add_data(struct dlgx_spreadsheet_st *sheet, int pos,
     const char *fmt, ...)
 {
     va_list ap;
@@ -382,7 +382,7 @@ int spreadsheet_st_add_data(struct dlg_spreadsheet_st *sheet, int pos,
  * @return Returns libdialog's default return values of a selected button.
  */
 int dlg_spreadsheet(const char *title, const char *subtitle,
-    struct dlg_spreadsheet_st *sheet)
+    struct dlgx_spreadsheet_st *sheet)
 {
     static DLG_KEYS_BINDING dialog_b[] = {
         VIEW_BINDINGS,
@@ -504,6 +504,6 @@ int dlg_spreadsheet(const char *title, const char *subtitle,
         }
     }
 
-    return dlg_cleanup_result(result, dialog);
+    return dlgx_cleanup_result(result, dialog);
 }
 

@@ -438,10 +438,10 @@ static void write_jxdbi_application_info(struct xante_app *xpp, cl_json_t *root)
     if (NULL == application)
         return;
 
-    n = cl_json_create_string(cl_string_valueof(xpp->info.application_name));
+    n = cl_json_create_string(xpp->info.application_name);
     cl_json_add_item_to_object(application, NAME, n);
 
-    n = cl_json_create_string(cl_string_valueof(xpp->info.version));
+    n = cl_json_create_string(xpp->info.version);
     cl_json_add_item_to_object(application, VERSION, n);
 
     n = cl_json_create_number(xpp->info.revision);
@@ -661,7 +661,7 @@ static int validate_application_access_control(struct xante_app *xpp)
     int ret = -1;
 
     asprintf(&query, "SELECT id FROM 'application' WHERE name = '%s'",
-             cl_string_valueof(xpp->info.application_name));
+             xpp->info.application_name);
 
     db_data = db_query(xpp->auth.db, query);
     free(query);

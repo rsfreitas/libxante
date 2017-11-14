@@ -68,7 +68,7 @@ static void update_cursor_position(WINDOW *dialog, char *input_s, int width,
     (void)wmove(dialog, (height - 2) - 3, 3 + col_offset);
 }
 
-static void draw_scrollbar(WINDOW *dialog, struct dlg_text *t, int width,
+static void draw_scrollbar(WINDOW *dialog, struct dlgx_text *t, int width,
     int height)
 {
     int first_data=0;
@@ -198,7 +198,7 @@ int dlg_inputbox(int width, int height, const char *title,
     const char **buttons_str = dlg_ok_labels();
     int selected_btn=0, result=DLG_EXIT_UNKNOWN, key=0, fkey=0, dlg_x, dlg_y,
         cur_x, cur_y, show_buttons=TRUE, chr_offset=0, first=FALSE, jump_y=0, d=0;
-    struct dlg_text t;
+    struct dlgx_text t;
     size_t len=0;
     char s[16]={0}, tmp[2048]={0};
     chtype blocked_attr, form_attr;
@@ -235,14 +235,14 @@ int dlg_inputbox(int width, int height, const char *title,
                               width - INTERNAL_H_MARGIN,  /* width */
                               dlg_y + cur_y + 2, dlg_x + 3);
 
-        if (dlg_text_init(view, &t, height - INTERNAL_V_MARGIN,
-                          width - INTERNAL_H_MARGIN, text) < 0)
+        if (dlgx_text_init(view, &t, height - INTERNAL_V_MARGIN,
+                           width - INTERNAL_H_MARGIN, text) < 0)
         {
             free(input_s);
             return -2;
         }
 
-        dlg_text_print(view, &t, PRINT_FIRST);
+        dlgx_text_print(view, &t, PRINT_FIRST);
         dlg_register_window(view, "dlg_inputbox", view_b);
         getyx(dialog, cur_y, cur_x);
 
@@ -407,8 +407,8 @@ int dlg_inputbox(int width, int height, const char *title,
                     if (text == NULL)
                         break;
 
-                    if (dlg_text_print(view, &t,
-                                      (key == DLGK_GRID_UP) ? PRINT_UP : PRINT_DOWN))
+                    if (dlgx_text_print(view, &t,
+                                        (key == DLGK_GRID_UP) ? PRINT_UP : PRINT_DOWN))
                     {
                         draw_scrollbar(dialog, &t, width, height);
                         update_cursor_position(dialog, input_s, width, height,
@@ -433,9 +433,9 @@ int dlg_inputbox(int width, int height, const char *title,
         dlg_unregister_window(view);
         dlg_del_window(view);
 
-        dlg_text_destroy(&t);
+        dlgx_text_destroy(&t);
     }
 
-    return dlg_cleanup_result(result, dialog);
+    return dlgx_cleanup_result(result, dialog);
 }
 

@@ -34,7 +34,8 @@
 #else
 
 /* Internal library declarations */
-int jtf_parse(const char *pathname, struct xante_app *xpp);
+int jtf_parse_application_info(const char *pathname, struct xante_app *xpp);
+int jtf_parse_application(const char *pathname, struct xante_app *xpp);
 void jtf_release_info(struct xante_app *xpp);
 
 #endif

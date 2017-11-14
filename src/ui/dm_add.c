@@ -58,15 +58,15 @@ bool ui_dialog_add_dm(struct xante_app *xpp, struct xante_item *item)
     cl_string_t *text = NULL;
 
     /* Prepare dialog */
-    dialog_set_backtitle(xpp);
-    dialog_update_cancel_button_label();
-    dialog_put_statusbar(DEFAULT_STATUSBAR_TEXT);
+    dlgx_set_backtitle(xpp);
+    dlgx_update_cancel_button_label();
+    dlgx_put_statusbar(DEFAULT_STATUSBAR_TEXT);
 
     /* Adjusts window width and height */
     text = cl_string_dup(item->options);
     cl_string_rplchr(text, XANTE_STR_LINE_BREAK, '\n');
-    width = dialog_get_input_window_width(item);
-    height = dialog_count_lines_by_delimiters(cl_string_valueof(text)) +
+    width = dlgx_get_input_window_width(item);
+    height = dlgx_count_lines_by_delimiters(cl_string_valueof(text)) +
         FORM_HEIGHT_WITHOUT_TEXT;
 
     /* Enables the help button */
@@ -74,11 +74,11 @@ bool ui_dialog_add_dm(struct xante_app *xpp, struct xante_item *item)
         dialog_vars.help_button = 1;
 
     do {
-        ret_dialog = dlg_inputbox(width, height,
-                                  cl_string_valueof(item->name),
-                                  cl_string_valueof(text), NULL, NULL,
-                                  sizeof(input) - 1, input,
-                                  true, NULL, NULL);
+        ret_dialog = dlgx_inputbox(width, height,
+                                   cl_string_valueof(item->name),
+                                   cl_string_valueof(text), NULL, NULL,
+                                   sizeof(input) - 1, input,
+                                   true, NULL, NULL);
 
         switch (ret_dialog) {
             case DLG_EXIT_OK:
@@ -88,10 +88,11 @@ bool ui_dialog_add_dm(struct xante_app *xpp, struct xante_item *item)
                      * internal change, so it will ask the user to save into
                      * the configuration file.
                      */
-                    dm_insert(xpp, item, input);
-                    change_add(xpp, "New dynamic menu entry", "EMPTY", input);
-                    added = true;
-                    loop = false;
+                    if (dm_insert(xpp, item, input)) {
+                        change_add(xpp, "New dynamic menu entry", "EMPTY", input);
+                        added = true;
+                        loop = false;
+                    }
                 } else
                     xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, 0,
                                          cl_tr("Error"),

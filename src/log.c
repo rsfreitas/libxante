@@ -77,9 +77,9 @@ int log_init(struct xante_app *xpp)
     enum cl_log_level level = CL_LOG_DEBUG;
     char *pathname = NULL;
 
-    level = tr_log_level(cl_string_valueof(xpp->info.log_level));
-    asprintf(&pathname, "%s/%s.log", cl_string_valueof(xpp->info.log_pathname),
-             cl_string_valueof(xpp->info.application_name));
+    level = tr_log_level(xpp->info.log_level);
+    asprintf(&pathname, "%s/%s.log", xpp->info.log_pathname,
+             xpp->info.application_name);
 
     xpp->log.log = cl_log_open(pathname, CL_LOG_SYNC_ALL_MSGS, level, 0);
     free(pathname);

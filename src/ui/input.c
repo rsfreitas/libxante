@@ -259,6 +259,15 @@ static bool validate_input_value(struct xante_app *xpp, struct xante_item *item,
     } else if (item->dialog_type == XANTE_UI_DIALOG_INPUT_TIME) {
         valid = validate_time(xpp, str_value);
     } else {
+        /*
+         * XXX: A XANTE_UI_DIALOG_INPUT_PASSWD must be validated inside a plugin,
+         *      in a EV_ITEM_VALUE_CONFIRM event, which is called before this
+         *      function.
+         *
+         *      We don't hold any information inside the JTF to compare them and
+         *      return true to keep running.
+         */
+
         valid = true;
     }
 
@@ -292,9 +301,9 @@ bool ui_dialog_input(struct xante_app *xpp, struct xante_item *item,
     cl_string_t *text = NULL, *value = NULL;
 
     /* Prepare dialog */
-    dialog_set_backtitle(xpp);
-    dialog_update_cancel_button_label();
-    dialog_put_statusbar(DEFAULT_STATUSBAR_TEXT);
+    dlgx_set_backtitle(xpp);
+    dlgx_update_cancel_button_label();
+    dlgx_put_statusbar(DEFAULT_STATUSBAR_TEXT);
 
     /* Prepares dialog content */
     value = cl_object_to_cstring(item_value(item));
@@ -308,8 +317,8 @@ bool ui_dialog_input(struct xante_app *xpp, struct xante_item *item,
     /* Adjusts window width and height */
     text = cl_string_dup(item->options);
     cl_string_rplchr(text, XANTE_STR_LINE_BREAK, '\n');
-    width = dialog_get_input_window_width(item);
-    height = dialog_count_lines_by_delimiters(cl_string_valueof(text)) +
+    width = dlgx_get_input_window_width(item);
+    height = dlgx_count_lines_by_delimiters(cl_string_valueof(text)) +
         FORM_HEIGHT_WITHOUT_TEXT;
 
     do {
@@ -317,11 +326,11 @@ bool ui_dialog_input(struct xante_app *xpp, struct xante_item *item,
             ret_dialog = ui_dialog_passwd(item, edit_value, input, sizeof(input),
                                           height, text);
         } else {
-            ret_dialog = dlg_inputbox(width, height,
-                                      cl_string_valueof(item->name),
-                                      cl_string_valueof(text), NULL, NULL,
-                                      get_input_length(item), input,
-                                      edit_value, NULL, NULL);
+            ret_dialog = dlgx_inputbox(width, height,
+                                       cl_string_valueof(item->name),
+                                       cl_string_valueof(text), NULL, NULL,
+                                       get_input_length(item), input,
+                                       edit_value, NULL, NULL);
         }
 
         switch (ret_dialog) {

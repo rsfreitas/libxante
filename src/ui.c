@@ -182,13 +182,12 @@ void ui_print_menu_tree(struct xante_app *xpp)
  *
  */
 
-/*
- * XXX: Remember once we call this function we only leave it when closing the
- *      application from the UI.
- */
 /**
  * @name xante_ui_run
  * @brief Puts a libxante application to run.
+ *
+ * It is important to remember that once we call this function we only leave it
+ * when closing the application from the UI.
  *
  * @param [in,out] xpp: The library main object.
  *
@@ -209,7 +208,7 @@ __PUB_API__ int xante_ui_run(xante_t *xpp)
     }
 
     xante_runtime_set_ui_active(xpp, true);
-    dialog_init(false);
+    dlgx_init(false);
     xante_dlg_set_backtitle(xpp);
     btn_cancel_label = strdup(cl_tr(MAIN_MENU_CANCEL_LABEL));
     root = ui_search_menu_by_object_id(xpp,
@@ -217,6 +216,10 @@ __PUB_API__ int xante_ui_run(xante_t *xpp)
 
 
     if (NULL == root) {
+        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, XANTE_BTN_OK,
+                             cl_tr("Error"), cl_tr("The menu '%s' was not found!"),
+                             cl_string_valueof(x->ui.main_menu_object_id));
+
         goto end_block;
     }
 
@@ -227,7 +230,7 @@ end_block:
         free(btn_cancel_label);
 
     xante_dlg_clear_backtitle(xpp);
-    dialog_uninit();
+    dlgx_uninit();
     xante_runtime_set_ui_active(xpp, false);
 
     return ret_dialog;

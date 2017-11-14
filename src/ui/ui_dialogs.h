@@ -25,15 +25,13 @@
  */
 
 #ifndef _LIBXANTE_UI_DIALOGS_H
-#define _LIBXANTE_UI_DIALOGS_H          1
+#define _LIBXANTE_UI_DIALOGS_H      1
 
 #ifndef LIBXANTE_COMPILE
 # ifndef _LIBXANTE_H
 #  error "Never use <ui_dialogs.h> directly; include <libxante.h> instead."
 # endif
 #endif
-
-#include "../dialog/addon_dialogs.h"
 
 /* Main cancel button label */
 #define MAIN_MENU_CANCEL_LABEL      "Exit"
@@ -53,9 +51,6 @@
 /* Maximum number of items of a dialog */
 #define MAX_DLG_ITEMS               15
 
-#define dialog_get_dlg_items(a)     \
-    ((a) > MAX_DLG_ITEMS ? MAX_DLG_ITEMS : (a))
-
 /* Window border size */
 #define WINDOW_BORDER_SIZE          10
 
@@ -65,33 +60,12 @@
 /* Columns of a dialog with an internal dialog */
 #define WINDOW_COLUMNS              (DIALOG_COLUMNS + 2)
 
-/* Just gives us the right item value */
-#define item_value(item)            \
-    ((item->value != NULL) ? item->value : item->default_value)
-
 /* Maximum number of characters that a user may type */
 #define MAX_INPUT_VALUE             1024
 
 /* Default ranges */
 #define DATE_MAX_INPUT_LENGTH       10
 #define TIME_MAX_INPUT_LENGTH       8
-
-/* utils.c */
-void dialog_uninit(void);
-void dialog_init(bool temporarily);
-void dialog_set_backtitle(struct xante_app *xpp);
-char *dialog_get_item_value_as_text(const struct xante_item *item);
-int dialog_count_lines_by_delimiters(const char *text);
-int dialog_count_lines(const char *text, int width);
-bool dialog_question(struct xante_app *xpp, const char *title, const char *msg,
-                     const char *button1_label, const char *button2_label,
-                     const char *statusbar_text);
-
-void dialog_update_cancel_button_label(void);
-void dialog_free_input(void);
-void dialog_alloc_input(unsigned int bytes);
-char *dialog_get_input_result(void);
-int dialog_get_input_window_width(const struct xante_item *item);
 
 /* menu */
 int ui_dialog_menu(struct xante_app *xpp, const struct xante_menu *menu,

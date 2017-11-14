@@ -126,11 +126,11 @@ bool ui_dialog_calendar(struct xante_app *xpp, struct xante_item *item,
     char *result = NULL;
 
     /* Prepare dialog */
-    dialog_set_backtitle(xpp);
-    dialog_update_cancel_button_label();
-    dialog_alloc_input(64);
-    dialog_put_statusbar((edit_value == true) ? DEFAULT_STATUSBAR_TEXT
-                                              : DEFAULT_NOT_EDIT_STATUSBAR_TEXT);
+    dlgx_set_backtitle(xpp);
+    dlgx_update_cancel_button_label();
+    dlgx_alloc_input(64);
+    dlgx_put_statusbar((edit_value == true) ? DEFAULT_STATUSBAR_TEXT
+                                            : DEFAULT_NOT_EDIT_STATUSBAR_TEXT);
 
     /* Adjusts the dialog content using the item content */
     split_item_value(item, &day, &month, &year);
@@ -162,7 +162,7 @@ bool ui_dialog_calendar(struct xante_app *xpp, struct xante_item *item,
                 if (edit_value == false)
                     break;
                 else {
-                    result = dialog_get_input_result();
+                    result = dlgx_get_input_result();
 
                     if (event_call(EV_ITEM_VALUE_CONFIRM, xpp, item,
                                    result) < 0)
@@ -205,7 +205,7 @@ bool ui_dialog_calendar(struct xante_app *xpp, struct xante_item *item,
     if (text != NULL)
         cl_string_unref(text);
 
-    dialog_free_input();
+    dlgx_free_input();
 
     return value_changed;
 }

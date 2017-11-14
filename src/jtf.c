@@ -191,6 +191,7 @@ static int parse_application_version(cl_json_t *internal,
     struct xante_app *xpp)
 {
     cl_json_t *app = NULL;
+    cl_string_t *tmp = NULL;
 
     app = cl_json_get_object_item(internal, APPLICATION);
 
@@ -200,9 +201,12 @@ static int parse_application_version(cl_json_t *internal,
     }
 
     if (parse_object_value(app, JTF_VERSION, CL_JSON_STRING, true,
-                           (void **)&xpp->info.version) < 0)
+                           (void **)&tmp) < 0)
     {
         return -1;
+    } else {
+        xpp->info.version = strdup(cl_string_valueof(tmp));
+        cl_string_unref(tmp);
     }
 
     if (parse_object_value(app, JTF_REVISION, CL_JSON_NUMBER, true,
@@ -229,6 +233,7 @@ static int parse_application_version(cl_json_t *internal,
 static int parse_jtf_info(cl_json_t *jtf, struct xante_app *xpp)
 {
     cl_json_t *general = NULL, *internal = NULL;
+    cl_string_t *tmp = NULL;
 
     internal = cl_json_get_object_item(jtf, INTERNAL);
 
@@ -248,45 +253,66 @@ static int parse_jtf_info(cl_json_t *jtf, struct xante_app *xpp)
     }
 
     if (parse_object_value(general, APPLICATION_NAME, CL_JSON_STRING, true,
-                           (void **)&xpp->info.application_name) < 0)
+                           (void **)&tmp) < 0)
     {
         return -1;
+    } else {
+        xpp->info.application_name = strdup(cl_string_valueof(tmp));
+        cl_string_unref(tmp);
     }
 
     if (parse_object_value(general, PLUGIN_NAME, CL_JSON_STRING, true,
-                           (void **)&xpp->info.plugin_name) < 0)
+                           (void **)&tmp) < 0)
     {
         return -1;
+    } else {
+        xpp->info.plugin_name = strdup(cl_string_valueof(tmp));
+        cl_string_unref(tmp);
     }
 
     if (parse_object_value(general, CONFIG_PATHNAME, CL_JSON_STRING, true,
-                           (void **)&xpp->info.cfg_pathname) < 0)
+                           (void **)&tmp) < 0)
     {
         return -1;
+    } else {
+        xpp->info.cfg_pathname = strdup(cl_string_valueof(tmp));
+        cl_string_unref(tmp);
     }
 
     if (parse_object_value(general, LOG_PATHNAME, CL_JSON_STRING, true,
-                           (void **)&xpp->info.log_pathname) < 0)
+                           (void **)&tmp) < 0)
     {
         return -1;
+    } else {
+        xpp->info.log_pathname = strdup(cl_string_valueof(tmp));
+        cl_string_unref(tmp);
     }
 
     if (parse_object_value(general, LOG_LEVEL, CL_JSON_STRING, true,
-                           (void **)&xpp->info.log_level) < 0)
+                           (void **)&tmp) < 0)
     {
         return -1;
+    } else {
+        xpp->info.log_level = strdup(cl_string_valueof(tmp));
+        cl_string_unref(tmp);
     }
 
     if (parse_object_value(general, COMPANY, CL_JSON_STRING, true,
-                           (void **)&xpp->info.company) < 0)
+                           (void **)&tmp) < 0)
     {
         return -1;
+    } else {
+        xpp->info.company = strdup(cl_string_valueof(tmp));
+        cl_string_unref(tmp);
     }
 
     if (parse_object_value(general, DESCRIPTION, CL_JSON_STRING, true,
-                           (void **)&xpp->info.description) < 0)
+                           (void **)&tmp) < 0)
     {
         return -1;
+    } else {
+        xpp->info.description = strdup(cl_string_valueof(tmp));
+        cl_string_unref(tmp);
     }
 
     return 0;
@@ -811,19 +837,6 @@ static int parse_ui(cl_json_t *jtf, struct xante_app *xpp)
     return 0;
 }
 
-static int parse_jtf_json(cl_json_t *jtf, struct xante_app *xpp)
-{
-    /* Parse main JTF informations */
-    if (parse_jtf_info(jtf, xpp) < 0)
-        return -1;
-
-    /* Parse the interface (menus and its items) */
-    if (parse_ui(jtf, xpp) < 0)
-        return -1;
-
-    return 0;
-}
-
 /*
  *
  * Internal API
@@ -831,8 +844,49 @@ static int parse_jtf_json(cl_json_t *jtf, struct xante_app *xpp)
  */
 
 /**
- * @name jtf_parse
- * @brief Parses a JTF to the xante_app structure.
+ * @name jtf_parse_application_info
+ * @brief Parses only the application relevant informations.
+ *
+ * @param [in] pathname: The JTF pathname.
+ * @param [in,out] xpp: The previously created xante_app structure.
+ *
+ * @return On success returns 0 or -1 otherwise.
+ */
+int jtf_parse_application_info(const char *pathname, struct xante_app *xpp)
+{
+    cl_json_t *jtf = NULL;
+    int ret = -1;
+
+    if ((NULL == pathname) || (NULL == xpp)) {
+        errno_set(XANTE_ERROR_NULL_ARG);
+        return -1;
+    }
+
+    /*
+     * We need to initialize libcollections here, since we're using its JSON
+     * API, and we need to have some relevant informations to validate the
+     * application initialization process.
+     */
+    cl_init(NULL);
+    jtf = cl_json_read_file(pathname);
+
+    if (NULL == jtf) {
+        errno_set(XANTE_ERROR_WRONG_JTF_FORMAT);
+        cl_uninit();
+        return -1;
+    }
+
+    /* Parse main JTF informations */
+    ret = parse_jtf_info(jtf, xpp);
+    cl_json_delete(jtf);
+    cl_uninit();
+
+    return ret;
+}
+
+/**
+ * @name jtf_parse_application
+ * @brief Parses the whole application data to the xante_app structure.
  *
  * This function is responsible to parse all application information from
  * within a JTF file and put them inside a xante_app structure.
@@ -842,7 +896,7 @@ static int parse_jtf_json(cl_json_t *jtf, struct xante_app *xpp)
  *
  * @return On success returns 0 or -1 otherwise.
  */
-int jtf_parse(const char *pathname, struct xante_app *xpp)
+int jtf_parse_application(const char *pathname, struct xante_app *xpp)
 {
     cl_json_t *jtf = NULL;
     int ret = -1;
@@ -856,11 +910,12 @@ int jtf_parse(const char *pathname, struct xante_app *xpp)
 
     if (NULL == jtf) {
         errno_set(XANTE_ERROR_WRONG_JTF_FORMAT);
+        cl_uninit();
         return -1;
     }
 
-    /* Translate the JSON format to our menus and its items */
-    ret = parse_jtf_json(jtf, xpp);
+    /* Parse the interface (menus and its items) */
+    ret = parse_ui(jtf, xpp);
     cl_json_delete(jtf);
 
     return ret;
@@ -878,27 +933,27 @@ void jtf_release_info(struct xante_app *xpp)
         return;
 
     if (xpp->info.cfg_pathname != NULL)
-        cl_string_unref(xpp->info.cfg_pathname);
+        free(xpp->info.cfg_pathname);
 
     if (xpp->info.log_pathname != NULL)
-        cl_string_unref(xpp->info.log_pathname);
+        free(xpp->info.log_pathname);
 
     if (xpp->info.log_level != NULL)
-        cl_string_unref(xpp->info.log_level);
+        free(xpp->info.log_level);
 
     if (xpp->info.application_name != NULL)
-        cl_string_unref(xpp->info.application_name);
+        free(xpp->info.application_name);
 
     if (xpp->info.plugin_name != NULL)
-        cl_string_unref(xpp->info.plugin_name);
+        free(xpp->info.plugin_name);
 
     if (xpp->info.version != NULL)
-        cl_string_unref(xpp->info.version);
+        free(xpp->info.version);
 
     if (xpp->info.company != NULL)
-        cl_string_unref(xpp->info.company);
+        free(xpp->info.company);
 
     if (xpp->info.description != NULL)
-        cl_string_unref(xpp->info.description);
+        free(xpp->info.description);
 }
 

@@ -98,14 +98,14 @@ int dlg_update_object(int width, int height, const char *title,
     int selected_btn=0, result=DLG_EXIT_UNKNOWN, key=0, fkey=0, dlg_x, dlg_y,
         show_buttons=TRUE, cur_x, cur_y, first=TRUE, sublines=0;
     cl_timeout_t *timeout = NULL, *dlg_timeout = NULL;
-    struct dlg_text t;
+    struct dlgx_text t;
     char *text;
 
     selected_btn = dialog_vars.defaultno;
     dlg_y = dlg_box_y_ordinate(height);
     dlg_x = dlg_box_x_ordinate(width);
     timeout = cl_timeout_create(update_interval, CL_TM_MSECONDS);
-    sublines = dlg_get_subtitle_lines(subtitle);
+    sublines = dlgx_get_subtitle_lines(subtitle);
 
     if (dialog_vars.timeout_secs)
         dlg_timeout = cl_timeout_create(dialog_vars.timeout_secs, CL_TM_SECONDS);
@@ -148,19 +148,19 @@ int dlg_update_object(int width, int height, const char *title,
 
             if (text != NULL) {
                 if (first == FALSE)
-                    dlg_text_destroy(&t);
+                    dlgx_text_destroy(&t);
 
-                if (dlg_text_init(view, &t, height - INTERNAL_V_MARGIN,
-                                  width - INTERNAL_H_MARGIN, text) < 0)
+                if (dlgx_text_init(view, &t, height - INTERNAL_V_MARGIN,
+                                   width - INTERNAL_H_MARGIN, text) < 0)
                 {
                     break;
                 }
 
                 /* clear text from subwin */
-                dlg_text_clear(view, &t);
+                dlgx_text_clear(view, &t);
 
                 /* print update_routine return value */
-                dlg_text_print(view, &t, PRINT_FIRST);
+                dlgx_text_print(view, &t, PRINT_FIRST);
                 wrefresh(dialog);
 
                 free(text);
@@ -231,12 +231,12 @@ int dlg_update_object(int width, int height, const char *title,
         cl_timeout_destroy(timeout);
 
     if (first == FALSE)
-        dlg_text_destroy(&t);
+        dlgx_text_destroy(&t);
 
     dlg_unregister_window(view);
     dlg_del_window(view);
 
-    return dlg_cleanup_result(result, dialog);
+    return dlgx_cleanup_result(result, dialog);
 }
 
 

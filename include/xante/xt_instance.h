@@ -3,10 +3,10 @@
  * Description:
  *
  * Author: Rodrigo Freitas
- * Created at: Tue May  2 21:41:44 2017
- * Project: libxante
+ * Created at: Tue Nov 14 09:05:28 2017
+ * Project: xt_instance.h
  *
- * Copyright (C) 2017 Rodrigo Freitas
+ * Copyright (c) 2017 All rights reserved
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,34 +24,19 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_EVENT_H
-#define _LIBXANTE_XT_EVENT_H          1
+#ifndef _LIBXANTE_XT_INSTANCE_H
+#define _LIBXANTE_XT_INSTANCE_H          1
 
 #ifndef LIBXANTE_COMPILE
 # ifndef _LIBXANTE_H
-#  error "Never use <xt_event.h> directly; include <libxante.h> instead."
+#  error "Never use <xt_instance.h> directly; include <libxante.h> instead."
 # endif
 #else
 
 /* Internal library declarations */
-int event_init(struct xante_app *xpp, bool use_event);
-void event_uninit(struct xante_app *xpp);
-int event_call(const char *event_name, struct xante_app *xpp, ...);
+int instance_init(const struct xante_app *xpp, bool single_instance);
 
 #endif
-
-/**
- * @name xante_event_argument
- * @brief Gets an event argument real value.
- *
- * @param [in] arg: The event argument.
- * @param [in] data_type: The event argument required field.
- *
- * @return On success returns the required event argument real value or NULL
- *         otherwise.
- */
-void *xante_event_argument(xante_event_arg_t *arg,
-                           enum xante_event_argument_type data_type);
 
 #endif
 

@@ -3,6 +3,10 @@
 A library to build (dialog based) applications using JSON templates and
 plugins.
 
+## License
+
+LGPLv2
+
 ## Overview
 
 This library is intended to build and run dialog based applications.

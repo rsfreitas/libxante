@@ -108,39 +108,22 @@ enum xante_session_source {
 
 /** Libxante initialization flags */
 enum xante_init_flags {
-    XANTE_USE_PLUGIN        = (1 << 0), // Enable/Disable plugin calls
-    XANTE_USE_AUTH          = (1 << 1)  // Enable/Disable database authentication
+    XANTE_USE_PLUGIN        = (1 << 0), // Enable/Disable plugin calls.
+    XANTE_USE_AUTH          = (1 << 1), // Enable/Disable database authentication.
+    XANTE_SINGLE_INSTANCE   = (1 << 2), // Enable/Disable application single
+                                        // instance mode.
 };
 
-/** String keys of a supported dialog */
-#define XANTE_UI_STR_DIALOG_MENU                "menu"
-#define XANTE_UI_STR_DIALOG_INPUT_INT           "input-int"
-#define XANTE_UI_STR_DIALOG_INPUT_FLOAT         "input-float"
-#define XANTE_UI_STR_DIALOG_INPUT_DATE          "input-date"
-#define XANTE_UI_STR_DIALOG_INPUT_TIME          "input-time"
-#define XANTE_UI_STR_DIALOG_INPUT_STRING        "input-string"
-#define XANTE_UI_STR_DIALOG_INPUT_PASSWD        "input-passwd"
-#define XANTE_UI_STR_DIALOG_CALENDAR            "calendar"
-#define XANTE_UI_STR_DIALOG_TIMEBOX             "timebox"
-#define XANTE_UI_STR_DIALOG_RADIO_CHECKLIST     "radio-checklist"
-#define XANTE_UI_STR_DIALOG_CHECKLIST           "checklist"
-#define XANTE_UI_STR_DIALOG_YESNO               "yesno"
-#define XANTE_UI_STR_DIALOG_DYNAMIC_MENU        "dynamic-menu"
-#define XANTE_UI_STR_DIALOG_DELETE_DYNAMIC_MENU "delete-dynamic-menu"
-#define XANTE_UI_STR_DIALOG_ADD_DYNAMIC_MENU    "add-dynamic-menu"
-//#define XANTE_UI_STR_DIALOG_CUSTOM              "custom"
-
-/** String keys of supported menus */
-#define XANTE_UI_STR_DEFAULT_MENU               "default"
-#define XANTE_UI_STR_DYNAMIC_MENU               "dynamic"
-
 /** Event arguments */
-#define XANTE_EVT_DATA_XANTE_T                  "xante-t"
-#define XANTE_EVT_DATA_XANTE_MENU_T             "xante-menu-t"
-#define XANTE_EVT_DATA_XANTE_ITEM_T             "xante-item-t"
-#define XANTE_EVT_DATA_XANTE_ITEM_VALUE         "xante-item-value"
-#define XANTE_EVT_DATA_XANTE_CONFIG             "xante-config"
-#define XANTE_EVT_DATA_XANTE_CHANGES_LIST       "xante-changes"
+enum xante_event_argument_type {
+    XANTE_EVENT_DATA_UNKNOWN = -1,
+    XANTE_EVENT_DATA_XANTE_T,
+    XANTE_EVENT_DATA_XANTE_MENU_T,
+    XANTE_EVENT_DATA_XANTE_ITEM_T,
+    XANTE_EVENT_DATA_XANTE_ITEM_VALUE,
+    XANTE_EVENT_DATA_XANTE_CONFIG,
+    XANTE_EVENT_DATA_XANTE_CHANGES_LIST
+};
 
 /** Main library object */
 typedef void    xante_t;
@@ -176,6 +159,7 @@ struct xante_change_entry {
 #include "xante/xt_error.h"
 #include "xante/xt_event.h"
 #include "xante/xt_init.h"
+#include "xante/xt_instance.h"
 #include "xante/xt_item.h"
 #include "xante/xt_jtf.h"
 #include "xante/xt_log.h"
