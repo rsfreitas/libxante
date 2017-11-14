@@ -127,14 +127,14 @@ bool ui_dialog_delete_dm(struct xante_app *xpp, struct xante_item *item,
                                           cl_string_valueof(item->menu_id));
 
     if (NULL == dm_menu) {
-        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, 0, cl_tr("Error"),
+        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
                              cl_tr("No dynamic menu was found!"));
 
         return deleted;
     }
 
     if (cl_list_size(dm_menu->items) == 0) {
-        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, 0, cl_tr("Error"),
+        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
                              cl_tr("The dynamic menu does not have any item "
                                    "to remove!"));
 
@@ -194,7 +194,7 @@ bool ui_dialog_delete_dm(struct xante_app *xpp, struct xante_item *item,
 
             case DLG_EXIT_HELP:
                 dialog_vars.help_button = 0;
-                xante_dlg_messagebox(xpp, XANTE_MSGBOX_INFO, 0, cl_tr("Help"),
+                xante_dlg_messagebox(xpp, XANTE_MSGBOX_INFO, cl_tr("Help"),
                                      cl_string_valueof(item->descriptive_help));
 
                 dialog_vars.help_button = 1;

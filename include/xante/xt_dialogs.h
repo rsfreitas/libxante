@@ -63,7 +63,6 @@ int xante_dlg_clear_backtitle(xante_t *xpp);
  *
  * @param [in] xpp: The library main object.
  * @param [in] type: The message box type (info, error, warning).
- * @param [in] buttons: The dialog buttons.
  * @param [in] title: The dialog title.
  * @param [in] message: The dialog message format.
  * @param [in] ...: The dialog message content.
@@ -71,8 +70,7 @@ int xante_dlg_clear_backtitle(xante_t *xpp);
  * @return On success returns the button selected or -1 otherwise.
  */
 int xante_dlg_messagebox(struct xante_app *xpp, enum xante_msgbox_type type,
-                         enum xante_buttons buttons, const char *title,
-                         const char *message, ...);
+                         const char *title, const char *message, ...);
 
 #endif
 

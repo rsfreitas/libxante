@@ -239,7 +239,7 @@ static void call_menu_dialog(struct xante_app *xpp,
                                        cl_string_valueof(selected_item->menu_id));
 
     if (NULL == menu) {
-        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, 0, cl_tr("Error"),
+        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
                              cl_tr("No menu '%s' was found!"),
                              cl_string_valueof(selected_item->name));
 
@@ -299,7 +299,7 @@ static void call_selected_item(struct xante_app *xpp,
     bool update_internal_menus = false, edit_item_value = true;
 
     if (NULL == selected_item) {
-        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, 0, cl_tr("Error"),
+        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
                              cl_tr("No item was selected!"));
 
         return;
@@ -356,7 +356,7 @@ static void call_selected_item(struct xante_app *xpp,
             if (edit_item_value == true)
                update_internal_menus = call_yesno_dialog(xpp, selected_item);
             else {
-                xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, 0, cl_tr("Error"),
+                xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
                                      cl_tr("Cannot change the value of this item!"));
             }
 
@@ -370,7 +370,7 @@ static void call_selected_item(struct xante_app *xpp,
             if (edit_item_value == true)
                 call_add_dm(xpp, selected_item);
             else {
-                xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, 0, cl_tr("Error"),
+                xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
                                      cl_tr("Cannot add item!"));
             }
 

@@ -168,7 +168,7 @@ static int calc_string_length(const char *s, int (*input_len)(const char *))
  *
  * @return Returns libdialog's default return values of a selected button.
  */
-int dlg_inputbox(int width, int height, const char *title,
+int dlgx_inputbox(int width, int height, const char *title,
     const char *subtitle, const char *input_title, const char *text,
     unsigned int max_len, char *input_s, bool edit,
     int (*input_len)(const char *), int (*input_check)(const char *))

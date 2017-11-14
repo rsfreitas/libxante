@@ -629,10 +629,8 @@ bool dm_insert(struct xante_app *xpp, struct xante_item *item,
     unref_menu = ui_search_unref_menu_by_object_id(xpp, menu_id);
 
     if (NULL == unref_menu) {
-        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, XANTE_BTN_OK,
-                             cl_tr("Error"),
-                             cl_tr("The menu '%s' was not found!"),
-                             menu_id);
+        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
+                             cl_tr("The menu '%s' was not found!"), menu_id);
 
         return false;
     }
@@ -640,8 +638,7 @@ bool dm_insert(struct xante_app *xpp, struct xante_item *item,
     rme_menu = ui_search_menu_by_object_id(xpp, menu_id);
 
     if (NULL == rme_menu) {
-        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, XANTE_BTN_OK,
-                             cl_tr("Error"),
+        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
                              cl_tr("A reference for the menu '%s' was not found!"),
                              menu_id);
 

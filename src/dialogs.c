@@ -191,16 +191,12 @@ __PUB_API__ int xante_dlg_clear_backtitle(xante_t *xpp)
     return 0;
 }
 
-/*
- * TODO: Only show buttons which was set in @buttons.
- */
 /**
  * @name xante_dlg_messagebox
  * @brief Creates a message box dialog.
  *
  * @param [in] xpp: The library main object.
  * @param [in] type: The message box type (info, error, warning).
- * @param [in] buttons: The dialog buttons.
  * @param [in] title: The dialog title.
  * @param [in] message: The dialog message format.
  * @param [in] ...: The dialog message content.
@@ -208,15 +204,14 @@ __PUB_API__ int xante_dlg_clear_backtitle(xante_t *xpp)
  * @return On success returns the button selected or -1 otherwise.
  */
 __PUB_API__ int xante_dlg_messagebox(struct xante_app *xpp,
-    enum xante_msgbox_type type, enum xante_buttons buttons __attribute__((unused)),
-    const char *title, const char *message, ...)
+    enum xante_msgbox_type type, const char *title, const char *message, ...)
 {
     va_list ap;
     char *msg = NULL;
     enum xante_buttons key;
     int height = 0, ret_dialog;
     cl_string_t *real_msg = NULL;
-    bool dialog_needs_close = false;
+    bool dialog_needs_close = false, restore_help_button = false;
 
     va_start(ap, message);
     vasprintf(&msg, message, ap);
@@ -225,6 +220,11 @@ __PUB_API__ int xante_dlg_messagebox(struct xante_app *xpp,
     if ((NULL == xpp) || (xante_runtime_ui_active(xpp) == false)) {
         dlgx_init(true);
         dialog_needs_close = true;
+    }
+
+    if (dialog_vars.help_button) {
+        restore_help_button = true;
+        dialog_vars.help_button = 0;
     }
 
     real_msg = cl_string_create("%s", msg);
@@ -236,6 +236,9 @@ __PUB_API__ int xante_dlg_messagebox(struct xante_app *xpp,
 
     ret_dialog = __xante_dlg_messagebox(MINIMUM_WIDTH, height, type, title,
                                         cl_string_valueof(real_msg));
+
+    if (restore_help_button == true)
+        dialog_vars.help_button = 1;
 
     if (dialog_needs_close == true)
         dlgx_uninit();
