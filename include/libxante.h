@@ -158,6 +158,7 @@ struct xante_change_entry {
 #include "xante/xt_env.h"
 #include "xante/xt_error.h"
 #include "xante/xt_event.h"
+#include "xante/xt_info.h"
 #include "xante/xt_init.h"
 #include "xante/xt_instance.h"
 #include "xante/xt_item.h"

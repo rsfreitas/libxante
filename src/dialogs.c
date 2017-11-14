@@ -232,7 +232,7 @@ __PUB_API__ int xante_dlg_messagebox(struct xante_app *xpp,
     height = dlgx_count_lines(msg, MINIMUM_WIDTH);
 
     if (xpp != NULL)
-        xante_info("MSGBOX: %s", msg);
+        xante_log_info("MSGBOX: %s", msg);
 
     ret_dialog = __xante_dlg_messagebox(MINIMUM_WIDTH, height, type, title,
                                         cl_string_valueof(real_msg));

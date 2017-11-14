@@ -910,11 +910,11 @@ int jtf_parse_application(const char *pathname, struct xante_app *xpp)
 
     if (NULL == jtf) {
         errno_set(XANTE_ERROR_WRONG_JTF_FORMAT);
-        cl_uninit();
         return -1;
     }
 
     /* Parse the interface (menus and its items) */
+    ui_init(xpp);
     ret = parse_ui(jtf, xpp);
     cl_json_delete(jtf);
 

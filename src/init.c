@@ -58,7 +58,7 @@ static void destroy_xante_app(const struct cl_ref_s *ref)
         return;
 
     event_uninit(xpp);
-    xante_info(cl_tr("Finishing application"));
+    xante_log_info(cl_tr("Finishing application"));
     change_uninit(xpp);
     ui_uninit(xpp);
     jtf_release_info(xpp);
@@ -78,8 +78,6 @@ static struct xante_app *new_xante_app(void)
         errno_set(XANTE_ERROR_NO_MEMORY);
         return NULL;
     }
-
-    ui_init(xpp);
 
     /* Initialize the reference count */
     xpp->ref.count = 1;
@@ -128,9 +126,9 @@ __PUB_API__ xante_t *xante_init(const char *jtf_pathname,
         return NULL;
 
     /*
-     * The JTF parsing must be divided and the first is done here since we need
-     * to have some relevant informations to keep going through this function
-     * and initialize/check everything else.
+     * The JTF parsing must be divided and the first part is done here since we
+     * need to have some relevant informations to keep going through this
+     * function and initialize/check everything else.
      */
     if (jtf_parse_application_info(jtf_pathname, xpp) < 0)
         goto error_block;
@@ -172,7 +170,7 @@ __PUB_API__ xante_t *xante_init(const char *jtf_pathname,
     if (event_init(xpp, bit_test(flags, XANTE_USE_PLUGIN)) < 0)
         goto error_block;
 
-    xante_info(cl_tr("Initializing application - %s"),
+    xante_log_info(cl_tr("Initializing application - %s"),
                xpp->info.application_name);
 
     return xpp;

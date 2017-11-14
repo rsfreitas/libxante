@@ -52,6 +52,18 @@ LIBXANTE_0.1 {
         xante_env_auth_path;
         xante_env_set_cfg_path;
         xante_env_cfg_path;
+        xante_config_path;
+        xante_log_path;
+        xante_log_level;
+        xante_application_name;
+        xante_plugin_name;
+        xante_version;
+        xante_company;
+        xante_description;
+        xante_revision;
+        xante_build;
+        xante_beta;
+        xante_info;
     local:
         *;
 };

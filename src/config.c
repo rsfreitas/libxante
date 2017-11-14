@@ -122,7 +122,7 @@ static bool need_to_write_config_file(struct xante_app *xpp,
 {
     /* Discard changes? */
     if (xante_runtime_discard_changes(xpp) == true) {
-        xante_info(cl_tr("Discarding changes"));
+        xante_log_info(cl_tr("Discarding changes"));
         return false;
     }
 
@@ -131,14 +131,14 @@ static bool need_to_write_config_file(struct xante_app *xpp,
     if ((xante_runtime_discard_changes_on_timeout(xpp) == true) &&
         (ui_return_status == DLG_EXIT_TIMEOUT))
     {
-        xante_info(cl_tr("Discarding changes by timeout"));
+        xante_log_info(cl_tr("Discarding changes by timeout"));
         return false;
     }
 #endif
 
     /* Did we already save the file? */
     if (xante_runtime_config_file_status(xpp) == XANTE_CFG_ST_SAVED) {
-        xante_info(cl_tr("The config file was already saved"));
+        xante_log_info(cl_tr("The config file was already saved"));
         return false;
     }
 
@@ -146,8 +146,8 @@ static bool need_to_write_config_file(struct xante_app *xpp,
     if ((change_has_occourred(xpp) == false) &&
         xante_runtime_force_config_file_saving(xpp) == false)
     {
-        xante_info(cl_tr("No internal change has been made. "
-                         "The config file does not need to be save."));
+        xante_log_info(cl_tr("No internal change has been made. "
+                             "The config file does not need to be save."));
 
         return false;
     }
@@ -171,7 +171,7 @@ static int save_item_config(cl_list_node_t *node, void *a)
                      cl_string_valueof(item->config_item),
                      "%s", cl_string_valueof(value));
 
-    xante_debug("saving item: %s", cl_string_valueof(value));
+    xante_log_debug("saving item: %s", cl_string_valueof(value));
     cl_string_unref(value);
 
     return 0;
@@ -198,7 +198,7 @@ static int write_config(struct xante_app *xpp, int ui_return_status)
                           cl_tr("Yes"), cl_tr("No"), NULL) == false)
         {
             xante_runtime_set_config_file_status(xpp, XANTE_CFG_ST_UNSAVED);
-            xante_info(cl_tr("User chose not to save internal modifications"));
+            xante_log_info(cl_tr("User chose not to save internal modifications"));
 
             goto end_block;
         }
