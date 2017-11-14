@@ -1,6 +1,6 @@
 
 /*
- * Description:
+ * Description: Utility functions.
  *
  * Author: Rodrigo Freitas
  * Created at: Tue May  2 20:25:58 2017
@@ -288,8 +288,8 @@ __PUB_API__ char *xante_application_version(xante_t *xpp)
     }
 
     version = cl_string_create(cl_tr("%s - Version %s.%d Build %d %s"),
-                               cl_string_valueof(x->info.application_name),
-                               cl_string_valueof(x->info.version),
+                               x->info.application_name,
+                               x->info.version,
                                x->info.revision, x->info.build,
                                (x->info.beta == true) ? "BETA" : "");
 

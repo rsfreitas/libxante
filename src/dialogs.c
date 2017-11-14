@@ -117,17 +117,17 @@ __PUB_API__ int xante_dlg_set_backtitle(xante_t *xpp)
                                  (x->auth.name != NULL)
                                     ? cl_string_valueof(x->auth.login_and_source)
                                     : "",
-                                 cl_string_valueof(x->info.company));
+                                 x->info.company);
     } else
         right = cl_string_create("[%s] %s",
                                  (x->auth.name != NULL)
                                     ? cl_string_valueof(x->auth.login_and_source)
                                     : "",
-                                 cl_string_valueof(x->info.company));
+                                 x->info.company);
 
     left = cl_string_create(cl_tr("%s - Version %s.%d Build %d %s"),
-                            cl_string_valueof(x->info.application_name),
-                            cl_string_valueof(x->info.version),
+                            x->info.application_name,
+                            x->info.version,
                             x->info.revision, x->info.build,
                             (x->info.beta == true) ? "BETA" : "");
 

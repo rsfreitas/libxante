@@ -41,10 +41,10 @@ static cl_cfg_file_t *load_cfg_file(struct xante_app *xpp)
     pathname = xante_env_cfg_path();
 
     if (NULL == pathname)
-        pathname = strdup(cl_string_valueof(xpp->info.cfg_pathname));
+        pathname = strdup(xpp->info.cfg_pathname);
 
     asprintf(&xpp->config.filename, "%s/%s.cfg", pathname,
-             cl_string_valueof(xpp->info.application_name));
+             xpp->info.application_name);
 
     free(pathname);
 

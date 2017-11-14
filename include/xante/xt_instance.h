@@ -3,10 +3,10 @@
  * Description:
  *
  * Author: Rodrigo Freitas
- * Created at: Tue May  2 21:07:38 2017
- * Project: libxante
+ * Created at: Tue Nov 14 09:05:28 2017
+ * Project: xt_instance.h
  *
- * Copyright (C) 2017 Rodrigo Freitas
+ * Copyright (c) 2017 All rights reserved
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,19 +24,17 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_JTF_H
-#define _LIBXANTE_XT_JTF_H          1
+#ifndef _LIBXANTE_XT_INSTANCE_H
+#define _LIBXANTE_XT_INSTANCE_H          1
 
 #ifndef LIBXANTE_COMPILE
 # ifndef _LIBXANTE_H
-#  error "Never use <xt_jtf.h> directly; include <libxante.h> instead."
+#  error "Never use <xt_instance.h> directly; include <libxante.h> instead."
 # endif
 #else
 
 /* Internal library declarations */
-int jtf_parse_application_info(const char *pathname, struct xante_app *xpp);
-int jtf_parse_application(const char *pathname, struct xante_app *xpp);
-void jtf_release_info(struct xante_app *xpp);
+int instance_init(const struct xante_app *xpp, bool single_instance);
 
 #endif
 

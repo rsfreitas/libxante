@@ -382,7 +382,7 @@ int event_init(struct xante_app *xpp, bool use_plugin)
         return 0;
     }
 
-    xpp->plugin.plugin = cl_plugin_load(cl_string_valueof(xpp->info.plugin_name));
+    xpp->plugin.plugin = cl_plugin_load(xpp->info.plugin_name);
 
     if (NULL == xpp->plugin.plugin) {
         // DEBUG

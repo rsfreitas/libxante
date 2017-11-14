@@ -101,19 +101,23 @@ enum xante_menu_creator {
     XANTE_MENU_CREATED_INTERNALLY
 };
 
-/** Application informations loaded from the JSON file (general object) */
+/**
+ * Application informations loaded from the JTF file (general object). These
+ * all must be primitive types since libcollections is initialized after load
+ * them.
+ */
 struct xante_info {
-    cl_string_t     *cfg_pathname;
-    cl_string_t     *log_pathname;
-    cl_string_t     *log_level;
-    cl_string_t     *application_name;
-    cl_string_t     *plugin_name;
-    cl_string_t     *version;
-    cl_string_t     *company;
-    cl_string_t     *description;
-    int             revision;
-    int             build;
-    bool            beta;
+    char    *cfg_pathname;
+    char    *log_pathname;
+    char    *log_level;
+    char    *application_name;
+    char    *plugin_name;
+    char    *version;
+    char    *company;
+    char    *description;
+    int     revision;
+    int     build;
+    bool    beta;
 };
 
 /** Application runtime informations */

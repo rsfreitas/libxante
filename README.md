@@ -33,8 +33,3 @@ make ALTERNATIVE_DIALOG=1
 
 ## Bindings
 
-## Recomendations
-
-- Every internal libdialog based function must start, i.e., must have the
-same prefix **dlgx\_**.
-

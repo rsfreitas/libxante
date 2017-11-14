@@ -108,8 +108,10 @@ enum xante_session_source {
 
 /** Libxante initialization flags */
 enum xante_init_flags {
-    XANTE_USE_PLUGIN        = (1 << 0), // Enable/Disable plugin calls
-    XANTE_USE_AUTH          = (1 << 1)  // Enable/Disable database authentication
+    XANTE_USE_PLUGIN        = (1 << 0), // Enable/Disable plugin calls.
+    XANTE_USE_AUTH          = (1 << 1), // Enable/Disable database authentication.
+    XANTE_SINGLE_INSTANCE   = (1 << 2), // Enable/Disable application single
+                                        // instance mode.
 };
 
 /** Event arguments */
@@ -157,6 +159,7 @@ struct xante_change_entry {
 #include "xante/xt_error.h"
 #include "xante/xt_event.h"
 #include "xante/xt_init.h"
+#include "xante/xt_instance.h"
 #include "xante/xt_item.h"
 #include "xante/xt_jtf.h"
 #include "xante/xt_log.h"
