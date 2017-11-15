@@ -116,7 +116,7 @@ static bool validate_date(struct xante_app *xpp, cl_string_t *value)
     int day, month, year;
 
     if (cl_string_cchr(value, '/') != 2) {
-        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, 0, cl_tr("Error"),
+        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
                              cl_tr("Invalid date format!"));
 
         return false;
@@ -142,21 +142,21 @@ static bool validate_date(struct xante_app *xpp, cl_string_t *value)
     cl_stringlist_destroy(date);
 
     if ((day <= 0) || (day > 31)) {
-        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, 0, cl_tr("Error"),
+        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
                              cl_tr("The day must be between 1 and 31!"));
 
         return false;
     }
 
     if ((month <= 0) || (month > 12)) {
-        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, 0, cl_tr("Error"),
+        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
                              cl_tr("The month must be between 1 and 12!"));
 
         return false;
     }
 
     if (year <= 0) {
-        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, 0, cl_tr("Error"),
+        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
                              cl_tr("The year must be greater than 0!"));
 
         return false;
@@ -172,7 +172,7 @@ static bool validate_time(struct xante_app *xpp, cl_string_t *value)
     int hour, minute, second;
 
     if (cl_string_cchr(value, ':') != 2) {
-        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, 0, cl_tr("Error"),
+        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
                              cl_tr("Invalid timeformat!"));
 
         return false;
@@ -198,21 +198,21 @@ static bool validate_time(struct xante_app *xpp, cl_string_t *value)
     cl_stringlist_destroy(time);
 
     if ((hour < 0) || (hour > 23)) {
-        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, 0, cl_tr("Error"),
+        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
                              cl_tr("The hour must be between 0 and 23!"));
 
         return false;
     }
 
     if ((minute < 0) || (minute > 59)) {
-        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, 0, cl_tr("Error"),
+        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
                              cl_tr("The minutes must be between 0 and 59!"));
 
         return false;
     }
 
     if ((second < 0) || (second > 59)) {
-        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, 0, cl_tr("Error"),
+        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
                              cl_tr("The seconds must be between 0 and 59!"));
 
         return false;
@@ -236,7 +236,7 @@ static bool validate_input_value(struct xante_app *xpp, struct xante_item *item,
                                  CL_VALIDATE_RANGE, CL_OBJECT_AS_INT(value));
 
         if (valid == false) {
-            xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, 0, cl_tr("Error"),
+            xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
                                  cl_tr("The entered value must be between "
                                        "'%d' and '%d'!"),
                                  CL_OBJECT_AS_INT(item->min),
@@ -248,7 +248,7 @@ static bool validate_input_value(struct xante_app *xpp, struct xante_item *item,
                                  cl_string_to_float(str_value));
 
         if (valid == false) {
-            xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, 0, cl_tr("Error"),
+            xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
                                  cl_tr("The entered value must be between "
                                        "'%.2f' and '%.2f'!"),
                                  CL_OBJECT_AS_FLOAT(item->min),
@@ -347,6 +347,12 @@ bool ui_dialog_input(struct xante_app *xpp, struct xante_item *item,
                 loop = false;
                 break;
 
+#ifdef ALTERNATIVE_DIALOG
+            case DLG_EXIT_TIMEOUT:
+                loop = false;
+                break;
+#endif
+
             case DLG_EXIT_ESC:
             case DLG_EXIT_CANCEL:
                 loop = false;
@@ -354,7 +360,7 @@ bool ui_dialog_input(struct xante_app *xpp, struct xante_item *item,
 
             case DLG_EXIT_HELP:
                 dialog_vars.help_button = 0;
-                xante_dlg_messagebox(xpp, XANTE_MSGBOX_INFO, 0, cl_tr("Help"),
+                xante_dlg_messagebox(xpp, XANTE_MSGBOX_INFO, cl_tr("Help"), "%s",
                                      cl_string_valueof(item->descriptive_help));
 
                 dialog_vars.help_button = 1;

@@ -143,8 +143,8 @@ int change_add(struct xante_app *xpp, const char *item_name,
     c->new_value = strdup(new_value);
 
     cl_list_unshift(xpp->changes.user_changes, c, -1);
-    xante_debug(cl_tr("Change [%s] -> old [%s] new [%s]"),
-                item_name, old_value, new_value);
+    xante_log_debug(cl_tr("Change [%s] -> old [%s] new [%s]"),
+                    item_name, old_value, new_value);
 
     return 0;
 }

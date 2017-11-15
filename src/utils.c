@@ -33,30 +33,6 @@
  */
 
 /**
- * @name is_valid_config_file_status
- * @brief Checks if a given status is valid inside the library environment.
- *
- * @param [in] status: The status to be checked.
- *
- * @return Returns true if is a valid internal status or false otherwise.
- */
-bool is_valid_config_file_status(enum xante_config_file_status status)
-{
-    switch (status) {
-        case XANTE_CFG_ST_CREATED:
-        case XANTE_CFG_ST_LOADED:
-        case XANTE_CFG_ST_SAVED:
-        case XANTE_CFG_ST_UNSAVED:
-            return true;
-
-        default:
-            break;
-    }
-
-    return false;
-}
-
-/**
  * @name is_valid_ui_dialog
  * @brief Checks if a given dialog type is valid inside the library
  *        environment.

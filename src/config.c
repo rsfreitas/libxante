@@ -111,34 +111,33 @@ static int load_config(struct xante_app *xpp)
 
 ok_block:
     event_call(EV_CONFIG_LOAD, xpp, cfg_file);
-    xante_runtime_set_config_file_status(xpp, XANTE_CFG_ST_LOADED);
     xpp->config.cfg_file = cfg_file;
 
     return 0;
 }
 
 static bool need_to_write_config_file(struct xante_app *xpp,
-    int ui_return_status)
+    enum xante_return_value ui_return_status)
 {
     /* Discard changes? */
     if (xante_runtime_discard_changes(xpp) == true) {
-        xante_info(cl_tr("Discarding changes"));
+        xante_log_info(cl_tr("Discarding changes"));
         return false;
     }
 
 #ifdef ALTERNATIVE_DIALOG
     /* Discard changes by timeout */
     if ((xante_runtime_discard_changes_on_timeout(xpp) == true) &&
-        (ui_return_status == DLG_EXIT_TIMEOUT))
+        (ui_return_status == XANTE_RETURN_TIMEOUT))
     {
-        xante_info(cl_tr("Discarding changes by timeout"));
+        xante_log_info(cl_tr("Discarding changes by timeout"));
         return false;
     }
 #endif
 
     /* Did we already save the file? */
-    if (xante_runtime_config_file_status(xpp) == XANTE_CFG_ST_SAVED) {
-        xante_info(cl_tr("The config file was already saved"));
+    if (ui_return_status == XANTE_RETURN_CONFIG_SAVED) {
+        xante_log_info(cl_tr("The config file was already saved"));
         return false;
     }
 
@@ -146,8 +145,8 @@ static bool need_to_write_config_file(struct xante_app *xpp,
     if ((change_has_occourred(xpp) == false) &&
         xante_runtime_force_config_file_saving(xpp) == false)
     {
-        xante_info(cl_tr("No internal change has been made. "
-                         "The config file does not need to be save."));
+        xante_log_info(cl_tr("No internal change has been made. "
+                             "The config file does not need to be save."));
 
         return false;
     }
@@ -171,7 +170,7 @@ static int save_item_config(cl_list_node_t *node, void *a)
                      cl_string_valueof(item->config_item),
                      "%s", cl_string_valueof(value));
 
-    xante_debug("saving item: %s", cl_string_valueof(value));
+    xante_log_debug("saving item: %s", cl_string_valueof(value));
     cl_string_unref(value);
 
     return 0;
@@ -186,8 +185,10 @@ static int save_menu_config(cl_list_node_t *node, void *a)
     return 0;
 }
 
-static int write_config(struct xante_app *xpp, int ui_return_status)
+static int write_config(struct xante_app *xpp)
 {
+    enum xante_return_value ui_return_status = xante_runtime_exit_value(xpp);
+
     if (need_to_write_config_file(xpp, ui_return_status) == false)
         goto end_block;
 
@@ -197,8 +198,8 @@ static int write_config(struct xante_app *xpp, int ui_return_status)
                           cl_tr("Do you want to save all modifications?"),
                           cl_tr("Yes"), cl_tr("No"), NULL) == false)
         {
-            xante_runtime_set_config_file_status(xpp, XANTE_CFG_ST_UNSAVED);
-            xante_info(cl_tr("User chose not to save internal modifications"));
+            runtime_set_exit_value(xpp, XANTE_RETURN_CONFIG_UNSAVED);
+            xante_log_info(cl_tr("User chose not to save internal modifications"));
 
             goto end_block;
         }
@@ -208,10 +209,11 @@ static int write_config(struct xante_app *xpp, int ui_return_status)
     if (NULL == xpp->config.cfg_file)
         xpp->config.cfg_file = cl_cfg_create();
 
+    /* Write configurations */
     cl_list_map(xpp->ui.menus, save_menu_config, xpp);
 
     cl_cfg_sync(xpp->config.cfg_file, xpp->config.filename);
-    xante_runtime_set_config_file_status(xpp, XANTE_CFG_ST_SAVED);
+    runtime_set_exit_value(xpp, XANTE_RETURN_CONFIG_SAVED);
 
     if (change_has_occourred(xpp) == true)
         event_call(EV_CHANGES_SAVED, xpp, NULL);
@@ -223,6 +225,7 @@ end_block:
         free(xpp->config.filename);
 
     cl_cfg_unload(xpp->config.cfg_file);
+
     return 0;
 }
 
@@ -259,11 +262,10 @@ __PUB_API__ int xante_config_load(xante_t *xpp)
  * The saving is made when needed.
  *
  * @param [in,out] xpp: The main library object.
- * @param [in] ui_return_status: The UI return value.
  *
  * @return On sucess returns 0 or -1 otherwise.
  */
-__PUB_API__ int xante_config_write(xante_t *xpp, int ui_return_status)
+__PUB_API__ int xante_config_write(xante_t *xpp)
 {
     errno_clear();
 
@@ -272,6 +274,6 @@ __PUB_API__ int xante_config_write(xante_t *xpp, int ui_return_status)
         return -1;
     }
 
-    return write_config(xpp, ui_return_status);
+    return write_config(xpp);
 }
 

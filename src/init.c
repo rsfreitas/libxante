@@ -58,12 +58,13 @@ static void destroy_xante_app(const struct cl_ref_s *ref)
         return;
 
     event_uninit(xpp);
-    xante_info(cl_tr("Finishing application"));
+    xante_log_info(cl_tr("Finishing application"));
     change_uninit(xpp);
     ui_uninit(xpp);
     jtf_release_info(xpp);
     log_uninit(xpp);
     auth_uninit(xpp);
+    runtime_stop(xpp);
     libcollections_uninit();
     free(xpp);
 }
@@ -78,8 +79,6 @@ static struct xante_app *new_xante_app(void)
         errno_set(XANTE_ERROR_NO_MEMORY);
         return NULL;
     }
-
-    ui_init(xpp);
 
     /* Initialize the reference count */
     xpp->ref.count = 1;
@@ -98,6 +97,7 @@ static struct xante_app *new_xante_app(void)
  * @name xante_init
  * @brief Initialize a libxante application.
  *
+ * @param [in] caller_name: The application name which is calling us.
  * @param [in] jtf_pathname: The JTF file.
  * @param [in] use_plugin: A boolean true/false to load or not the application
  *                         plugin.
@@ -109,7 +109,7 @@ static struct xante_app *new_xante_app(void)
  *
  * @return On success returns a xante_t object or NULL otherwise.
  */
-__PUB_API__ xante_t *xante_init(const char *jtf_pathname,
+__PUB_API__ xante_t *xante_init(const char *caller_name, const char *jtf_pathname,
     enum xante_init_flags flags, enum xante_session session, const char *username,
     const char *password)
 {
@@ -128,9 +128,9 @@ __PUB_API__ xante_t *xante_init(const char *jtf_pathname,
         return NULL;
 
     /*
-     * The JTF parsing must be divided and the first is done here since we need
-     * to have some relevant informations to keep going through this function
-     * and initialize/check everything else.
+     * The JTF parsing must be divided and the first part is done here since we
+     * need to have some relevant informations to keep going through this
+     * function and initialize/check everything else.
      */
     if (jtf_parse_application_info(jtf_pathname, xpp) < 0)
         goto error_block;
@@ -141,12 +141,12 @@ __PUB_API__ xante_t *xante_init(const char *jtf_pathname,
     /* Start log file */
     log_init(xpp);
 
+    /* Set runtime flags */
+    runtime_start(xpp, caller_name);
+
     /* We check if we can run */
     if (instance_init(xpp, bit_test(flags, XANTE_SINGLE_INSTANCE)) < 0)
         goto error_block;
-
-    /* Set runtime flags */
-    runtime_start(xpp);
 
     /* Start translation environment */
 
@@ -172,8 +172,8 @@ __PUB_API__ xante_t *xante_init(const char *jtf_pathname,
     if (event_init(xpp, bit_test(flags, XANTE_USE_PLUGIN)) < 0)
         goto error_block;
 
-    xante_info(cl_tr("Initializing application - %s"),
-               xpp->info.application_name);
+    xante_log_info(cl_tr("Initializing application - %s"),
+                   xpp->info.application_name);
 
     return xpp;
 

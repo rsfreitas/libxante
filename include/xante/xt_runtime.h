@@ -34,7 +34,14 @@
 #else
 
 /* Internal library declarations */
-void runtime_start(struct xante_app *xpp);
+void runtime_start(struct xante_app *xpp, const char *caller_name);
+void runtime_stop(struct xante_app *xpp);
+
+/* These setters are for read only runtime flags */
+void runtime_set_exit_value(struct xante_app *xpp, int exit_value);
+void runtime_set_ui_active(struct xante_app *xpp, bool ui_active);
+void runtime_set_execute_plugin(struct xante_app *xpp, bool execute_plugin);
+void runtime_set_user_authentication(struct xante_app *xpp, bool auth);
 
 #endif
 
@@ -59,7 +66,7 @@ int xante_runtime_set_discard_changes(xante_t *xpp, bool discard_changes);
  *
  * @return Returns true/false if it's going to ignore.
  */
-bool xante_runtime_discard_changes(xante_t *xpp);
+bool xante_runtime_discard_changes(const xante_t *xpp);
 
 /**
  * @name xante_runtime_set_discard_changes_on_timeout
@@ -81,18 +88,7 @@ int xante_runtime_set_discard_changes_on_timeout(xante_t *xpp,
  *
  * @return Returns true/false if it's going to ignore.
  */
-bool xante_runtime_discard_changes_on_timeout(xante_t *xpp);
-
-/**
- * @name xante_runtime_set_execute_plugin.
- * @brief Enables/disables the plugin from an application.
- *
- * @param [in] xpp: The library main object.
- * @param [in] execute_plugin: The boolean value to enable/disable.
- *
- * @return On success returns 0 or -1 otherwise.
- */
-int xante_runtime_set_execute_plugin(xante_t *xpp, bool execute_plugin);
+bool xante_runtime_discard_changes_on_timeout(const xante_t *xpp);
 
 /**
  * @name xante_runtime_execute_plugin
@@ -102,32 +98,7 @@ int xante_runtime_set_execute_plugin(xante_t *xpp, bool execute_plugin);
  *
  * @return Returns true/false if the application is working or not.
  */
-bool xante_runtime_execute_plugin(xante_t *xpp);
-
-/**
- * @name xante_runtime_set_create_default_config_file
- * @brief Sets/Unsets if an application is going to save its configuration
- *        file with default values.
- *
- * @param [in] xpp: The library main object.
- * @param [in] create_default_config_file: The boolean value to create or not
- *                                         the file.
- *
- * @return On success returns 0 or -1 otherwise.
- */
-int xante_runtime_set_create_default_config_file(xante_t *xpp,
-                                                 bool create_default_config_file);
-
-/**
- * @name xante_runtime_create_default_config_file
- * @brief Retrives if an application is going to save its default configuration
- *        file.
- *
- * @param [in] xpp: The library main object.
- *
- * @return Returns true/false if it's going to.
- */
-bool xante_runtime_create_default_config_file(xante_t *xpp);
+bool xante_runtime_execute_plugin(const xante_t *xpp);
 
 /**
  * @name xante_runtime_set_force_config_file_saving
@@ -150,7 +121,7 @@ int xante_runtime_set_force_config_file_saving(xante_t *xpp, bool force_saving);
  *
  * @return Returns true/false if it's going to.
  */
-bool xante_runtime_force_config_file_saving(xante_t *xpp);
+bool xante_runtime_force_config_file_saving(const xante_t *xpp);
 
 /**
  * @name xante_runtime_set_ui_dialog_timeout
@@ -171,29 +142,7 @@ int xante_runtime_set_ui_dialog_timeout(xante_t *xpp, unsigned int timeout);
  *
  * @return On success returns the timeout or -1 otherwise.
  */
-int xante_runtime_ui_dialog_timeout(xante_t *xpp);
-
-/**
- * @name xante_runtime_set_config_file_status
- * @brief Sets the current status of the application configuration file.
- *
- * @param [in] xpp: The library main object.
- * @param [in] status: The new configuration file status.
- *
- * @return On success returns 0 or -1 otherwise.
- */
-int xante_runtime_set_config_file_status(xante_t *xpp,
-                                         enum xante_config_file_status status);
-
-/**
- * @name xante_runtime_config_file_status
- * @brief Retrieves the current configuration file status.
- *
- * @param [in] xpp: The library main object.
- *
- * @return On success returns the configuration file status or -1 otherwise.
- */
-int xante_runtime_config_file_status(xante_t *xpp);
+int xante_runtime_ui_dialog_timeout(const xante_t *xpp);
 
 /**
  * @name xante_runtime_set_show_config_saving_question.
@@ -217,7 +166,7 @@ int xante_runtime_set_show_config_saving_question(xante_t *xpp,
  *
  * @return Returns true/false if it's going to.
  */
-bool xante_runtime_show_config_saving_question(xante_t *xpp);
+bool xante_runtime_show_config_saving_question(const xante_t *xpp);
 
 /**
  * @name xante_runtime_set_accent_characters
@@ -238,18 +187,7 @@ int xante_runtime_set_accent_characters(xante_t *xpp, bool use_accents);
  *
  * @return Returns true/false if it's using or not.
  */
-bool xante_runtime_accent_characters(xante_t *xpp);
-
-/**
- * @name xante_runtime_set_exit_value
- * @brief Sets the exit value of a libxante application.
- *
- * @param [in] xpp: The library main object.
- * @param [in] exit_value: The exit value.
- *
- * @return On success returns 0 or -1 otherwise.
- */
-int xante_runtime_set_exit_value(xante_t *xpp, int exit_value);
+bool xante_runtime_accent_characters(const xante_t *xpp);
 
 /**
  * @name xante_runtime_exit_value
@@ -259,7 +197,7 @@ int xante_runtime_set_exit_value(xante_t *xpp, int exit_value);
  *
  * @return On success returns the exit code or -1 otherwise.
  */
-int xante_runtime_exit_value(xante_t *xpp);
+enum xante_return_value xante_runtime_exit_value(const xante_t *xpp);
 
 /**
  * @name xante_runtime_set_close_ui
@@ -280,18 +218,7 @@ int xante_runtime_set_close_ui(xante_t *xpp, bool close_ui);
  *
  * @return Returns true/false if the application needs to close its UI.
  */
-bool xante_runtime_close_ui(xante_t *xpp);
-
-/**
- * @name xante_runtime_set_ui_active
- * @brief Set/Unsets if the application is in the UI mode or not.
- *
- * @param [in] xpp: The library main object.
- * @param [in] ui_active: The boolean value to set/unset the UI.
- *
- * @return On success returns 0 or -1 otherwise.
- */
-int xante_runtime_set_ui_active(xante_t *xpp, bool ui_active);
+bool xante_runtime_close_ui(const xante_t *xpp);
 
 /**
  * @name xante_runtime_ui_active
@@ -301,19 +228,7 @@ int xante_runtime_set_ui_active(xante_t *xpp, bool ui_active);
  *
  * @return Returns true/false if it's in the UI mode.
  */
-bool xante_runtime_ui_active(xante_t *xpp);
-
-/**
- * @name xante_runtime_set_user_authentication
- * @brief Sets/Unsets if the application is going to use internal user access
- *        authentication.
- *
- * @param [in] xpp: The library main object.
- * @param [in] auth: The boolean flag to set/unset the authentication.
- *
- * @return On success returns 0 or -1 otherwise.
- */
-int xante_runtime_set_user_authentication(xante_t *xpp, bool auth);
+bool xante_runtime_ui_active(const xante_t *xpp);
 
 /**
  * @name xante_runtime_user_authentication
@@ -323,7 +238,17 @@ int xante_runtime_set_user_authentication(xante_t *xpp, bool auth);
  *
  * @return Returns true/false if it is using.
  */
-bool xante_runtime_user_authentication(xante_t *xpp);
+bool xante_runtime_user_authentication(const xante_t *xpp);
+
+/**
+ * @name xante_runtime_caller_name
+ * @brief Retrieves the application name which got us running.
+ *
+ * @param [in] xpp: The library main object.
+ *
+ * @return On success returns the caller name or NULL otherwise.
+ */
+const char *xante_runtime_caller_name(const xante_t *xpp);
 
 #endif
 

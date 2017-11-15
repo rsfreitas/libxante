@@ -49,22 +49,22 @@ void log_uninit(struct xante_app *xpp);
  * @param [in] fmt: The message format.
  * @param [in] ...: The message content.
  */
-void xante_log(enum cl_log_level level, const char *function,
-               int line, const char *fmt, ...);
+void xante_log(enum cl_log_level level, const char *function, int line,
+               const char *fmt, ...) __attribute__((format(printf, 4, 5)));
 
 /**
  * Macros to log messages with several levels.
  */
-#define xante_info(fmt, args...)     \
+#define xante_log_info(fmt, args...)     \
     xante_log(CL_LOG_INFO, NULL, 0, fmt, ## args)
 
-#define xante_debug(fmt, args...)    \
+#define xante_log_debug(fmt, args...)    \
     xante_log(CL_LOG_DEBUG, __FUNCTION__, __LINE__, fmt, ## args)
 
-#define xante_error(fmt, args...)    \
+#define xante_log_error(fmt, args...)    \
     xante_log(CL_LOG_ERROR, __FUNCTION__, __LINE__, fmt, ## args)
 
-#define xante_warning(fmt, args...)  \
+#define xante_log_warning(fmt, args...)  \
     xante_log(CL_LOG_WARNG, __FUNCTION__, __LINE__, fmt, ## args)
 
 #endif

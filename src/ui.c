@@ -191,23 +191,25 @@ void ui_print_menu_tree(struct xante_app *xpp)
  *
  * @param [in,out] xpp: The library main object.
  *
- * @return On success returns 0 or -1 otherwise.
+ * @return Return an exit value indicating what happened inside (see enum
+ *         xante_return_value declaration).
  */
-__PUB_API__ int xante_ui_run(xante_t *xpp)
+__PUB_API__ enum xante_return_value xante_ui_run(xante_t *xpp)
 {
     struct xante_app *x = (struct xante_app *)xpp;
     struct xante_menu *root = NULL;
     char *btn_cancel_label = NULL;
+    enum xante_return_value exit_status;
     int ret_dialog;
 
     errno_clear();
 
     if (NULL == xpp) {
         errno_set(XANTE_ERROR_NULL_ARG);
-        return -1;
+        return XANTE_RETURN_ERROR;
     }
 
-    xante_runtime_set_ui_active(xpp, true);
+    runtime_set_ui_active(xpp, true);
     dlgx_init(false);
     xante_dlg_set_backtitle(xpp);
     btn_cancel_label = strdup(cl_tr(MAIN_MENU_CANCEL_LABEL));
@@ -216,8 +218,8 @@ __PUB_API__ int xante_ui_run(xante_t *xpp)
 
 
     if (NULL == root) {
-        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, XANTE_BTN_OK,
-                             cl_tr("Error"), cl_tr("The menu '%s' was not found!"),
+        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
+                             cl_tr("The menu '%s' was not found!"),
                              cl_string_valueof(x->ui.main_menu_object_id));
 
         goto end_block;
@@ -231,9 +233,15 @@ end_block:
 
     xante_dlg_clear_backtitle(xpp);
     dlgx_uninit();
-    xante_runtime_set_ui_active(xpp, false);
+    exit_status = (ret_dialog == DLG_EXIT_TIMEOUT) ? XANTE_RETURN_TIMEOUT
+                                                   : ((ret_dialog == DLG_EXIT_OK)
+                                                        ? XANTE_RETURN_OK
+                                                        : XANTE_RETURN_ERROR);
 
-    return ret_dialog;
+    runtime_set_ui_active(xpp, false);
+    runtime_set_exit_value(xpp, exit_status);
+
+    return exit_status;
 }
 
 __PUB_API__ void xante_ui_suspend(void)

@@ -50,11 +50,10 @@ int xante_config_load(xante_t *xpp);
  * The saving is made when needed.
  *
  * @param [in,out] xpp: The main library object.
- * @param [in] ui_return_status: The UI return value.
  *
  * @return On sucess returns 0 or -1 otherwise.
  */
-int xante_config_write(xante_t *xpp, int ui_return_status);
+int xante_config_write(xante_t *xpp);
 
 #endif
 

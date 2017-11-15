@@ -49,7 +49,13 @@ int instance_init(const struct xante_app *xpp, bool single_instance)
     if (single_instance == false)
         goto end_block;
 
-    if (cl_instance_active(xpp->info.application_name)) {
+    /*
+     * XXX: It's important to remember that we must have handled the caller_name
+     *      before.
+     */
+    if (cl_instance_active(xpp->info.application_name,
+                           xante_runtime_caller_name(xpp)))
+    {
         errno_set(XANTE_ERROR_INSTANCE_ALREADY_RUNNING);
         return -1;
     }

@@ -57,16 +57,7 @@ enum xante_ui_dialog {
 //    XANTE_UI_DIALOG_FORM
 };
 
-/** A possible state from the application config file */
-enum xante_config_file_status {
-    XANTE_CFG_ST_UNKNOWN,
-    XANTE_CFG_ST_CREATED,
-    XANTE_CFG_ST_LOADED,
-    XANTE_CFG_ST_SAVED,
-    XANTE_CFG_ST_UNSAVED
-};
-
-/** A access mode from a menu or a menu item */
+/** An access mode from a menu or a menu item */
 enum xante_access_mode {
     XANTE_ACCESS_HIDDEN     = 0,
     XANTE_ACCESS_VIEW       = (1 << 0),
@@ -125,6 +116,15 @@ enum xante_event_argument_type {
     XANTE_EVENT_DATA_XANTE_CHANGES_LIST
 };
 
+/** Return values of an application */
+enum xante_return_value {
+    XANTE_RETURN_ERROR = -1,        //** Internal error.
+    XANTE_RETURN_OK,                //** Application ended without modifications.
+    XANTE_RETURN_CONFIG_SAVED,      //** Application ended with user saving modifications.
+    XANTE_RETURN_CONFIG_UNSAVED,    //** Application ended with unsaved modifications.
+    XANTE_RETURN_TIMEOUT            //** Application ended by timeout.
+};
+
 /** Main library object */
 typedef void    xante_t;
 
@@ -158,6 +158,7 @@ struct xante_change_entry {
 #include "xante/xt_env.h"
 #include "xante/xt_error.h"
 #include "xante/xt_event.h"
+#include "xante/xt_info.h"
 #include "xante/xt_init.h"
 #include "xante/xt_instance.h"
 #include "xante/xt_item.h"

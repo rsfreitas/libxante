@@ -41,5 +41,35 @@ struct xante_menu *xante_menu_create(enum xante_menu_creator creator);
 
 #endif
 
+/**
+ * @name xante_menu_name
+ * @brief Gives the current name of a menu object.
+ *
+ * @param [in] menu: The menu object.
+ *
+ * @return On success returns the menu name or NULL otherwise.
+ */
+const char *xante_menu_name(const xante_menu_t *menu);
+
+/**
+ * @name xante_menu_object_id
+ * @brief Gives the current object_id property of a menu object.
+ *
+ * @param [in] menu: The menu object.
+ *
+ * @return On success returns the object identification or NULL otherwise.
+ */
+const char *xante_menu_object_id(const xante_menu_t *menu);
+
+/**
+ * @name xante_menu_type
+ * @brief Gives the current menu type of a menu object.
+ *
+ * @param [in] menu: The menu object.
+ *
+ * @return On success return the menu type or -1 otherwise.
+ */
+enum xante_ui_menu xante_menu_type(const xante_menu_t *menu);
+
 #endif
 
