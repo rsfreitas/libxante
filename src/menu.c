@@ -170,13 +170,45 @@ struct xante_menu *xante_menu_create(enum xante_menu_creator creator)
  *
  */
 
-__PUB_API__ xante_menu_t *xante_menu_create_from_json(cl_json_t *menu)
+__PUB_API__ const char *xante_menu_name(const xante_menu_t *menu)
 {
-    return NULL;
+    struct xante_menu *m = (struct xante_menu *)menu;
+
+    errno_clear();
+
+    if (NULL == menu) {
+        errno_set(XANTE_ERROR_NULL_ARG);
+        return NULL;
+    }
+
+    return cl_string_valueof(m->name);
 }
 
-__PUB_API__ xante_menu_t *xante_menu_create_from_string(const char *menu)
+__PUB_API__ const char *xante_menu_object_id(const xante_menu_t *menu)
 {
-    return NULL;
+    struct xante_menu *m = (struct xante_menu *)menu;
+
+    errno_clear();
+
+    if (NULL == menu) {
+        errno_set(XANTE_ERROR_NULL_ARG);
+        return NULL;
+    }
+
+    return cl_string_valueof(m->object_id);
+}
+
+__PUB_API__ enum xante_ui_menu xante_menu_type(const xante_menu_t *menu)
+{
+    struct xante_menu *m = (struct xante_menu *)menu;
+
+    errno_clear();
+
+    if (NULL == menu) {
+        errno_set(XANTE_ERROR_NULL_ARG);
+        return -1;
+    }
+
+    return m->menu_type;
 }
 

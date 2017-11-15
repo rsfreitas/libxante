@@ -176,41 +176,142 @@ struct xante_item *xante_item_create(void)
  *
  */
 
-__PUB_API__ void xante_item_name(void)
+__PUB_API__ const char *xante_item_name(const xante_item_t *item)
 {
+    struct xante_item *i = (struct xante_item *)item;
+
+    errno_clear();
+
+    if (NULL == item) {
+        errno_set(XANTE_ERROR_NULL_ARG);
+        return NULL;
+    }
+
+    return cl_string_valueof(i->name);
 }
 
-__PUB_API__ void xante_item_object_id(void)
+__PUB_API__ const char *xante_item_object_id(const xante_item_t *item)
 {
+    struct xante_item *i = (struct xante_item *)item;
+
+    errno_clear();
+
+    if (NULL == item) {
+        errno_set(XANTE_ERROR_NULL_ARG);
+        return NULL;
+    }
+
+    return cl_string_valueof(i->object_id);
 }
 
-__PUB_API__ void xante_item_access_mode(void)
+__PUB_API__ enum xante_access_mode xante_item_access_mode(const xante_item_t *item)
 {
+    struct xante_item *i = (struct xante_item *)item;
+
+    errno_clear();
+
+    if (NULL == item) {
+        errno_set(XANTE_ERROR_NULL_ARG);
+        return -1;
+    }
+
+    return i->mode;
 }
 
-__PUB_API__ void xante_item_default_value(void)
+__PUB_API__ cl_object_t *xante_item_default_value(const xante_item_t *item)
 {
+    struct xante_item *i = (struct xante_item *)item;
+
+    errno_clear();
+
+    if (NULL == item) {
+        errno_set(XANTE_ERROR_NULL_ARG);
+        return NULL;
+    }
+
+    return cl_object_ref(i->default_value);
 }
 
-__PUB_API__ void xante_item_value(void)
+__PUB_API__ cl_object_t *xante_item_value(const xante_item_t *item)
 {
+    struct xante_item *i = (struct xante_item *)item;
+
+    errno_clear();
+
+    if (NULL == item) {
+        errno_set(XANTE_ERROR_NULL_ARG);
+        return NULL;
+    }
+
+    return cl_object_ref(i->value);
 }
 
-__PUB_API__ void xante_item_dialog_type(void)
+__PUB_API__ enum xante_ui_dialog xante_item_dialog_type(const xante_item_t *item)
 {
+    struct xante_item *i = (struct xante_item *)item;
+
+    errno_clear();
+
+    if (NULL == item) {
+        errno_set(XANTE_ERROR_NULL_ARG);
+        return -1;
+    }
+
+    return i->dialog_type;
 }
 
-__PUB_API__ void xante_item_checklist_type(void)
+__PUB_API__ int xante_item_checklist_type(const xante_item_t *item)
 {
+    struct xante_item *i = (struct xante_item *)item;
+
+    errno_clear();
+
+    if (NULL == item) {
+        errno_set(XANTE_ERROR_NULL_ARG);
+        return -1;
+    }
+
+    return i->dialog_checklist_type;
 }
 
-__PUB_API__ xante_item_t *xante_item_create_from_json(cl_json_t *item)
+__PUB_API__ int xante_item_update_value(xante_item_t *item, const char *fmt, ...)
 {
-    return NULL;
-}
+    struct xante_item *i = (struct xante_item *)item;
+    cl_string_t *tmp = NULL;
+    cl_object_t *data = NULL;
+    char *buf = NULL;
+    va_list ap;
 
-__PUB_API__ xante_item_t *xante_item_create_from_string(const char *item)
-{
-    return NULL;
+    errno_clear();
+
+    if ((NULL == item) || (NULL == fmt)) {
+        errno_set(XANTE_ERROR_NULL_ARG);
+        return -1;
+    }
+
+    va_start(ap, fmt);
+    vasprintf(&buf, fmt, ap);
+    va_end(ap);
+
+    tmp = cl_string_create("%s", buf);
+    free(buf);
+
+    if (NULL == tmp) {
+        errno_set(XANTE_ERROR_INVALID_INTERNAL_CONVERSION);
+        return -1;
+    }
+
+    data = cl_object_from_cstring(tmp);
+
+    if (NULL == data) {
+        errno_set(XANTE_ERROR_INVALID_INTERNAL_CONVERSION);
+        return -1;
+    }
+
+    cl_string_unref(tmp);
+    cl_object_unref(i->value);
+    i->value = data;
+
+    return 0;
 }
 

@@ -37,6 +37,7 @@
  * @name xante_init
  * @brief Initialize a libxante application.
  *
+ * @param [in] caller_name: The application name which is calling us.
  * @param [in] jtf_pathname: The JTF file.
  * @param [in] flags: Library initialization flags.
  * @param [in] session: The session type.
@@ -45,9 +46,9 @@
  *
  * @return On success returns a xante_t object or NULL otherwise.
  */
-xante_t *xante_init(const char *jtf_pathname, enum xante_init_flags flags,
-                    enum xante_session session, const char *username,
-                    const char *password);
+xante_t *xante_init(const char *caller_name, const char *jtf_pathname,
+                    enum xante_init_flags flags, enum xante_session session,
+                    const char *username, const char *password);
 
 /**
  * @name xante_uninit

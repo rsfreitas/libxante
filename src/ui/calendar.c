@@ -179,6 +179,12 @@ bool ui_dialog_calendar(struct xante_app *xpp, struct xante_item *item,
 
                 break;
 
+#ifdef ALTERNATIVE_DIALOG
+            case DLG_EXIT_TIMEOUT:
+                loop = false;
+                break;
+#endif
+
             case DLG_EXIT_ESC:
             case DLG_EXIT_CANCEL:
                 loop = false;
@@ -186,7 +192,7 @@ bool ui_dialog_calendar(struct xante_app *xpp, struct xante_item *item,
 
             case DLG_EXIT_HELP:
                 dialog_vars.help_button = 0;
-                xante_dlg_messagebox(xpp, XANTE_MSGBOX_INFO, cl_tr("Help"),
+                xante_dlg_messagebox(xpp, XANTE_MSGBOX_INFO, cl_tr("Help"), "%s",
                                      cl_string_valueof(item->descriptive_help));
 
                 dialog_vars.help_button = 1;

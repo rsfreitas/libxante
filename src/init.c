@@ -64,6 +64,7 @@ static void destroy_xante_app(const struct cl_ref_s *ref)
     jtf_release_info(xpp);
     log_uninit(xpp);
     auth_uninit(xpp);
+    runtime_stop(xpp);
     libcollections_uninit();
     free(xpp);
 }
@@ -96,6 +97,7 @@ static struct xante_app *new_xante_app(void)
  * @name xante_init
  * @brief Initialize a libxante application.
  *
+ * @param [in] caller_name: The application name which is calling us.
  * @param [in] jtf_pathname: The JTF file.
  * @param [in] use_plugin: A boolean true/false to load or not the application
  *                         plugin.
@@ -107,7 +109,7 @@ static struct xante_app *new_xante_app(void)
  *
  * @return On success returns a xante_t object or NULL otherwise.
  */
-__PUB_API__ xante_t *xante_init(const char *jtf_pathname,
+__PUB_API__ xante_t *xante_init(const char *caller_name, const char *jtf_pathname,
     enum xante_init_flags flags, enum xante_session session, const char *username,
     const char *password)
 {
@@ -139,12 +141,12 @@ __PUB_API__ xante_t *xante_init(const char *jtf_pathname,
     /* Start log file */
     log_init(xpp);
 
+    /* Set runtime flags */
+    runtime_start(xpp, caller_name);
+
     /* We check if we can run */
     if (instance_init(xpp, bit_test(flags, XANTE_SINGLE_INSTANCE)) < 0)
         goto error_block;
-
-    /* Set runtime flags */
-    runtime_start(xpp);
 
     /* Start translation environment */
 
@@ -171,7 +173,7 @@ __PUB_API__ xante_t *xante_init(const char *jtf_pathname,
         goto error_block;
 
     xante_log_info(cl_tr("Initializing application - %s"),
-               xpp->info.application_name);
+                   xpp->info.application_name);
 
     return xpp;
 

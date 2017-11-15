@@ -41,5 +41,90 @@ struct xante_item *xante_item_create(void);
 
 #endif
 
+/**
+ * @name xante_item_name
+ * @brief Gives the current name of an item object.
+ *
+ * @param [in] item: The item object.
+ *
+ * @return On success returns the item name or NULL otherwise.
+ */
+const char *xante_item_name(const xante_item_t *item);
+
+/**
+ * @name xante_item_object_id
+ * @brief Gives the current object identification of an item object.
+ *
+ * @param [in] item: The item object.
+ *
+ * @return On success returns the object identification or NULL otherwise.
+ */
+const char *xante_item_object_id(const xante_item_t *item);
+
+/**
+ * @name xante_item_access_mode
+ * @brief Gives the current access mode of an item object.
+ *
+ * @param [in] item: The item object.
+ *
+ * @return On success returns the access mode or -1 otherwise.
+ */
+enum xante_access_mode xante_item_access_mode(const xante_item_t *item);
+
+/**
+ * @name xante_item_default_value
+ * @brief Gives the default value of an item object.
+ *
+ * @param [in] item: The item object.
+ *
+ * @return On success returns a reference to the default value of the item or
+ *         NULL otherwise.
+ */
+cl_object_t *xante_item_default_value(const xante_item_t *item);
+
+/**
+ * @name xante_item_value
+ * @brief Gives the current value of an item object.
+ *
+ * @param [in] item: The item object.
+ *
+ * @return On success returns a reference to the current item's value or NULL
+ *         otherwise. If the item has no value it will also return NULL.
+ */
+cl_object_t *xante_item_value(const xante_item_t *item);
+
+/**
+ * @name xante_item_dialog_type
+ * @brief Gives the dialog type of an item object.
+ *
+ * @param [in] item: The item object.
+ *
+ * @return On success returns the item dialog type or -1 otherwise.
+ */
+enum xante_ui_dialog xante_item_dialog_type(const xante_item_t *item);
+
+/**
+ * @name xante_item_checklist_type
+ * @brief Gives the checklist type of an item object.
+ *
+ * @param [in] item: The item object.
+ *
+ * @return On success returns the item checklist type or -1 otherwise.
+ */
+int xante_item_checklist_type(const xante_item_t *item);
+
+/**
+ * @name xante_item_update_value
+ * @brief Updates the current value of an item object.
+ *
+ * @param [in] item: The item object.
+ * @param [in] fmt: The new value format, as string.
+ * @param [in] ...: The new value values.
+ *
+ * @return On success returns 0 or -1 otherwise.
+ */
+int xante_item_update_value(xante_item_t *item, const char *fmt, ...)
+                            __attribute__((format(printf, 2, 3)));
+
 #endif
 

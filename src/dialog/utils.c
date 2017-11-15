@@ -546,7 +546,7 @@ bool dlgx_question(struct xante_app *xpp, const char *title, const char *msg,
 
     if (xante_runtime_ui_active(xpp) == false) {
         dlgx_init(false);
-        xante_runtime_set_ui_active(xpp, true);
+        runtime_set_ui_active(xpp, true);
         dialog_needs_closing = true;
     }
 
@@ -568,7 +568,7 @@ bool dlgx_question(struct xante_app *xpp, const char *title, const char *msg,
 
     if (dialog_needs_closing == true) {
         dlgx_uninit();
-        xante_runtime_set_ui_active(xpp, false);
+        runtime_set_ui_active(xpp, false);
     }
 
     cl_string_unref(form_msg);

@@ -122,19 +122,21 @@ struct xante_info {
 
 /** Application runtime informations */
 struct xante_runtime {
-    bool                            discard_changes;
-    bool                            discard_changes_on_timeout;
-    bool                            execute_plugin;
-    bool                            create_default_config_file;
-    bool                            force_config_file_saving;
-    bool                            show_config_saving_question;
-    bool                            accent_characters;
-    bool                            close_ui;
-    bool                            ui_active;
-    bool                            user_authentication;
-    int                             ui_dialog_timeout;          /** seconds */
-    int                             exit_value;
-    enum xante_config_file_status   config_file_status;
+    /* Read only */
+    enum xante_return_value     exit_value;
+    bool                        ui_active;
+    bool                        execute_plugin;
+    bool                        user_authentication;
+    char                        *caller_name;
+
+    /* Read/Write */
+    bool                        discard_changes;
+    bool                        discard_changes_on_timeout;
+    bool                        force_config_file_saving;
+    bool                        show_config_saving_question;
+    bool                        accent_characters;
+    bool                        close_ui;
+    int                         ui_dialog_timeout;          /** seconds */
 };
 
 /** XanteItem's flag to be validated when parsed from a JTF file */

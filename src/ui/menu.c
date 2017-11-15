@@ -495,6 +495,13 @@ int ui_dialog_menu(struct xante_app *xpp, const struct xante_menu *menu,
 
                 break;
 
+#ifdef ALTERNATIVE_DIALOG
+            case DLG_EXIT_TIMEOUT:
+                xante_log_info(cl_tr("Internal timeout reached... Leaving..."));
+                loop = false;
+                break;
+#endif
+
             case DLG_EXIT_ESC:
             case DLG_EXIT_CANCEL:
                 /* Are we leaving the application? */

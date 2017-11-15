@@ -57,9 +57,10 @@ void ui_print_menu_tree(struct xante_app *xpp);
  *
  * @param [in,out] xpp: The library main object.
  *
- * @return On success returns 0 or -1 otherwise.
+ * @return Return an exit value indicating what happened inside (see enum
+ *         xante_return_value declaration).
  */
-int xante_ui_run(xante_t *xpp);
+enum xante_return_value xante_ui_run(xante_t *xpp);
 
 #endif
 

@@ -956,7 +956,7 @@ int auth_init(struct xante_app *xpp, bool use_auth, enum xante_session session,
     int ret = -1;
 
     if (use_auth == false) {
-        xante_runtime_set_user_authentication(xpp, false);
+        runtime_set_user_authentication(xpp, false);
         return 0;
     }
 

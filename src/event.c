@@ -378,7 +378,7 @@ int event_call(const char *event_name, struct xante_app *xpp, ...)
 int event_init(struct xante_app *xpp, bool use_plugin)
 {
     if (use_plugin == false) {
-        xante_runtime_set_execute_plugin(xpp, false);
+        runtime_set_execute_plugin(xpp, false);
         return 0;
     }
 
@@ -386,7 +386,7 @@ int event_init(struct xante_app *xpp, bool use_plugin)
 
     if (NULL == xpp->plugin.plugin) {
         // DEBUG
-        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, 0, "ERROR",
+        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, "ERROR",
                 "%s", cl_strerror(cl_get_last_error()));
         errno_set(XANTE_ERROR_PLUGIN_LOAD_ERROR);
         return -1;
