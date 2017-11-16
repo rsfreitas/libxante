@@ -425,6 +425,7 @@ static struct xante_item *get_item_at(cl_list_t *list, int index)
     return item;
 }
 
+#ifdef ALTERNATIVE_DIALOG
 static void update_menu_item_brief(int current_item, void *a)
 {
     struct xante_menu *menu = (struct xante_menu *)a;
@@ -440,6 +441,7 @@ static void update_menu_item_brief(int current_item, void *a)
 
     dlgx_put_item_brief(text);
 }
+#endif
 
 /*
  *

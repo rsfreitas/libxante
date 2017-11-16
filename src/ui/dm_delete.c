@@ -172,8 +172,7 @@ bool ui_dialog_delete_dm(struct xante_app *xpp, struct xante_item *item,
                                    MINIMUM_WIDTH, list_options_height,
                                    number_of_options, dlg_items, " X",
                                    item->dialog_checklist_type,
-                                   &selected_index,
-                                   update_item_brief, item);
+                                   &selected_index);
 #endif
 
         switch (ret_dialog) {

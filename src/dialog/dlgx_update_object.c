@@ -142,7 +142,9 @@ int dlg_update_object(int width, int height, const char *title,
 
             /* Finishes the dialog by an internal routine "signal" */
             if (status && (*status)) {
+#ifdef ALTERNATIVE_DIALOG
                 result = DLG_EXIT_FROM_STATUS;
+#endif
                 break;
             }
 
@@ -179,10 +181,12 @@ int dlg_update_object(int width, int height, const char *title,
         if (cl_stdin_select() == true) {
             key = dlg_mouse_wgetch_nowait(dialog, &fkey);
 
+#ifdef ALTERNATIVE_DIALOG
             if (key == DLG_EXIT_TIMEOUT) {
                 result = DLG_EXIT_TIMEOUT;
                 break;
             }
+#endif
 
             /* Clears the internal library timeout */
             if (dialog_vars.timeout_secs) {
@@ -196,7 +200,9 @@ int dlg_update_object(int width, int height, const char *title,
             /* Checks the internal library timeout */
             if (dialog_vars.timeout_secs)
                 if (cl_timeout_expired(dlg_timeout) == true) {
+#ifdef ALTERNATIVE_DIALOG
                     result = DLG_EXIT_TIMEOUT;
+#endif
                     break;
                 }
         }

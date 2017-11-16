@@ -204,6 +204,7 @@ static bool item_value_has_changed(struct xante_app *xpp, struct xante_item *ite
     return changed;
 }
 
+#ifdef ALTERNATIVE_DIALOG
 static void update_item_brief(int current_index, void *a)
 {
     struct xante_item *item = (struct xante_item *)a;
@@ -220,6 +221,7 @@ static void update_item_brief(int current_index, void *a)
     dlgx_put_item_brief(cl_string_valueof(brief));
     cl_string_unref(brief);
 }
+#endif
 
 /*
  *
@@ -282,8 +284,7 @@ bool ui_dialog_checklist(struct xante_app *xpp, struct xante_item *item,
                                    MINIMUM_WIDTH, list_options_height,
                                    number_of_options, dlg_items, " X",
                                    item->dialog_checklist_type,
-                                   &selected_index,
-                                   update_item_brief, item);
+                                   &selected_index);
 #endif
 
         switch (ret_dialog) {

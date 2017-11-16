@@ -233,10 +233,16 @@ end_block:
 
     xante_dlg_clear_backtitle(xpp);
     dlgx_uninit();
+
+#ifdef ALTERNATIVE_DIALOG
     exit_status = (ret_dialog == DLG_EXIT_TIMEOUT) ? XANTE_RETURN_TIMEOUT
                                                    : ((ret_dialog == DLG_EXIT_OK)
                                                         ? XANTE_RETURN_OK
                                                         : XANTE_RETURN_ERROR);
+#else
+    exit_status = (ret_dialog == DLG_EXIT_OK) ? XANTE_RETURN_OK
+                                              : XANTE_RETURN_ERROR;
+#endif
 
     runtime_set_ui_active(xpp, false);
     runtime_set_exit_value(xpp, exit_status);
