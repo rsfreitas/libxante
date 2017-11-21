@@ -68,8 +68,8 @@
 #define TIME_MAX_INPUT_LENGTH       8
 
 /* menu */
-int ui_dialog_menu(struct xante_app *xpp, const struct xante_menu *menu,
-                   const char *cancel_label);
+int ui_dialog_menu(struct xante_app *xpp, cl_list_t *menus,
+                   const struct xante_menu *menu, const char *cancel_label);
 
 /* yesno */
 bool ui_dialog_yesno(struct xante_app *xpp, struct xante_item *item);

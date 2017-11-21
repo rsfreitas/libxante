@@ -37,13 +37,10 @@
 void ui_xante_item_ref(struct xante_item *item);
 void ui_xante_item_unref(struct xante_item *item);
 struct xante_item *ui_new_xante_item(void);
-void ui_init(struct xante_app *xpp);
-void ui_uninit(struct xante_app *xpp);
-struct xante_menu *ui_search_menu_by_object_id(const struct xante_app *xpp,
+void ui_data_init(struct xante_app *xpp);
+void ui_data_uninit(struct xante_app *xpp);
+struct xante_menu *ui_search_menu_by_object_id(const cl_list_t *menus,
                                                const char *object_id_to_search);
-
-struct xante_menu *ui_search_unref_menu_by_object_id(const struct xante_app *xpp,
-                                                     const char *object_id_to_search);
 
 void ui_print_menu_tree(struct xante_app *xpp);
 #endif

@@ -1,6 +1,6 @@
 # Libxante's plugin
 
-This document describe the specifications of a plugin to be used inside
+This document describes the specifications of a plugin to be used inside
 an application using libxante.
 
 ## Plugin

@@ -60,7 +60,7 @@ static void destroy_xante_app(const struct cl_ref_s *ref)
     event_uninit(xpp);
     xante_log_info(cl_tr("Finishing application"));
     change_uninit(xpp);
-    ui_uninit(xpp);
+    ui_data_uninit(xpp);
     jtf_release_info(xpp);
     log_uninit(xpp);
     auth_uninit(xpp);

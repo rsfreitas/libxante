@@ -940,7 +940,7 @@ int jtf_parse_application(const char *pathname, struct xante_app *xpp)
     }
 
     /* Parse the interface (menus and its items) */
-    ui_init(xpp);
+    ui_data_init(xpp);
     ret = parse_ui(jtf, xpp);
     cl_json_delete(jtf);
 

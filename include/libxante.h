@@ -165,6 +165,7 @@ struct xante_change_entry {
 #include "xante/xt_jtf.h"
 #include "xante/xt_log.h"
 #include "xante/xt_menu.h"
+#include "xante/xt_mjtf.h"
 #include "xante/xt_runtime.h"
 #include "xante/xt_translation.h"
 #include "xante/xt_ui.h"

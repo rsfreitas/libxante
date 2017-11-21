@@ -46,22 +46,18 @@ static int __search_menu_by_object_id(cl_list_node_t *node, void *a)
     return 0;
 }
 
-static struct xante_menu *search_menu_by_object_id(const cl_list_t *menus,
-    const char *object_id_to_search)
+static void ui_init(struct xante_app *xpp)
 {
-    cl_list_node_t *node = NULL;
-    struct xante_menu *menu = NULL;
+    runtime_set_ui_active(xpp, true);
+    dlgx_init(false);
+    xante_dlg_set_backtitle(xpp);
+}
 
-    node = cl_list_map(menus, __search_menu_by_object_id,
-                       (void *)object_id_to_search);
-
-    if (NULL == node)
-        return NULL;
-
-    menu = cl_list_node_content(node);
-    cl_list_node_unref(node);
-
-    return menu;
+static void ui_uninit(struct xante_app *xpp)
+{
+    xante_dlg_clear_backtitle(xpp);
+    dlgx_uninit();
+    runtime_set_ui_active(xpp, false);
 }
 
 /*
@@ -71,12 +67,12 @@ static struct xante_menu *search_menu_by_object_id(const cl_list_t *menus,
  */
 
 /**
- * @name ui_init
+ * @name ui_data_init
  * @brief Initializes everything related to UI informations.
  *
  * @param [in,out] xpp: The previously created xante_app structure.
  */
-void ui_init(struct xante_app *xpp)
+void ui_data_init(struct xante_app *xpp)
 {
     if (NULL == xpp)
         return;
@@ -85,12 +81,12 @@ void ui_init(struct xante_app *xpp)
 }
 
 /**
- * @name ui_uninit
+ * @name ui_data_uninit
  * @brief Releases all informations related to the UI.
  *
  * @param [in,out] xpp: The previously created xante_app structure.
  */
-void ui_uninit(struct xante_app *xpp)
+void ui_data_uninit(struct xante_app *xpp)
 {
     if (NULL == xpp)
         return;
@@ -106,45 +102,35 @@ void ui_uninit(struct xante_app *xpp)
 
 /**
  * @name ui_search_menu_by_object_id
- * @brief Searches a xante_menu structure inside the main menu list which have
- *        a specific object_id.
+ * @brief Searches a xante_menu structure inside a menu list which has a specific
+ *        object_id.
  *
  * Remember, when searching a menu pointed by an item, its object_id is located
  * inside the menu_id.
  *
- * @param [in] xpp: The main library object.
+ * @param [in] menus: The list of menus.
  * @param [in] object_it_to_search: The menu object_id which will be used to
  *                                  search.
  *
  * @return On success, i.e, the menu is found, returns a pointer to its
  *         xante_menu structure or NULL otherwise.
  */
-struct xante_menu *ui_search_menu_by_object_id(const struct xante_app *xpp,
+struct xante_menu *ui_search_menu_by_object_id(const cl_list_t *menus,
     const char *object_id_to_search)
 {
-    return search_menu_by_object_id(xpp->ui.menus, object_id_to_search);
-}
+    cl_list_node_t *node = NULL;
+    struct xante_menu *menu = NULL;
 
-/**
- * @name ui_search_unref_menu_by_object_id
- * @brief Searches a xante_menu structure inside the unreferenced menus list
- *        which have a specific object_id.
- *
- * Remember, when searching a menu pointed by an item, its object_id is located
- * inside the menu_id.
- *
- * @param [in] xpp: The main library object.
- * @param [in] object_it_to_search: The menu object_id which will be used to
- *                                  search.
- *
- * @return On success, i.e, the menu is found, returns a pointer to its
- *         xante_menu structure or NULL otherwise.
- */
-struct xante_menu *ui_search_unref_menu_by_object_id(const struct xante_app *xpp,
-    const char *object_id_to_search)
-{
-    return search_menu_by_object_id(xpp->ui.unreferenced_menus,
-                                    object_id_to_search);
+    node = cl_list_map(menus, __search_menu_by_object_id,
+                       (void *)object_id_to_search);
+
+    if (NULL == node)
+        return NULL;
+
+    menu = cl_list_node_content(node);
+    cl_list_node_unref(node);
+
+    return menu;
 }
 
 // DEBUG
@@ -186,7 +172,7 @@ void ui_print_menu_tree(struct xante_app *xpp)
  * @name xante_ui_run
  * @brief Puts a libxante application to run.
  *
- * It is important to remember that once we call this function we only leave it
+ * It is important to remember that when we call this function we only leave it
  * when closing the application from the UI.
  *
  * @param [in,out] xpp: The library main object.
@@ -200,7 +186,7 @@ __PUB_API__ enum xante_return_value xante_ui_run(xante_t *xpp)
     struct xante_menu *root = NULL;
     char *btn_cancel_label = NULL;
     enum xante_return_value exit_status;
-    int ret_dialog;
+    int ret_dialog = DLG_EXIT_CANCEL;
 
     errno_clear();
 
@@ -209,15 +195,13 @@ __PUB_API__ enum xante_return_value xante_ui_run(xante_t *xpp)
         return XANTE_RETURN_ERROR;
     }
 
-    runtime_set_ui_active(xpp, true);
-    dlgx_init(false);
-    xante_dlg_set_backtitle(xpp);
+    ui_init(xpp);
     btn_cancel_label = strdup(cl_tr(MAIN_MENU_CANCEL_LABEL));
-    root = ui_search_menu_by_object_id(xpp,
+    root = ui_search_menu_by_object_id(x->ui.menus,
                                        cl_string_valueof(x->ui.main_menu_object_id));
 
-
     if (NULL == root) {
+        /* FIXME: Needs to set error code here */
         xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
                              cl_tr("The menu '%s' was not found!"),
                              cl_string_valueof(x->ui.main_menu_object_id));
@@ -225,14 +209,13 @@ __PUB_API__ enum xante_return_value xante_ui_run(xante_t *xpp)
         goto end_block;
     }
 
-    ret_dialog = ui_dialog_menu(xpp, root, btn_cancel_label);
+    ret_dialog = ui_dialog_menu(xpp, x->ui.menus, root, btn_cancel_label);
 
 end_block:
     if (btn_cancel_label != NULL)
         free(btn_cancel_label);
 
-    xante_dlg_clear_backtitle(xpp);
-    dlgx_uninit();
+    ui_uninit(xpp);
 
 #ifdef ALTERNATIVE_DIALOG
     exit_status = (ret_dialog == DLG_EXIT_TIMEOUT) ? XANTE_RETURN_TIMEOUT
@@ -244,8 +227,54 @@ end_block:
                                               : XANTE_RETURN_ERROR;
 #endif
 
-    runtime_set_ui_active(xpp, false);
     runtime_set_exit_value(xpp, exit_status);
+
+    return exit_status;
+}
+
+/*
+ * Here we receive a MJTF string with a dialog to be displayed.
+ *
+ * What if we call this before starting the application? Should we
+ * initialize the libdialog?
+ */
+__PUB_API__ enum xante_return_value xante_ui_run_ex(xante_t *xpp,
+    const char *mjtf)
+{
+    enum xante_return_value exit_status = XANTE_RETURN_OK;
+    int ret_dialog = DLG_EXIT_CANCEL;
+    bool close_libdialog = false;
+
+    errno_clear();
+
+    if ((NULL == xpp) || (NULL == mjtf)) {
+        errno_set(XANTE_ERROR_NULL_ARG);
+        return XANTE_RETURN_ERROR;
+    }
+
+    // parse mjtf
+
+    if (xante_runtime_ui_active(xpp) == false) {
+        ui_init(xpp);
+        close_libdialog = true;
+    }
+
+    // put the dialog to run
+
+    // release mjtf
+
+#ifdef ALTERNATIVE_DIALOG
+    exit_status = (ret_dialog == DLG_EXIT_TIMEOUT) ? XANTE_RETURN_TIMEOUT
+                                                   : ((ret_dialog == DLG_EXIT_OK)
+                                                        ? XANTE_RETURN_OK
+                                                        : XANTE_RETURN_ERROR);
+#else
+    exit_status = (ret_dialog == DLG_EXIT_OK) ? XANTE_RETURN_OK
+                                              : XANTE_RETURN_ERROR;
+#endif
+
+    if (close_libdialog == true)
+        ui_uninit(xpp);
 
     return exit_status;
 }
