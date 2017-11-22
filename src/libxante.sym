@@ -37,6 +37,7 @@ LIBXANTE_0.1 {
         xante_dlg_clear_backtitle;
         xante_dlg_set_backtitle;
         xante_application_version;
+        xante_object_id_calc;
         xante_auth_set_path;
         xante_auth_create_database;
         xante_auth_export_jxdbi;

@@ -163,6 +163,12 @@ struct xante_item *xante_item_create(void)
         return NULL;
     }
 
+    /*
+     * Our default behavior is to let every new item in edit mode. If one
+     * desires to block any the JTF must be properly configured.
+     */
+    item->mode = XANTE_ACCESS_EDIT;
+
     /* Initialize reference count */
     item->ref.count = 1;
     item->ref.free = __destroy_xante_item;

@@ -27,6 +27,15 @@
                 "mode": 1,
                 "items": [
                     {
+                        "name": "Custom",
+                        "type": "custom",
+                        "options": "foo_custom",
+                        "object_id": "1001",
+                        "help": {
+                            "brief": "This is a help description to the custom option."
+                        }
+                    },
+                    {
                         "name": "Yes no option",
                         "mode": 2,
                         "type": "yesno",

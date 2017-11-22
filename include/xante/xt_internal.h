@@ -68,6 +68,7 @@
 #define EV_ITEM_VALUE_UPDATED                   "item-value-updated"
 #define EV_ITEM_EXIT                            "item-exit"
 #define EV_MENU_EXIT                            "menu-exit"
+#define EV_CUSTOM                               "custom-event"
 
 /** Environment variables */
 #define ENV_XANTE_DB_PATH                       "XANTE_DB_PATH"
@@ -89,7 +90,7 @@
 #define XANTE_UI_STR_DIALOG_DYNAMIC_MENU        "dynamic-menu"
 #define XANTE_UI_STR_DIALOG_DELETE_DYNAMIC_MENU "delete-dynamic-menu"
 #define XANTE_UI_STR_DIALOG_ADD_DYNAMIC_MENU    "add-dynamic-menu"
-//#define XANTE_UI_STR_DIALOG_CUSTOM              "custom"
+#define XANTE_UI_STR_DIALOG_CUSTOM              "custom"
 
 /** String keys of supported menus */
 #define XANTE_UI_STR_DEFAULT_MENU               "default"

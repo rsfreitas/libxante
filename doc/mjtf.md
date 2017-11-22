@@ -23,7 +23,6 @@ even a sequence of dialogs to be accessible through the first one.
 {
     "item": {
         "name": string,
-        "object_id": string,
         "type": string,
         "mode": int,
         "menu_id": string,
@@ -52,6 +51,9 @@ even a sequence of dialogs to be accessible through the first one.
     }
 }
 ```
+
+Note that with a single item one does not need to configure the _object\_id_ of
+an item.
 
 ### Sequnce of dialogs
 

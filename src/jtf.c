@@ -449,11 +449,13 @@ static void pre_adjust_item_info(struct xante_item *item)
         item->flags.menu_id = true;
     } else {
         if ((item->dialog_type != XANTE_UI_DIALOG_DELETE_DYNAMIC_MENU_ITEM) &&
-            (item->dialog_type != XANTE_UI_DIALOG_ADD_DYNAMIC_MENU_ITEM))
+            (item->dialog_type != XANTE_UI_DIALOG_ADD_DYNAMIC_MENU_ITEM) &&
+            (item->dialog_type != XANTE_UI_DIALOG_CUSTOM))
         {
             item->flags.config = true;
         }
 
+        /* Almost every item needs to have the "options" object */
         item->flags.options = true;
     }
 }
@@ -698,12 +700,17 @@ static int parse_ui(cl_json_t *jtf, struct xante_app *xpp)
  * @name jtf_parse_item
  * @brief Parses a JTF item from a JSON node.
  *
+ * With the \a ignores_object_id argument we provide a mechanism to manually
+ * created JTF won't need the object_id to its items.
+ *
  * @param [in] item: The item as a JSON node.
+ * @param [in] ignores_object_id: A boolean flag to ignore the existence or not
+ *                                of the object_id information.
  *
  * @return On success returns a struct xante_item with the parsed info or
  *         NULL otherwise.
  */
-struct xante_item *jtf_parse_item(const cl_json_t *item)
+struct xante_item *jtf_parse_item(const cl_json_t *item, bool ignores_object_id)
 {
     struct xante_item *i;
     cl_string_t *default_value = NULL;
@@ -727,13 +734,13 @@ struct xante_item *jtf_parse_item(const cl_json_t *item)
         return NULL;
     }
 
-    if (parse_object_value(item, MODE, CL_JSON_NUMBER, true,
+    if (parse_object_value(item, MODE, CL_JSON_NUMBER, false,
                            (void **)&i->mode) < 0)
     {
         return NULL;
     }
 
-    if (parse_object_value(item, OBJECT_ID, CL_JSON_STRING, true,
+    if (parse_object_value(item, OBJECT_ID, CL_JSON_STRING, !ignores_object_id,
                            (void **)&i->object_id) < 0)
     {
         return NULL;
@@ -858,7 +865,7 @@ struct xante_menu *jtf_parse_menu(const cl_json_t *menu)
     t = cl_json_get_array_size(items);
 
     for (i = 0; i < t; i++) {
-        it = jtf_parse_item(cl_json_get_array_item(items, i));
+        it = jtf_parse_item(cl_json_get_array_item(items, i), false);
 
         if (NULL == it)
             return NULL;

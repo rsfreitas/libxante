@@ -42,7 +42,9 @@ int event_call(const char *event_name, struct xante_app *xpp, ...);
 
 /**
  * @name xante_event_argument
- * @brief Gets an event argument real value.
+ * @brief Gets the real value of an event argument.
+ *
+ * It is common to see this function used inside modules.
  *
  * @param [in] arg: The event argument.
  * @param [in] data_type: The event argument required field.

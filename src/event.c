@@ -311,7 +311,8 @@ static int call(const char *event_name, struct xante_app *xpp, va_list ap)
     int ret = 0;
 
     if ((strcmp(event_name, EV_INIT) == 0) ||
-        (strcmp(event_name, EV_UNINIT) == 0))
+        (strcmp(event_name, EV_UNINIT) == 0) ||
+        (strcmp(event_name, EV_CUSTOM) == 0))
     {
         ret = ev_void(xpp, event_name);
     } else if ((strcmp(event_name, EV_CONFIG_LOAD) == 0) ||

@@ -79,7 +79,7 @@ static int mjtf_parse(struct xante_mjtf *mjtf, cl_json_t *jdata)
     object = cl_json_get_object_item(jdata, "item");
 
     if (object != NULL) {
-        mjtf->object = jtf_parse_item(object);
+        mjtf->object = jtf_parse_item(object, true);
 
         if (NULL == mjtf->object)
             return -1;
