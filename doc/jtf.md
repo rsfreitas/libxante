@@ -25,7 +25,7 @@ it may reference an application skeleton.
     "general": {
         "name": string,
         "description": string,
-        "plugin": string,
+        "module": string,
         "config_pathname": string,
         "log_pathname": string,
         "log_level": string,

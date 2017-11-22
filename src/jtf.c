@@ -39,7 +39,7 @@
 /* JTF object names */
 #define GENERAL             "general"
 #define APPLICATION_NAME    "name"
-#define PLUGIN_NAME         "plugin"
+#define MODULE_NAME         "module"
 #define CONFIG_PATHNAME     "config_pathname"
 #define LOG_PATHNAME        "log_pathname"
 #define LOG_LEVEL           "log_level"
@@ -261,12 +261,12 @@ static int parse_jtf_info(cl_json_t *jtf, struct xante_app *xpp)
         cl_string_unref(tmp);
     }
 
-    if (parse_object_value(general, PLUGIN_NAME, CL_JSON_STRING, true,
+    if (parse_object_value(general, MODULE_NAME, CL_JSON_STRING, true,
                            (void **)&tmp) < 0)
     {
         return -1;
     } else {
-        xpp->info.plugin_name = strdup(cl_string_valueof(tmp));
+        xpp->info.module_name = strdup(cl_string_valueof(tmp));
         cl_string_unref(tmp);
     }
 
@@ -970,8 +970,8 @@ void jtf_release_info(struct xante_app *xpp)
     if (xpp->info.application_name != NULL)
         free(xpp->info.application_name);
 
-    if (xpp->info.plugin_name != NULL)
-        free(xpp->info.plugin_name);
+    if (xpp->info.module_name != NULL)
+        free(xpp->info.module_name);
 
     if (xpp->info.version != NULL)
         free(xpp->info.version);

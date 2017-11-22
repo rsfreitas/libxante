@@ -12,7 +12,7 @@
     "general": {
         "name": "config-test",
         "description": "Test of configurations",
-        "plugin": "/usr/local/lib/test.so",
+        "module": "/usr/local/lib/test.so",
         "config_pathname": "/tmp",
         "log_pathname": "/tmp",
         "log_level": "debug",

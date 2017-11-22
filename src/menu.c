@@ -185,7 +185,7 @@ struct xante_menu *xante_menu_head(const cl_list_t *menus)
     node = cl_list_peek(menus);
 
     if (NULL == node) {
-        /* FIXME: Needs to set error code here */
+        errno_set(XANTE_ERROR_MENU_HEAD_NOT_FOUND);
         return NULL;
     }
 

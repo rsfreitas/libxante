@@ -111,7 +111,7 @@ struct xante_info {
     char    *log_pathname;
     char    *log_level;
     char    *application_name;
-    char    *plugin_name;
+    char    *module_name;
     char    *version;
     char    *company;
     char    *description;
@@ -125,7 +125,7 @@ struct xante_runtime {
     /* Read only */
     enum xante_return_value     exit_value;
     bool                        ui_active;
-    bool                        execute_plugin;
+    bool                        execute_module;
     bool                        user_authentication;
     char                        *caller_name;
 
@@ -215,8 +215,8 @@ struct xante_log {
     cl_log_t                *log;
 };
 
-struct xante_plugin {
-    cl_plugin_t             *plugin;
+struct xante_module {
+    cl_plugin_t             *module;
     cl_plugin_info_t        *info;
     cl_stringlist_t         *functions;
 };
@@ -253,7 +253,7 @@ struct xante_app {
     struct xante_log        log;
     struct xante_config     config;
     struct xante_changes    changes;
-    struct xante_plugin     plugin;
+    struct xante_module     module;
     struct xante_auth       auth;
     struct cl_ref_s         ref;
 };

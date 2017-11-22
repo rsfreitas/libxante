@@ -114,16 +114,17 @@ static bool item_value_has_changed(struct xante_app *xpp,
  * @param [in] edit_value: A flag to indicate if the value will be editable
  *                         or not.
  *
- * @return Returns a boolean value indicating if the item's value has been
- *         changed (true) or not (false).
+ * @return Returns a ui_return_t value indicating if the item's value has been
+ *         changed (true) or not (false) with the dialog selected button.
  */
-bool ui_dialog_timebox(struct xante_app *xpp, struct xante_item *item,
+ui_return_t ui_dialog_timebox(struct xante_app *xpp, struct xante_item *item,
     bool edit_value)
 {
     bool value_changed = false, loop = true;
     cl_string_t *text = NULL;
     int ret_dialog = DLG_EXIT_OK, hour = 0, minutes = 0, seconds = 0;
     char *result = NULL;
+    ui_return_t ret;
 
     /* Prepare dialog */
     dlgx_set_backtitle(xpp);
@@ -213,6 +214,9 @@ bool ui_dialog_timebox(struct xante_app *xpp, struct xante_item *item,
 
     dlgx_free_input();
 
-    return value_changed;
+    ret.selected_button = ret_dialog;
+    ret.updated_value = value_changed;
+
+    return ret;
 }
 

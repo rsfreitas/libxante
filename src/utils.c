@@ -241,15 +241,6 @@ bool equals(const char *a, const char *b)
  *
  */
 
-/**
- * @name xante_application_version
- * @brief Gets a string with the application version information.
- *
- * @param [in] xpp: The library main object.
- *
- * @return On success returns a buffer with the application version or NULL
- *         otherwise.
- */
 __PUB_API__ char *xante_application_version(xante_t *xpp)
 {
     struct xante_app *x = (struct xante_app *)xpp;

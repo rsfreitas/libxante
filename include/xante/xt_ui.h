@@ -59,5 +59,22 @@ void ui_print_menu_tree(struct xante_app *xpp);
  */
 enum xante_return_value xante_ui_run(xante_t *xpp);
 
+/**
+ * @name xante_ui_run_mjtf
+ * @brief Puts a MJTF dialog to run.
+ *
+ * This function may be called inside a module event function and also, this
+ * event may run with an already running application or not. This way this
+ * function is in charge to know this situation and does all required
+ * initialization to run the dialog.
+ *
+ * @param [in,out] xpp: The library main object.
+ * @param [in] raw_mjtf: The MJTF dialog in a string format.
+ *
+ * @return Return an exit value indicating what happened inside (see enum
+ *         xante_return_value declaration).
+ */
+enum xante_return_value xante_ui_run_mjtf(xante_t *xpp, const char *raw_mjtf);
+
 #endif
 

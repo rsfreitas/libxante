@@ -90,7 +90,7 @@ CL_PLUGIN_SET_INFO(
     test,
     "0.1",
     "Rodrigo Freitas",
-    "Libxante's config-test plugin",
+    "Libxante's config-test module",
     API
 )
 

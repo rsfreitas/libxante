@@ -73,9 +73,8 @@ static int ui_run_mjtf(struct xante_app *xpp, struct xante_mjtf *mjtf)
         ret_dialog = ui_dialog_menu(xpp, mjtf->menus, first, btn_cancel_label);
         xante_menu_unref(first);
         free(btn_cancel_label);
-    } else { /* Or a single item? */
+    } else /* Or a single item? */
         ret_dialog = ui_dialog_item(xpp, NULL, mjtf->object);
-    }
 
     return ret_dialog;
 }
@@ -144,8 +143,11 @@ struct xante_menu *ui_search_menu_by_object_id(const cl_list_t *menus,
     node = cl_list_map(menus, __search_menu_by_object_id,
                        (void *)object_id_to_search);
 
-    if (NULL == node)
+    if (NULL == node) {
+        errno_set(XANTE_ERROR_MENU_NOT_FOUND);
+        errno_store_additional_content(object_id_to_search);
         return NULL;
+    }
 
     menu = cl_list_node_content(node);
     cl_list_node_unref(node);
@@ -188,18 +190,6 @@ void ui_print_menu_tree(struct xante_app *xpp)
  *
  */
 
-/**
- * @name xante_ui_run
- * @brief Puts a libxante application to run.
- *
- * It is important to remember that when we call this function we only leave it
- * when closing the application from the UI.
- *
- * @param [in,out] xpp: The library main object.
- *
- * @return Return an exit value indicating what happened inside (see enum
- *         xante_return_value declaration).
- */
 __PUB_API__ enum xante_return_value xante_ui_run(xante_t *xpp)
 {
     struct xante_app *x = (struct xante_app *)xpp;
@@ -221,7 +211,6 @@ __PUB_API__ enum xante_return_value xante_ui_run(xante_t *xpp)
                                        cl_string_valueof(x->ui.main_menu_object_id));
 
     if (NULL == root) {
-        /* FIXME: Needs to set error code here */
         xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
                              cl_tr("The menu '%s' was not found!"),
                              cl_string_valueof(x->ui.main_menu_object_id));
@@ -252,12 +241,6 @@ end_block:
     return exit_status;
 }
 
-/*
- * Here we receive a MJTF string with a dialog to be displayed.
- *
- * What if we call this before starting the application? Should we
- * initialize the libdialog?
- */
 __PUB_API__ enum xante_return_value xante_ui_run_mjtf(xante_t *xpp,
     const char *raw_mjtf)
 {
@@ -275,9 +258,8 @@ __PUB_API__ enum xante_return_value xante_ui_run_mjtf(xante_t *xpp,
 
     mjtf = mjtf_load(raw_mjtf);
 
-    if (NULL == mjtf) {
+    if (NULL == mjtf)
         return XANTE_RETURN_ERROR;
-    }
 
     if (xante_runtime_ui_active(xpp) == false) {
         ui_init(xpp);

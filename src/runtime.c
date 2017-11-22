@@ -75,7 +75,7 @@ void runtime_start(struct xante_app *xpp, const char *caller_name)
     xante_runtime_set_show_config_saving_question(xpp, true);
     xante_runtime_set_accent_characters(xpp, false);
     xante_runtime_set_close_ui(xpp, false);
-    runtime_set_execute_plugin(xpp, true);
+    runtime_set_execute_module(xpp, true);
     runtime_set_exit_value(xpp, XANTE_RETURN_OK);
     runtime_set_ui_active(xpp, false);
     runtime_set_user_authentication(xpp, true);
@@ -113,15 +113,15 @@ void runtime_set_ui_active(struct xante_app *xpp, bool ui_active)
 }
 
 /**
- * @name runtime_set_execute_plugin.
- * @brief Enables/disables the plugin from an application.
+ * @name runtime_set_execute_module.
+ * @brief Enables/disables the module from an application.
  *
  * @param [in] xpp: The library main object.
- * @param [in] execute_plugin: The boolean value to enable/disable.
+ * @param [in] execute_module: The boolean value to enable/disable.
  */
-void runtime_set_execute_plugin(struct xante_app *xpp, bool execute_plugin)
+void runtime_set_execute_module(struct xante_app *xpp, bool execute_module)
 {
-    xpp->runtime.execute_plugin = execute_plugin;
+    xpp->runtime.execute_module = execute_module;
 }
 
 /**
@@ -205,7 +205,7 @@ __PUB_API__ bool xante_runtime_discard_changes_on_timeout(const xante_t *xpp)
     return x->runtime.discard_changes_on_timeout;
 }
 
-__PUB_API__ bool xante_runtime_execute_plugin(const xante_t *xpp)
+__PUB_API__ bool xante_runtime_execute_module(const xante_t *xpp)
 {
     struct xante_app *x = (struct xante_app *)xpp;
 
@@ -216,7 +216,7 @@ __PUB_API__ bool xante_runtime_execute_plugin(const xante_t *xpp)
         return false;
     }
 
-    return x->runtime.execute_plugin;
+    return x->runtime.execute_module;
 }
 
 __PUB_API__ int xante_runtime_set_force_config_file_saving(xante_t *xpp,

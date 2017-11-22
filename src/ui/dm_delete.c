@@ -112,14 +112,15 @@ static void calc_checklist_limits(const struct xante_menu *dm_menu,
  * @param [in] edit_value: A boolean flag indicating if is possible to edit
  *                         the option or not (removing an item).
  *
- * @return Returns true if an item was deleted or false otherwise.
+ * @return Returns a ui_return_t value indicating if an item was deleted or not.
  */
-bool ui_dialog_delete_dm(struct xante_app *xpp, struct xante_item *item,
+ui_return_t ui_dialog_delete_dm(struct xante_app *xpp, struct xante_item *item,
     bool edit_value)
 {
     bool deleted = false, loop = true;
     struct xante_menu *dm_menu = NULL;
     DIALOG_LISTITEM *dlg_items = NULL;
+    ui_return_t ret;
     int ret_dialog = DLG_EXIT_OK, list_options_height = 0, height = 0,
         number_of_options = 0, selected_index = -1;
 
@@ -130,7 +131,10 @@ bool ui_dialog_delete_dm(struct xante_app *xpp, struct xante_item *item,
         xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
                              cl_tr("No dynamic menu was found!"));
 
-        return deleted;
+        ret.selected_button = ret_dialog;
+        ret.updated_value = deleted;
+
+        return ret;
     }
 
     if (cl_list_size(dm_menu->items) == 0) {
@@ -138,7 +142,10 @@ bool ui_dialog_delete_dm(struct xante_app *xpp, struct xante_item *item,
                              cl_tr("The dynamic menu does not have any item "
                                    "to remove!"));
 
-        return deleted;
+        ret.selected_button = ret_dialog;
+        ret.updated_value = deleted;
+
+        return ret;
     }
 
     /* Prepare dialog */
@@ -212,6 +219,9 @@ bool ui_dialog_delete_dm(struct xante_app *xpp, struct xante_item *item,
 
     release_dialog_content(dlg_items, list_options_height);
 
-    return deleted;
+    ret.selected_button = ret_dialog;
+    ret.updated_value = deleted;
+
+    return ret;
 }
 

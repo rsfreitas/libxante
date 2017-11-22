@@ -1,6 +1,7 @@
 
 /*
- * Description:
+ * Description: Functions to handle the creation of dialog from inside a
+ *              module.
  *
  * Author: Rodrigo Freitas
  * Created at: Tue Nov 21 19:24:44 2017
@@ -39,6 +40,7 @@ static struct xante_mjtf *new_xante_mjtf(void)
     m = calloc(1, sizeof(struct xante_mjtf));
 
     if (NULL == m) {
+        errno_set(XANTE_ERROR_NO_MEMORY);
         return NULL;
     }
 
@@ -64,9 +66,8 @@ static int mjtf_parse(struct xante_mjtf *mjtf, cl_json_t *jdata)
         for (i = 0; i < t; i++) {
             menu = jtf_parse_menu(cl_json_get_array_item(object, i));
 
-            if (NULL == menu) {
+            if (NULL == menu)
                 return -1;
-            }
 
             cl_list_unshift(mjtf->menus, menu, -1);
         }
@@ -80,13 +81,13 @@ static int mjtf_parse(struct xante_mjtf *mjtf, cl_json_t *jdata)
     if (object != NULL) {
         mjtf->object = jtf_parse_item(object);
 
-        if (NULL == mjtf->object) {
+        if (NULL == mjtf->object)
             return -1;
-        }
 
         return 0;
     }
 
+    errno_set(XANTE_ERROR_MJTF_NO_OBJECT);
     return -1;
 }
 
@@ -104,17 +105,19 @@ struct xante_mjtf *mjtf_load(const char *mjtf)
     jdata = cl_json_parse_string(mjtf);
 
     if (NULL == jdata) {
+        errno_set(XANTE_ERROR_WRONG_JTF_FORMAT);
         return NULL;
     }
 
     m = new_xante_mjtf();
 
-    if (NULL == m) {
+    if (NULL == m)
         return NULL;
-    }
 
     /* Parse the MJTF */
     if (mjtf_parse(m, jdata) < 0) {
+        mjtf_unload(m);
+        m = NULL;
     }
 
     if (jdata != NULL)

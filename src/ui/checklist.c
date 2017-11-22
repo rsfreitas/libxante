@@ -241,16 +241,17 @@ static void update_item_brief(int current_index, void *a)
  * @param [in] edit_value: A flag to indicate if the value will be editable
  *                         or not.
  *
- * @return Returns a boolean value indicating if the item's value has been
- *         changed (true) or not (false).
+ * @return Returns a ui_return_t value indicating if the item's value has been
+ *         changed (true) or not (false) with the dialog selected button.
  */
-bool ui_dialog_checklist(struct xante_app *xpp, struct xante_item *item,
+ui_return_t ui_dialog_checklist(struct xante_app *xpp, struct xante_item *item,
     bool edit_value)
 {
     bool loop = true, value_changed = false;
     int ret_dialog = DLG_EXIT_OK, list_options_height = 0, height = 0,
         number_of_options = 0, selected_index = -1, selected_items;
     DIALOG_LISTITEM *dlg_items = NULL;
+    ui_return_t ret;
 
     /* Prepare dialog */
     dlgx_set_backtitle(xpp);
@@ -341,6 +342,9 @@ bool ui_dialog_checklist(struct xante_app *xpp, struct xante_item *item,
 
     release_dialog_content(dlg_items, list_options_height);
 
-    return value_changed;
+    ret.selected_button = ret_dialog;
+    ret.updated_value = value_changed;
+
+    return ret;
 }
 

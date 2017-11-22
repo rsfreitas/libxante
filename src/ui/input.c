@@ -260,7 +260,7 @@ static bool validate_input_value(struct xante_app *xpp, struct xante_item *item,
         valid = validate_time(xpp, str_value);
     } else {
         /*
-         * XXX: A XANTE_UI_DIALOG_INPUT_PASSWD must be validated inside a plugin,
+         * XXX: A XANTE_UI_DIALOG_INPUT_PASSWD must be validated inside a module,
          *      in a EV_ITEM_VALUE_CONFIRM event, which is called before this
          *      function.
          *
@@ -289,16 +289,17 @@ static bool validate_input_value(struct xante_app *xpp, struct xante_item *item,
  * @param [in] edit_value: A flag to indicate if the value will be editable
  *                         or not.
  *
- * @return Returns a boolean value indicating if the item's value has been
- *         changed (true) or not (false).
+ * @return Returns a ui_return_t value indicating if the item's value has been
+ *         changed (true) or not (false) with the dialog selected button.
  */
-bool ui_dialog_input(struct xante_app *xpp, struct xante_item *item,
+ui_return_t ui_dialog_input(struct xante_app *xpp, struct xante_item *item,
     bool edit_value)
 {
     bool loop = true, value_changed = false;
     int ret_dialog = DLG_EXIT_OK, height, width;
     char input[MAX_INPUT_VALUE] = {0};
     cl_string_t *text = NULL, *value = NULL;
+    ui_return_t ret;
 
     /* Prepare dialog */
     dlgx_set_backtitle(xpp);
@@ -371,6 +372,9 @@ bool ui_dialog_input(struct xante_app *xpp, struct xante_item *item,
     if (item->descriptive_help != NULL)
         dialog_vars.help_button = 0;
 
-    return value_changed;
+    ret.selected_button = ret_dialog;
+    ret.updated_value = value_changed;
+
+    return ret;
 }
 

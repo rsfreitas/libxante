@@ -1118,18 +1118,6 @@ bool auth_check_item_access(const struct xante_app *xpp,
  *
  */
 
-/**
- * @name xante_auth_create_database
- * @brief Creates an empty default database to applications.
- *
- * The database file name is always the same, auth.xdb.
- *
- * @param [in] pathname: The path to save the database file.
- * @param [in] overwrite: A boolean flag to overwrite or not if the database
- *                        already exists.
- *
- * @return On success returns 0 or -1 otherwise.
- */
 __PUB_API__ int xante_auth_create_database(const char *pathname,
     bool overwrite)
 {
@@ -1166,18 +1154,6 @@ __PUB_API__ int xante_auth_create_database(const char *pathname,
     return ret;
 }
 
-/**
- * @name xante_auth_export_jxdbi
- * @brief Exports an intermediate file to populate databases.
- *
- * A JXDBI file has information about the UI from an application and is used
- * to populate a database with this info.
- *
- * @param [in] xpp: The library main object.
- * @param [in] filename: The output file name.
- *
- * @return On success returns 0 or -1 otherwise.
- */
 __PUB_API__ int xante_auth_export_jxdbi(xante_t *xpp, const char *filename)
 {
     errno_clear();

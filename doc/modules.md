@@ -1,16 +1,16 @@
-# Libxante's plugin
+# Application module
 
-This document describes the specifications of a plugin to be used inside
+This document describes the specifications of the module to be used inside
 an application using libxante.
 
-## Plugin
+## Module
 
-A plugin is an outside application with functions which may be called
-from within an application.
+A module is an outside application (shared object) with functions which are
+called from inside an application.
 
 ### Format
 
-A libxante's plugin must be written with the **libcollections** plugin
+A libxante's module must be written using the **libcollections** plugin
 API.
 
 ### Mandatory functions
