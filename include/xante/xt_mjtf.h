@@ -34,6 +34,9 @@
 #else
 
 /* Internal library declarations */
+struct xante_mjtf *mjtf_load(const char *mjtf);
+void mjtf_unload(struct xante_mjtf *mjtf);
+
 #endif
 
 #endif

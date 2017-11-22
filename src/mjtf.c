@@ -26,11 +26,6 @@
 
 #include "libxante.h"
 
-struct xante_mjtf {
-    cl_list_t           *menus;
-    struct xante_item   *object;
-};
-
 /*
  *
  * Internal functions
@@ -43,14 +38,56 @@ static struct xante_mjtf *new_xante_mjtf(void)
 
     m = calloc(1, sizeof(struct xante_mjtf));
 
-    if (NULL == xante_mjtf) {
+    if (NULL == m) {
         return NULL;
     }
 
     m->menus = NULL;
-    m->object = NUL;
+    m->object = NULL;
 
     return m;
+}
+
+static int mjtf_parse(struct xante_mjtf *mjtf, cl_json_t *jdata)
+{
+    cl_json_t *object = NULL;
+    struct xante_menu *menu = NULL;
+    int i, t;
+
+    /* Our first attempt is to load a complete menu */
+    object = cl_json_get_object_item(jdata, "menu");
+
+    if (object != NULL) {
+        mjtf->menus = cl_list_create(xante_menu_destroy, NULL, NULL, NULL);
+        t = cl_json_get_array_size(object);
+
+        for (i = 0; i < t; i++) {
+            menu = jtf_parse_menu(cl_json_get_array_item(object, i));
+
+            if (NULL == menu) {
+                return -1;
+            }
+
+            cl_list_unshift(mjtf->menus, menu, -1);
+        }
+
+        return 0;
+    }
+
+    /* The second is to load a single item */
+    object = cl_json_get_object_item(jdata, "item");
+
+    if (object != NULL) {
+        mjtf->object = jtf_parse_item(object);
+
+        if (NULL == mjtf->object) {
+            return -1;
+        }
+
+        return 0;
+    }
+
+    return -1;
 }
 
 /*
@@ -59,11 +96,44 @@ static struct xante_mjtf *new_xante_mjtf(void)
  *
  */
 
-struct xante_mjtf *xante_mjtf_load(const char *mjtf)
+struct xante_mjtf *mjtf_load(const char *mjtf)
 {
+    cl_json_t *jdata = NULL;
+    struct xante_mjtf *m = NULL;
+
+    jdata = cl_json_parse_string(mjtf);
+
+    if (NULL == jdata) {
+        return NULL;
+    }
+
+    m = new_xante_mjtf();
+
+    if (NULL == m) {
+        return NULL;
+    }
+
+    /* Parse the MJTF */
+    if (mjtf_parse(m, jdata) < 0) {
+    }
+
+    if (jdata != NULL)
+        cl_json_delete(jdata);
+
+    return m;
 }
 
-int xante_mjtf_unload(struct xante_mjtf *mjtf)
+void mjtf_unload(struct xante_mjtf *mjtf)
 {
+    if (NULL == mjtf)
+        return;
+
+    if (mjtf->menus != NULL)
+        cl_list_destroy(mjtf->menus);
+
+    if (mjtf->object != NULL)
+        xante_item_unref(mjtf->object);
+
+    free(mjtf);
 }
 

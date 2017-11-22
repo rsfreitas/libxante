@@ -258,6 +258,12 @@ struct xante_app {
     struct cl_ref_s         ref;
 };
 
+/** The structure to hold runtime dialog */
+struct xante_mjtf {
+    cl_list_t           *menus;
+    struct xante_item   *object;
+};
+
 /* Exclusive internal library headers */
 #include "ui_dialogs.h"
 #include "addon_dialogs.h"

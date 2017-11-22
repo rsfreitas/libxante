@@ -60,6 +60,26 @@ static void ui_uninit(struct xante_app *xpp)
     runtime_set_ui_active(xpp, false);
 }
 
+static int ui_run_mjtf(struct xante_app *xpp, struct xante_mjtf *mjtf)
+{
+    char *btn_cancel_label = NULL;
+    struct xante_menu *first = NULL;
+    int ret_dialog = DLG_EXIT_CANCEL;
+
+    /* Are we dealing with a complete menu? */
+    if (mjtf->menus != NULL) {
+        btn_cancel_label = strdup(cl_tr("Back"));
+        first = xante_menu_head(mjtf->menus);
+        ret_dialog = ui_dialog_menu(xpp, mjtf->menus, first, btn_cancel_label);
+        xante_menu_unref(first);
+        free(btn_cancel_label);
+    } else { /* Or a single item? */
+        ret_dialog = ui_dialog_item(xpp, NULL, mjtf->object);
+    }
+
+    return ret_dialog;
+}
+
 /*
  *
  * Internal API
@@ -238,30 +258,36 @@ end_block:
  * What if we call this before starting the application? Should we
  * initialize the libdialog?
  */
-__PUB_API__ enum xante_return_value xante_ui_run_ex(xante_t *xpp,
-    const char *mjtf)
+__PUB_API__ enum xante_return_value xante_ui_run_mjtf(xante_t *xpp,
+    const char *raw_mjtf)
 {
     enum xante_return_value exit_status = XANTE_RETURN_OK;
     int ret_dialog = DLG_EXIT_CANCEL;
     bool close_libdialog = false;
+    struct xante_mjtf *mjtf = NULL;
 
     errno_clear();
 
-    if ((NULL == xpp) || (NULL == mjtf)) {
+    if ((NULL == xpp) || (NULL == raw_mjtf)) {
         errno_set(XANTE_ERROR_NULL_ARG);
         return XANTE_RETURN_ERROR;
     }
 
-    // parse mjtf
+    mjtf = mjtf_load(raw_mjtf);
+
+    if (NULL == mjtf) {
+        return XANTE_RETURN_ERROR;
+    }
 
     if (xante_runtime_ui_active(xpp) == false) {
         ui_init(xpp);
         close_libdialog = true;
     }
 
-    // put the dialog to run
+    ret_dialog = ui_run_mjtf(xpp, mjtf);
 
-    // release mjtf
+    if (mjtf != NULL)
+        mjtf_unload(mjtf);
 
 #ifdef ALTERNATIVE_DIALOG
     exit_status = (ret_dialog == DLG_EXIT_TIMEOUT) ? XANTE_RETURN_TIMEOUT
