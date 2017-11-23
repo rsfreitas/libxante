@@ -35,6 +35,7 @@ struct xante_event_argument {
     cl_cfg_file_t           *cfg_file;
     cl_object_t             *value;
     cl_list_t               *changes;
+    void                    *data;
 };
 
 static const char *__mandatory_functions[] = {
@@ -102,6 +103,7 @@ static int ev_void(struct xante_app *xpp, const char *event_name)
         .value = NULL,
         .cfg_file = NULL,
         .changes = NULL,
+        .data = NULL,
     };
 
     ret = cl_plugin_call(xpp->module.module, event_name, "xpp_arg", &arg,
@@ -125,6 +127,7 @@ static void ev_config(struct xante_app *xpp, const char *event_name, va_list ap)
         .item = NULL,
         .value = NULL,
         .changes = NULL,
+        .data = NULL,
     };
 
     cfg_file = va_arg(ap, void *);
@@ -166,6 +169,7 @@ static int ev_item(struct xante_app *xpp, const char *event_name, va_list ap)
         .value = NULL,
         .cfg_file = NULL,
         .changes = NULL,
+        .data = NULL,
     };
 
     item = va_arg(ap, void *);
@@ -175,12 +179,23 @@ static int ev_item(struct xante_app *xpp, const char *event_name, va_list ap)
     if (NULL == function_name)
         return 0; /* Should we return an error? */
 
+    /*
+     * We need to pass the custom data, otherwise this routine call (maybe)
+     * won't result in something useful.
+     */
+    if (strcmp(event_name, EV_UPDATE_ROUTINE) == 0)
+        arg.data = va_arg(ap, void *);
+
     ret = cl_plugin_foreign_call(xpp->module.module, event_name, CL_INT,
                                  CL_PLUGIN_ARGS_COMMON, "xpp_arg", CL_POINTER,
                                  &arg, NULL);
 
-    if (strcmp(event_name, EV_ITEM_SELECTED) == 0)
+    /* These events have a return value */
+    if ((strcmp(event_name, EV_ITEM_SELECTED) == 0) ||
+        (strcmp(event_name, EV_UPDATE_ROUTINE) == 0))
+    {
         event_return = CL_OBJECT_AS_INT(ret);
+    }
 
     free(function_name);
     cl_object_unref(ret);
@@ -201,6 +216,7 @@ static int ev_menu(struct xante_app *xpp, const char *event_name, va_list ap)
         .value = NULL,
         .cfg_file = NULL,
         .changes = NULL,
+        .data = NULL,
     };
 
     menu = va_arg(ap, void *);
@@ -235,6 +251,7 @@ static int ev_item_value(struct xante_app *xpp, const char *event_name, va_list 
         .value = NULL,
         .cfg_file = NULL,
         .changes = NULL,
+        .data = NULL,
     };
 
     item = va_arg(ap, void *);
@@ -286,6 +303,35 @@ static int ev_item_value(struct xante_app *xpp, const char *event_name, va_list 
     return event_return;
 }
 
+/*
+ * Here we don't use the 'call' function since it is a special event. It
+ * doesn't receive any argument, just returns a pointer to some data used
+ * inside the oficial update-routine.
+ */
+static void *ev_update_routine_data(struct xante_app *xpp,
+    struct xante_item *item)
+{
+    char *function_name = NULL;
+    cl_object_t *ret = NULL;
+    void *data = NULL;
+
+    function_name = get_function_name(item->events, EV_UPDATE_ROUTINE_DATA);
+
+    if (NULL == function_name)
+        return NULL; /* Should we return an error? */
+
+    ret = cl_plugin_foreign_call(xpp->module.module, function_name, CL_POINTER,
+                                 CL_PLUGIN_ARGS_VOID, NULL);
+
+    if (NULL == ret)
+        return NULL;
+
+    data = CL_OBJECT_AS_POINTER(ret);
+    cl_object_unref(ret);
+
+    return data;
+}
+
 static int ev_changes(struct xante_app *xpp)
 {
     cl_object_t *ret = NULL;
@@ -297,6 +343,7 @@ static int ev_changes(struct xante_app *xpp)
         .value = NULL,
         .cfg_file = NULL,
         .changes = xpp->changes.user_changes,
+        .data = NULL,
     };
 
     ret = cl_plugin_call(xpp->module.module, EV_CHANGES_SAVED, "xpp_arg", &arg, NULL);
@@ -308,11 +355,10 @@ static int ev_changes(struct xante_app *xpp)
 
 static int call(const char *event_name, struct xante_app *xpp, va_list ap)
 {
-    int ret = 0;
+    int ret = -1;
 
     if ((strcmp(event_name, EV_INIT) == 0) ||
-        (strcmp(event_name, EV_UNINIT) == 0) ||
-        (strcmp(event_name, EV_CUSTOM) == 0))
+        (strcmp(event_name, EV_UNINIT) == 0))
     {
         ret = ev_void(xpp, event_name);
     } else if ((strcmp(event_name, EV_CONFIG_LOAD) == 0) ||
@@ -321,7 +367,9 @@ static int call(const char *event_name, struct xante_app *xpp, va_list ap)
         ev_config(xpp, event_name, ap);
     } else if ((strcmp(event_name, EV_ITEM_SELECTED) == 0) ||
                (strcmp(event_name, EV_ITEM_VALUE_UPDATED) == 0) ||
-               (strcmp(event_name, EV_ITEM_EXIT) == 0))
+               (strcmp(event_name, EV_ITEM_EXIT) == 0) ||
+               (strcmp(event_name, EV_UPDATE_ROUTINE) == 0) ||
+               (strcmp(event_name, EV_CUSTOM) == 0))
     {
         ret = ev_item(xpp, event_name, ap);
     } else if (strcmp(event_name, EV_MENU_EXIT) == 0)
@@ -346,6 +394,7 @@ static int call(const char *event_name, struct xante_app *xpp, va_list ap)
  *
  * @param [in] event_name: The name of the event which will be called.
  * @param [in] xpp: The library main object.
+ * @param [in] ...: Variadic arguments according the event called.
  *
  * @return On success returns 0 or -1 otherwise.
  */
@@ -441,6 +490,42 @@ void event_uninit(struct xante_app *xpp)
     }
 }
 
+/**
+ * @name event_update_routine_data
+ * @brief Calls the EV_UPDATE_ROUTINE_DATA from the item to get a reference to
+ *        some data.
+ *
+ * This data may be used inside the EV_UPDATE_ROUTINE event.
+ *
+ * @param [in,out] xpp: The library main object.
+ * @param [in,out] item: The item which will have its event called.
+ *
+ * @return On success returns a pointer to the data ou NULL otherwise.
+ */
+void *event_update_routine_data(struct xante_app *xpp, struct xante_item *item)
+{
+    return ev_update_routine_data(xpp, item);
+}
+
+/**
+ * @name event_update_routine
+ * @brief Calls the EV_UPDATE_ROUTINE from the item.
+ *
+ * This function (event) is used to update the progress stage of a progress
+ * dialog, by returning the new stage value, or update a sync dialog
+ * internal data.
+ *
+ * @param [in,out] xpp: The library main object.
+ * @param [in,out] item: The item which will have its event called.
+ *
+ * @return Returns the value returned by the event function.
+ */
+int event_update_routine(struct xante_app *xpp, struct xante_item *item,
+    void *data)
+{
+    return event_call(EV_UPDATE_ROUTINE, xpp, item, data);
+}
+
 /*
  *
  * API
@@ -477,6 +562,9 @@ __PUB_API__ void *xante_event_argument(xante_event_arg_t *arg,
 
         case XANTE_EVENT_DATA_XANTE_CHANGES_LIST:
             return evt_arg->changes;
+
+        case XANTE_EVENT_DATA_CUSTOM:
+            return evt_arg->data;
 
         default:
             break;

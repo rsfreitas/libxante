@@ -69,6 +69,8 @@
 #define EV_ITEM_EXIT                            "item-exit"
 #define EV_MENU_EXIT                            "menu-exit"
 #define EV_CUSTOM                               "custom-event"
+#define EV_UPDATE_ROUTINE                       "update-routine"
+#define EV_UPDATE_ROUTINE_DATA                  "update-routine-data"
 
 /** Environment variables */
 #define ENV_XANTE_DB_PATH                       "XANTE_DB_PATH"
@@ -91,6 +93,7 @@
 #define XANTE_UI_STR_DIALOG_DELETE_DYNAMIC_MENU "delete-dynamic-menu"
 #define XANTE_UI_STR_DIALOG_ADD_DYNAMIC_MENU    "add-dynamic-menu"
 #define XANTE_UI_STR_DIALOG_CUSTOM              "custom"
+#define XANTE_UI_STR_DIALOG_PROGRESS            "progress"
 
 /** String keys of supported menus */
 #define XANTE_UI_STR_DEFAULT_MENU               "default"
@@ -162,7 +165,7 @@ struct xante_item {
     cl_object_t             *default_value;
     cl_json_t               *events;
 
-    /* Input range */
+    /* Ranges */
     cl_object_t             *min;
     cl_object_t             *max;
     int                     string_length;
@@ -177,6 +180,7 @@ struct xante_item {
     enum xante_ui_dialog    dialog_type;
     struct flag_parser      flags;
     struct cl_ref_s         ref;
+    bool                    cancel_update;
 };
 
 /** UI Menu informations */

@@ -214,7 +214,7 @@ static struct xante_item *dup_item(struct xante_menu *menu, int item_index,
         d_item->config_block = create_item_config_block(menu, menu_index, item);
     }
 
-    if (is_input_item(d_item->dialog_type) == true)
+    if (item_has_ranges(d_item->dialog_type) == true)
         d_item->value_spec = cl_spec_create(CL_READABLE | CL_WRITABLE,
                                             d_item->min, d_item->max,
                                             d_item->string_length);

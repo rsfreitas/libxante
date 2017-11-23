@@ -137,7 +137,7 @@
                             "brief": "This is a help description input.",
                             "description": "This is a help description."
                         },
-                        "input_ranges": {
+                        "ranges": {
                             "max": 300,
                             "min": 10
                         },
@@ -156,7 +156,7 @@
                             "brief": "This is a help description float.",
                             "description": "This is a help description."
                         },
-                        "input_ranges": {
+                        "ranges": {
                             "max": 34.5,
                             "min": 1.0
                         },
@@ -175,7 +175,7 @@
                             "brief": "This is a help description passwd.",
                             "description": "This is a help description."
                         },
-                        "input_ranges": {
+                        "ranges": {
                             "string_length": 16
                         },
                         "config": {
@@ -193,7 +193,7 @@
                             "brief": "This is a help description string.",
                             "description": "This is a help description."
                         },
-                        "input_ranges": {
+                        "ranges": {
                             "string_length": 32
                         },
                         "config": {

@@ -412,6 +412,10 @@ int ui_dialog_item(struct xante_app *xpp, cl_list_t *menus,
 
             break;
 
+        case XANTE_UI_DIALOG_PROGRESS:
+            ret_dialog = ui_dialog_progress(xpp, selected_item);
+            break;
+
         default:
             break;
     }

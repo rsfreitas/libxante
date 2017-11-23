@@ -69,7 +69,7 @@ it may reference an application skeleton.
                             "description": string,
                             "options": array of strings
                         },
-                        "input_ranges": {
+                        "ranges": {
                             "string_length": int,
                             "max": int/float,
                             "min": int/float,

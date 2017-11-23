@@ -37,7 +37,7 @@ even a sequence of dialogs to be accessible through the first one.
             "description": string,
             "options": array of strings
         },
-        "input_ranges": {
+        "ranges": {
             "string_length": int,
             "max": int/float,
             "min": int/float,
@@ -98,7 +98,7 @@ an item.
                         "description": string,
                         "options": array of strings
                     },
-                    "input_ranges": {
+                    "ranges": {
                         "string_length": int,
                         "max": int/float,
                         "min": int/float,

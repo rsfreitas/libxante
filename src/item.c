@@ -321,3 +321,23 @@ __PUB_API__ int xante_item_update_value(xante_item_t *item, const char *fmt, ...
     return 0;
 }
 
+__PUB_API__ int xante_item_cancel_update(xante_item_t *item)
+{
+    struct xante_item *i = (struct xante_item *)item;
+
+    errno_clear();
+
+    if (NULL == item) {
+        errno_set(XANTE_ERROR_NULL_ARG);
+        return -1;
+    }
+
+    /*
+     * If any update routine is running for this item it will stop right
+     * after this change.
+     */
+    i->cancel_update = true;
+
+    return 0;
+}
+

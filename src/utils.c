@@ -153,6 +153,8 @@ enum xante_ui_dialog translate_string_dialog_type(const char *type)
         dialog = XANTE_UI_DIALOG_ADD_DYNAMIC_MENU_ITEM;
     else if (strcmp(type, XANTE_UI_STR_DIALOG_CUSTOM) == 0)
         dialog = XANTE_UI_DIALOG_CUSTOM;
+    else if (strcmp(type, XANTE_UI_STR_DIALOG_PROGRESS) == 0)
+        dialog = XANTE_UI_DIALOG_PROGRESS;
 
     return dialog;
 }
@@ -185,20 +187,21 @@ bool is_menu_item(const cl_string_t *type)
 }
 
 /**
- * @name is_input_item
+ * @name item_has_ranges
  * @brief Checks if an item is of an input kind.
  *
  * @param [in] type: The item type.
  *
  * @return Returns true is is an input kind or false if not.
  */
-bool is_input_item(enum xante_ui_dialog dlg_type)
+bool item_has_ranges(enum xante_ui_dialog dlg_type)
 {
     switch (dlg_type) {
         case XANTE_UI_DIALOG_INPUT_INT:
         case XANTE_UI_DIALOG_INPUT_FLOAT:
         case XANTE_UI_DIALOG_INPUT_STRING:
         case XANTE_UI_DIALOG_INPUT_PASSWD:
+        case XANTE_UI_DIALOG_PROGRESS:
             return true;
 
         default:

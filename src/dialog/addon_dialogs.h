@@ -133,9 +133,9 @@ void dlgx_alloc_input(unsigned int bytes);
 char *dlgx_get_input_result(void);
 int dlgx_get_input_window_width(const struct xante_item *item);
 
-/* simple gauge */
-int dlgx_simple_gauge(const char *title, const char *cprompt, int height,
-                      int width, int percent);
+/* simple progress */
+int dlgx_simple_progress(const char *title, const char *cprompt, int height,
+                         int width, int percent);
 
 /* scrolltext */
 int dlgx_scrolltext(int width, int height, const char *title,
