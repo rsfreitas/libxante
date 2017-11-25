@@ -55,6 +55,7 @@ static void *make_progress(cl_thread_t *thread)
     cl_thread_set_state(thread, CL_THREAD_ST_CREATED);
     cl_thread_set_state(thread, CL_THREAD_ST_INITIALIZED);
 
+    xante_log_info("%s: %d\n", __FUNCTION__, CL_OBJECT_AS_INT(item->max));
     do {
         percent = event_update_routine(xpp, item, progress->data);
         dlgx_simple_progress(cl_string_valueof(item->name),
@@ -63,7 +64,7 @@ static void *make_progress(cl_thread_t *thread)
                              percent);
 
         cl_msleep(100);
-    } while (((percent + 1) < 101) && (item->cancel_update == false));
+    } while (((percent + 1) < CL_OBJECT_AS_INT(item->max)) && (item->cancel_update == false));
 
     return NULL;
 }
@@ -115,9 +116,11 @@ ui_return_t ui_dialog_progress(struct xante_app *xpp, struct xante_item *item)
     thread = cl_thread_spawn(CL_THREAD_JOINABLE, make_progress, &progress);
 
     if (NULL == thread) {
+        /* TODO */
     }
 
     if (cl_thread_wait_startup(thread) != 0) {
+        /* TODO */
     }
 
     /* Since there is a thread-join here it will wait for the thread to end. */

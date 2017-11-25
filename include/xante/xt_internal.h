@@ -93,7 +93,7 @@
 #define XANTE_UI_STR_DIALOG_DELETE_DYNAMIC_MENU "delete-dynamic-menu"
 #define XANTE_UI_STR_DIALOG_ADD_DYNAMIC_MENU    "add-dynamic-menu"
 #define XANTE_UI_STR_DIALOG_CUSTOM              "custom"
-#define XANTE_UI_STR_DIALOG_PROGRESS            "progress"
+#define XANTE_UI_STR_DIALOG_PROGRESS            "progress-bar"
 
 /** String keys of supported menus */
 #define XANTE_UI_STR_DEFAULT_MENU               "default"

@@ -404,7 +404,7 @@ int ui_dialog_item(struct xante_app *xpp, cl_list_t *menus,
             break;
 
         case XANTE_UI_DIALOG_CUSTOM:
-            if (event_call(EV_CUSTOM, xpp, NULL) < 0) {
+            if (event_call(EV_CUSTOM, xpp, selected_item, NULL) < 0) {
                 xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
                                      cl_tr("Error calling custom object '%s'"),
                                      cl_string_valueof(selected_item->name));

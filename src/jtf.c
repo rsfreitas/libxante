@@ -354,6 +354,10 @@ static int parse_item_ranges(const cl_json_t *item, struct xante_item *i,
             min_range = true;
             break;
 
+        case XANTE_UI_DIALOG_PROGRESS:
+            max_range = true;
+            break;
+
         default:
             break;
      }
@@ -365,8 +369,8 @@ static int parse_item_ranges(const cl_json_t *item, struct xante_item *i,
         return -1;
     }
 
-    expected_type = (i->dialog_type == XANTE_UI_DIALOG_INPUT_INT) ? CL_JSON_NUMBER
-                                                                  : CL_JSON_NUMBER_FLOAT;
+    expected_type = (i->dialog_type == XANTE_UI_DIALOG_INPUT_FLOAT) ? CL_JSON_NUMBER_FLOAT
+                                                                    : CL_JSON_NUMBER;
 
     if ((parse_object_value(ranges, MIN_RANGE, expected_type, false,
                             min) < 0) && min_range)
@@ -461,7 +465,8 @@ static void pre_adjust_item_info(struct xante_item *item)
     } else {
         if ((item->dialog_type != XANTE_UI_DIALOG_DELETE_DYNAMIC_MENU_ITEM) &&
             (item->dialog_type != XANTE_UI_DIALOG_ADD_DYNAMIC_MENU_ITEM) &&
-            (item->dialog_type != XANTE_UI_DIALOG_CUSTOM))
+            (item->dialog_type != XANTE_UI_DIALOG_CUSTOM) &&
+            (item->dialog_type != XANTE_UI_DIALOG_PROGRESS))
         {
             item->flags.config = true;
         }
@@ -540,6 +545,11 @@ static void adjusts_item_info(struct xante_item *item, cl_string_t *default_valu
             i_min = *(int *)&min_range;
             i_max = *(int *)&max_range;
             item->min = cl_object_create(CL_INT, i_min);
+            item->max = cl_object_create(CL_INT, i_max);
+            break;
+
+        case XANTE_UI_DIALOG_PROGRESS:
+            i_max = *(int *)&max_range;
             item->max = cl_object_create(CL_INT, i_max);
             break;
 

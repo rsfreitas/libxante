@@ -24,6 +24,8 @@
  * USA
  */
 
+#include <unistd.h>
+
 #include <collections.h>
 #include <libxante.h>
 
@@ -105,7 +107,7 @@ CL_PLUGIN_OBJECT_PTR_ONLY(int, xapl_init)
     xante_event_arg_t *arg = CL_PLUGIN_PTR_ARGUMENT();
     (void)arg;
 
-    xante_info("%s", __FUNCTION__);
+    xante_log_info("%s", __FUNCTION__);
 
     return 0;
 }
@@ -115,7 +117,7 @@ CL_PLUGIN_OBJECT_PTR_ONLY(void, xapl_uninit)
     xante_event_arg_t *arg = CL_PLUGIN_PTR_ARGUMENT();
     (void)arg;
 
-    xante_info("%s", __FUNCTION__);
+    xante_log_info("%s", __FUNCTION__);
 }
 
 CL_PLUGIN_OBJECT_PTR_ONLY(void, xapl_config_load)
@@ -123,7 +125,7 @@ CL_PLUGIN_OBJECT_PTR_ONLY(void, xapl_config_load)
     xante_event_arg_t *arg = CL_PLUGIN_PTR_ARGUMENT();
     (void)arg;
 
-    xante_info("%s", __FUNCTION__);
+    xante_log_info("%s", __FUNCTION__);
 }
 
 CL_PLUGIN_OBJECT_PTR_ONLY(void, xapl_config_unload)
@@ -131,7 +133,7 @@ CL_PLUGIN_OBJECT_PTR_ONLY(void, xapl_config_unload)
     xante_event_arg_t *arg = CL_PLUGIN_PTR_ARGUMENT();
     (void)arg;
 
-    xante_info("%s", __FUNCTION__);
+    xante_log_info("%s", __FUNCTION__);
 }
 
 CL_PLUGIN_OBJECT_PTR_ONLY(int, xapl_changes_saved)
@@ -139,7 +141,7 @@ CL_PLUGIN_OBJECT_PTR_ONLY(int, xapl_changes_saved)
     xante_event_arg_t *arg = CL_PLUGIN_PTR_ARGUMENT();
     (void)arg;
 
-    xante_info("%s", __FUNCTION__);
+    xante_log_info("%s", __FUNCTION__);
     return 0;
 }
 
@@ -154,7 +156,7 @@ CL_PLUGIN_OBJECT_PTR_ONLY(int, yesno_selected)
     xante_event_arg_t *arg = CL_PLUGIN_PTR_ARGUMENT();
     (void)arg;
 
-    xante_info("%s", __FUNCTION__);
+    xante_log_info("%s", __FUNCTION__);
     return 0;
 }
 
@@ -163,7 +165,7 @@ CL_PLUGIN_OBJECT_PTR_ONLY(int, yesno_confirm)
     xante_event_arg_t *arg = CL_PLUGIN_PTR_ARGUMENT();
     (void)arg;
 
-    xante_info("%s", __FUNCTION__);
+    xante_log_info("%s", __FUNCTION__);
     return 0;
 }
 
@@ -172,7 +174,7 @@ CL_PLUGIN_OBJECT_PTR_ONLY(void, yesno_updated)
     xante_event_arg_t *arg = CL_PLUGIN_PTR_ARGUMENT();
     (void)arg;
 
-    xante_info("%s", __FUNCTION__);
+    xante_log_info("%s", __FUNCTION__);
 }
 
 CL_PLUGIN_OBJECT_PTR_ONLY(void, yesno_exit)
@@ -180,6 +182,52 @@ CL_PLUGIN_OBJECT_PTR_ONLY(void, yesno_exit)
     xante_event_arg_t *arg = CL_PLUGIN_PTR_ARGUMENT();
     (void)arg;
 
-    xante_info("%s", __FUNCTION__);
+    xante_log_info("%s", __FUNCTION__);
+}
+
+CL_PLUGIN_OBJECT_PTR_ONLY(int, foo_custom)
+{
+    xante_event_arg_t *arg = CL_PLUGIN_PTR_ARGUMENT();
+    xante_t *xpp = xante_event_argument(arg, XANTE_EVENT_DATA_XANTE_T);
+    xante_item_t *item = xante_event_argument(arg, XANTE_EVENT_DATA_XANTE_ITEM_T);
+
+    xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, __FUNCTION__,
+                         "Custom event name: %s", xante_item_name(item));
+
+    return 0;
+}
+
+struct progress_data {
+    int x;
+    int y;
+};
+
+static int percent = 0;
+
+static struct progress_data pb = {
+    .x = 42,
+    .y = 10001,
+};
+
+CL_PLUGIN_OBJECT_PTR_ONLY(void, *pb_data)
+{
+    xante_event_arg_t *arg = CL_PLUGIN_PTR_ARGUMENT();
+    (void)arg;
+
+    percent = 0;
+
+    return &pb;
+}
+
+CL_PLUGIN_OBJECT_PTR_ONLY(int, progress)
+{
+    xante_event_arg_t *arg = CL_PLUGIN_PTR_ARGUMENT();
+    struct progress_data *p = (struct progress_data *)xante_event_argument(arg, XANTE_EVENT_DATA_CUSTOM);
+
+    sleep(1);
+    percent += 10;
+    xante_log_info("%s: %d-%d", __FUNCTION__, p->x, p->y);
+
+    return percent;
 }
 

@@ -189,7 +189,9 @@ __PUB_API__ int xante_dlg_messagebox(struct xante_app *xpp,
     vasprintf(&msg, message, ap);
     va_end(ap);
 
-    if ((NULL == xpp) || (xante_runtime_ui_active(xpp) == false)) {
+    if ((NULL == xpp) ||
+        ((xpp != NULL) && xante_runtime_ui_active(xpp) == false))
+    {
         dlgx_init(true);
         dialog_needs_close = true;
     }

@@ -29,10 +29,25 @@
                     {
                         "name": "Custom",
                         "type": "custom",
-                        "options": "foo_custom",
                         "object_id": "1001",
                         "help": {
                             "brief": "This is a help description to the custom option."
+                        },
+                        "events": {
+                            "custom-event": "foo_custom"
+                        }
+                    },
+                    {
+                        "name": "Progress bar",
+                        "type": "progress-bar",
+                        "object_id": "10002",
+                        "options": "Look at the progress bar",
+                        "ranges": {
+                            "max": 100
+                        },
+                        "events": {
+                            "update-routine-data": "pb_data",
+                            "update-routine": "progress"
                         }
                     },
                     {

@@ -10,7 +10,7 @@ TARGET = $(SONAME)
 INCLUDEDIR = -I/usr/local/include
 
 DEVC_FLAGS = -DLINUX
-CFLAGS = -Wall -Wextra -O0 -fPIC -ggdb -g3 -fvisibility=hidden \
+CFLAGS = -Wall -Wextra -O0 -fPIC -ggdb -g3 -fvisibility=hidden -fgnu89-inline \
 	 $(INCLUDEDIR) -D_GNU_SOURCE
 
 LIBDIR = -L/usr/local/lib

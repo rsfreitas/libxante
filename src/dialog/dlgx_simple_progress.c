@@ -38,7 +38,7 @@
  */
 
 /**
- * @name dlg_simple_progress
+ * @name dlgx_simple_progress
  * @brief Creates a progress object.
  *
  * @param [in] title: Object window title.
@@ -50,7 +50,7 @@
  *
  * @return Returns DLG_EXIT_OK (always).
  */
-int dlg_simple_progress(const char *title, const char *cprompt, int height,
+int dlgx_simple_progress(const char *title, const char *cprompt, int height,
     int width, int percent)
 {
     int i, x, y;

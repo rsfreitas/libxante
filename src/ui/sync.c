@@ -57,13 +57,13 @@ static void *make_sync(cl_thread_t *thread)
 
     do {
         percent = event_update_routine(xpp, item, sync->data);
-        dlgx_simple_sync(cl_string_valueof(item->name),
-                             cl_string_valueof(item->options),
-                             PROGRESS_DIALOG_HEIGHT, PROGRESS_DIALOG_WIDTH,
-                             percent);
-
+/*        dlgx_simple_sync(cl_string_valueof(item->name),
+                         cl_string_valueof(item->options),
+                         PROGRESS_DIALOG_HEIGHT, PROGRESS_DIALOG_WIDTH,
+                         percent);
+*/
         cl_msleep(100);
-    } while (((percent + 1) < 101) && (item->cancel_sync == false));
+    } while (((percent + 1) < 101) && (item->cancel_update == false));
 
     return NULL;
 }
@@ -105,7 +105,7 @@ ui_return_t ui_dialog_sync(struct xante_app *xpp, struct xante_item *item)
     // wait for thread to end
 
     /* Assures that we will be able to, at least, start the sync */
-    item->cancel_sync = false;
+    item->cancel_update = false;
     data = event_update_routine_data(xpp, item);
     sync.data = data;
     thread = cl_thread_spawn(CL_THREAD_JOINABLE, make_sync, &sync);

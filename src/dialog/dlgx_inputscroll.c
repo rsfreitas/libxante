@@ -278,7 +278,7 @@ int dlgx_inputbox(int width, int height, const char *title,
 
     if (edit == true) {
         d = idigits(max_len);
-        sprintf(s, "%0*u/%d", d, len, max_len - 1);
+        sprintf(s, "%0*zu/%d", d, len, max_len - 1);
         (void)wmove(counter, 0, width - 6 - strlen(s));
         dlg_print_autowrap(counter, s, cur_y, cur_x);
         wrefresh(counter);
@@ -362,7 +362,7 @@ int dlgx_inputbox(int width, int height, const char *title,
 
                 /* Checks if we just hit a valid key */
                 if (is_valid_char(key)) {
-                    sprintf(s, "%0*u/%d", d, len, max_len - 1);
+                    sprintf(s, "%0*zu/%d", d, len, max_len - 1);
                     (void)wmove(counter, 0, width - 6 - strlen(s));
                     dlg_print_autowrap(counter, s, cur_y, cur_x);
                     wrefresh(counter);

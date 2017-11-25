@@ -186,9 +186,16 @@ static int ev_item(struct xante_app *xpp, const char *event_name, va_list ap)
     if (strcmp(event_name, EV_UPDATE_ROUTINE) == 0)
         arg.data = va_arg(ap, void *);
 
-    ret = cl_plugin_foreign_call(xpp->module.module, event_name, CL_INT,
-                                 CL_PLUGIN_ARGS_COMMON, "xpp_arg", CL_POINTER,
+    ret = cl_plugin_foreign_call(xpp->module.module, function_name, CL_INT,
+                                 CL_PLUGIN_ARGS_POINTER, "xpp_arg", CL_POINTER,
                                  &arg, NULL);
+
+    if ((NULL == ret) &&
+        (strcmp(event_name, EV_CUSTOM) == 0))
+    {
+        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
+                             "Event call error: %s", cl_strerror(cl_get_last_error()));
+    }
 
     /* These events have a return value */
     if ((strcmp(event_name, EV_ITEM_SELECTED) == 0) ||
@@ -227,7 +234,7 @@ static int ev_menu(struct xante_app *xpp, const char *event_name, va_list ap)
         return 0; /* Should we return an error? */
 
     ret = cl_plugin_foreign_call(xpp->module.module, event_name, CL_INT,
-                                 CL_PLUGIN_ARGS_COMMON, "xpp_arg", CL_POINTER,
+                                 CL_PLUGIN_ARGS_POINTER, "xpp_arg", CL_POINTER,
                                  &arg, NULL);
 
     if (strcmp(event_name, EV_MENU_EXIT) == 0)
@@ -288,7 +295,7 @@ static int ev_item_value(struct xante_app *xpp, const char *event_name, va_list 
     }
 
     ret = cl_plugin_foreign_call(xpp->module.module, event_name, CL_INT,
-                                 CL_PLUGIN_ARGS_COMMON, "xpp_arg", CL_POINTER,
+                                 CL_PLUGIN_ARGS_POINTER, "xpp_arg", CL_POINTER,
                                  &arg, NULL);
 
     if (strcmp(event_name, EV_ITEM_VALUE_CONFIRM) == 0)
