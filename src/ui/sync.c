@@ -26,6 +26,9 @@
 
 #include "libxante.h"
 
+#define DEFAULT_STATUSBAR_TEXT      \
+    "A task is running in background. Wait for it to end."
+
 /* The dialog size onto the screen */
 #define SYNC_DIALOG_HEIGHT          5
 #define SYNC_DIALOG_WIDTH           60
@@ -253,6 +256,7 @@ ui_return_t ui_dialog_sync(struct xante_app *xpp, struct xante_item *item)
 
     /* Prepare dialog */
     dlgx_set_backtitle(xpp);
+    dlgx_put_statusbar(DEFAULT_STATUSBAR_TEXT);
 
     /* Assures that we will be able to, at least, start the sync */
     item->cancel_update = false;

@@ -25,7 +25,6 @@
  */
 
 #include "libxante.h"
-#include "ui_dialogs.h"
 
 /*
  *

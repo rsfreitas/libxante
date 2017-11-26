@@ -64,6 +64,21 @@
                         }
                     },
                     {
+                        "name": "Ranges",
+                        "type": "range",
+                        "object_id": "10004",
+                        "options": "Select interval",
+                        "default_value": "55",
+                        "ranges": {
+                            "min": 0,
+                            "max": 255
+                        },
+                        "config": {
+                            "block": "Main",
+                            "item": "range"
+                        }
+                    },
+                    {
                         "name": "Yes no option",
                         "mode": 2,
                         "type": "yesno",

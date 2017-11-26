@@ -97,6 +97,7 @@
 #define XANTE_UI_STR_DIALOG_PROGRESS            "progress-bar"
 #define XANTE_UI_STR_DIALOG_SPINNER_SYNC        "spinner-sync"
 #define XANTE_UI_STR_DIALOG_DOTS_SYNC           "dots-sync"
+#define XANTE_UI_STR_DIALOG_RANGE               "range"
 
 /** String keys of supported menus */
 #define XANTE_UI_STR_DEFAULT_MENU               "default"

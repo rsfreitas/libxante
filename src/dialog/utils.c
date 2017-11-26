@@ -487,6 +487,7 @@ char *dlgx_get_item_value_as_text(const struct xante_item *item)
         case XANTE_UI_DIALOG_CALENDAR:
         case XANTE_UI_DIALOG_TIMEBOX:
         case XANTE_UI_DIALOG_INPUT_STRING:
+        case XANTE_UI_DIALOG_RANGE:
             value = cl_object_to_cstring(item_value(item));
 
             if ((value != NULL) && (cl_string_length(value) > 0))

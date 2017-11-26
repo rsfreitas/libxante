@@ -25,7 +25,6 @@
  */
 
 #include "libxante.h"
-#include "ui_dialogs.h"
 
 #define DEFAULT_STATUSBAR_TEXT              \
     "[ESC] Cancel [Enter] Confirm a selected option [Tab/Left/Right] Select an option"

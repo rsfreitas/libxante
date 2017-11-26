@@ -28,10 +28,12 @@
 #include <float.h>
 
 #include "libxante.h"
-#include "ui_dialogs.h"
 
 #define DEFAULT_STATUSBAR_TEXT              \
     "[ESC] Cancel [Enter] Confirm a selected option [Tab/Left/Right] Select an option"
+
+#define DEFAULT_RANGE_STATUSBAR_TEXT        \
+    "[ESC] Cancel [Enter] Confirm selected option [Tab/Left/Right] Select an option [Up/Down] Adjust range value"
 
 /*
  *
@@ -93,9 +95,11 @@ static bool item_value_has_changed(struct xante_app *xpp,
 
         result = cl_string_create("%s", new_value);
 
-        if (item->dialog_type == XANTE_UI_DIALOG_INPUT_INT)
+        if ((item->dialog_type == XANTE_UI_DIALOG_INPUT_INT) ||
+            (item->dialog_type == XANTE_UI_DIALOG_RANGE))
+        {
             item->value = cl_object_create(CL_INT, cl_string_to_int(result));
-        else if (item->dialog_type == XANTE_UI_DIALOG_INPUT_FLOAT)
+        } else if (item->dialog_type == XANTE_UI_DIALOG_INPUT_FLOAT)
             item->value = cl_object_create(CL_FLOAT, cl_string_to_float(result));
         else
             item->value = cl_object_from_cstring(result);
@@ -297,14 +301,16 @@ ui_return_t ui_dialog_input(struct xante_app *xpp, struct xante_item *item,
 {
     bool loop = true, value_changed = false;
     int ret_dialog = DLG_EXIT_OK, height, width;
-    char input[MAX_INPUT_VALUE] = {0};
+    char input[MAX_INPUT_VALUE] = {0}, *range_value = NULL;
     cl_string_t *text = NULL, *value = NULL;
     ui_return_t ret;
 
     /* Prepare dialog */
     dlgx_set_backtitle(xpp);
     dlgx_update_cancel_button_label();
-    dlgx_put_statusbar(DEFAULT_STATUSBAR_TEXT);
+    dlgx_put_statusbar((item->dialog_type == XANTE_UI_DIALOG_RANGE)
+                                ? DEFAULT_RANGE_STATUSBAR_TEXT
+                                : DEFAULT_STATUSBAR_TEXT);
 
     /* Prepares dialog content */
     value = cl_object_to_cstring(item_value(item));
@@ -320,12 +326,31 @@ ui_return_t ui_dialog_input(struct xante_app *xpp, struct xante_item *item,
     cl_string_rplchr(text, XANTE_STR_LINE_BREAK, '\n');
     width = dlgx_get_input_window_width(item);
     height = dlgx_count_lines_by_delimiters(cl_string_valueof(text)) +
-        FORM_HEIGHT_WITHOUT_TEXT;
+        (item->dialog_type == XANTE_UI_DIALOG_RANGE) ? 2 : FORM_HEIGHT_WITHOUT_TEXT;
 
     do {
         if (item->dialog_type == XANTE_UI_DIALOG_INPUT_PASSWD) {
             ret_dialog = ui_dialog_passwd(item, edit_value, input, sizeof(input),
                                           height, text);
+        } else if (item->dialog_type == XANTE_UI_DIALOG_RANGE) {
+            dlgx_free_input();
+            ret_dialog = dialog_rangebox(cl_string_valueof(item->name),
+                                         cl_string_valueof(text),
+                                         height,
+                                         width,
+                                         CL_OBJECT_AS_INT(item->min),
+                                         CL_OBJECT_AS_INT(item->max),
+                                         strtol(input, NULL, 10));
+
+            /*
+             * Since this is a libdialog's dialog, we need to copy its internal
+             * result to our.
+             */
+            range_value = dlgx_get_input_result();
+            strncpy(input, range_value, max(strlen(range_value),
+                                            MAX_INPUT_VALUE));
+
+            free(range_value);
         } else {
             ret_dialog = dlgx_inputbox(width, height,
                                        cl_string_valueof(item->name),

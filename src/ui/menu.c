@@ -25,7 +25,6 @@
  */
 
 #include "libxante.h"
-#include "ui_dialogs.h"
 
 #define DEFAULT_STATUSBAR_TEXT          \
     "[ESC] Exit [Enter] Select an option [Up/Down] Move [TAB/Left/Right] Choose option"
@@ -357,6 +356,7 @@ int ui_dialog_item(struct xante_app *xpp, cl_list_t *menus,
         case XANTE_UI_DIALOG_INPUT_STRING:
         case XANTE_UI_DIALOG_INPUT_TIME:
         case XANTE_UI_DIALOG_INPUT_PASSWD:
+        case XANTE_UI_DIALOG_RANGE:
             ret_dialog = ui_dialog_input(xpp, selected_item, edit_item_value);
             break;
 

@@ -26,6 +26,9 @@
 
 #include "libxante.h"
 
+#define DEFAULT_STATUSBAR_TEXT          \
+    "Wait the process to end."
+
 /* The dialog size onto the screen */
 #define PROGRESS_DIALOG_HEIGHT          7
 #define PROGRESS_DIALOG_WIDTH           60
@@ -115,6 +118,7 @@ ui_return_t ui_dialog_progress(struct xante_app *xpp, struct xante_item *item)
 
     /* Prepare dialog */
     dlgx_set_backtitle(xpp);
+    dlgx_put_statusbar(DEFAULT_STATUSBAR_TEXT);
 
     /* Assures that we will be able to, at least, start the progress */
     item->cancel_update = false;
