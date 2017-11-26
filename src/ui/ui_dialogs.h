@@ -114,5 +114,8 @@ ui_return_t ui_dialog_add_dm(struct xante_app *xpp, struct xante_item *item);
 /* progress */
 ui_return_t ui_dialog_progress(struct xante_app *xpp, struct xante_item *item);
 
+/* sync */
+ui_return_t ui_dialog_sync(struct xante_app *xpp, struct xante_item *item);
+
 #endif
 

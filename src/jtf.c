@@ -355,6 +355,8 @@ static int parse_item_ranges(const cl_json_t *item, struct xante_item *i,
             break;
 
         case XANTE_UI_DIALOG_PROGRESS:
+        case XANTE_UI_DIALOG_SPINNER_SYNC:
+        case XANTE_UI_DIALOG_DOTS_SYNC:
             max_range = true;
             break;
 
@@ -463,10 +465,16 @@ static void pre_adjust_item_info(struct xante_item *item)
     {
         item->flags.menu_id = true;
     } else {
-        if ((item->dialog_type != XANTE_UI_DIALOG_DELETE_DYNAMIC_MENU_ITEM) &&
-            (item->dialog_type != XANTE_UI_DIALOG_ADD_DYNAMIC_MENU_ITEM) &&
-            (item->dialog_type != XANTE_UI_DIALOG_CUSTOM) &&
-            (item->dialog_type != XANTE_UI_DIALOG_PROGRESS))
+        if ((item->dialog_type == XANTE_UI_DIALOG_INPUT_INT) ||
+            (item->dialog_type == XANTE_UI_DIALOG_INPUT_FLOAT) ||
+            (item->dialog_type == XANTE_UI_DIALOG_INPUT_DATE) ||
+            (item->dialog_type == XANTE_UI_DIALOG_INPUT_TIME) ||
+            (item->dialog_type == XANTE_UI_DIALOG_INPUT_STRING) ||
+            (item->dialog_type == XANTE_UI_DIALOG_CALENDAR) ||
+            (item->dialog_type == XANTE_UI_DIALOG_TIMEBOX) ||
+            (item->dialog_type == XANTE_UI_DIALOG_CHECKLIST) ||
+            (item->dialog_type == XANTE_UI_DIALOG_RADIO_CHECKLIST) ||
+            (item->dialog_type == XANTE_UI_DIALOG_YES_NO))
         {
             item->flags.config = true;
         }
@@ -549,6 +557,8 @@ static void adjusts_item_info(struct xante_item *item, cl_string_t *default_valu
             break;
 
         case XANTE_UI_DIALOG_PROGRESS:
+        case XANTE_UI_DIALOG_SPINNER_SYNC:
+        case XANTE_UI_DIALOG_DOTS_SYNC:
             i_max = *(int *)&max_range;
             item->max = cl_object_create(CL_INT, i_max);
             break;

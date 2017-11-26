@@ -231,3 +231,23 @@ CL_PLUGIN_OBJECT_PTR_ONLY(int, progress)
     return percent;
 }
 
+CL_PLUGIN_OBJECT_PTR_ONLY(bool, foo_sync)
+{
+    xante_event_arg_t *arg = CL_PLUGIN_PTR_ARGUMENT();
+    struct progress_data *p = (struct progress_data *)xante_event_argument(arg, XANTE_EVENT_DATA_CUSTOM);
+    xante_item_t *item = xante_event_argument(arg, XANTE_EVENT_DATA_XANTE_ITEM_T);
+
+    percent += 5;
+    xante_log_info("%s: percent = %d", __FUNCTION__, percent);
+
+    if (percent > 100) {
+        xante_log_info("%s: lock for 20 seconds", __FUNCTION__);
+        sleep(20);
+        return false;
+    }
+
+    sleep(1);
+    xante_item_update_value(item, ": percent = %d", percent);
+    return true;
+}
+

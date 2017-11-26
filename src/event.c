@@ -183,8 +183,11 @@ static int ev_item(struct xante_app *xpp, const char *event_name, va_list ap)
      * We need to pass the custom data, otherwise this routine call (maybe)
      * won't result in something useful.
      */
-    if (strcmp(event_name, EV_UPDATE_ROUTINE) == 0)
+    if ((strcmp(event_name, EV_UPDATE_ROUTINE) == 0) ||
+        (strcmp(event_name, EV_UPDATE_ROUTINE) == 0))
+    {
         arg.data = va_arg(ap, void *);
+    }
 
     ret = cl_plugin_foreign_call(xpp->module.module, function_name, CL_INT,
                                  CL_PLUGIN_ARGS_POINTER, "xpp_arg", CL_POINTER,
@@ -199,6 +202,7 @@ static int ev_item(struct xante_app *xpp, const char *event_name, va_list ap)
 
     /* These events have a return value */
     if ((strcmp(event_name, EV_ITEM_SELECTED) == 0) ||
+        (strcmp(event_name, EV_SYNC_ROUTINE) == 0) ||
         (strcmp(event_name, EV_UPDATE_ROUTINE) == 0))
     {
         event_return = CL_OBJECT_AS_INT(ret);
@@ -376,6 +380,7 @@ static int call(const char *event_name, struct xante_app *xpp, va_list ap)
                (strcmp(event_name, EV_ITEM_VALUE_UPDATED) == 0) ||
                (strcmp(event_name, EV_ITEM_EXIT) == 0) ||
                (strcmp(event_name, EV_UPDATE_ROUTINE) == 0) ||
+               (strcmp(event_name, EV_SYNC_ROUTINE) == 0) ||
                (strcmp(event_name, EV_CUSTOM) == 0))
     {
         ret = ev_item(xpp, event_name, ap);
@@ -398,6 +403,8 @@ static int call(const char *event_name, struct xante_app *xpp, va_list ap)
 /**
  * @name event_call
  * @brief Calls an application event function from within the module.
+ *
+ * All events called with this function return an int value.
  *
  * @param [in] event_name: The name of the event which will be called.
  * @param [in] xpp: The library main object.
@@ -512,25 +519,6 @@ void event_uninit(struct xante_app *xpp)
 void *event_update_routine_data(struct xante_app *xpp, struct xante_item *item)
 {
     return ev_update_routine_data(xpp, item);
-}
-
-/**
- * @name event_update_routine
- * @brief Calls the EV_UPDATE_ROUTINE from the item.
- *
- * This function (event) is used to update the progress stage of a progress
- * dialog, by returning the new stage value, or update a sync dialog
- * internal data.
- *
- * @param [in,out] xpp: The library main object.
- * @param [in,out] item: The item which will have its event called.
- *
- * @return Returns the value returned by the event function.
- */
-int event_update_routine(struct xante_app *xpp, struct xante_item *item,
-    void *data)
-{
-    return event_call(EV_UPDATE_ROUTINE, xpp, item, data);
 }
 
 /*

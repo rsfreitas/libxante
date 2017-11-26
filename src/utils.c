@@ -155,6 +155,10 @@ enum xante_ui_dialog translate_string_dialog_type(const char *type)
         dialog = XANTE_UI_DIALOG_CUSTOM;
     else if (strcmp(type, XANTE_UI_STR_DIALOG_PROGRESS) == 0)
         dialog = XANTE_UI_DIALOG_PROGRESS;
+    else if (strcmp(type, XANTE_UI_STR_DIALOG_SPINNER_SYNC) == 0)
+        dialog = XANTE_UI_DIALOG_SPINNER_SYNC;
+    else if (strcmp(type, XANTE_UI_STR_DIALOG_DOTS_SYNC) == 0)
+        dialog = XANTE_UI_DIALOG_DOTS_SYNC;
 
     return dialog;
 }
@@ -202,6 +206,8 @@ bool item_has_ranges(enum xante_ui_dialog dlg_type)
         case XANTE_UI_DIALOG_INPUT_STRING:
         case XANTE_UI_DIALOG_INPUT_PASSWD:
         case XANTE_UI_DIALOG_PROGRESS:
+        case XANTE_UI_DIALOG_SPINNER_SYNC:
+        case XANTE_UI_DIALOG_DOTS_SYNC:
             return true;
 
         default:

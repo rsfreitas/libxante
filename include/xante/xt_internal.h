@@ -71,6 +71,7 @@
 #define EV_CUSTOM                               "custom-event"
 #define EV_UPDATE_ROUTINE                       "update-routine"
 #define EV_UPDATE_ROUTINE_DATA                  "update-routine-data"
+#define EV_SYNC_ROUTINE                         "sync-routine"
 
 /** Environment variables */
 #define ENV_XANTE_DB_PATH                       "XANTE_DB_PATH"
@@ -94,6 +95,8 @@
 #define XANTE_UI_STR_DIALOG_ADD_DYNAMIC_MENU    "add-dynamic-menu"
 #define XANTE_UI_STR_DIALOG_CUSTOM              "custom"
 #define XANTE_UI_STR_DIALOG_PROGRESS            "progress-bar"
+#define XANTE_UI_STR_DIALOG_SPINNER_SYNC        "spinner-sync"
+#define XANTE_UI_STR_DIALOG_DOTS_SYNC           "dots-sync"
 
 /** String keys of supported menus */
 #define XANTE_UI_STR_DEFAULT_MENU               "default"

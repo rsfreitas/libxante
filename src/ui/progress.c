@@ -55,16 +55,20 @@ static void *make_progress(cl_thread_t *thread)
     cl_thread_set_state(thread, CL_THREAD_ST_CREATED);
     cl_thread_set_state(thread, CL_THREAD_ST_INITIALIZED);
 
-    xante_log_info("%s: %d\n", __FUNCTION__, CL_OBJECT_AS_INT(item->max));
     do {
-        percent = event_update_routine(xpp, item, progress->data);
+        percent = event_call(EV_UPDATE_ROUTINE, xpp, item, progress->data);
         dlgx_simple_progress(cl_string_valueof(item->name),
                              cl_string_valueof(item->options),
                              PROGRESS_DIALOG_HEIGHT, PROGRESS_DIALOG_WIDTH,
                              percent);
 
+        /* Abort if we caught a invalid value */
+        if (percent < 0)
+            break;
+
         cl_msleep(100);
-    } while (((percent + 1) < CL_OBJECT_AS_INT(item->max)) && (item->cancel_update == false));
+    } while (((percent + 1) < CL_OBJECT_AS_INT(item->max)) &&
+             (item->cancel_update == false));
 
     return NULL;
 }
@@ -109,6 +113,9 @@ ui_return_t ui_dialog_progress(struct xante_app *xpp, struct xante_item *item)
         .item = item
     };
 
+    /* Prepare dialog */
+    dlgx_set_backtitle(xpp);
+
     /* Assures that we will be able to, at least, start the progress */
     item->cancel_update = false;
     data = event_update_routine_data(xpp, item);
@@ -116,15 +123,27 @@ ui_return_t ui_dialog_progress(struct xante_app *xpp, struct xante_item *item)
     thread = cl_thread_spawn(CL_THREAD_JOINABLE, make_progress, &progress);
 
     if (NULL == thread) {
-        /* TODO */
+        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
+                             cl_tr("Sync thread creation error: %s"),
+                             cl_strerror(cl_get_last_error()));
+
+        goto end_block;
     }
 
     if (cl_thread_wait_startup(thread) != 0) {
-        /* TODO */
+        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
+                             cl_tr("Error waiting for thread to initialize: %s"),
+                             cl_strerror(cl_get_last_error()));
+
+        goto end_block;
     }
 
     /* Since there is a thread-join here it will wait for the thread to end. */
     cl_thread_destroy(thread);
+
+end_block:
+    ret.selected_button = DLG_EXIT_OK;
+    ret.updated_value = false;
 
     return ret;
 }
