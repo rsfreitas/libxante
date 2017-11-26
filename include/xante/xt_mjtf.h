@@ -1,10 +1,9 @@
 
 /*
- * Description: Functions to handle application user interface
- *              internationalization.
+ * Description:
  *
  * Author: Rodrigo Freitas
- * Created at: Tue May  2 21:03:18 2017
+ * Created at: Tue Nov 21 19:26:16 2017
  * Project: libxante
  *
  * Copyright (C) 2017 Rodrigo Freitas
@@ -25,5 +24,20 @@
  * USA
  */
 
-#include "libxante.h"
+#ifndef _LIBXANTE_XT_MJTF_H
+#define _LIBXANTE_XT_MJTF_H          1
+
+#ifndef LIBXANTE_COMPILE
+# ifndef _LIBXANTE_H
+#  error "Never use <xt_mjtf.h> directly; include <libxante.h> instead."
+# endif
+#else
+
+/* Internal library declarations */
+struct xante_mjtf *mjtf_load(const char *mjtf);
+void mjtf_unload(struct xante_mjtf *mjtf);
+
+#endif
+
+#endif
 

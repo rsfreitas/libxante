@@ -37,13 +37,10 @@
 void ui_xante_item_ref(struct xante_item *item);
 void ui_xante_item_unref(struct xante_item *item);
 struct xante_item *ui_new_xante_item(void);
-void ui_init(struct xante_app *xpp);
-void ui_uninit(struct xante_app *xpp);
-struct xante_menu *ui_search_menu_by_object_id(const struct xante_app *xpp,
+void ui_data_init(struct xante_app *xpp);
+void ui_data_uninit(struct xante_app *xpp);
+struct xante_menu *ui_search_menu_by_object_id(const cl_list_t *menus,
                                                const char *object_id_to_search);
-
-struct xante_menu *ui_search_unref_menu_by_object_id(const struct xante_app *xpp,
-                                                     const char *object_id_to_search);
 
 void ui_print_menu_tree(struct xante_app *xpp);
 #endif
@@ -61,6 +58,23 @@ void ui_print_menu_tree(struct xante_app *xpp);
  *         xante_return_value declaration).
  */
 enum xante_return_value xante_ui_run(xante_t *xpp);
+
+/**
+ * @name xante_ui_run_mjtf
+ * @brief Puts a MJTF dialog to run.
+ *
+ * This function may be called inside a module event function and also, this
+ * event may run with an already running application or not. This way this
+ * function is in charge to know this situation and does all required
+ * initialization to run the dialog.
+ *
+ * @param [in,out] xpp: The library main object.
+ * @param [in] raw_mjtf: The MJTF dialog in a string format.
+ *
+ * @return Return an exit value indicating what happened inside (see enum
+ *         xante_return_value declaration).
+ */
+enum xante_return_value xante_ui_run_mjtf(xante_t *xpp, const char *raw_mjtf);
 
 #endif
 

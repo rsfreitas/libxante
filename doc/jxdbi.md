@@ -1,6 +1,6 @@
 # JXDBI - JSON Xanter Database Information
 
-This document describe de specfications of a JSON Xanter Database Information
+This document describes de specfications of a JSON Xanter Database Information
 file (JXDBI), used to populate a libxanter's database with information from
 a specific application.
 

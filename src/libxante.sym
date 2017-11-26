@@ -11,7 +11,7 @@ LIBXANTE_0.1 {
         xante_runtime_discard_changes;
         xante_runtime_set_discard_changes_on_timeout;
         xante_runtime_discard_changes_on_timeout;
-        xante_runtime_execute_plugin;
+        xante_runtime_execute_module;
         xante_runtime_set_force_config_file_saving;
         xante_runtime_force_config_file_saving;
         xante_runtime_set_ui_dialog_timeout;
@@ -27,6 +27,7 @@ LIBXANTE_0.1 {
         xante_runtime_user_authentication;
         xante_runtime_caller_name;
         xante_ui_run;
+        xante_ui_run_mjtf;
         xante_ui_suspend;
         xante_ui_continue;
         xante_load_config;
@@ -36,6 +37,7 @@ LIBXANTE_0.1 {
         xante_dlg_clear_backtitle;
         xante_dlg_set_backtitle;
         xante_application_version;
+        xante_object_id_calc;
         xante_auth_set_path;
         xante_auth_create_database;
         xante_auth_export_jxdbi;
@@ -49,7 +51,7 @@ LIBXANTE_0.1 {
         xante_log_path;
         xante_log_level;
         xante_application_name;
-        xante_plugin_name;
+        xante_module_name;
         xante_version;
         xante_company;
         xante_description;
@@ -65,6 +67,7 @@ LIBXANTE_0.1 {
         xante_item_dialog_type;
         xante_item_checklist_type;
         xante_item_update_value;
+        xante_item_cancel_progress;
         xante_menu_name;
         xante_menu_object_id;
         xante_menu_type;

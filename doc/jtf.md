@@ -1,6 +1,6 @@
 # JTF - JSON template files
 
-This document describe the specifications of a JSON Template File (JTF),
+This document describes the specifications of a JSON Template File (JTF),
 used by **libxante** to build an application.
 
 ## Format
@@ -25,7 +25,7 @@ it may reference an application skeleton.
     "general": {
         "name": string,
         "description": string,
-        "plugin": string,
+        "module": string,
         "config_pathname": string,
         "log_pathname": string,
         "log_level": string,
@@ -69,7 +69,7 @@ it may reference an application skeleton.
                             "description": string,
                             "options": array of strings
                         },
-                        "input_ranges": {
+                        "ranges": {
                             "string_length": int,
                             "max": int/float,
                             "min": int/float,

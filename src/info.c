@@ -89,7 +89,7 @@ __PUB_API__ const char *xante_application_name(const xante_t *xpp)
     return x->info.application_name;
 }
 
-__PUB_API__ const char *xante_plugin_name(const xante_t *xpp)
+__PUB_API__ const char *xante_module_name(const xante_t *xpp)
 {
     struct xante_app *x = (struct xante_app *)xpp;
 
@@ -100,7 +100,7 @@ __PUB_API__ const char *xante_plugin_name(const xante_t *xpp)
         return NULL;
     }
 
-    return x->info.plugin_name;
+    return x->info.module_name;
 }
 
 __PUB_API__ const char *xante_version(const xante_t *xpp)
@@ -205,7 +205,7 @@ __PUB_API__ const char *xante_info(const xante_t *xpp)
                      "\"log_path\":\"%s\","
                      "\"log_level\":\"%s\","
                      "\"application_name\":\"%s\","
-                     "\"plugin_name\":\"%s\","
+                     "\"module_name\":\"%s\","
                      "\"version\":\"%s\","
                      "\"company\":\"%s\","
                      "\"description\":\"%s\","
@@ -216,7 +216,7 @@ __PUB_API__ const char *xante_info(const xante_t *xpp)
                      xante_log_path(xpp),
                      xante_log_level(xpp),
                      xante_application_name(xpp),
-                     xante_plugin_name(xpp),
+                     xante_module_name(xpp),
                      xante_version(xpp),
                      xante_company(xpp),
                      xante_description(xpp),

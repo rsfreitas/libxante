@@ -12,7 +12,7 @@
     "general": {
         "name": "config-test",
         "description": "Test of configurations",
-        "plugin": "/usr/local/lib/test.so",
+        "module": "/usr/local/lib/test.so",
         "config_pathname": "/tmp",
         "log_pathname": "/tmp",
         "log_level": "debug",
@@ -26,6 +26,58 @@
                 "object_id": "0",
                 "mode": 1,
                 "items": [
+                    {
+                        "name": "Custom",
+                        "type": "custom",
+                        "object_id": "1001",
+                        "help": {
+                            "brief": "This is a help description to the custom option."
+                        },
+                        "events": {
+                            "custom-event": "foo_custom"
+                        }
+                    },
+                    {
+                        "name": "Progress bar",
+                        "type": "progress-bar",
+                        "object_id": "10002",
+                        "options": "Look at the progress bar",
+                        "ranges": {
+                            "max": 100
+                        },
+                        "events": {
+                            "update-routine-data": "pb_data",
+                            "update-routine": "progress"
+                        }
+                    },
+                    {
+                        "name": "Spinner sync",
+                        "type": "dots-sync",
+                        "object_id": "10003",
+                        "options": "Copying files (wait for about 20 seconds)",
+                        "ranges": {
+                            "max": 10
+                        },
+                        "events": {
+                            "update-routine-data": "pb_data",
+                            "sync-routine": "foo_sync"
+                        }
+                    },
+                    {
+                        "name": "Ranges",
+                        "type": "range",
+                        "object_id": "10004",
+                        "options": "Select interval",
+                        "default_value": "55",
+                        "ranges": {
+                            "min": 0,
+                            "max": 255
+                        },
+                        "config": {
+                            "block": "Main",
+                            "item": "range"
+                        }
+                    },
                     {
                         "name": "Yes no option",
                         "mode": 2,
@@ -128,7 +180,7 @@
                             "brief": "This is a help description input.",
                             "description": "This is a help description."
                         },
-                        "input_ranges": {
+                        "ranges": {
                             "max": 300,
                             "min": 10
                         },
@@ -147,7 +199,7 @@
                             "brief": "This is a help description float.",
                             "description": "This is a help description."
                         },
-                        "input_ranges": {
+                        "ranges": {
                             "max": 34.5,
                             "min": 1.0
                         },
@@ -166,7 +218,7 @@
                             "brief": "This is a help description passwd.",
                             "description": "This is a help description."
                         },
-                        "input_ranges": {
+                        "ranges": {
                             "string_length": 16
                         },
                         "config": {
@@ -184,7 +236,7 @@
                             "brief": "This is a help description string.",
                             "description": "This is a help description."
                         },
-                        "input_ranges": {
+                        "ranges": {
                             "string_length": 32
                         },
                         "config": {

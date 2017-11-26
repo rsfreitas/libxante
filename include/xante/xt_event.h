@@ -37,12 +37,17 @@
 int event_init(struct xante_app *xpp, bool use_event);
 void event_uninit(struct xante_app *xpp);
 int event_call(const char *event_name, struct xante_app *xpp, ...);
+void *event_update_routine_data(struct xante_app *xpp, struct xante_item *item);
+int event_update_routine(struct xante_app *xpp, struct xante_item *item,
+                         void *data);
 
 #endif
 
 /**
  * @name xante_event_argument
- * @brief Gets an event argument real value.
+ * @brief Gets the real value of an event argument.
+ *
+ * It is common to see this function used inside modules.
  *
  * @param [in] arg: The event argument.
  * @param [in] data_type: The event argument required field.

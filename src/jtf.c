@@ -39,7 +39,7 @@
 /* JTF object names */
 #define GENERAL             "general"
 #define APPLICATION_NAME    "name"
-#define PLUGIN_NAME         "plugin"
+#define MODULE_NAME         "module"
 #define CONFIG_PATHNAME     "config_pathname"
 #define LOG_PATHNAME        "log_pathname"
 #define LOG_LEVEL           "log_level"
@@ -60,7 +60,7 @@
 #define ITEMS               "items"
 #define OPTIONS             "options"
 #define DEFAULT_VALUE       "default_value"
-#define INPUT_RANGES        "input_ranges"
+#define RANGES              "ranges"
 #define STRING_LENGTH       "string_length"
 #define MAX_RANGE           "max"
 #define MIN_RANGE           "min"
@@ -261,12 +261,12 @@ static int parse_jtf_info(cl_json_t *jtf, struct xante_app *xpp)
         cl_string_unref(tmp);
     }
 
-    if (parse_object_value(general, PLUGIN_NAME, CL_JSON_STRING, true,
+    if (parse_object_value(general, MODULE_NAME, CL_JSON_STRING, true,
                            (void **)&tmp) < 0)
     {
         return -1;
     } else {
-        xpp->info.plugin_name = strdup(cl_string_valueof(tmp));
+        xpp->info.module_name = strdup(cl_string_valueof(tmp));
         cl_string_unref(tmp);
     }
 
@@ -318,11 +318,11 @@ static int parse_jtf_info(cl_json_t *jtf, struct xante_app *xpp)
     return 0;
 }
 
-static int parse_item_input_ranges(const cl_json_t *item, struct xante_item *i,
+static int parse_item_ranges(const cl_json_t *item, struct xante_item *i,
     void **max, void **min)
 {
-    cl_json_t *input_range = NULL;
-    bool input_string = true;
+    cl_json_t *ranges = NULL;
+    bool input_string = false, max_range = false, min_range = false;
     enum cl_json_type expected_type;
 
     /*
@@ -331,40 +331,58 @@ static int parse_item_input_ranges(const cl_json_t *item, struct xante_item *i,
      * XXX: We just need to remember that the 'type' object must be previously
      *      loaded.
      */
-    if (is_input_item(i->dialog_type) == false)
+    if (item_has_ranges(i->dialog_type) == false)
         return 0;
 
-    input_range = cl_json_get_object_item(item, INPUT_RANGES);
+    ranges = cl_json_get_object_item(item, RANGES);
 
-    if (NULL == input_range) {
-        errno_set(XANTE_ERROR_JTF_NO_INPUT_RANGES);
+    if (NULL == ranges) {
+        errno_set(XANTE_ERROR_JTF_NO_RANGES);
         return -1;
     }
 
-    input_string = ((i->dialog_type == XANTE_UI_DIALOG_INPUT_INT) ||
-                    (i->dialog_type == XANTE_UI_DIALOG_INPUT_FLOAT)) ? false
-                                                                     : true;
+    /* Decide what ranges we're goind to parse */
+    switch (i->dialog_type) {
+        case XANTE_UI_DIALOG_INPUT_STRING:
+        case XANTE_UI_DIALOG_INPUT_PASSWD:
+            input_string = true;
+            break;
 
-    if ((parse_object_value(input_range, STRING_LENGTH, CL_JSON_NUMBER, false,
+        case XANTE_UI_DIALOG_INPUT_INT:
+        case XANTE_UI_DIALOG_INPUT_FLOAT:
+        case XANTE_UI_DIALOG_RANGE:
+            max_range = true;
+            min_range = true;
+            break;
+
+        case XANTE_UI_DIALOG_PROGRESS:
+        case XANTE_UI_DIALOG_SPINNER_SYNC:
+        case XANTE_UI_DIALOG_DOTS_SYNC:
+            max_range = true;
+            break;
+
+        default:
+            break;
+     }
+
+    if ((parse_object_value(ranges, STRING_LENGTH, CL_JSON_NUMBER, false,
                             (void **)&i->string_length) < 0) &&
         input_string)
     {
         return -1;
     }
 
-    expected_type = (i->dialog_type == XANTE_UI_DIALOG_INPUT_INT) ? CL_JSON_NUMBER
-                                                                  : CL_JSON_NUMBER_FLOAT;
+    expected_type = (i->dialog_type == XANTE_UI_DIALOG_INPUT_FLOAT) ? CL_JSON_NUMBER_FLOAT
+                                                                    : CL_JSON_NUMBER;
 
-    if ((parse_object_value(input_range, MIN_RANGE, expected_type, false,
-                            min) < 0) &&
-        (input_string == false))
+    if ((parse_object_value(ranges, MIN_RANGE, expected_type, false,
+                            min) < 0) && min_range)
     {
         return -1;
     }
 
-    if ((parse_object_value(input_range, MAX_RANGE, expected_type, false,
-                            max) < 0) &&
-        (input_string == false))
+    if ((parse_object_value(ranges, MAX_RANGE, expected_type, false,
+                            max) < 0) && max_range)
     {
         return -1;
     }
@@ -448,12 +466,22 @@ static void pre_adjust_item_info(struct xante_item *item)
     {
         item->flags.menu_id = true;
     } else {
-        if ((item->dialog_type != XANTE_UI_DIALOG_DELETE_DYNAMIC_MENU_ITEM) &&
-            (item->dialog_type != XANTE_UI_DIALOG_ADD_DYNAMIC_MENU_ITEM))
+        if ((item->dialog_type == XANTE_UI_DIALOG_INPUT_INT) ||
+            (item->dialog_type == XANTE_UI_DIALOG_INPUT_FLOAT) ||
+            (item->dialog_type == XANTE_UI_DIALOG_INPUT_DATE) ||
+            (item->dialog_type == XANTE_UI_DIALOG_INPUT_TIME) ||
+            (item->dialog_type == XANTE_UI_DIALOG_INPUT_STRING) ||
+            (item->dialog_type == XANTE_UI_DIALOG_CALENDAR) ||
+            (item->dialog_type == XANTE_UI_DIALOG_TIMEBOX) ||
+            (item->dialog_type == XANTE_UI_DIALOG_CHECKLIST) ||
+            (item->dialog_type == XANTE_UI_DIALOG_RADIO_CHECKLIST) ||
+            (item->dialog_type == XANTE_UI_DIALOG_YES_NO) ||
+            (item->dialog_type == XANTE_UI_DIALOG_RANGE))
         {
             item->flags.config = true;
         }
 
+        /* Almost every item needs to have the "options" object */
         item->flags.options = true;
     }
 }
@@ -524,9 +552,17 @@ static void adjusts_item_info(struct xante_item *item, cl_string_t *default_valu
             break;
 
         case XANTE_UI_DIALOG_INPUT_INT:
+        case XANTE_UI_DIALOG_RANGE:
             i_min = *(int *)&min_range;
             i_max = *(int *)&max_range;
             item->min = cl_object_create(CL_INT, i_min);
+            item->max = cl_object_create(CL_INT, i_max);
+            break;
+
+        case XANTE_UI_DIALOG_PROGRESS:
+        case XANTE_UI_DIALOG_SPINNER_SYNC:
+        case XANTE_UI_DIALOG_DOTS_SYNC:
+            i_max = *(int *)&max_range;
             item->max = cl_object_create(CL_INT, i_max);
             break;
 
@@ -548,7 +584,7 @@ static void adjusts_item_info(struct xante_item *item, cl_string_t *default_valu
             item->options = options;
     }
 
-    if (is_input_item(item->dialog_type) == true)
+    if (item_has_ranges(item->dialog_type) == true)
         item->value_spec = cl_spec_create(CL_READABLE | CL_WRITABLE, item->min,
                                           item->max, item->string_length);
 }
@@ -698,12 +734,17 @@ static int parse_ui(cl_json_t *jtf, struct xante_app *xpp)
  * @name jtf_parse_item
  * @brief Parses a JTF item from a JSON node.
  *
+ * With the \a ignores_object_id argument we provide a mechanism to manually
+ * created JTF won't need the object_id to its items.
+ *
  * @param [in] item: The item as a JSON node.
+ * @param [in] ignores_object_id: A boolean flag to ignore the existence or not
+ *                                of the object_id information.
  *
  * @return On success returns a struct xante_item with the parsed info or
  *         NULL otherwise.
  */
-struct xante_item *jtf_parse_item(const cl_json_t *item)
+struct xante_item *jtf_parse_item(const cl_json_t *item, bool ignores_object_id)
 {
     struct xante_item *i;
     cl_string_t *default_value = NULL;
@@ -727,13 +768,13 @@ struct xante_item *jtf_parse_item(const cl_json_t *item)
         return NULL;
     }
 
-    if (parse_object_value(item, MODE, CL_JSON_NUMBER, true,
+    if (parse_object_value(item, MODE, CL_JSON_NUMBER, false,
                            (void **)&i->mode) < 0)
     {
         return NULL;
     }
 
-    if (parse_object_value(item, OBJECT_ID, CL_JSON_STRING, true,
+    if (parse_object_value(item, OBJECT_ID, CL_JSON_STRING, !ignores_object_id,
                            (void **)&i->object_id) < 0)
     {
         return NULL;
@@ -779,7 +820,7 @@ struct xante_item *jtf_parse_item(const cl_json_t *item)
     if (parse_item_config(item, i) < 0)
         return NULL;
 
-    if (parse_item_input_ranges(item, i, &max, &min) < 0)
+    if (parse_item_ranges(item, i, &max, &min) < 0)
         return NULL;
 
     /* Set up specific item properties */
@@ -858,7 +899,7 @@ struct xante_menu *jtf_parse_menu(const cl_json_t *menu)
     t = cl_json_get_array_size(items);
 
     for (i = 0; i < t; i++) {
-        it = jtf_parse_item(cl_json_get_array_item(items, i));
+        it = jtf_parse_item(cl_json_get_array_item(items, i), false);
 
         if (NULL == it)
             return NULL;
@@ -940,7 +981,7 @@ int jtf_parse_application(const char *pathname, struct xante_app *xpp)
     }
 
     /* Parse the interface (menus and its items) */
-    ui_init(xpp);
+    ui_data_init(xpp);
     ret = parse_ui(jtf, xpp);
     cl_json_delete(jtf);
 
@@ -970,8 +1011,8 @@ void jtf_release_info(struct xante_app *xpp)
     if (xpp->info.application_name != NULL)
         free(xpp->info.application_name);
 
-    if (xpp->info.plugin_name != NULL)
-        free(xpp->info.plugin_name);
+    if (xpp->info.module_name != NULL)
+        free(xpp->info.module_name);
 
     if (xpp->info.version != NULL)
         free(xpp->info.version);

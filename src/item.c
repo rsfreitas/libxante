@@ -163,6 +163,12 @@ struct xante_item *xante_item_create(void)
         return NULL;
     }
 
+    /*
+     * Our default behavior is to let every new item in edit mode. If one
+     * desires to block any the JTF must be properly configured.
+     */
+    item->mode = XANTE_ACCESS_EDIT;
+
     /* Initialize reference count */
     item->ref.count = 1;
     item->ref.free = __destroy_xante_item;
@@ -311,6 +317,26 @@ __PUB_API__ int xante_item_update_value(xante_item_t *item, const char *fmt, ...
     cl_string_unref(tmp);
     cl_object_unref(i->value);
     i->value = data;
+
+    return 0;
+}
+
+__PUB_API__ int xante_item_cancel_update(xante_item_t *item)
+{
+    struct xante_item *i = (struct xante_item *)item;
+
+    errno_clear();
+
+    if (NULL == item) {
+        errno_set(XANTE_ERROR_NULL_ARG);
+        return -1;
+    }
+
+    /*
+     * If any update routine is running for this item it will stop right
+     * after this change.
+     */
+    i->cancel_update = true;
 
     return 0;
 }

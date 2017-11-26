@@ -86,14 +86,6 @@ static int __xante_dlg_messagebox(int width, int height,
  *
  */
 
-/**
- * @name xante_dlg_set_backtitle
- * @brief Sets the application backtitle to its default value.
- *
- * @param [in,out] xpp: The library main object.
- *
- * @return On success returns 0 or -1 otherwise.
- */
 __PUB_API__ int xante_dlg_set_backtitle(xante_t *xpp)
 {
     struct xante_app *x = (struct xante_app *)xpp;
@@ -163,14 +155,6 @@ __PUB_API__ int xante_dlg_set_backtitle(xante_t *xpp)
     return 0;
 }
 
-/**
- * @name xante_dlg_clear_backtitle
- * @brief Clears the application backtitle content.
- *
- * @param [in,out] xpp: The library main object.
- *
- * @return On success returns 0 or -1 otherwise.
- */
 __PUB_API__ int xante_dlg_clear_backtitle(xante_t *xpp)
 {
     errno_clear();
@@ -191,18 +175,6 @@ __PUB_API__ int xante_dlg_clear_backtitle(xante_t *xpp)
     return 0;
 }
 
-/**
- * @name xante_dlg_messagebox
- * @brief Creates a message box dialog.
- *
- * @param [in] xpp: The library main object.
- * @param [in] type: The message box type (info, error, warning).
- * @param [in] title: The dialog title.
- * @param [in] message: The dialog message format.
- * @param [in] ...: The dialog message content.
- *
- * @return On success returns the button selected or -1 otherwise.
- */
 __PUB_API__ int xante_dlg_messagebox(struct xante_app *xpp,
     enum xante_msgbox_type type, const char *title, const char *message, ...)
 {
@@ -217,7 +189,9 @@ __PUB_API__ int xante_dlg_messagebox(struct xante_app *xpp,
     vasprintf(&msg, message, ap);
     va_end(ap);
 
-    if ((NULL == xpp) || (xante_runtime_ui_active(xpp) == false)) {
+    if ((NULL == xpp) ||
+        ((xpp != NULL) && xante_runtime_ui_active(xpp) == false))
+    {
         dlgx_init(true);
         dialog_needs_close = true;
     }

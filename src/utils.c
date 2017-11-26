@@ -59,6 +59,7 @@ bool is_valid_ui_dialog(enum xante_ui_dialog type)
         case XANTE_UI_DIALOG_DYNAMIC_MENU:
         case XANTE_UI_DIALOG_DELETE_DYNAMIC_MENU_ITEM:
         case XANTE_UI_DIALOG_ADD_DYNAMIC_MENU_ITEM:
+        case XANTE_UI_DIALOG_CUSTOM:
             return true;
 
         default:
@@ -150,6 +151,16 @@ enum xante_ui_dialog translate_string_dialog_type(const char *type)
         dialog = XANTE_UI_DIALOG_DELETE_DYNAMIC_MENU_ITEM;
     else if (strcmp(type, XANTE_UI_STR_DIALOG_ADD_DYNAMIC_MENU) == 0)
         dialog = XANTE_UI_DIALOG_ADD_DYNAMIC_MENU_ITEM;
+    else if (strcmp(type, XANTE_UI_STR_DIALOG_CUSTOM) == 0)
+        dialog = XANTE_UI_DIALOG_CUSTOM;
+    else if (strcmp(type, XANTE_UI_STR_DIALOG_PROGRESS) == 0)
+        dialog = XANTE_UI_DIALOG_PROGRESS;
+    else if (strcmp(type, XANTE_UI_STR_DIALOG_SPINNER_SYNC) == 0)
+        dialog = XANTE_UI_DIALOG_SPINNER_SYNC;
+    else if (strcmp(type, XANTE_UI_STR_DIALOG_DOTS_SYNC) == 0)
+        dialog = XANTE_UI_DIALOG_DOTS_SYNC;
+    else if (strcmp(type, XANTE_UI_STR_DIALOG_RANGE) == 0)
+        dialog = XANTE_UI_DIALOG_RANGE;
 
     return dialog;
 }
@@ -182,20 +193,24 @@ bool is_menu_item(const cl_string_t *type)
 }
 
 /**
- * @name is_input_item
+ * @name item_has_ranges
  * @brief Checks if an item is of an input kind.
  *
  * @param [in] type: The item type.
  *
  * @return Returns true is is an input kind or false if not.
  */
-bool is_input_item(enum xante_ui_dialog dlg_type)
+bool item_has_ranges(enum xante_ui_dialog dlg_type)
 {
     switch (dlg_type) {
         case XANTE_UI_DIALOG_INPUT_INT:
         case XANTE_UI_DIALOG_INPUT_FLOAT:
         case XANTE_UI_DIALOG_INPUT_STRING:
         case XANTE_UI_DIALOG_INPUT_PASSWD:
+        case XANTE_UI_DIALOG_PROGRESS:
+        case XANTE_UI_DIALOG_SPINNER_SYNC:
+        case XANTE_UI_DIALOG_DOTS_SYNC:
+        case XANTE_UI_DIALOG_RANGE:
             return true;
 
         default:
@@ -241,15 +256,6 @@ bool equals(const char *a, const char *b)
  *
  */
 
-/**
- * @name xante_application_version
- * @brief Gets a string with the application version information.
- *
- * @param [in] xpp: The library main object.
- *
- * @return On success returns a buffer with the application version or NULL
- *         otherwise.
- */
 __PUB_API__ char *xante_application_version(xante_t *xpp)
 {
     struct xante_app *x = (struct xante_app *)xpp;

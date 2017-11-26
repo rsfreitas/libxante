@@ -40,7 +40,7 @@ void runtime_stop(struct xante_app *xpp);
 /* These setters are for read only runtime flags */
 void runtime_set_exit_value(struct xante_app *xpp, int exit_value);
 void runtime_set_ui_active(struct xante_app *xpp, bool ui_active);
-void runtime_set_execute_plugin(struct xante_app *xpp, bool execute_plugin);
+void runtime_set_execute_module(struct xante_app *xpp, bool execute_module);
 void runtime_set_user_authentication(struct xante_app *xpp, bool auth);
 
 #endif
@@ -91,14 +91,14 @@ int xante_runtime_set_discard_changes_on_timeout(xante_t *xpp,
 bool xante_runtime_discard_changes_on_timeout(const xante_t *xpp);
 
 /**
- * @name xante_runtime_execute_plugin
- * @brief Retrieves if the application is working with a plugin or not.
+ * @name xante_runtime_execute_module
+ * @brief Retrieves if the application is working with a module or not.
  *
  * @param [in] xpp: The library main object.
  *
  * @return Returns true/false if the application is working or not.
  */
-bool xante_runtime_execute_plugin(const xante_t *xpp);
+bool xante_runtime_execute_module(const xante_t *xpp);
 
 /**
  * @name xante_runtime_set_force_config_file_saving

@@ -1,6 +1,6 @@
 # Authentication database
 
-This document describe the database used to authenticate users using an
+This document describes the database used to authenticate users using an
 application.
 
 ## Format

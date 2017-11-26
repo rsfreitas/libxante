@@ -67,39 +67,55 @@
 #define DATE_MAX_INPUT_LENGTH       10
 #define TIME_MAX_INPUT_LENGTH       8
 
+/* A new type of data to be used as a return value from the dialog functions. */
+typedef struct {
+    int     selected_button;
+    bool    updated_value;
+} ui_return_t;
+
 /* menu */
-int ui_dialog_menu(struct xante_app *xpp, const struct xante_menu *menu,
-                   const char *cancel_label);
+int ui_dialog_menu(struct xante_app *xpp, cl_list_t *menus,
+                   const struct xante_menu *menu, const char *cancel_label);
+
+int ui_dialog_item(struct xante_app *xpp, cl_list_t *menus,
+                   struct xante_item *selected_item);
 
 /* yesno */
-bool ui_dialog_yesno(struct xante_app *xpp, struct xante_item *item);
+ui_return_t ui_dialog_yesno(struct xante_app *xpp, struct xante_item *item);
 
 /* calendar */
-bool ui_dialog_calendar(struct xante_app *xpp, struct xante_item *item,
-                        bool edit_value);
+ui_return_t ui_dialog_calendar(struct xante_app *xpp, struct xante_item *item,
+                               bool edit_value);
 
 /* timebox */
-bool ui_dialog_timebox(struct xante_app *xpp, struct xante_item *item,
-                       bool edit_value);
+ui_return_t ui_dialog_timebox(struct xante_app *xpp, struct xante_item *item,
+                              bool edit_value);
 
 /* checklist */
-bool ui_dialog_checklist(struct xante_app *xpp, struct xante_item *item,
-                         bool edit_value);
+ui_return_t ui_dialog_checklist(struct xante_app *xpp, struct xante_item *item,
+                                bool edit_value);
 
 /* passwd */
-int ui_dialog_passwd(struct xante_item *item, bool edit_value, char *input,
-                     unsigned int input_length, int height, cl_string_t *text);
+int ui_dialog_passwd(struct xante_item *item, bool edit_value,
+                     char *input, unsigned int input_length,
+                     int height, cl_string_t *text);
 
 /* input */
-bool ui_dialog_input(struct xante_app *xpp, struct xante_item *item,
-                     bool edit_value);
+ui_return_t ui_dialog_input(struct xante_app *xpp, struct xante_item *item,
+                            bool edit_value);
 
 /* dm_delete */
-bool ui_dialog_delete_dm(struct xante_app *xpp, struct xante_item *item,
-                         bool edit_value);
+ui_return_t ui_dialog_delete_dm(struct xante_app *xpp, struct xante_item *item,
+                                bool edit_value);
 
 /* dm_add */
-bool ui_dialog_add_dm(struct xante_app *xpp, struct xante_item *item);
+ui_return_t ui_dialog_add_dm(struct xante_app *xpp, struct xante_item *item);
+
+/* progress */
+ui_return_t ui_dialog_progress(struct xante_app *xpp, struct xante_item *item);
+
+/* sync */
+ui_return_t ui_dialog_sync(struct xante_app *xpp, struct xante_item *item);
 
 #endif
 

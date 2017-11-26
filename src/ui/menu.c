@@ -25,7 +25,6 @@
  */
 
 #include "libxante.h"
-#include "ui_dialogs.h"
 
 #define DEFAULT_STATUSBAR_TEXT          \
     "[ESC] Exit [Enter] Select an option [Up/Down] Move [TAB/Left/Right] Choose option"
@@ -229,16 +228,18 @@ static void release_dialog_content(DIALOG_LISTITEM *listitem, int total_items)
     free(listitem);
 }
 
+/* Rename menus to something better */
 static void call_menu_dialog(struct xante_app *xpp,
-    struct xante_item *selected_item)
+    cl_list_t *menus, struct xante_item *selected_item)
 {
-    struct xante_menu *menu = NULL;
+    struct xante_menu *referenced_menu = NULL;
     char *btn_cancel_label = NULL;
 
-    menu = ui_search_menu_by_object_id(xpp,
-                                       cl_string_valueof(selected_item->menu_id));
+    referenced_menu =
+        ui_search_menu_by_object_id(menus,
+                                    cl_string_valueof(selected_item->menu_id));
 
-    if (NULL == menu) {
+    if (NULL == referenced_menu) {
         xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
                              cl_tr("No menu '%s' was found!"),
                              cl_string_valueof(selected_item->name));
@@ -247,150 +248,8 @@ static void call_menu_dialog(struct xante_app *xpp,
     }
 
     btn_cancel_label = strdup(cl_tr("Back"));
-    ui_dialog_menu(xpp, menu, btn_cancel_label);
+    ui_dialog_menu(xpp, menus, referenced_menu, btn_cancel_label);
     free(btn_cancel_label);
-}
-
-static bool call_input_dialog(struct xante_app *xpp,
-    struct xante_item *selected_item, bool edit_value)
-{
-    return ui_dialog_input(xpp, selected_item, edit_value);
-}
-
-static bool call_calendar_dialog(struct xante_app *xpp,
-    struct xante_item *selected_item, bool edit_value)
-{
-    return ui_dialog_calendar(xpp, selected_item, edit_value);
-}
-
-static bool call_timebox_dialog(struct xante_app *xpp,
-    struct xante_item *selected_item, bool edit_value)
-{
-    return ui_dialog_timebox(xpp, selected_item, edit_value);
-}
-
-static bool call_checklist_dialog(struct xante_app *xpp,
-    struct xante_item *selected_item, bool edit_value)
-{
-    return ui_dialog_checklist(xpp, selected_item, edit_value);
-}
-
-static bool call_yesno_dialog(struct xante_app *xpp,
-    struct xante_item *selected_item)
-{
-    return ui_dialog_yesno(xpp, selected_item);
-}
-
-static void call_delete_dm(struct xante_app *xpp,
-    struct xante_item *selected_item, bool edit_value)
-{
-    ui_dialog_delete_dm(xpp, selected_item, edit_value);
-}
-
-static void call_add_dm(struct xante_app *xpp,
-    struct xante_item *selected_item)
-{
-    ui_dialog_add_dm(xpp, selected_item);
-}
-
-static void call_selected_item(struct xante_app *xpp,
-    struct xante_item *selected_item)
-{
-    bool update_internal_menus = false, edit_item_value = true;
-
-    if (NULL == selected_item) {
-        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
-                             cl_tr("No item was selected!"));
-
-        return;
-    }
-
-    /* Are we leaving? */
-    if (xante_runtime_close_ui(xpp) == true)
-        return;
-
-    if (event_call(EV_ITEM_SELECTED, xpp, selected_item) < 0)
-        return;
-
-    /* Verify input edit */
-    if (!(selected_item->mode & XANTE_ACCESS_EDIT))
-        edit_item_value = false;
-
-    switch (selected_item->dialog_type) {
-        case XANTE_UI_DIALOG_MENU:
-        case XANTE_UI_DIALOG_DYNAMIC_MENU:
-            call_menu_dialog(xpp, selected_item);
-            break;
-
-        case XANTE_UI_DIALOG_INPUT_INT:
-        case XANTE_UI_DIALOG_INPUT_FLOAT:
-        case XANTE_UI_DIALOG_INPUT_DATE:
-        case XANTE_UI_DIALOG_INPUT_STRING:
-        case XANTE_UI_DIALOG_INPUT_TIME:
-        case XANTE_UI_DIALOG_INPUT_PASSWD:
-            update_internal_menus = call_input_dialog(xpp, selected_item,
-                                                      edit_item_value);
-
-            break;
-
-        case XANTE_UI_DIALOG_CALENDAR:
-            update_internal_menus = call_calendar_dialog(xpp, selected_item,
-                                                         edit_item_value);
-
-            break;
-
-        case XANTE_UI_DIALOG_TIMEBOX:
-            update_internal_menus = call_timebox_dialog(xpp, selected_item,
-                                                        edit_item_value);
-
-            break;
-
-        case XANTE_UI_DIALOG_RADIO_CHECKLIST:
-        case XANTE_UI_DIALOG_CHECKLIST:
-            update_internal_menus = call_checklist_dialog(xpp, selected_item,
-                                                          edit_item_value);
-
-            break;
-
-        case XANTE_UI_DIALOG_YES_NO:
-            if (edit_item_value == true)
-               update_internal_menus = call_yesno_dialog(xpp, selected_item);
-            else {
-                xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
-                                     cl_tr("Cannot change the value of this item!"));
-            }
-
-            break;
-
-        case XANTE_UI_DIALOG_DELETE_DYNAMIC_MENU_ITEM:
-            call_delete_dm(xpp, selected_item, edit_item_value);
-            break;
-
-        case XANTE_UI_DIALOG_ADD_DYNAMIC_MENU_ITEM:
-            if (edit_item_value == true)
-                call_add_dm(xpp, selected_item);
-            else {
-                xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
-                                     cl_tr("Cannot add item!"));
-            }
-
-            break;
-
-        default:
-            break;
-    }
-
-    /*
-     * We'll need to search if the item that has been updated is pointed by a
-     * dynamic menu. If so, we're going to update its contents.
-     */
-    if (update_internal_menus == true) {
-        dm_update(xpp, selected_item);
-        event_call(EV_ITEM_VALUE_UPDATED, xpp, selected_item);
-    }
-
-    /* Run return event */
-    event_call(EV_ITEM_EXIT, xpp, selected_item);
 }
 
 static int item_at(unsigned int index, cl_list_node_t *node, void *a)
@@ -425,6 +284,7 @@ static struct xante_item *get_item_at(cl_list_t *list, int index)
     return item;
 }
 
+#ifdef ALTERNATIVE_DIALOG
 static void update_menu_item_brief(int current_item, void *a)
 {
     struct xante_menu *menu = (struct xante_menu *)a;
@@ -440,6 +300,7 @@ static void update_menu_item_brief(int current_item, void *a)
 
     dlgx_put_item_brief(text);
 }
+#endif
 
 /*
  *
@@ -448,17 +309,150 @@ static void update_menu_item_brief(int current_item, void *a)
  */
 
 /**
+ * @name ui_dialog_item
+ * @brief Create and run a dialog according to the item passed as argument.
+ *
+ * @param [in,out] xpp: The library main object.
+ * @param [in,out] menus: The list of menus accessible through internal objects.
+ * @param [in,out] selected_item: The selected item object.
+ *
+ * @return Returns the button used by the user to end the dialog.
+ */
+int ui_dialog_item(struct xante_app *xpp, cl_list_t *menus,
+    struct xante_item *selected_item)
+{
+    ui_return_t ret_dialog;
+    bool edit_item_value = true;
+    int ret = -1;
+
+    if (NULL == selected_item) {
+        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
+                             cl_tr("No item was selected!"));
+
+        return ret;
+    }
+
+    /* Are we leaving? */
+    if (xante_runtime_close_ui(xpp) == true)
+        return DLG_EXIT_OK;
+
+    if (event_call(EV_ITEM_SELECTED, xpp, selected_item) < 0)
+        return ret;
+
+    /* Verify input edit */
+    if (!(selected_item->mode & XANTE_ACCESS_EDIT))
+        edit_item_value = false;
+
+    switch (selected_item->dialog_type) {
+        case XANTE_UI_DIALOG_MENU:
+        case XANTE_UI_DIALOG_DYNAMIC_MENU:
+            call_menu_dialog(xpp, menus, selected_item);
+            ret_dialog.selected_button = DLG_EXIT_OK;
+            break;
+
+        case XANTE_UI_DIALOG_INPUT_INT:
+        case XANTE_UI_DIALOG_INPUT_FLOAT:
+        case XANTE_UI_DIALOG_INPUT_DATE:
+        case XANTE_UI_DIALOG_INPUT_STRING:
+        case XANTE_UI_DIALOG_INPUT_TIME:
+        case XANTE_UI_DIALOG_INPUT_PASSWD:
+        case XANTE_UI_DIALOG_RANGE:
+            ret_dialog = ui_dialog_input(xpp, selected_item, edit_item_value);
+            break;
+
+        case XANTE_UI_DIALOG_CALENDAR:
+            ret_dialog = ui_dialog_calendar(xpp, selected_item,
+                                            edit_item_value);
+
+            break;
+
+        case XANTE_UI_DIALOG_TIMEBOX:
+            ret_dialog = ui_dialog_timebox(xpp, selected_item,
+                                           edit_item_value);
+
+            break;
+
+        case XANTE_UI_DIALOG_RADIO_CHECKLIST:
+        case XANTE_UI_DIALOG_CHECKLIST:
+            ret_dialog = ui_dialog_checklist(xpp, selected_item,
+                                             edit_item_value);
+
+            break;
+
+        case XANTE_UI_DIALOG_YES_NO:
+            if (edit_item_value == true)
+                ret_dialog = ui_dialog_yesno(xpp, selected_item);
+            else {
+                xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
+                                     cl_tr("Cannot change the value of this item!"));
+            }
+
+            break;
+
+        case XANTE_UI_DIALOG_DELETE_DYNAMIC_MENU_ITEM:
+            ui_dialog_delete_dm(xpp, selected_item, edit_item_value);
+            break;
+
+        case XANTE_UI_DIALOG_ADD_DYNAMIC_MENU_ITEM:
+            if (edit_item_value == true)
+                ui_dialog_add_dm(xpp, selected_item);
+            else {
+                xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
+                                     cl_tr("Cannot add item!"));
+            }
+
+            break;
+
+        case XANTE_UI_DIALOG_CUSTOM:
+            if (event_call(EV_CUSTOM, xpp, selected_item, NULL) < 0) {
+                xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
+                                     cl_tr("Error calling custom object '%s'"),
+                                     cl_string_valueof(selected_item->name));
+            }
+
+            break;
+
+        case XANTE_UI_DIALOG_PROGRESS:
+            ret_dialog = ui_dialog_progress(xpp, selected_item);
+            break;
+
+        case XANTE_UI_DIALOG_SPINNER_SYNC:
+        case XANTE_UI_DIALOG_DOTS_SYNC:
+            ret_dialog = ui_dialog_sync(xpp, selected_item);
+            break;
+
+        default:
+            break;
+    }
+
+    /*
+     * We'll need to search if the item that has been updated is pointed by a
+     * dynamic menu. If so, we're going to update its contents.
+     */
+    if (ret_dialog.updated_value == true) {
+        dm_update(xpp, selected_item);
+        event_call(EV_ITEM_VALUE_UPDATED, xpp, selected_item);
+    }
+
+    /* Run return event */
+    event_call(EV_ITEM_EXIT, xpp, selected_item);
+
+    return ret_dialog.selected_button;
+}
+
+/**
  * @name ui_dialog_menu
  * @brief Creates a dialog of menu type.
  *
  * @param [in,out] xpp: The main library object.
- * @param [in] menu: The menu data to be used as content to the dialog.
+ * @param [in] menus: The list of menus accessible through internal objects.
+ * @param [in] entry_menu: The menu used as the entry point of all the others.
  * @param [in] cancel_label: A string label of the cancel button.
  *
  * @return Returns the libdialog type of return value.
  */
-int ui_dialog_menu(struct xante_app *xpp, const struct xante_menu *menu,
-    const char *cancel_label)
+int ui_dialog_menu(struct xante_app *xpp, cl_list_t *menus,
+    const struct xante_menu *entry_menu, const char *cancel_label)
 {
     DIALOG_LISTITEM *dlg_items = NULL;
     bool loop = true;
@@ -471,27 +465,27 @@ int ui_dialog_menu(struct xante_app *xpp, const struct xante_menu *menu,
         if (xante_runtime_close_ui(xpp) == true)
             break;
 
-        calc_menu_limits(menu, &dlg_lines, &dlg_width, &items_to_select,
+        calc_menu_limits(entry_menu, &dlg_lines, &dlg_width, &items_to_select,
                          &total_items);
 
-        dlg_items = prepare_dialog_content(menu, total_items);
+        dlg_items = prepare_dialog_content(entry_menu, total_items);
         prepare_dialog_look(xpp, cancel_label);
 
 #ifdef ALTERNATIVE_DIALOG
-        ret_dialog = dlg_menu(cl_string_valueof(menu->name), "", dlg_lines,
+        ret_dialog = dlg_menu(cl_string_valueof(entry_menu->name), "", dlg_lines,
                               dlg_width, items_to_select, total_items,
                               dlg_items, &selected_index, NULL,
-                              update_menu_item_brief, (void *)menu);
+                              update_menu_item_brief, (void *)entry_menu);
 #else
-        ret_dialog = dlg_menu(cl_string_valueof(menu->name), "", dlg_lines,
+        ret_dialog = dlg_menu(cl_string_valueof(entry_menu->name), "", dlg_lines,
                               dlg_width, items_to_select, total_items,
                               dlg_items, &selected_index, NULL);
 #endif
 
         switch (ret_dialog) {
             case DLG_EXIT_OK:
-                call_selected_item(xpp,
-                                   get_item_at(menu->items, selected_index));
+                ui_dialog_item(xpp, menus, get_item_at(entry_menu->items,
+                                                       selected_index));
 
                 break;
 
@@ -513,7 +507,7 @@ int ui_dialog_menu(struct xante_app *xpp, const struct xante_menu *menu,
                         loop = false;
                     }
                 } else {
-                    if (event_call(EV_MENU_EXIT, xpp, menu) == 0)
+                    if (event_call(EV_MENU_EXIT, xpp, entry_menu) == 0)
                         loop = false;
                 }
 

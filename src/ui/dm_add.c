@@ -25,7 +25,6 @@
  */
 
 #include "libxante.h"
-#include "ui_dialogs.h"
 
 #define DEFAULT_STATUSBAR_TEXT              \
     "[ESC] Cancel [Enter] Confirm a selected option [Tab/Left/Right] Select an option"
@@ -50,12 +49,13 @@ static bool is_input_valid(const char *input)
  *
  */
 
-bool ui_dialog_add_dm(struct xante_app *xpp, struct xante_item *item)
+ui_return_t ui_dialog_add_dm(struct xante_app *xpp, struct xante_item *item)
 {
     bool added = false, loop = true;
     int ret_dialog = DLG_EXIT_OK, height, width;
     char input[MAX_INPUT_VALUE] = {0};
     cl_string_t *text = NULL;
+    ui_return_t ret;
 
     /* Prepare dialog */
     dlgx_set_backtitle(xpp);
@@ -123,6 +123,9 @@ bool ui_dialog_add_dm(struct xante_app *xpp, struct xante_item *item)
     if (item->descriptive_help != NULL)
         dialog_vars.help_button = 0;
 
-    return added;
+    ret.selected_button = ret_dialog;
+    ret.updated_value = added;
+
+    return ret;
 }
 

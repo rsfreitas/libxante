@@ -51,10 +51,12 @@ enum xante_ui_dialog {
     XANTE_UI_DIALOG_YES_NO,
     XANTE_UI_DIALOG_DYNAMIC_MENU,
     XANTE_UI_DIALOG_DELETE_DYNAMIC_MENU_ITEM,
-    XANTE_UI_DIALOG_ADD_DYNAMIC_MENU_ITEM
-//    XANTE_UI_DIALOG_CUSTOM,
-//    XANTE_UI_DIALOG_RANGE,
-//    XANTE_UI_DIALOG_FORM
+    XANTE_UI_DIALOG_ADD_DYNAMIC_MENU_ITEM,
+    XANTE_UI_DIALOG_CUSTOM,
+    XANTE_UI_DIALOG_PROGRESS,
+    XANTE_UI_DIALOG_SPINNER_SYNC,
+    XANTE_UI_DIALOG_DOTS_SYNC,
+    XANTE_UI_DIALOG_RANGE
 };
 
 /** An access mode from a menu or a menu item */
@@ -99,7 +101,7 @@ enum xante_session_source {
 
 /** Libxante initialization flags */
 enum xante_init_flags {
-    XANTE_USE_PLUGIN        = (1 << 0), // Enable/Disable plugin calls.
+    XANTE_USE_MODULE        = (1 << 0), // Enable/Disable module calls.
     XANTE_USE_AUTH          = (1 << 1), // Enable/Disable database authentication.
     XANTE_SINGLE_INSTANCE   = (1 << 2), // Enable/Disable application single
                                         // instance mode.
@@ -113,7 +115,8 @@ enum xante_event_argument_type {
     XANTE_EVENT_DATA_XANTE_ITEM_T,
     XANTE_EVENT_DATA_XANTE_ITEM_VALUE,
     XANTE_EVENT_DATA_XANTE_CONFIG,
-    XANTE_EVENT_DATA_XANTE_CHANGES_LIST
+    XANTE_EVENT_DATA_XANTE_CHANGES_LIST,
+    XANTE_EVENT_DATA_CUSTOM
 };
 
 /** Return values of an application */
@@ -165,8 +168,8 @@ struct xante_change_entry {
 #include "xante/xt_jtf.h"
 #include "xante/xt_log.h"
 #include "xante/xt_menu.h"
+#include "xante/xt_mjtf.h"
 #include "xante/xt_runtime.h"
-#include "xante/xt_translation.h"
 #include "xante/xt_ui.h"
 #include "xante/xt_utils.h"
 

@@ -25,7 +25,6 @@
  */
 
 #include "libxante.h"
-#include "ui_dialogs.h"
 
 #define DEFAULT_STATUSBAR_TEXT          \
     "[ESC] Cancel [Enter] Confirm a selection [Up/Down] Move [TAB/Left/Right] Choose option [Spacebar] Select option"
@@ -204,6 +203,7 @@ static bool item_value_has_changed(struct xante_app *xpp, struct xante_item *ite
     return changed;
 }
 
+#ifdef ALTERNATIVE_DIALOG
 static void update_item_brief(int current_index, void *a)
 {
     struct xante_item *item = (struct xante_item *)a;
@@ -220,6 +220,7 @@ static void update_item_brief(int current_index, void *a)
     dlgx_put_item_brief(cl_string_valueof(brief));
     cl_string_unref(brief);
 }
+#endif
 
 /*
  *
@@ -239,16 +240,17 @@ static void update_item_brief(int current_index, void *a)
  * @param [in] edit_value: A flag to indicate if the value will be editable
  *                         or not.
  *
- * @return Returns a boolean value indicating if the item's value has been
- *         changed (true) or not (false).
+ * @return Returns a ui_return_t value indicating if the item's value has been
+ *         changed (true) or not (false) with the dialog selected button.
  */
-bool ui_dialog_checklist(struct xante_app *xpp, struct xante_item *item,
+ui_return_t ui_dialog_checklist(struct xante_app *xpp, struct xante_item *item,
     bool edit_value)
 {
     bool loop = true, value_changed = false;
     int ret_dialog = DLG_EXIT_OK, list_options_height = 0, height = 0,
         number_of_options = 0, selected_index = -1, selected_items;
     DIALOG_LISTITEM *dlg_items = NULL;
+    ui_return_t ret;
 
     /* Prepare dialog */
     dlgx_set_backtitle(xpp);
@@ -282,8 +284,7 @@ bool ui_dialog_checklist(struct xante_app *xpp, struct xante_item *item,
                                    MINIMUM_WIDTH, list_options_height,
                                    number_of_options, dlg_items, " X",
                                    item->dialog_checklist_type,
-                                   &selected_index,
-                                   update_item_brief, item);
+                                   &selected_index);
 #endif
 
         switch (ret_dialog) {
@@ -340,6 +341,9 @@ bool ui_dialog_checklist(struct xante_app *xpp, struct xante_item *item,
 
     release_dialog_content(dlg_items, list_options_height);
 
-    return value_changed;
+    ret.selected_button = ret_dialog;
+    ret.updated_value = value_changed;
+
+    return ret;
 }
 

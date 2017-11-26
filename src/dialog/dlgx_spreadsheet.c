@@ -457,10 +457,12 @@ int dlg_spreadsheet(const char *title, const char *subtitle,
             b = &sheet->cell[sheet->cells - abs(selected_btn)];
             key = dlg_mouse_wgetch((selected_btn < 0) ? b->window : dialog, &fkey);
 
+#ifdef ALTERNATIVE_DIALOG
             if (key == DLG_EXIT_TIMEOUT) {
                 result = DLG_EXIT_TIMEOUT;
                 break;
             }
+#endif
 
             if (dlg_result_key(key, fkey, &result))
                 break;

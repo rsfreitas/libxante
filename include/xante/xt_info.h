@@ -74,14 +74,14 @@ const char *xante_log_level(const xante_t *xpp);
 const char *xante_application_name(const xante_t *xpp);
 
 /**
- * @name xante_plugin_name
- * @brief Gives the plugin name used by the application.
+ * @name xante_module_name
+ * @brief Gives the module name used by the application.
  *
  * @param [in] xpp: The library main object.
  *
- * @return On success returns the plugin name or NULL otherwise.
+ * @return On success returns the module name or NULL otherwise.
  */
-const char *xante_plugin_name(const xante_t *xpp);
+const char *xante_module_name(const xante_t *xpp);
 
 /**
  * @name xante_version

@@ -68,6 +68,10 @@
 #define EV_ITEM_VALUE_UPDATED                   "item-value-updated"
 #define EV_ITEM_EXIT                            "item-exit"
 #define EV_MENU_EXIT                            "menu-exit"
+#define EV_CUSTOM                               "custom-event"
+#define EV_UPDATE_ROUTINE                       "update-routine"
+#define EV_UPDATE_ROUTINE_DATA                  "update-routine-data"
+#define EV_SYNC_ROUTINE                         "sync-routine"
 
 /** Environment variables */
 #define ENV_XANTE_DB_PATH                       "XANTE_DB_PATH"
@@ -89,7 +93,11 @@
 #define XANTE_UI_STR_DIALOG_DYNAMIC_MENU        "dynamic-menu"
 #define XANTE_UI_STR_DIALOG_DELETE_DYNAMIC_MENU "delete-dynamic-menu"
 #define XANTE_UI_STR_DIALOG_ADD_DYNAMIC_MENU    "add-dynamic-menu"
-//#define XANTE_UI_STR_DIALOG_CUSTOM              "custom"
+#define XANTE_UI_STR_DIALOG_CUSTOM              "custom"
+#define XANTE_UI_STR_DIALOG_PROGRESS            "progress-bar"
+#define XANTE_UI_STR_DIALOG_SPINNER_SYNC        "spinner-sync"
+#define XANTE_UI_STR_DIALOG_DOTS_SYNC           "dots-sync"
+#define XANTE_UI_STR_DIALOG_RANGE               "range"
 
 /** String keys of supported menus */
 #define XANTE_UI_STR_DEFAULT_MENU               "default"
@@ -111,7 +119,7 @@ struct xante_info {
     char    *log_pathname;
     char    *log_level;
     char    *application_name;
-    char    *plugin_name;
+    char    *module_name;
     char    *version;
     char    *company;
     char    *description;
@@ -125,7 +133,7 @@ struct xante_runtime {
     /* Read only */
     enum xante_return_value     exit_value;
     bool                        ui_active;
-    bool                        execute_plugin;
+    bool                        execute_module;
     bool                        user_authentication;
     char                        *caller_name;
 
@@ -161,7 +169,7 @@ struct xante_item {
     cl_object_t             *default_value;
     cl_json_t               *events;
 
-    /* Input range */
+    /* Ranges */
     cl_object_t             *min;
     cl_object_t             *max;
     int                     string_length;
@@ -176,6 +184,7 @@ struct xante_item {
     enum xante_ui_dialog    dialog_type;
     struct flag_parser      flags;
     struct cl_ref_s         ref;
+    bool                    cancel_update;
 };
 
 /** UI Menu informations */
@@ -215,8 +224,8 @@ struct xante_log {
     cl_log_t                *log;
 };
 
-struct xante_plugin {
-    cl_plugin_t             *plugin;
+struct xante_module {
+    cl_plugin_t             *module;
     cl_plugin_info_t        *info;
     cl_stringlist_t         *functions;
 };
@@ -253,9 +262,15 @@ struct xante_app {
     struct xante_log        log;
     struct xante_config     config;
     struct xante_changes    changes;
-    struct xante_plugin     plugin;
+    struct xante_module     module;
     struct xante_auth       auth;
     struct cl_ref_s         ref;
+};
+
+/** The structure to hold runtime dialog */
+struct xante_mjtf {
+    cl_list_t           *menus;
+    struct xante_item   *object;
 };
 
 /* Exclusive internal library headers */

@@ -92,7 +92,10 @@ static const char *__description[] = {
     cl_tr_noop("Wrong JTF object type"),                                //*
     cl_tr_noop("Unknown event data type"),
     cl_tr_noop("An instance of this application is already running"),
-    cl_tr_noop("Internal invalid data conversion")
+    cl_tr_noop("Internal invalid data conversion"),
+    cl_tr_noop("The MJTF has no object to be loaded"),
+    cl_tr_noop("Menu '%s' was not found"),                              //*
+    cl_tr_noop("The head of menu list was not found")
 };
 
 static const char *__unknown_error = cl_tr_noop("Unknown error");
@@ -156,12 +159,6 @@ void errno_store_additional_content(const char *content)
  *
  */
 
-/**
- * @name xante_get_last_error
- * @brief Gets the current library internal error code.
- *
- * @return Returns the current error code.
- */
 __PUB_API__ enum xante_error_code xante_get_last_error(void)
 {
     struct xante_storage_error *ste = (struct xante_storage_error *)__errno;
@@ -169,14 +166,6 @@ __PUB_API__ enum xante_error_code xante_get_last_error(void)
     return ste->code;
 }
 
-/**
- * @name xante_strerror
- * @brief Gives a description message about an error code.
- *
- * @param [in] code: The error code to be translated.
- *
- * @return Returns the descriptive string of the error.
- */
 __PUB_API__ const char *xante_strerror(enum xante_error_code code)
 {
     struct xante_storage_error *ste = (struct xante_storage_error *)__errno;

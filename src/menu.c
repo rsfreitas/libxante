@@ -164,6 +164,38 @@ struct xante_menu *xante_menu_create(enum xante_menu_creator creator)
     return menu;
 }
 
+/**
+ * @name xante_menu_head
+ * @brief Gives a reference to the head of a menu list.
+ *
+ * @param [in] menus: The list of menus.
+ *
+ * @return On success returns a reference the head of the list or NULL
+ *         otherwise.
+ */
+struct xante_menu *xante_menu_head(const cl_list_t *menus)
+{
+    cl_list_node_t *node = NULL;
+    struct xante_menu *head = NULL;
+
+    if (NULL == menus) {
+        return NULL;
+    }
+
+    node = cl_list_peek(menus);
+
+    if (NULL == node) {
+        errno_set(XANTE_ERROR_MENU_HEAD_NOT_FOUND);
+        return NULL;
+    }
+
+    head = cl_list_node_content(node);
+    xante_menu_ref(head);
+    cl_list_node_unref(node);
+
+    return head;
+}
+
 /*
  *
  * API

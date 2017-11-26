@@ -25,7 +25,6 @@
  */
 
 #include "libxante.h"
-#include "ui_dialogs.h"
 
 #define DEFAULT_STATUSBAR_TEXT              \
     "[ESC] Cancel [Enter] Confirm a selected option [Tab/Left/Right] Select an option"
@@ -43,16 +42,17 @@
  * @param [in] xpp: The main library object.
  * @param [in] item: The item to be used inside the dialog.
  *
- * @return Returns a boolean value indicating if the item's value has been
- *         changed (true) or not (false).
+ * @return Returns a ui_return_t value indicating if the item's value has been
+ *         changed (true) or not (false) with the dialog selected button.
  */
-bool ui_dialog_yesno(struct xante_app *xpp, struct xante_item *item)
+ui_return_t ui_dialog_yesno(struct xante_app *xpp, struct xante_item *item)
 {
     const char *yes = cl_tr("Yes"), *no = cl_tr("No");
     bool value_changed = false, loop = true;
     cl_object_t *value = NULL;
     cl_string_t *text = NULL;
     int choice = -1, height, ret_dialog = DLG_EXIT_OK;
+    ui_return_t ret;
 
     /* Prepare dialog */
     dlgx_set_backtitle(xpp);
@@ -126,6 +126,9 @@ bool ui_dialog_yesno(struct xante_app *xpp, struct xante_item *item)
     if (text != NULL)
         cl_string_unref(text);
 
-    return value_changed;
+    ret.selected_button = ret_dialog;
+    ret.updated_value = value_changed;
+
+    return ret;
 }
 

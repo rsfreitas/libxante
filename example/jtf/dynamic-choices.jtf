@@ -12,7 +12,7 @@
     "general": {
         "name": "config-test",
         "description": "Test of configurations",
-        "plugin": "/usr/local/lib/test.so",
+        "module": "/usr/local/lib/test.so",
         "config_pathname": "/tmp",
         "log_pathname": "/tmp",
         "log_level": "debug",
@@ -129,7 +129,7 @@
                             "brief": "This is a help description input.",
                             "description": "This is a help description."
                         },
-                        "input_ranges": {
+                        "ranges": {
                             "max": 300,
                             "min": 10
                         },
@@ -147,7 +147,7 @@
                             "brief": "This is a help description float.",
                             "description": "This is a help description."
                         },
-                        "input_ranges": {
+                        "ranges": {
                             "max": 34.5,
                             "min": 1.0
                         },
@@ -165,7 +165,7 @@
                             "brief": "This is a help description passwd.",
                             "description": "This is a help description."
                         },
-                        "input_ranges": {
+                        "ranges": {
                             "string_length": 16
                         },
                         "config": {
@@ -182,7 +182,7 @@
                             "brief": "This is a help description string.",
                             "description": "This is a help description."
                         },
-                        "input_ranges": {
+                        "ranges": {
                             "string_length": 32
                         },
                         "config": {
@@ -248,7 +248,7 @@
                         "mode": 1,
                         "type": "input-string",
                         "default_value": "",
-                        "input_ranges": {
+                        "ranges": {
                             "string_length": 32
                         },
                         "config": {
@@ -260,7 +260,7 @@
                         "mode": 1,
                         "type": "input-string",
                         "default_value": "",
-                        "input_ranges": {
+                        "ranges": {
                             "string_length": 32
                         },
                         "config": {

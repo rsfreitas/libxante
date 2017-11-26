@@ -60,7 +60,7 @@ static void destroy_xante_app(const struct cl_ref_s *ref)
     event_uninit(xpp);
     xante_log_info(cl_tr("Finishing application"));
     change_uninit(xpp);
-    ui_uninit(xpp);
+    ui_data_uninit(xpp);
     jtf_release_info(xpp);
     log_uninit(xpp);
     auth_uninit(xpp);
@@ -93,22 +93,6 @@ static struct xante_app *new_xante_app(void)
  *
  */
 
-/**
- * @name xante_init
- * @brief Initialize a libxante application.
- *
- * @param [in] caller_name: The application name which is calling us.
- * @param [in] jtf_pathname: The JTF file.
- * @param [in] use_plugin: A boolean true/false to load or not the application
- *                         plugin.
- * @param [in] use_auth: A boolean true/false to use an internal user
- *                       authentication.
- * @param [in] session: The session type.
- * @param [in] username: The username to access the application.
- * @param [in] password: The username's password.
- *
- * @return On success returns a xante_t object or NULL otherwise.
- */
 __PUB_API__ xante_t *xante_init(const char *caller_name, const char *jtf_pathname,
     enum xante_init_flags flags, enum xante_session session, const char *username,
     const char *password)
@@ -168,8 +152,8 @@ __PUB_API__ xante_t *xante_init(const char *caller_name, const char *jtf_pathnam
     /* Start user modifications monitoring */
     change_init(xpp);
 
-    /* Call the plugin initialization function or disable its using */
-    if (event_init(xpp, bit_test(flags, XANTE_USE_PLUGIN)) < 0)
+    /* Call the module initialization function or disable its using */
+    if (event_init(xpp, bit_test(flags, XANTE_USE_MODULE)) < 0)
         goto error_block;
 
     xante_log_info(cl_tr("Initializing application - %s"),
@@ -181,14 +165,6 @@ error_block:
     return NULL;
 }
 
-/**
- * @name xante_uninit
- * @brief Ends a libxante application.
- *
- * @param [in,out] xpp: The library main object.
- *
- * @return On success returns 0 or -1 otherwise.
- */
 __PUB_API__ int xante_uninit(xante_t *xpp)
 {
     struct xante_app *x = (struct xante_app *)xpp;
