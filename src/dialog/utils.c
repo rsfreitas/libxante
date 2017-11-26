@@ -685,15 +685,21 @@ void dlgx_alloc_input(unsigned int bytes)
 char *dlgx_get_input_result(void)
 {
     char *result = NULL;
+    size_t size;
+    unsigned int last_position;
 
     result = calloc(1, strlen(dialog_vars.input_result));
 
     if (NULL == result)
         return NULL;
 
-    /* Removes an invalid char at the input end */
+    /* Removes an invalid char at the input end if there is one there */
+    size = strlen(dialog_vars.input_result);
+    last_position = size - 1;
+
     strncpy(result, dialog_vars.input_result,
-            strlen(dialog_vars.input_result) - 1);
+            (isalnum(dialog_vars.input_result[last_position]) ? size
+                                                              : last_position));
 
     return result;
 }

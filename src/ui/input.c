@@ -264,12 +264,12 @@ static bool validate_input_value(struct xante_app *xpp, struct xante_item *item,
         valid = validate_time(xpp, str_value);
     } else {
         /*
-         * XXX: A XANTE_UI_DIALOG_INPUT_PASSWD must be validated inside a module,
-         *      in a EV_ITEM_VALUE_CONFIRM event, which is called before this
-         *      function.
+         * XXX: A XANTE_UI_DIALOG_INPUT_PASSWD and XANTE_UI_DIALOG_RANGE must
+         *      be validated inside the module, in a EV_ITEM_VALUE_CONFIRM
+         *      event, which is called before this function.
          *
          *      We don't hold any information inside the JTF to compare them and
-         *      return true to keep running.
+         *      just return true to keep running.
          */
 
         valid = true;

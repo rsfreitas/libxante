@@ -56,7 +56,9 @@ enum xante_ui_dialog {
     XANTE_UI_DIALOG_PROGRESS,
     XANTE_UI_DIALOG_SPINNER_SYNC,
     XANTE_UI_DIALOG_DOTS_SYNC,
-    XANTE_UI_DIALOG_RANGE
+    XANTE_UI_DIALOG_RANGE,
+    XANTE_UI_DIALOG_FILE_SELECT,
+    XANTE_UI_DIALOG_DIR_SELECT
 };
 
 /** An access mode from a menu or a menu item */

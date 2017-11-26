@@ -79,6 +79,26 @@
                         }
                     },
                     {
+                        "name": "File select",
+                        "type": "file-select",
+                        "object_id": "10005",
+                        "options": "/home/rodrigo",
+                        "events": {
+                            "item-value-confirm": "validate_file",
+                            "item-value-updated": "confirm_file"
+                        }
+                    },
+                    {
+                        "name": "Directory select",
+                        "type": "dir-select",
+                        "object_id": "10006",
+                        "options": "/home",
+                        "events": {
+                            "item-value-confirm": "validate_dir",
+                            "item-value-updated": "confirm_dir"
+                        }
+                    },
+                    {
                         "name": "Yes no option",
                         "mode": 2,
                         "type": "yesno",

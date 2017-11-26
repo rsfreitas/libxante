@@ -421,6 +421,11 @@ int ui_dialog_item(struct xante_app *xpp, cl_list_t *menus,
             ret_dialog = ui_dialog_sync(xpp, selected_item);
             break;
 
+        case XANTE_UI_DIALOG_FILE_SELECT:
+        case XANTE_UI_DIALOG_DIR_SELECT:
+            ret_dialog = ui_dialog_fselect(xpp, selected_item);
+            break;
+
         default:
             break;
     }

@@ -161,6 +161,10 @@ enum xante_ui_dialog translate_string_dialog_type(const char *type)
         dialog = XANTE_UI_DIALOG_DOTS_SYNC;
     else if (strcmp(type, XANTE_UI_STR_DIALOG_RANGE) == 0)
         dialog = XANTE_UI_DIALOG_RANGE;
+    else if (strcmp(type, XANTE_UI_STR_DIALOG_FILE_SELECT) == 0)
+        dialog = XANTE_UI_DIALOG_FILE_SELECT;
+    else if (strcmp(type, XANTE_UI_STR_DIALOG_DIR_SELECT) == 0)
+        dialog = XANTE_UI_DIALOG_DIR_SELECT;
 
     return dialog;
 }
