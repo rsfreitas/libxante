@@ -28,6 +28,19 @@
 #include "libxante.h"
 
 /*
+ * Informations to be used inside functions called while traversing a list
+ * of items.
+ */
+struct search_data {
+    char    *name;
+    char    *object_id;
+    char    *block;
+    char    *item;
+    void    *found;
+    int     (*compare)(cl_list_node_t *, void *);
+};
+
+/*
  *
  * Internal functions
  *
@@ -92,6 +105,182 @@ static void __destroy_xante_item(const struct cl_ref_s *ref)
         cl_json_delete(item->events);
 
     free(item);
+}
+
+/*
+ * Helper function to compare an item by its name.
+ */
+static int search_by_name(cl_list_node_t *node, void *a)
+{
+    struct xante_item *item = cl_list_node_content(node);
+    struct search_data *sd = (struct search_data *)a;
+
+    if (strcmp(cl_string_valueof(item->name), sd->name) == 0)
+        return 1;
+
+    return 0;
+}
+
+/*
+ * Helper function to compare an item by its object_id.
+ */
+static int search_by_object_id(cl_list_node_t *node, void *a)
+{
+    struct xante_item *item = cl_list_node_content(node);
+    struct search_data *sd = (struct search_data *)a;
+
+    if (strcmp(cl_string_valueof(item->object_id), sd->object_id) == 0)
+        return 1;
+
+    return 0;
+}
+
+/*
+ * Helper function to compare an item by its configuration information.
+ */
+static int search_by_config_name(cl_list_node_t *node, void *a)
+{
+    struct xante_item *item = cl_list_node_content(node);
+    struct search_data *sd = (struct search_data *)a;
+
+    if ((strcmp(cl_string_valueof(item->config_block), sd->block) == 0) &&
+        (strcmp(cl_string_valueof(item->config_item), sd->item) == 0))
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
+/*
+ * Searches for an item inside a menu (node). If the item is found, the function
+ * returns a positive value and a reference to it will live in sd->found.
+ */
+static int look_for_item_in_menu(cl_list_node_t *node, void *a)
+{
+    struct xante_menu *menu = cl_list_node_content(node);
+    struct search_data *sd = (struct search_data *)a;
+    cl_list_node_t *item_node = NULL;
+
+    item_node = cl_list_map(menu->items, sd->compare, sd);
+
+    if (item_node != NULL) {
+        sd->found = cl_list_node_content(item_node);
+        cl_list_node_unref(item_node);
+        return 1;
+    }
+
+    return 0;
+}
+
+static struct xante_item *look_for_item(const struct xante_app *xpp,
+    struct search_data *data)
+{
+    cl_list_node_t *node = NULL;
+    struct xante_item *item = NULL;
+
+    node = cl_list_map(xpp->ui.menus, look_for_item_in_menu, data);
+
+    if (NULL == node)
+        return NULL;
+
+    item = data->found;
+    cl_list_node_unref(node);
+
+    return item;
+}
+
+static struct xante_item *xante_item_search_by_name(const struct xante_app *xpp,
+    va_list ap)
+{
+    struct search_data sd;
+    char *menu_name = NULL, *item_name = NULL;
+    struct xante_menu *menu = NULL;
+
+    menu_name = va_arg(ap, char *);
+    item_name = va_arg(ap, char *);
+
+    if ((NULL == menu_name) || (NULL == item_name)) {
+        errno_set(XANTE_ERROR_INVALID_ARG);
+        return NULL;
+    }
+
+    menu = xante_menu_search_by_name(xpp->ui.menus, menu_name);
+
+    if (NULL == menu) {
+        errno_set(XANTE_ERROR_MENU_NOT_FOUND);
+        errno_store_additional_content(menu_name);
+        return NULL;
+    }
+
+    sd.name = item_name;
+    sd.compare = search_by_name;
+
+    if (look_for_item_in_menu(menu, &sd) == 0) {
+        errno_set(XANTE_ERROR_ITEM_NOT_FOUND);
+        errno_store_additional_content(item_name);
+        return NULL;
+    }
+
+    return (struct xante_item *)sd.found;
+}
+
+static struct xante_item *xante_item_search_by_object_id(const struct xante_app *xpp,
+    va_list ap)
+{
+    struct search_data sd;
+    char *object_id = NULL;
+    struct xante_item *item = NULL;
+
+    object_id = va_arg(ap, char *);
+
+    if (NULL == object_id) {
+        errno_set(XANTE_ERROR_INVALID_ARG);
+        return NULL;
+    }
+
+    sd.object_id = object_id;
+    sd.compare = search_by_object_id;
+    item = look_for_item(xpp, &sd);
+
+    if (NULL == item) {
+        errno_set(XANTE_ERROR_ITEM_NOT_FOUND);
+        errno_store_additional_content(object_id);
+        return NULL;
+    }
+
+    return item;
+}
+
+static struct xante_item *xante_item_search_by_config_name(const struct xante_app *xpp,
+    va_list ap)
+{
+    struct search_data sd;
+    char *config_block = NULL, *config_item = NULL, *tmp = NULL;
+    struct xante_item *item = NULL;
+
+    config_block = va_arg(ap, char *);
+    config_item = va_arg(ap, char *);
+
+    if ((NULL == config_block) || (NULL == config_item)) {
+        errno_set(XANTE_ERROR_INVALID_ARG);
+        return NULL;
+    }
+
+    sd.block = config_block;
+    sd.item = config_item;
+    sd.compare = search_by_config_name;
+    item = look_for_item(xpp, &sd);
+
+    if (NULL == item) {
+        asprintf(&tmp, "%s - %s", config_block, config_item);
+        errno_set(XANTE_ERROR_ITEM_NOT_FOUND);
+        errno_store_additional_content(tmp);
+        free(tmp);
+        return NULL;
+    }
+
+    return item;
 }
 
 /*
@@ -339,5 +528,43 @@ __PUB_API__ int xante_item_cancel_update(xante_item_t *item)
     i->cancel_update = true;
 
     return 0;
+}
+
+__PUB_API__ xante_item_t *xante_item_search(const xante_t *xpp,
+    enum xante_item_search_mode mode, ...)
+{
+    va_list ap;
+    struct xante_item *item = NULL;
+
+    errno_clear();
+
+    if (NULL == xpp) {
+        errno_set(XANTE_ERROR_NULL_ARG);
+        return NULL;
+    }
+
+    va_start(ap, NULL);
+
+    switch (mode) {
+        case XANTE_ITEM_SEARCH_BY_NAME:
+            item = xante_item_search_by_name(xpp, ap);
+            break;
+
+        case XANTE_ITEM_SEARCH_BY_CONFIG_NAME:
+            item = xante_item_search_by_config_name(xpp, ap);
+            break;
+
+        case XANTE_ITEM_SEARCH_BY_OBJECT_ID:
+            item = xante_item_search_by_object_id(xpp, ap);
+            break;
+
+        default:
+            errno_set(XANTE_ERROR_INVALID_ARG);
+            return NULL;
+    }
+
+    va_end(ap);
+
+    return item;
 }
 

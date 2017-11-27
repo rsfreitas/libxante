@@ -147,12 +147,22 @@ static int calc_string_length(const char *s, int (*input_len)(const char *))
 
 /**
  * @name dlg_inputbox
- * @brief Creates a widget of input kind with the possibility of show a variable
- *        text size, as an editor, allowing one the scroll it with the keyboard.
+ * @brief Creates a widget of input kind with the possibility of showing a
+ *        fixed text, allowing scroll it with the keyboard.
  *
- * IMPORTANTE: To use the scroll feature, the subtitle width cannot be larger
- *             to have a line break. This widget is not ready yet for a dynamic
- *             resizing.
+ * To use the scroll feature, the subtitle width cannot be larger to have a
+ * line break. This widget is not ready yet for a dynamic resizing.
+ *
+ * This dialog can also validate the input text by showing to the user a
+ * wrong status, changing the text color. This feature is enabled when using
+ * \a input_check.
+ *
+ * At the inputbox line is displayed the maximum number of input characters
+ * and the number of "consumed" characters (as the user types inside it).
+ *
+ * By default, to calculate the number of consumed characters a simple
+ * strlen call is made, but an alternative fuction to do this task may be
+ * passed.
  *
  * @param [in] width: The window width.
  * @param [in] height: The window height.

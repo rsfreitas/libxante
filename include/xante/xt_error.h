@@ -82,6 +82,7 @@ enum xante_error_code {
     XANTE_ERROR_MJTF_NO_OBJECT,
     XANTE_ERROR_MENU_NOT_FOUND,                     //*
     XANTE_ERROR_MENU_HEAD_NOT_FOUND,
+    XANTE_ERROR_ITEM_NOT_FOUND,                     //*
 
     XANTE_MAX_ERROR_CODE
 };

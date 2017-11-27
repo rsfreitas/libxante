@@ -123,8 +123,8 @@ ui_return_t ui_dialog_delete_dm(struct xante_app *xpp, struct xante_item *item,
     int ret_dialog = DLG_EXIT_OK, list_options_height = 0, height = 0,
         number_of_options = 0, selected_index = -1;
 
-    dm_menu = ui_search_menu_by_object_id(xpp->ui.menus,
-                                          cl_string_valueof(item->menu_id));
+    dm_menu = xante_menu_search_by_object_id(xpp->ui.menus,
+                                             cl_string_valueof(item->menu_id));
 
     if (NULL == dm_menu) {
         xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),

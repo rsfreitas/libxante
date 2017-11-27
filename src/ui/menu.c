@@ -236,8 +236,8 @@ static void call_menu_dialog(struct xante_app *xpp,
     char *btn_cancel_label = NULL;
 
     referenced_menu =
-        ui_search_menu_by_object_id(menus,
-                                    cl_string_valueof(selected_item->menu_id));
+        xante_menu_search_by_object_id(menus,
+                                       cl_string_valueof(selected_item->menu_id));
 
     if (NULL == referenced_menu) {
         xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),

@@ -126,5 +126,43 @@ int xante_item_checklist_type(const xante_item_t *item);
 int xante_item_update_value(xante_item_t *item, const char *fmt, ...)
                             __attribute__((format(printf, 2, 3)));
 
+/**
+ * @name xante_item_search
+ * @brief Searches for an item inside the application environment.
+ *
+ * This function supports three different ways of searching for an item:
+ *
+ * 1 - XANTE_ITEM_SEARCH_BY_NAME
+ *
+ *  As the name says will search for an item with a specific name. This mode
+ *  requires two arguments:
+ *
+ *      - The menu name
+ *      - The item name
+ *
+ * 2 - XANTE_ITEM_SEARCH_BY_CONFIG_NAME
+ *
+ *  This mode will search for an item by its configuration information and
+ *  requires two arguments:
+ *
+ *      - The configuration block name.
+ *      - The configuration item name.
+ *
+ * 3 - XANTE_ITEM_SEARCH_BY_OBJECT_ID
+ *
+ *  This mode will search for an iten by its object_id attribute and requires
+ *  one argument:
+ *
+ *      - The object_id.
+ *
+ * @param [in] xpp: The library main object.
+ * @param [in] mode: The desired search mode.
+ * @param [in] ...: The arguments required by the desired search mode.
+ *
+ * @return On success returns the item or NULL otherwise.
+ */
+xante_item_t *xante_item_search(const xante_t *xpp,
+                                enum xante_item_search_mode mode, ...);
+
 #endif
 

@@ -130,6 +130,14 @@ enum xante_return_value {
     XANTE_RETURN_TIMEOUT            //** Application ended by timeout.
 };
 
+/** Modes to search for an item */
+enum xante_item_search_mode {
+    XANTE_ITEM_INVALID_SEARCH,
+    XANTE_ITEM_SEARCH_BY_NAME,
+    XANTE_ITEM_SEARCH_BY_CONFIG_NAME,
+    XANTE_ITEM_SEARCH_BY_OBJECT_ID
+};
+
 /** Main library object */
 typedef void    xante_t;
 
@@ -149,7 +157,7 @@ struct xante_change_entry {
 
 #ifdef LIBXANTE_COMPILE
 # define MAJOR_VERSION  0
-# define MINOR_VERSION  1
+# define MINOR_VERSION  0
 # define RELEASE        3
 
 # include "xante/xt_internal.h"

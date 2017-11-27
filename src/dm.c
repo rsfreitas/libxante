@@ -279,8 +279,8 @@ static int find_submenu_to_replicate(cl_list_node_t *a, void *b)
 
     /* Is this a submenu? */
     if (item->dialog_type == XANTE_UI_DIALOG_MENU) {
-        menu = ui_search_menu_by_object_id(ld->xpp->ui.menus,
-                                           cl_string_valueof(item->menu_id));
+        menu = xante_menu_search_by_object_id(ld->xpp->ui.menus,
+                                              cl_string_valueof(item->menu_id));
 
         if (dm_replicate(ld->xpp, menu, ld->number_of_copies,
                          ld->first_copy_index, ld->input_name) < 0)
@@ -572,8 +572,8 @@ void dm_update(struct xante_app *xpp, struct xante_item *selected_item)
     }
 
     rme_menu =
-        ui_search_menu_by_object_id(xpp->ui.menus,
-                                    cl_string_valueof(unref_menu->object_id));
+        xante_menu_search_by_object_id(xpp->ui.menus,
+                                       cl_string_valueof(unref_menu->object_id));
 
     if (NULL == rme_menu) {
         // error msg
@@ -626,8 +626,8 @@ bool dm_insert(struct xante_app *xpp, struct xante_item *item,
     struct xante_menu *unref_menu = NULL, *rme_menu = NULL;
     const char *menu_id = cl_string_valueof(item->menu_id);
 
-    unref_menu = ui_search_menu_by_object_id(xpp->ui.unreferenced_menus,
-                                             menu_id);
+    unref_menu = xante_menu_search_by_object_id(xpp->ui.unreferenced_menus,
+                                                menu_id);
 
     if (NULL == unref_menu) {
         xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
@@ -636,7 +636,7 @@ bool dm_insert(struct xante_app *xpp, struct xante_item *item,
         return false;
     }
 
-    rme_menu = ui_search_menu_by_object_id(xpp->ui.menus, menu_id);
+    rme_menu = xante_menu_search_by_object_id(xpp->ui.menus, menu_id);
 
     if (NULL == rme_menu) {
         xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
