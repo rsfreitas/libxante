@@ -184,7 +184,9 @@ static int ev_item(struct xante_app *xpp, const char *event_name, va_list ap)
      * won't result in something useful.
      */
     if ((strcmp(event_name, EV_UPDATE_ROUTINE) == 0) ||
-        (strcmp(event_name, EV_UPDATE_ROUTINE) == 0))
+        (strcmp(event_name, EV_SYNC_ROUTINE) == 0) ||
+        (strcmp(event_name, EV_VALUE_CHECK) == 0) ||
+        (strcmp(event_name, EV_VALUE_STRLEN) == 0))
     {
         arg.data = va_arg(ap, void *);
     }
@@ -203,7 +205,9 @@ static int ev_item(struct xante_app *xpp, const char *event_name, va_list ap)
     /* These events have a return value */
     if ((strcmp(event_name, EV_ITEM_SELECTED) == 0) ||
         (strcmp(event_name, EV_SYNC_ROUTINE) == 0) ||
-        (strcmp(event_name, EV_UPDATE_ROUTINE) == 0))
+        (strcmp(event_name, EV_UPDATE_ROUTINE) == 0) ||
+        (strcmp(event_name, EV_VALUE_CHECK) == 0) ||
+        (strcmp(event_name, EV_VALUE_STRLEN) == 0))
     {
         event_return = CL_OBJECT_AS_INT(ret);
     }
@@ -319,14 +323,14 @@ static int ev_item_value(struct xante_app *xpp, const char *event_name, va_list 
  * doesn't receive any argument, just returns a pointer to some data used
  * inside the oficial update-routine.
  */
-static void *ev_update_routine_data(struct xante_app *xpp,
+static void *ev_item_custom_data(struct xante_app *xpp,
     struct xante_item *item)
 {
     char *function_name = NULL;
     cl_object_t *ret = NULL;
     void *data = NULL;
 
-    function_name = get_function_name(item->events, EV_UPDATE_ROUTINE_DATA);
+    function_name = get_function_name(item->events, EV_ITEM_CUSTOM_DATA);
 
     if (NULL == function_name)
         return NULL; /* Should we return an error? */
@@ -381,7 +385,9 @@ static int call(const char *event_name, struct xante_app *xpp, va_list ap)
                (strcmp(event_name, EV_ITEM_EXIT) == 0) ||
                (strcmp(event_name, EV_UPDATE_ROUTINE) == 0) ||
                (strcmp(event_name, EV_SYNC_ROUTINE) == 0) ||
-               (strcmp(event_name, EV_CUSTOM) == 0))
+               (strcmp(event_name, EV_CUSTOM) == 0) ||
+               (strcmp(event_name, EV_VALUE_CHECK) == 0) ||
+               (strcmp(event_name, EV_VALUE_STRLEN) == 0))
     {
         ret = ev_item(xpp, event_name, ap);
     } else if (strcmp(event_name, EV_MENU_EXIT) == 0)
@@ -505,8 +511,8 @@ void event_uninit(struct xante_app *xpp)
 }
 
 /**
- * @name event_update_routine_data
- * @brief Calls the EV_UPDATE_ROUTINE_DATA from the item to get a reference to
+ * @name event_item_custom_data
+ * @brief Calls the EV_ITEM_CUSTOM_DATA from the item to get a reference to
  *        some data.
  *
  * This data may be used inside the EV_UPDATE_ROUTINE event.
@@ -516,9 +522,9 @@ void event_uninit(struct xante_app *xpp)
  *
  * @return On success returns a pointer to the data ou NULL otherwise.
  */
-void *event_update_routine_data(struct xante_app *xpp, struct xante_item *item)
+void *event_item_custom_data(struct xante_app *xpp, struct xante_item *item)
 {
-    return ev_update_routine_data(xpp, item);
+    return ev_item_custom_data(xpp, item);
 }
 
 /*

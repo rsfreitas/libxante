@@ -70,8 +70,10 @@
 #define EV_MENU_EXIT                            "menu-exit"
 #define EV_CUSTOM                               "custom-event"
 #define EV_UPDATE_ROUTINE                       "update-routine"
-#define EV_UPDATE_ROUTINE_DATA                  "update-routine-data"
+#define EV_ITEM_CUSTOM_DATA                     "item-custom-data"
 #define EV_SYNC_ROUTINE                         "sync-routine"
+#define EV_VALUE_STRLEN                         "value-strlen"
+#define EV_VALUE_CHECK                          "value-check"
 
 /** Environment variables */
 #define ENV_XANTE_DB_PATH                       "XANTE_DB_PATH"
@@ -103,6 +105,8 @@
 #define XANTE_UI_STR_DIALOG_FILE_VIEW           "file-view"
 #define XANTE_UI_STR_DIALOG_TAILBOX             "tailbox"
 #define XANTE_UI_STR_DIALOG_SCROLLTEXT          "scrolltext"
+#define XANTE_UI_STR_DIALOG_UPDATE_OBJECT       "update-object"
+#define XANTE_UI_STR_DIALOG_INPUTSCROLL         "inputscroll"
 
 /** String keys of supported menus */
 #define XANTE_UI_STR_DEFAULT_MENU               "default"

@@ -24,6 +24,7 @@
  * USA
  */
 
+#include <string.h>
 #include <unistd.h>
 
 #include <collections.h>
@@ -234,7 +235,6 @@ CL_PLUGIN_OBJECT_PTR_ONLY(int, progress)
 CL_PLUGIN_OBJECT_PTR_ONLY(bool, foo_sync)
 {
     xante_event_arg_t *arg = CL_PLUGIN_PTR_ARGUMENT();
-    struct progress_data *p = (struct progress_data *)xante_event_argument(arg, XANTE_EVENT_DATA_CUSTOM);
     xante_item_t *item = xante_event_argument(arg, XANTE_EVENT_DATA_XANTE_ITEM_T);
 
     percent += 5;
@@ -249,5 +249,53 @@ CL_PLUGIN_OBJECT_PTR_ONLY(bool, foo_sync)
     sleep(1);
     xante_item_update_value(item, ": percent = %d", percent);
     return true;
+}
+
+CL_PLUGIN_OBJECT_PTR_ONLY(int, clock_module)
+{
+    xante_event_arg_t *arg = CL_PLUGIN_PTR_ARGUMENT();
+    xante_item_t *item = xante_event_argument(arg, XANTE_EVENT_DATA_XANTE_ITEM_T);
+
+    cl_datetime_t *dt;
+    cl_string_t *s = NULL;
+
+    dt = cl_dt_localtime();
+    s = cl_dt_to_cstring(dt, "%F %T");
+    cl_dt_destroy(dt);
+
+    xante_item_update_value(item, "%s", cl_string_valueof(s));
+    cl_string_unref(s);
+
+    return 0;
+}
+
+CL_PLUGIN_OBJECT_PTR_ONLY(void, *scroll_content)
+{
+    xante_event_arg_t *arg = CL_PLUGIN_PTR_ARGUMENT();
+    char *content = NULL;
+
+    (void)arg;
+    asprintf(&content, "This is the content\nwhich the module just\ncreated.\n\n\nAnd this is to show\nthat we can\nscroll the content.\nTo a\nfew\nmore\nlines.");
+
+    return content;
+}
+
+CL_PLUGIN_OBJECT_PTR_ONLY(int, scroll_strlen)
+{
+    xante_event_arg_t *arg = CL_PLUGIN_PTR_ARGUMENT();
+    char *input = (char *)xante_event_argument(arg, XANTE_EVENT_DATA_CUSTOM);
+
+    xante_log_info("%s: input = '%s'", __FUNCTION__, input);
+    return strlen(input);
+}
+
+CL_PLUGIN_OBJECT_PTR_ONLY(int, scroll_check)
+{
+    xante_event_arg_t *arg = CL_PLUGIN_PTR_ARGUMENT();
+    char *input = (char *)xante_event_argument(arg, XANTE_EVENT_DATA_CUSTOM);
+
+    xante_log_info("%s: input = '%s'", __FUNCTION__, input);
+
+    return 1; /* ok */
 }
 

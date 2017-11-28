@@ -69,6 +69,8 @@ bool is_valid_ui_dialog(enum xante_ui_dialog type)
         case XANTE_UI_DIALOG_FILE_VIEW:
         case XANTE_UI_DIALOG_TAILBOX:
         case XANTE_UI_DIALOG_SCROLLTEXT:
+        case XANTE_UI_DIALOG_UPDATE_OBJECT:
+        case XANTE_UI_DIALOG_INPUTSCROLL:
             return true;
 
         default:
@@ -180,6 +182,10 @@ enum xante_ui_dialog translate_string_dialog_type(const char *type)
         dialog = XANTE_UI_DIALOG_TAILBOX;
     else if (strcmp(type, XANTE_UI_STR_DIALOG_SCROLLTEXT) == 0)
         dialog = XANTE_UI_DIALOG_SCROLLTEXT;
+    else if (strcmp(type, XANTE_UI_STR_DIALOG_UPDATE_OBJECT) == 0)
+        dialog = XANTE_UI_DIALOG_UPDATE_OBJECT;
+    else if (strcmp(type, XANTE_UI_STR_DIALOG_INPUTSCROLL) == 0)
+        dialog = XANTE_UI_DIALOG_INPUTSCROLL;
 
     return dialog;
 }
@@ -230,6 +236,7 @@ bool item_has_ranges(enum xante_ui_dialog dlg_type)
         case XANTE_UI_DIALOG_SPINNER_SYNC:
         case XANTE_UI_DIALOG_DOTS_SYNC:
         case XANTE_UI_DIALOG_RANGE:
+        case XANTE_UI_DIALOG_INPUTSCROLL:
             return true;
 
         default:

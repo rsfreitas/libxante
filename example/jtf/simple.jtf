@@ -27,6 +27,29 @@
                 "mode": 1,
                 "items": [
                     {
+                        "name": "Input string scroll",
+                        "type": "inputscroll",
+                        "default_value": "Olha o conteudo ai...",
+                        "options": "The title of our scroll text:",
+                        "object_id": "9",
+                        "help": {
+                            "brief": "This is a help description string.",
+                            "description": "This is a help description."
+                        },
+                        "ranges": {
+                            "string_length": 128
+                        },
+                        "config": {
+                            "block": "Main",
+                            "item": "input_string_scroll"
+                        },
+                        "events": {
+                            "update-routine-data": "scroll_content",
+                            "value-strlen": "scroll_strlen",
+                            "value-check": "scroll_check"
+                        }
+                    },
+                    {
                         "name": "File view",
                         "type": "file-view",
                         "object_id": "999",
@@ -50,6 +73,16 @@
                         "object_id": "997",
                         "options": "This is my text",
                         "default_value": "Or maybe this?"
+                    },
+                    {
+                        "name": "Update object",
+                        "type": "update-object",
+                        "object_id": "996",
+                        "options": "The CLOCK",
+                        "events": {
+                            "update-routine-data": "pb_data",
+                            "update-routine": "clock_module"
+                        }
                     },
                     {
                         "name": "Custom",
@@ -275,7 +308,8 @@
                         "name": "Input string",
                         "mode": 1,
                         "type": "input-string",
-                        "default_value": "",
+                        "default_value": "teste",
+                        "options": "This is a little string",
                         "object_id": "9",
                         "help": {
                             "brief": "This is a help description string.",

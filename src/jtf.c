@@ -345,6 +345,7 @@ static int parse_item_ranges(const cl_json_t *item, struct xante_item *i,
     switch (i->dialog_type) {
         case XANTE_UI_DIALOG_INPUT_STRING:
         case XANTE_UI_DIALOG_INPUT_PASSWD:
+        case XANTE_UI_DIALOG_INPUTSCROLL:
             input_string = true;
             break;
 
@@ -476,7 +477,8 @@ static void pre_adjust_item_info(struct xante_item *item)
             (item->dialog_type == XANTE_UI_DIALOG_CHECKLIST) ||
             (item->dialog_type == XANTE_UI_DIALOG_RADIO_CHECKLIST) ||
             (item->dialog_type == XANTE_UI_DIALOG_YES_NO) ||
-            (item->dialog_type == XANTE_UI_DIALOG_RANGE))
+            (item->dialog_type == XANTE_UI_DIALOG_RANGE) ||
+            (item->dialog_type == XANTE_UI_DIALOG_INPUTSCROLL))
         {
             item->flags.config = true;
         }

@@ -36,6 +36,16 @@
     "[ESC] Cancel [Enter] Confirm selected option [Tab/Left/Right] Select an option [Up/Down] Adjust range value"
 
 /*
+ * Since the callbacks used by the dlgx_inputscroll function receives a
+ * void *, this structure is built to hold some informations needed to
+ * call events from the module while inside them.
+ */
+struct inputscroll_data {
+    struct xante_app    *xpp;
+    struct xante_item   *item;
+};
+
+/*
  *
  * Internal functions
  *
@@ -64,6 +74,7 @@ static int get_input_length(const struct xante_item *item)
 
         case XANTE_UI_DIALOG_INPUT_STRING:
         case XANTE_UI_DIALOG_INPUT_PASSWD:
+        case XANTE_UI_DIALOG_INPUTSCROLL:
             l = item->string_length;
             break;
 
@@ -278,6 +289,26 @@ static bool validate_input_value(struct xante_app *xpp, struct xante_item *item,
     return valid;
 }
 
+static int inputscroll_len(const char *value, void *data)
+{
+    struct inputscroll_data *input = (struct inputscroll_data *)data;
+
+    if (NULL == data)
+        return 0;
+
+    return event_call(EV_VALUE_STRLEN, input->xpp, input->item, value);
+}
+
+static int inputscroll_check(const char *value, void *data)
+{
+    struct inputscroll_data *input = (struct inputscroll_data *)data;
+
+    if (NULL == data)
+        return 1;
+
+    return event_call(EV_VALUE_CHECK, input->xpp, input->item, value);
+}
+
 /*
  *
  * Internal API
@@ -300,10 +331,15 @@ ui_return_t ui_dialog_input(struct xante_app *xpp, struct xante_item *item,
     bool edit_value)
 {
     bool loop = true, value_changed = false;
-    int ret_dialog = DLG_EXIT_OK, height, width;
-    char input[MAX_INPUT_VALUE] = {0}, *range_value = NULL;
+    int ret_dialog = DLG_EXIT_OK, height = 0, width;
+    char input[MAX_INPUT_VALUE] = {0}, *range_value = NULL,
+         *scroll_content = NULL;
     cl_string_t *text = NULL, *value = NULL;
     ui_return_t ret;
+    struct inputscroll_data input_data = {
+        .xpp = xpp,
+        .item = item,
+    };
 
     /* Prepare dialog */
     dlgx_set_backtitle(xpp);
@@ -326,7 +362,12 @@ ui_return_t ui_dialog_input(struct xante_app *xpp, struct xante_item *item,
     cl_string_rplchr(text, XANTE_STR_LINE_BREAK, '\n');
     width = dlgx_get_input_window_width(item);
     height = dlgx_count_lines_by_delimiters(cl_string_valueof(text)) +
-        (item->dialog_type == XANTE_UI_DIALOG_RANGE) ? 2 : FORM_HEIGHT_WITHOUT_TEXT;
+        ((item->dialog_type == XANTE_UI_DIALOG_RANGE) ? 2 : FORM_HEIGHT_WITHOUT_TEXT);
+
+    if (item->dialog_type == XANTE_UI_DIALOG_INPUTSCROLL) {
+        /* Gets the scrollable text to be displayed from a module function */
+        scroll_content = event_item_custom_data(xpp, item);
+    }
 
     do {
         if (item->dialog_type == XANTE_UI_DIALOG_INPUT_PASSWD) {
@@ -351,12 +392,21 @@ ui_return_t ui_dialog_input(struct xante_app *xpp, struct xante_item *item,
                                             MAX_INPUT_VALUE));
 
             free(range_value);
+        } else if (item->dialog_type == XANTE_UI_DIALOG_INPUTSCROLL) {
+            ret_dialog = dlgx_inputbox(width, 20,// height,
+                                       cl_string_valueof(item->name),
+                                       cl_string_valueof(item->options),
+                                       cl_tr("Enter value:"),
+                                       scroll_content,
+                                       get_input_length(item), input,
+                                       edit_value, inputscroll_len,
+                                       inputscroll_check, &input_data);
         } else {
             ret_dialog = dlgx_inputbox(width, height,
                                        cl_string_valueof(item->name),
                                        cl_string_valueof(text), NULL, NULL,
                                        get_input_length(item), input,
-                                       edit_value, NULL, NULL);
+                                       edit_value, NULL, NULL, NULL);
         }
 
         switch (ret_dialog) {
@@ -393,6 +443,9 @@ ui_return_t ui_dialog_input(struct xante_app *xpp, struct xante_item *item,
                 break;
         }
     } while (loop);
+
+    if (scroll_content != NULL)
+        free(scroll_content);
 
     if (item->descriptive_help != NULL)
         dialog_vars.help_button = 0;

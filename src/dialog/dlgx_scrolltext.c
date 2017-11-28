@@ -109,6 +109,9 @@ int dlgx_scrolltext(int width, int height, const char *title,
     dlg_x = dlg_box_x_ordinate(width);
     sublines = dlgx_get_subtitle_lines(subtitle);
 
+    if (sublines == 0)
+        sublines += 1;
+
     /* main window */
     dialog = dlg_new_window(height, width, dlg_y, dlg_x);
     dlg_register_window(dialog, "dlg_scrolltext", dialog_b);

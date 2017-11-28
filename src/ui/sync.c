@@ -260,7 +260,7 @@ ui_return_t ui_dialog_sync(struct xante_app *xpp, struct xante_item *item)
 
     /* Assures that we will be able to, at least, start the sync */
     item->cancel_update = false;
-    data = event_update_routine_data(xpp, item);
+    data = event_item_custom_data(xpp, item);
     sync.data = data;
     thread = cl_thread_spawn(CL_THREAD_JOINABLE, make_sync, &sync);
 

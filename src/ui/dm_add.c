@@ -78,7 +78,7 @@ ui_return_t ui_dialog_add_dm(struct xante_app *xpp, struct xante_item *item)
                                    cl_string_valueof(item->name),
                                    cl_string_valueof(text), NULL, NULL,
                                    sizeof(input) - 1, input,
-                                   true, NULL, NULL);
+                                   true, NULL, NULL, NULL);
 
         switch (ret_dialog) {
             case DLG_EXIT_OK:

@@ -129,5 +129,9 @@ ui_return_t ui_dialog_tailbox(struct xante_app *xpp, struct xante_item *item);
 /* scrolltext */
 ui_return_t ui_dialog_scrolltext(struct xante_app *xpp, struct xante_item *item);
 
+/* update-object */
+ui_return_t ui_dialog_update_object(struct xante_app *xpp,
+                                    struct xante_item *item);
+
 #endif
 

@@ -146,8 +146,8 @@ int dlgx_scrolltext(int width, int height, const char *title,
 int dlgx_inputbox(int width, int height, const char *title,
                   const char *subtitle, const char *input_title,
                   const char *text, unsigned int max_len, char *input_s,
-                  bool edit, int (*input_len)(const char *),
-                  int (*input_check)(const char *));
+                  bool edit, int (*input_len)(const char *, void *),
+                  int (*input_check)(const char *, void *), void *data);
 
 /* spreadsheet */
 struct dlgx_spreadsheet_st *spreadsheet_st_init(const char *row_text,
@@ -163,8 +163,7 @@ int dlgx_spreadsheet(const char *title, const char *subtitle,
 /* update object */
 int dlgx_update_object(int width, int height, const char *title,
                        const char *subtitle, int update_interval,
-                       char *(*update_routine)(void *, int *), void *arg,
-                       int *status);
+                       char *(*update_routine)(void *), void *arg);
 
 #endif
 

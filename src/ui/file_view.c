@@ -85,6 +85,8 @@ ui_return_t ui_dialog_file_view(struct xante_app *xpp, struct xante_item *item)
 
         switch (ret_dialog) {
             case DLG_EXIT_OK:
+            case DLG_EXIT_ESC:
+            case DLG_EXIT_CANCEL:
                 loop = false;
                 break;
 
@@ -93,11 +95,6 @@ ui_return_t ui_dialog_file_view(struct xante_app *xpp, struct xante_item *item)
                 loop = false;
                 break;
 #endif
-
-            case DLG_EXIT_ESC:
-            case DLG_EXIT_CANCEL:
-                loop = false;
-                break;
 
             case DLG_EXIT_HELP:
                 dialog_vars.help_button = 0;

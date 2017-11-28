@@ -61,7 +61,9 @@ enum xante_ui_dialog {
     XANTE_UI_DIALOG_DIR_SELECT,
     XANTE_UI_DIALOG_FILE_VIEW,
     XANTE_UI_DIALOG_TAILBOX,
-    XANTE_UI_DIALOG_SCROLLTEXT
+    XANTE_UI_DIALOG_SCROLLTEXT,
+    XANTE_UI_DIALOG_UPDATE_OBJECT,
+    XANTE_UI_DIALOG_INPUTSCROLL
 };
 
 /** An access mode from a menu or a menu item */
@@ -161,7 +163,7 @@ struct xante_change_entry {
 #ifdef LIBXANTE_COMPILE
 # define MAJOR_VERSION  0
 # define MINOR_VERSION  0
-# define RELEASE        3
+# define RELEASE        4
 
 # include "xante/xt_internal.h"
 #endif

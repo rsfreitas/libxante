@@ -54,7 +54,7 @@
  */
 
 /**
- * @name dlg_update_object
+ * @name dlgx_update_object
  * @brief Creates a custom object that allow us to display messages inside a
  *        window.
  *
@@ -75,7 +75,7 @@
  *
  * @return Returns libdialog's default return values of a selected button.
  */
-int dlg_update_object(int width, int height, const char *title,
+int dlgx_update_object(int width, int height, const char *title,
     const char *subtitle, int update_interval,
     char *(*update_routine)(void *), void *arg)
 {
@@ -105,6 +105,9 @@ int dlg_update_object(int width, int height, const char *title,
     dlg_x = dlg_box_x_ordinate(width);
     timeout = cl_timeout_create(update_interval, CL_TM_MSECONDS);
     sublines = dlgx_get_subtitle_lines(subtitle);
+
+    if (sublines == 0)
+        sublines += 1;
 
     if (dialog_vars.timeout_secs)
         dlg_timeout = cl_timeout_create(dialog_vars.timeout_secs, CL_TM_SECONDS);

@@ -30,7 +30,7 @@
     "[ESC] Cancel [Enter] Confirm selected button [Up/Down/Pg Up/Pg Down] Navigate through the text"
 
 /* The dialog size onto the screen */
-#define DIALOG_HEIGHT                       12
+#define DIALOG_HEIGHT                       14
 #define DIALOG_WIDTH                        60
 
 /*

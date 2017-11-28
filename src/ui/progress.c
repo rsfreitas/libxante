@@ -91,8 +91,8 @@ static void *make_progress(cl_thread_t *thread)
  *
  * The \a item must have two events filled:
  *
- * EV_UPDATE_ROUTINE_DATA: which must return a pointer to a specific data
- *                         which will passed to the update-routine.
+ * EV_ITEM_CUSTOM_DATA: which must return a pointer to a specific data
+ *                      which will passed to the update-routine.
  *
  * EV_UPDATE_ROUTINE: which must return the new stage to be updated to the
  *                    user.
@@ -109,7 +109,6 @@ static void *make_progress(cl_thread_t *thread)
 ui_return_t ui_dialog_progress(struct xante_app *xpp, struct xante_item *item)
 {
     ui_return_t ret;
-    void *data;
     cl_thread_t *thread;
     struct progress_thread progress = {
         .xpp = xpp,
@@ -122,8 +121,7 @@ ui_return_t ui_dialog_progress(struct xante_app *xpp, struct xante_item *item)
 
     /* Assures that we will be able to, at least, start the progress */
     item->cancel_update = false;
-    data = event_update_routine_data(xpp, item);
-    progress.data = data;
+    progress.data = event_item_custom_data(xpp, item);
     thread = cl_thread_spawn(CL_THREAD_JOINABLE, make_progress, &progress);
 
     if (NULL == thread) {

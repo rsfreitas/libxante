@@ -357,6 +357,7 @@ int ui_dialog_item(struct xante_app *xpp, cl_list_t *menus,
         case XANTE_UI_DIALOG_INPUT_TIME:
         case XANTE_UI_DIALOG_INPUT_PASSWD:
         case XANTE_UI_DIALOG_RANGE:
+        case XANTE_UI_DIALOG_INPUTSCROLL:
             ret_dialog = ui_dialog_input(xpp, selected_item, edit_item_value);
             break;
 
@@ -436,6 +437,10 @@ int ui_dialog_item(struct xante_app *xpp, cl_list_t *menus,
 
         case XANTE_UI_DIALOG_SCROLLTEXT:
             ret_dialog = ui_dialog_scrolltext(xpp, selected_item);
+            break;
+
+        case XANTE_UI_DIALOG_UPDATE_OBJECT:
+            ret_dialog = ui_dialog_update_object(xpp, selected_item);
             break;
 
         default:
