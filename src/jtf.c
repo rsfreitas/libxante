@@ -503,7 +503,7 @@ static void pre_adjust_item_info(struct xante_item *item)
  * @param [in] brief_options_help: A JSON object with checklist options brief
  *                                 help.
  */
-static void adjusts_item_info(struct xante_item *item, cl_string_t *default_value,
+static int adjusts_item_info(struct xante_item *item, cl_string_t *default_value,
     void *options, void *max_range, void *min_range, void *brief_options_help)
 {
     int i, t, i_max, i_min;
@@ -575,12 +575,24 @@ static void adjusts_item_info(struct xante_item *item, cl_string_t *default_valu
             item->max = cl_object_create(CL_FLOAT, f_max);
             break;
 
+        case XANTE_UI_DIALOG_MIXEDFORM:
+            item->mixedform_options = cl_json_parse(options);
+
+            if (NULL == item->mixedform_options) {
+                errno_set(XANTE_ERROR_INVALID_MIXEDFORM_JSON);
+                errno_store_additional_content(cl_string_valueof(item->name));
+                return -1;
+            }
+
+            break;
+
         default:
             break;
     }
 
     if ((item->dialog_type != XANTE_UI_DIALOG_CHECKLIST) &&
-        (item->dialog_type != XANTE_UI_DIALOG_RADIO_CHECKLIST))
+        (item->dialog_type != XANTE_UI_DIALOG_RADIO_CHECKLIST) &&
+        (item->dialog_type != XANTE_UI_DIALOG_MIXEDFORM))
     {
         if (options != NULL)
             item->options = options;
@@ -589,6 +601,8 @@ static void adjusts_item_info(struct xante_item *item, cl_string_t *default_valu
     if (item_has_ranges(item->dialog_type) == true)
         item->value_spec = cl_spec_create(CL_READABLE | CL_WRITABLE, item->min,
                                           item->max, item->string_length);
+
+    return 0;
 }
 
 static int parse_dynamic_menu_properties(const cl_json_t *menu,
@@ -826,8 +840,11 @@ struct xante_item *jtf_parse_item(const cl_json_t *item, bool ignores_object_id)
         return NULL;
 
     /* Set up specific item properties */
-    adjusts_item_info(i, default_value, options, max, min,
-                      brief_options_help);
+    if (adjusts_item_info(i, default_value, options, max, min,
+                          brief_options_help) < 0)
+    {
+        return NULL;
+    }
 
     if (default_value != NULL)
         cl_string_unref(default_value);

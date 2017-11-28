@@ -62,14 +62,18 @@ static int load_item_config(cl_list_node_t *node, void *a)
     cl_cfg_file_t *cfg_file = (cl_cfg_file_t *)a;
     cl_cfg_entry_t *key = NULL;
 
-    key = cl_cfg_entry(cfg_file, cl_string_valueof(item->config_block),
-                       cl_string_valueof(item->config_item));
+    if (item->dialog_type == XANTE_UI_DIALOG_MIXEDFORM)
+        ui_mixedform_load_and_set_value(item, cfg_file);
+    else {
+        key = cl_cfg_entry(cfg_file, cl_string_valueof(item->config_block),
+                           cl_string_valueof(item->config_item));
 
-    /* Work with the item's default value */
-    if (NULL == key)
-        return 0;
+        /* Work with the item's default value */
+        if (NULL == key)
+            return 0;
 
-    item->value = cl_cfg_entry_value(key);
+        item->value = cl_cfg_entry_value(key);
+    }
 
     return 0;
 }
@@ -154,24 +158,84 @@ static bool need_to_write_config_file(struct xante_app *xpp,
     return true;
 }
 
+static void save_mixedform_field(struct xante_app *xpp, cl_json_t *field)
+{
+    cl_json_t *node;
+    cl_string_t *config_block, *config_item, *value;
+
+    node = cl_json_get_object_item(field, "config_block");
+
+    if (NULL == node)
+        return;
+
+    config_block = cl_json_get_object_value(node);
+    node = cl_json_get_object_item(field, "config_item");
+
+    if (NULL == node)
+        return;
+
+    config_item = cl_json_get_object_value(node);
+    node = cl_json_get_object_item(field, "value");
+
+    if (NULL == node) {
+        node = cl_json_get_object_item(field, "default_value");
+
+        if (NULL == node)
+            return;
+    }
+
+    value = cl_json_get_object_value(node);
+    cl_cfg_set_value(xpp->config.cfg_file,
+                     cl_string_valueof(config_block),
+                     cl_string_valueof(config_item),
+                     "%s", cl_string_valueof(value));
+
+    xante_log_debug("saving item: %s", cl_string_valueof(value));
+}
+
+/*
+ * A mixedform item has some peculiar differences from a standard item. It has
+ * its values stored inside a JSON object, which should be individually written
+ * into the file.
+ */
+static void save_mixedform_item(struct xante_app *xpp, struct xante_item *item)
+{
+    int total_fields = 0, i;
+    cl_json_t *fields = NULL;
+
+    fields = cl_json_get_object_item(item->mixedform_options, "fields");
+
+    if (NULL == fields)
+        return;
+
+    total_fields = cl_json_get_array_size(fields);
+
+    for (i = 0; i < total_fields; i++)
+        save_mixedform_field(xpp, cl_json_get_array_item(fields, i));
+}
+
 static int save_item_config(cl_list_node_t *node, void *a)
 {
     struct xante_item *item = cl_list_node_content(node);
     struct xante_app *xpp = (struct xante_app *)a;
     cl_string_t *value = NULL;
 
-    /* Checks if we can save the item */
-    if (item->flags.config == false)
-        return 0;
+    if (item->dialog_type == XANTE_UI_DIALOG_MIXEDFORM) {
+        save_mixedform_item(xpp, item);
+    } else {
+        /* Checks if we can save the item */
+        if (item->flags.config == false)
+            return 0;
 
-    value = cl_object_to_cstring(item_value(item));
-    cl_cfg_set_value(xpp->config.cfg_file,
-                     cl_string_valueof(item->config_block),
-                     cl_string_valueof(item->config_item),
-                     "%s", cl_string_valueof(value));
+        value = cl_object_to_cstring(item_value(item));
+        cl_cfg_set_value(xpp->config.cfg_file,
+                         cl_string_valueof(item->config_block),
+                         cl_string_valueof(item->config_item),
+                         "%s", cl_string_valueof(value));
 
-    xante_log_debug("saving item: %s", cl_string_valueof(value));
-    cl_string_unref(value);
+        xante_log_debug("saving item: %s", cl_string_valueof(value));
+        cl_string_unref(value);
+    }
 
     return 0;
 }
@@ -200,7 +264,6 @@ static int write_config(struct xante_app *xpp)
         {
             runtime_set_exit_value(xpp, XANTE_RETURN_CONFIG_UNSAVED);
             xante_log_info(cl_tr("User chose not to save internal modifications"));
-
             goto end_block;
         }
     }

@@ -87,6 +87,7 @@ ui_return_t ui_dialog_update_object(struct xante_app *xpp,
 
     /* Prepare dialog */
     dlgx_set_backtitle(xpp);
+    dlgx_update_cancel_button_label();
     dlgx_put_statusbar(DEFAULT_STATUSBAR_TEXT);
 
     /* Gets the user custom data */

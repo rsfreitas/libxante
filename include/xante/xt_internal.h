@@ -107,6 +107,7 @@
 #define XANTE_UI_STR_DIALOG_SCROLLTEXT          "scrolltext"
 #define XANTE_UI_STR_DIALOG_UPDATE_OBJECT       "update-object"
 #define XANTE_UI_STR_DIALOG_INPUTSCROLL         "inputscroll"
+#define XANTE_UI_STR_DIALOG_MIXEDFORM           "mixedform"
 
 /** String keys of supported menus */
 #define XANTE_UI_STR_DEFAULT_MENU               "default"
@@ -189,6 +190,7 @@ struct xante_item {
     cl_object_t             *value;
     cl_stringlist_t         *checklist_options;
     cl_stringlist_t         *checklist_brief_options;
+    cl_json_t               *mixedform_options;
     int                     dialog_checklist_type;
     enum xante_ui_dialog    dialog_type;
     struct flag_parser      flags;
@@ -282,9 +284,9 @@ struct xante_mjtf {
     struct xante_item   *object;
 };
 
-/* Exclusive internal library headers */
-#include "ui_dialogs.h"
-#include "addon_dialogs.h"
+/* Just gives us the right item value */
+#define item_value(item)            \
+    ((item->value != NULL) ? item->value : item->default_value)
 
 /*
  * Internal macros
@@ -293,6 +295,10 @@ struct xante_mjtf {
 #define max(a,b)                            ((a) > (b) ? (a) : (b))
 #define min(a,b)                            ((a) < (b) ? (a) : (b))
 #define bit_test(data, bit)                 (((data) & (bit)) == (bit)) ? true : false
+
+/* Exclusive internal library headers */
+#include "ui_dialogs.h"
+#include "addon_dialogs.h"
 
 #endif
 

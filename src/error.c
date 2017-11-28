@@ -94,9 +94,10 @@ static const char *__description[] = {
     cl_tr_noop("An instance of this application is already running"),
     cl_tr_noop("Internal invalid data conversion"),
     cl_tr_noop("The MJTF has no object to be loaded"),
-    cl_tr_noop("Menu '%s' was not found"),                              //*
+    cl_tr_noop("Menu was not found"),                                   //*
     cl_tr_noop("The head of menu list was not found"),
-    cl_tr_noop("Item '%s' was not found"),                              //*
+    cl_tr_noop("Item was not found"),                                   //*
+    cl_tr_noop("Invalid mixedform JSON"),                               //*
 };
 
 static const char *__unknown_error = cl_tr_noop("Unknown error");

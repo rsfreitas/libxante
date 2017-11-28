@@ -27,6 +27,18 @@
                 "mode": 1,
                 "items": [
                     {
+                        "name": "Mixedform of options",
+                        "type": "mixedform",
+                        "object_id": "9996",
+                        "options": "{
+                            \"title\": \"Fill the user info\",
+                            \"fields\": [
+                            {\"name\": \"Username\", \"default_value\": \"user\", \"config_block\": \"Mixedform\", \"config_item\": \"Username\", \"read_only\": true},
+                            {\"name\": \"Username2\", \"default_value\": \"user2\", \"config_block\": \"Mixedform\", \"config_item\": \"Username2\", \"password\": true},
+                            {\"name\": \"Real name\", \"default_value\": \"Linux User\", \"config_block\": \"Mixedform\", \"config_item\": \"RealName\"}
+                        ] }"
+                    },
+                    {
                         "name": "Input string scroll",
                         "type": "inputscroll",
                         "default_value": "Olha o conteudo ai...",
@@ -44,7 +56,7 @@
                             "item": "input_string_scroll"
                         },
                         "events": {
-                            "update-routine-data": "scroll_content",
+                            "item-custom-data": "scroll_content",
                             "value-strlen": "scroll_strlen",
                             "value-check": "scroll_check"
                         }
@@ -80,7 +92,7 @@
                         "object_id": "996",
                         "options": "The CLOCK",
                         "events": {
-                            "update-routine-data": "pb_data",
+                            "item-custom-data": "pb_data",
                             "update-routine": "clock_module"
                         }
                     },
@@ -104,7 +116,7 @@
                             "max": 100
                         },
                         "events": {
-                            "update-routine-data": "pb_data",
+                            "item-custom-data": "pb_data",
                             "update-routine": "progress"
                         }
                     },
@@ -117,7 +129,7 @@
                             "max": 10
                         },
                         "events": {
-                            "update-routine-data": "pb_data",
+                            "item-custom-data": "pb_data",
                             "sync-routine": "foo_sync"
                         }
                     },

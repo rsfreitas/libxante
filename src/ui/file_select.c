@@ -27,7 +27,7 @@
 #include "libxante.h"
 
 #define DEFAULT_STATUSBAR_TEXT              \
-    "[ESC] Cancel [Enter] Confirm selected button [Tab/Left/Right/Up/Down] Navigate through options [Spacebar] Select dir/file"
+    "[ESC] Cancel [Enter] Confirm selected button [Tab/Arrows] Navigate through options [Spacebar] Select dir/file"
 
 /* The dialog size onto the screen */
 #define DIALOG_HEIGHT                       12

@@ -133,5 +133,9 @@ ui_return_t ui_dialog_scrolltext(struct xante_app *xpp, struct xante_item *item)
 ui_return_t ui_dialog_update_object(struct xante_app *xpp,
                                     struct xante_item *item);
 
+/* mixedform */
+ui_return_t ui_dialog_mixedform(struct xante_app *xpp, struct xante_item *item);
+void ui_mixedform_load_and_set_value(struct xante_item *item, cl_cfg_file_t *cfg);
+
 #endif
 

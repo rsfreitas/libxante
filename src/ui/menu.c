@@ -443,6 +443,10 @@ int ui_dialog_item(struct xante_app *xpp, cl_list_t *menus,
             ret_dialog = ui_dialog_update_object(xpp, selected_item);
             break;
 
+        case XANTE_UI_DIALOG_MIXEDFORM:
+            ret_dialog = ui_dialog_mixedform(xpp, selected_item);
+            break;
+
         default:
             break;
     }
