@@ -63,7 +63,7 @@
  *
  * The function to create the message will be called from time to time according
  * an internal timeout. It must also return a char *string which will be freed
- * by calling 'free'.
+ * by calling 'free' internally.
  *
  * @param [in] width: Window width.
  * @param [in] height: Window height.
@@ -72,13 +72,12 @@
  * @param [in] update_internal: The milliseconds value to call the update_routine.
  * @param [in] update_routine: The routine.
  * @param [in] arg: An argument to the update_routine.
- * @param [in] status: A status returned by the update_routine.
  *
  * @return Returns libdialog's default return values of a selected button.
  */
 int dlg_update_object(int width, int height, const char *title,
     const char *subtitle, int update_interval,
-    char *(*update_routine)(void *, int *), void *arg, int *status)
+    char *(*update_routine)(void *), void *arg)
 {
     static DLG_KEYS_BINDING dialog_b[] = {
         VIEW_BINDINGS,
@@ -123,30 +122,18 @@ int dlg_update_object(int width, int height, const char *title,
     getyx(dialog, cur_y, cur_x);
     (void)cur_x;
     dlg_draw_box(dialog, cur_y + 1, 2, height - (4 + sublines), width - 4,
-                         border2_attr, border2_attr);
+                 border2_attr, border2_attr);
 
     view = dlg_sub_window(dialog, height - (6 + sublines), /* height */
-                                  width - INTERNAL_H_MARGIN,  /* width */
-                                  dlg_y + cur_y + 2, dlg_x + 3);
+                          width - INTERNAL_H_MARGIN,  /* width */
+                          dlg_y + cur_y + 2, dlg_x + 3);
 
     dlg_register_window(view, "dlg_update_object", view_b);
-
-    /* inicializa status interno da rotina */
-    if (status)
-        *status = FALSE;
 
     while (result == DLG_EXIT_UNKNOWN) {
         if (cl_timeout_expired(timeout) || (first == TRUE)) {
             /* run update_routine */
-            text = (*update_routine)(arg, status);
-
-            /* Finishes the dialog by an internal routine "signal" */
-            if (status && (*status)) {
-#ifdef ALTERNATIVE_DIALOG
-                result = DLG_EXIT_FROM_STATUS;
-#endif
-                break;
-            }
+            text = (*update_routine)(arg);
 
             if (text != NULL) {
                 if (first == FALSE)

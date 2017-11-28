@@ -128,6 +128,7 @@ bool dlgx_question(struct xante_app *xpp, const char *title, const char *msg,
                      const char *statusbar_text);
 
 void dlgx_update_cancel_button_label(void);
+void dlgx_update_ok_button_label(void);
 void dlgx_free_input(void);
 void dlgx_alloc_input(unsigned int bytes);
 char *dlgx_get_input_result(void);

@@ -30,8 +30,8 @@
     "Wait the process to end."
 
 /* The dialog size onto the screen */
-#define PROGRESS_DIALOG_HEIGHT          7
-#define PROGRESS_DIALOG_WIDTH           60
+#define DIALOG_HEIGHT                   7
+#define DIALOG_WIDTH                    60
 
 struct progress_thread {
     struct xante_app    *xpp;
@@ -62,7 +62,7 @@ static void *make_progress(cl_thread_t *thread)
         percent = event_call(EV_UPDATE_ROUTINE, xpp, item, progress->data);
         dlgx_simple_progress(cl_string_valueof(item->name),
                              cl_string_valueof(item->options),
-                             PROGRESS_DIALOG_HEIGHT, PROGRESS_DIALOG_WIDTH,
+                             DIALOG_HEIGHT, DIALOG_WIDTH,
                              percent);
 
         /* Abort if we caught a invalid value */

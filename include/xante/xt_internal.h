@@ -100,6 +100,9 @@
 #define XANTE_UI_STR_DIALOG_RANGE               "range"
 #define XANTE_UI_STR_DIALOG_FILE_SELECT         "file-select"
 #define XANTE_UI_STR_DIALOG_DIR_SELECT          "dir-select"
+#define XANTE_UI_STR_DIALOG_FILE_VIEW           "file-view"
+#define XANTE_UI_STR_DIALOG_TAILBOX             "tailbox"
+#define XANTE_UI_STR_DIALOG_SCROLLTEXT          "scrolltext"
 
 /** String keys of supported menus */
 #define XANTE_UI_STR_DEFAULT_MENU               "default"

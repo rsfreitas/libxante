@@ -3,7 +3,7 @@
  * Description:
  *
  * Author: Rodrigo Freitas
- * Created at: Fri May  5 21:08:15 2017
+ * Created at: Mon Nov 27 15:10:13 2017
  * Project: libxante
  *
  * Copyright (C) 2017 Rodrigo Freitas
@@ -22,5 +22,19 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  * USA
+ */
+
+#include "libxante.h"
+
+/*
+ *
+ * Internal functions
+ *
+ */
+
+/*
+ *
+ * Internal API
+ *
  */
 

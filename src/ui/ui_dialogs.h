@@ -120,5 +120,14 @@ ui_return_t ui_dialog_sync(struct xante_app *xpp, struct xante_item *item);
 /* file-select */
 ui_return_t ui_dialog_fselect(struct xante_app *xpp, struct xante_item *item);
 
+/* file-view */
+ui_return_t ui_dialog_file_view(struct xante_app *xpp, struct xante_item *item);
+
+/* tailbox */
+ui_return_t ui_dialog_tailbox(struct xante_app *xpp, struct xante_item *item);
+
+/* scrolltext */
+ui_return_t ui_dialog_scrolltext(struct xante_app *xpp, struct xante_item *item);
+
 #endif
 

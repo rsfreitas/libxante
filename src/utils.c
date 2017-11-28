@@ -60,6 +60,15 @@ bool is_valid_ui_dialog(enum xante_ui_dialog type)
         case XANTE_UI_DIALOG_DELETE_DYNAMIC_MENU_ITEM:
         case XANTE_UI_DIALOG_ADD_DYNAMIC_MENU_ITEM:
         case XANTE_UI_DIALOG_CUSTOM:
+        case XANTE_UI_DIALOG_PROGRESS:
+        case XANTE_UI_DIALOG_SPINNER_SYNC:
+        case XANTE_UI_DIALOG_DOTS_SYNC:
+        case XANTE_UI_DIALOG_RANGE:
+        case XANTE_UI_DIALOG_FILE_SELECT:
+        case XANTE_UI_DIALOG_DIR_SELECT:
+        case XANTE_UI_DIALOG_FILE_VIEW:
+        case XANTE_UI_DIALOG_TAILBOX:
+        case XANTE_UI_DIALOG_SCROLLTEXT:
             return true;
 
         default:
@@ -165,6 +174,12 @@ enum xante_ui_dialog translate_string_dialog_type(const char *type)
         dialog = XANTE_UI_DIALOG_FILE_SELECT;
     else if (strcmp(type, XANTE_UI_STR_DIALOG_DIR_SELECT) == 0)
         dialog = XANTE_UI_DIALOG_DIR_SELECT;
+    else if (strcmp(type, XANTE_UI_STR_DIALOG_FILE_VIEW) == 0)
+        dialog = XANTE_UI_DIALOG_FILE_VIEW;
+    else if (strcmp(type, XANTE_UI_STR_DIALOG_TAILBOX) == 0)
+        dialog = XANTE_UI_DIALOG_TAILBOX;
+    else if (strcmp(type, XANTE_UI_STR_DIALOG_SCROLLTEXT) == 0)
+        dialog = XANTE_UI_DIALOG_SCROLLTEXT;
 
     return dialog;
 }
@@ -252,6 +267,22 @@ bool equals(const char *a, const char *b)
         return true;
 
     return false;
+}
+
+/**
+ * @name file_exists
+ * @brief Checks if a specific file exists.
+ *
+ * @param [in] pathname: The file path.
+ *
+ * @return Returns true or false if file exists or not.
+ */
+bool file_exists(const char *pathname)
+{
+    if (access(pathname, 0x00) == -1)
+        return false;
+
+    return true;
 }
 
 /*

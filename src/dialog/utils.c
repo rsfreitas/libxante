@@ -650,6 +650,18 @@ void dlgx_update_cancel_button_label(void)
 }
 
 /**
+ * @name dlgx_update_ok_button_label
+ * @brief Sets a default value to the ok button label used inside dialogs.
+ */
+void dlgx_update_ok_button_label(void)
+{
+    if (dialog_vars.ok_label != NULL)
+        free(dialog_vars.ok_label);
+
+    dialog_vars.ok_label = strdup(cl_tr("Ok"));
+}
+
+/**
  * @name dlgx_free_input
  * @brief Releases the dialog input buffer previously allocated.
  */

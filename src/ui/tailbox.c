@@ -3,7 +3,7 @@
  * Description:
  *
  * Author: Rodrigo Freitas
- * Created at: Sun Nov 26 15:57:46 2017
+ * Created at: Mon Nov 27 15:10:12 2017
  * Project: libxante
  *
  * Copyright (C) 2017 Rodrigo Freitas
@@ -27,29 +27,11 @@
 #include "libxante.h"
 
 #define DEFAULT_STATUSBAR_TEXT              \
-    "[ESC] Cancel [Enter] Confirm selected button [Tab/Left/Right/Up/Down] Navigate through options [Spacebar] Select dir/file"
+    "[ESC] Cancel [Enter] Confirm selected button"
 
 /* The dialog size onto the screen */
-#define DIALOG_HEIGHT                       12
-#define DIALOG_WIDTH                        60
-
-/*
- *
- * Internal functions
- *
- */
-
-static void set_internal_value(struct xante_item *item, const char *new_value)
-{
-    cl_string_t *result = NULL;
-
-    if (item->value != NULL)
-        cl_object_unref(item->value);
-
-    result = cl_string_create("%s", new_value);
-    item->value = cl_object_from_cstring(result);
-    cl_string_unref(result);
-}
+#define DIALOG_HEIGHT                       26
+#define DIALOG_WIDTH                        75
 
 /*
  *
@@ -57,54 +39,52 @@ static void set_internal_value(struct xante_item *item, const char *new_value)
  *
  */
 
-ui_return_t ui_dialog_fselect(struct xante_app *xpp, struct xante_item *item)
+ui_return_t ui_dialog_tailbox(struct xante_app *xpp, struct xante_item *item)
 {
     ui_return_t ret;
     int ret_dialog = DLG_EXIT_OK;
-    bool choice_selected = false, loop = true;
-    char *chosen_path = NULL;
+    bool loop = true;
+    cl_object_t *value = NULL;
+    char *text = NULL;
 
     /* Prepare dialog */
     dlgx_set_backtitle(xpp);
     dlgx_update_cancel_button_label();
     dlgx_put_statusbar(DEFAULT_STATUSBAR_TEXT);
 
+    /* Gets the item voalue */
+    value = item_value(item);
+
+    if (value != NULL)
+        text = CL_OBJECT_AS_STRING(value);
+    else
+        text = strdup(cl_string_valueof(item->options));
+
+    if (NULL == text) {
+        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
+                             cl_tr("No file was selected to view."));
+
+        goto end_block;
+    }
+
+    if (file_exists(text) == false) {
+        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
+                             cl_tr("File '%s' not found."), text);
+
+        goto end_block;
+    }
+
+    /* FIXME: Need to fix libdialog for this to work */
     /* Enables the help button */
-    if (item->descriptive_help != NULL)
-        dialog_vars.help_button = 1;
+//    if (item->descriptive_help != NULL)
+//        dialog_vars.help_button = 1;
 
     do {
-        dlgx_free_input();
-
-        if (item->dialog_type == XANTE_UI_DIALOG_FILE_SELECT) {
-            ret_dialog = dialog_fselect(cl_string_valueof(item->name),
-                                        cl_string_valueof(item->options),
-                                        DIALOG_HEIGHT, DIALOG_WIDTH);
-        } else {
-            ret_dialog = dialog_dselect(cl_string_valueof(item->name),
-                                        cl_string_valueof(item->options),
-                                        DIALOG_HEIGHT, DIALOG_WIDTH);
-        }
+        ret_dialog = dialog_tailbox(cl_string_valueof(item->name), text,
+                                    DIALOG_HEIGHT, DIALOG_WIDTH, false);
 
         switch (ret_dialog) {
             case DLG_EXIT_OK:
-                chosen_path = dlgx_get_input_result();
-
-                if (event_call(EV_ITEM_VALUE_CONFIRM, xpp, item,
-                               chosen_path) < 0)
-                {
-                    free(chosen_path);
-                    break;
-                }
-
-                /*
-                 * Here we can set the item's internal value and consequently
-                 * set it as having a change to allow the UPDATED event be
-                 * called.
-                 */
-                set_internal_value(item, chosen_path);
-                choice_selected = true;
-                free(chosen_path);
                 loop = false;
                 break;
 
@@ -132,8 +112,12 @@ ui_return_t ui_dialog_fselect(struct xante_app *xpp, struct xante_item *item)
     if (item->descriptive_help != NULL)
         dialog_vars.help_button = 0;
 
+    if (text != NULL)
+        free(text);
+
+end_block:
     ret.selected_button = DLG_EXIT_OK;
-    ret.updated_value = choice_selected;
+    ret.updated_value = false;
 
     return ret;
 }

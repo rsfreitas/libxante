@@ -30,8 +30,8 @@
     "A task is running in background. Wait for it to end."
 
 /* The dialog size onto the screen */
-#define SYNC_DIALOG_HEIGHT          5
-#define SYNC_DIALOG_WIDTH           60
+#define DIALOG_HEIGHT               5
+#define DIALOG_WIDTH                60
 
 struct sync_thread {
     struct xante_app    *xpp;
@@ -195,7 +195,7 @@ static void *make_sync(cl_thread_t *thread)
 
         update_synctext(text, stepbar, sync_model->type);
         dialog_msgbox(cl_string_valueof(item->name), cl_string_valueof(text),
-                      SYNC_DIALOG_HEIGHT, SYNC_DIALOG_WIDTH, 0);
+                      DIALOG_HEIGHT, DIALOG_WIDTH, 0);
 
         stepbar++;
 

@@ -48,7 +48,7 @@ static cl_cfg_file_t *load_cfg_file(struct xante_app *xpp)
 
     free(pathname);
 
-    if (access(xpp->config.filename, 0x00) == -1)
+    if (file_exists(xpp->config.filename) == false)
         return NULL;
 
     cfg = cl_cfg_load(xpp->config.filename);

@@ -426,6 +426,18 @@ int ui_dialog_item(struct xante_app *xpp, cl_list_t *menus,
             ret_dialog = ui_dialog_fselect(xpp, selected_item);
             break;
 
+        case XANTE_UI_DIALOG_FILE_VIEW:
+            ret_dialog = ui_dialog_file_view(xpp, selected_item);
+            break;
+
+        case XANTE_UI_DIALOG_TAILBOX:
+            ret_dialog = ui_dialog_tailbox(xpp, selected_item);
+            break;
+
+        case XANTE_UI_DIALOG_SCROLLTEXT:
+            ret_dialog = ui_dialog_scrolltext(xpp, selected_item);
+            break;
+
         default:
             break;
     }

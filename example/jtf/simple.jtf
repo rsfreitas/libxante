@@ -27,6 +27,31 @@
                 "mode": 1,
                 "items": [
                     {
+                        "name": "File view",
+                        "type": "file-view",
+                        "object_id": "999",
+                        "options": "/home/rodrigo/green.rc",
+                        "help": {
+                            "description": "Only a little help"
+                        }
+                    },
+                    {
+                        "name": "Log monitor",
+                        "type": "tailbox",
+                        "object_id": "998",
+                        "options": "/tmp/config-test.log",
+                        "help": {
+                            "description": "Only a little help"
+                        }
+                    },
+                    {
+                        "name": "Scrolltext from var",
+                        "type": "scrolltext",
+                        "object_id": "997",
+                        "options": "This is my text",
+                        "default_value": "Or maybe this?"
+                    },
+                    {
                         "name": "Custom",
                         "type": "custom",
                         "object_id": "1001",

@@ -42,6 +42,7 @@ bool item_has_ranges(enum xante_ui_dialog dlg_type);
 bool is_menu_item(const cl_string_t *type);
 int idigits(int n);
 bool equals(const char *a, const char *b);
+bool file_exists(const char *pathname);
 
 #endif
 

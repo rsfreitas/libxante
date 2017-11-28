@@ -71,7 +71,7 @@ static void draw_scrollbar(WINDOW *dialog, struct dlgx_text *t, int width,
  */
 
 /**
- * @name dlg_scrolltext
+ * @name dlgx_scrolltext
  * @brief Creates an object to show a static text with scrolling available.
  *
  * @param [in] width: Window width.
@@ -82,7 +82,7 @@ static void draw_scrollbar(WINDOW *dialog, struct dlgx_text *t, int width,
  *
  * @return Returns libdialog's default return values of a selected button.
  */
-int dlg_scrolltext(int width, int height, const char *title,
+int dlgx_scrolltext(int width, int height, const char *title,
     const char *subtitle, const char *text)
 {
     static DLG_KEYS_BINDING dialog_b[] = {
@@ -139,7 +139,8 @@ int dlg_scrolltext(int width, int height, const char *title,
 
     dlgx_text_print(view, &t, PRINT_FIRST);
     dlg_register_window(view, "dlg_scrolltext", view_b);
-    draw_scrollbar(dialog, &t, width, height, sublines);
+    draw_scrollbar(dialog, &t, width, (sublines > 0 ) ? height : height + 1,
+                   (sublines > 0) ? sublines : sublines + 1);
 
     while (result == DLG_EXIT_UNKNOWN) {
         if (show_buttons) {
