@@ -56,6 +56,23 @@ static cl_cfg_file_t *load_cfg_file(struct xante_app *xpp)
     return cfg;
 }
 
+static void load_buildlist_item(struct xante_item *item,
+    cl_cfg_file_t *cfg)
+{
+    cl_cfg_entry_t *key = NULL;
+    cl_object_t *value = NULL;
+    cl_string_t *s = NULL;
+
+    key = cl_cfg_entry(cfg, cl_string_valueof(item->config_block),
+                       cl_string_valueof(item->config_item));
+
+    value = cl_cfg_entry_value(key);
+    s = CL_OBJECT_AS_CSTRING(value);
+    item->selected_items = cl_string_split(s, ",");
+    cl_string_unref(s);
+    cl_object_unref(value);
+}
+
 static int load_item_config(cl_list_node_t *node, void *a)
 {
     struct xante_item *item = cl_list_node_content(node);
@@ -64,6 +81,8 @@ static int load_item_config(cl_list_node_t *node, void *a)
 
     if (item->dialog_type == XANTE_UI_DIALOG_MIXEDFORM)
         ui_mixedform_load_and_set_value(item, cfg_file);
+    else if (item->dialog_type == XANTE_UI_DIALOG_BUILDLIST)
+        load_buildlist_item(item, cfg_file);
     else {
         key = cl_cfg_entry(cfg_file, cl_string_valueof(item->config_block),
                            cl_string_valueof(item->config_item));
@@ -214,15 +233,35 @@ static void save_mixedform_item(struct xante_app *xpp, struct xante_item *item)
         save_mixedform_field(xpp, cl_json_get_array_item(fields, i));
 }
 
+static void save_buildlist_item(struct xante_app *xpp, struct xante_item *item)
+{
+    cl_string_t *value;
+
+    value = cl_stringlist_flat(item->selected_items, ',');
+
+    if (NULL == value)
+        return;
+
+    cl_cfg_set_value(xpp->config.cfg_file,
+                     cl_string_valueof(item->config_block),
+                     cl_string_valueof(item->config_item),
+                     "%s", cl_string_valueof(value));
+
+    xante_log_debug("saving item: %s", cl_string_valueof(value));
+    cl_string_unref(value);
+}
+
 static int save_item_config(cl_list_node_t *node, void *a)
 {
     struct xante_item *item = cl_list_node_content(node);
     struct xante_app *xpp = (struct xante_app *)a;
     cl_string_t *value = NULL;
 
-    if (item->dialog_type == XANTE_UI_DIALOG_MIXEDFORM) {
+    if (item->dialog_type == XANTE_UI_DIALOG_MIXEDFORM)
         save_mixedform_item(xpp, item);
-    } else {
+    else if (item->dialog_type == XANTE_UI_DIALOG_BUILDLIST)
+        save_buildlist_item(xpp, item);
+    else {
         /* Checks if we can save the item */
         if (item->flags.config == false)
             return 0;

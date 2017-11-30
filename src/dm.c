@@ -204,7 +204,7 @@ static struct xante_item *dup_item(struct xante_menu *menu, int item_index,
     d_item->dialog_checklist_type = item->dialog_checklist_type;
     d_item->string_length = item->string_length;
 
-    d_item->checklist_options = cl_stringlist_dup(item->checklist_options);
+    d_item->list_items = cl_stringlist_dup(item->list_items);
     d_item->default_value = cl_object_dup(item->default_value);
     d_item->min = cl_object_dup(item->min);
     d_item->max = cl_object_dup(item->max);

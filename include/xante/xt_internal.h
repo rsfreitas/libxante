@@ -108,6 +108,7 @@
 #define XANTE_UI_STR_DIALOG_UPDATE_OBJECT       "update-object"
 #define XANTE_UI_STR_DIALOG_INPUTSCROLL         "inputscroll"
 #define XANTE_UI_STR_DIALOG_MIXEDFORM           "mixedform"
+#define XANTE_UI_STR_DIALOG_BUILDLIST           "buildlist"
 
 /** String keys of supported menus */
 #define XANTE_UI_STR_DEFAULT_MENU               "default"
@@ -188,8 +189,9 @@ struct xante_item {
     /* Internal */
     cl_string_t             *options;
     cl_object_t             *value;
-    cl_stringlist_t         *checklist_options;
+    cl_stringlist_t         *list_items;
     cl_stringlist_t         *checklist_brief_options;
+    cl_stringlist_t         *selected_items;
     cl_json_t               *mixedform_options;
     int                     dialog_checklist_type;
     enum xante_ui_dialog    dialog_type;

@@ -92,8 +92,8 @@ static void __destroy_xante_item(const struct cl_ref_s *ref)
     if (item->max != NULL)
         cl_object_unref(item->max);
 
-    if (item->checklist_options != NULL)
-        cl_stringlist_destroy(item->checklist_options);
+    if (item->list_items != NULL)
+        cl_stringlist_destroy(item->list_items);
 
     if (item->checklist_brief_options != NULL)
         cl_stringlist_destroy(item->checklist_brief_options);

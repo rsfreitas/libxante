@@ -53,11 +53,11 @@ static DIALOG_LISTITEM *prepare_dialog_content(struct xante_item *item,
     }
 
     current_value = CL_OBJECT_AS_INT(item_value(item));
-    total = cl_stringlist_size(item->checklist_options);
+    total = cl_stringlist_size(item->list_items);
 
     for (index = 0; index < total; index++) {
         listitem = &litems[index];
-        option = cl_stringlist_get(item->checklist_options, index);
+        option = cl_stringlist_get(item->list_items, index);
 
         listitem->name = strdup("");
         listitem->help = strdup("");
@@ -94,11 +94,11 @@ static void release_dialog_content(DIALOG_LISTITEM *listitem, int total_items)
 static void calc_checklist_limits(const struct xante_item *item, int *options,
     int *height, int *list_height)
 {
-    *list_height = cl_stringlist_size(item->checklist_options);
-    *options = dialog_get_dlg_items(*list_height);
+    *options = cl_stringlist_size(item->list_items);
+    *list_height = dialog_get_dlg_items(*options);
 
     /* XXX: This 1 is from the dialog text message. */
-    *height = *options + DIALOG_HEIGHT_WITHOUT_TEXT + 1;
+    *height = *list_height + DIALOG_HEIGHT_WITHOUT_TEXT + 1;
 }
 
 static cl_stringlist_t *get_checklist_entries(DIALOG_LISTITEM *dlg_items,
@@ -262,7 +262,7 @@ ui_return_t ui_dialog_checklist(struct xante_app *xpp, struct xante_item *item,
     calc_checklist_limits(item, &number_of_options, &height,
                           &list_options_height);
 
-    dlg_items = prepare_dialog_content(item, list_options_height);
+    dlg_items = prepare_dialog_content(item, number_of_options);
 
     /* Enables the help button */
     if (item->descriptive_help != NULL)
@@ -273,7 +273,8 @@ ui_return_t ui_dialog_checklist(struct xante_app *xpp, struct xante_item *item,
         ret_dialog = dlg_checklist(cl_string_valueof(item->name),
                                    cl_tr("Choose an option"), height,
                                    MINIMUM_WIDTH, list_options_height,
-                                   number_of_options, dlg_items, " X",
+                                   number_of_options,
+                                   dlg_items, " X",
                                    item->dialog_checklist_type,
                                    &selected_index,
                                    update_item_brief, item,
@@ -339,7 +340,7 @@ ui_return_t ui_dialog_checklist(struct xante_app *xpp, struct xante_item *item,
     if (item->descriptive_help != NULL)
         dialog_vars.help_button = 0;
 
-    release_dialog_content(dlg_items, list_options_height);
+    release_dialog_content(dlg_items, number_of_options);
 
     ret.selected_button = ret_dialog;
     ret.updated_value = value_changed;

@@ -72,6 +72,7 @@ bool is_valid_ui_dialog(enum xante_ui_dialog type)
         case XANTE_UI_DIALOG_UPDATE_OBJECT:
         case XANTE_UI_DIALOG_INPUTSCROLL:
         case XANTE_UI_DIALOG_MIXEDFORM:
+        case XANTE_UI_DIALOG_BUILDLIST:
             return true;
 
         default:
@@ -189,6 +190,8 @@ enum xante_ui_dialog translate_string_dialog_type(const char *type)
         dialog = XANTE_UI_DIALOG_INPUTSCROLL;
     else if (strcmp(type, XANTE_UI_STR_DIALOG_MIXEDFORM) == 0)
         dialog = XANTE_UI_DIALOG_MIXEDFORM;
+    else if (strcmp(type, XANTE_UI_STR_DIALOG_BUILDLIST) == 0)
+        dialog = XANTE_UI_DIALOG_BUILDLIST;
 
     return dialog;
 }

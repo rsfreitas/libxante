@@ -498,7 +498,7 @@ char *dlgx_get_item_value_as_text(const struct xante_item *item)
 
         case XANTE_UI_DIALOG_RADIO_CHECKLIST:
             index = CL_OBJECT_AS_INT(item_value(item));
-            value = cl_stringlist_get(item->checklist_options, index);
+            value = cl_stringlist_get(item->list_items, index);
 
             if (value != NULL)
                 text = strdup(cl_string_valueof(value));

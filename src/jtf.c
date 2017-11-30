@@ -478,7 +478,8 @@ static void pre_adjust_item_info(struct xante_item *item)
             (item->dialog_type == XANTE_UI_DIALOG_RADIO_CHECKLIST) ||
             (item->dialog_type == XANTE_UI_DIALOG_YES_NO) ||
             (item->dialog_type == XANTE_UI_DIALOG_RANGE) ||
-            (item->dialog_type == XANTE_UI_DIALOG_INPUTSCROLL))
+            (item->dialog_type == XANTE_UI_DIALOG_INPUTSCROLL) ||
+            (item->dialog_type == XANTE_UI_DIALOG_BUILDLIST))
         {
             item->flags.config = true;
         }
@@ -517,15 +518,21 @@ static int adjusts_item_info(struct xante_item *item, cl_string_t *default_value
     switch (item->dialog_type) {
         case XANTE_UI_DIALOG_RADIO_CHECKLIST:
         case XANTE_UI_DIALOG_CHECKLIST:
+        case XANTE_UI_DIALOG_BUILDLIST:
             if (options != NULL) {
                 t = cl_json_get_array_size(options);
-                item->checklist_options = cl_stringlist_create();
+                item->list_items = cl_stringlist_create();
 
                 for (i = 0; i < t; i++) {
                     node = cl_json_get_array_item(options, i);
                     value = cl_json_get_object_value(node);
-                    cl_stringlist_add(item->checklist_options, value);
+                    cl_stringlist_add(item->list_items, value);
                 }
+            }
+
+            /* There's nothing more to do if we're a buildlist object. */
+            if (item->dialog_type == XANTE_UI_DIALOG_BUILDLIST) {
+                break;
             }
 
             item->dialog_checklist_type =
@@ -809,7 +816,8 @@ struct xante_item *jtf_parse_item(const cl_json_t *item, bool ignores_object_id)
     }
 
     if ((i->dialog_type == XANTE_UI_DIALOG_CHECKLIST) ||
-        (i->dialog_type == XANTE_UI_DIALOG_RADIO_CHECKLIST))
+        (i->dialog_type == XANTE_UI_DIALOG_RADIO_CHECKLIST) ||
+        (i->dialog_type == XANTE_UI_DIALOG_BUILDLIST))
     {
         expected_option = CL_JSON_ARRAY;
     }
