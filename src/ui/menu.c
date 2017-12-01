@@ -447,6 +447,10 @@ int ui_dialog_item(struct xante_app *xpp, cl_list_t *menus,
             ret_dialog = ui_dialog_mixedform(xpp, selected_item);
             break;
 
+        case XANTE_UI_DIALOG_BUILDLIST:
+            ret_dialog = ui_dialog_buildlist(xpp, selected_item);
+            break;
+
         default:
             break;
     }
