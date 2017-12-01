@@ -37,10 +37,11 @@
 #define DIALOG_HEIGHT               22
 
 struct dialog_properties {
-    int width;
-    int height;
-    int list_height;
-    int number_of_options;
+    int             width;
+    int             height;
+    int             list_height;
+    int             number_of_options;
+    cl_stringlist_t *default_value;
 };
 
 /*
@@ -52,18 +53,41 @@ struct dialog_properties {
 static void build_dialog_properties(const struct xante_item *item,
     struct dialog_properties *properties)
 {
+    properties->default_value = NULL;
     properties->width = DIALOG_WIDTH;
     properties->height = DIALOG_HEIGHT;
     properties->number_of_options = cl_stringlist_size(item->list_items);
     properties->list_height = dialog_get_dlg_items(properties->number_of_options);
 }
 
+static cl_stringlist_t *get_default_value(const struct xante_item *item)
+{
+    cl_stringlist_t *l = NULL;
+    cl_string_t *s = NULL;
+
+    if (NULL == item->default_value)
+        return NULL;
+
+    s = CL_OBJECT_AS_CSTRING(item->default_value);
+    l = cl_string_split(s, ",");
+    cl_string_unref(s);
+
+    return l;
+}
+
 static DIALOG_LISTITEM *prepare_dialog_content(const struct xante_item *item,
-    const struct dialog_properties *properties)
+    struct dialog_properties *properties)
 {
     DIALOG_LISTITEM *litems = NULL, *listitem = NULL;
     cl_string_t *option = NULL;
+    cl_stringlist_t *slist = NULL;
     int index;
+
+    if (NULL == item->selected_items) {
+        properties->default_value = get_default_value(item);
+        slist = properties->default_value;
+    } else
+        slist = item->selected_items;
 
     litems = calloc(properties->number_of_options, sizeof(DIALOG_LISTITEM));
 
@@ -80,7 +104,7 @@ static DIALOG_LISTITEM *prepare_dialog_content(const struct xante_item *item,
         listitem->name = strdup("");
         listitem->help = strdup("");
 
-        if (cl_stringlist_contains(item->selected_items, option))
+        if (cl_stringlist_contains(slist, option))
             listitem->state = 1;
         else
             listitem->state = 0;
@@ -92,7 +116,7 @@ static DIALOG_LISTITEM *prepare_dialog_content(const struct xante_item *item,
 }
 
 static void release_dialog_content(DIALOG_LISTITEM *listitem,
-    const struct dialog_properties *properties)
+    struct dialog_properties *properties)
 {
     int i;
 
@@ -103,6 +127,9 @@ static void release_dialog_content(DIALOG_LISTITEM *listitem,
     }
 
     free(listitem);
+
+    if (properties->default_value != NULL)
+        cl_stringlist_destroy(properties->default_value);
 }
 
 static cl_string_t *get_current_result(DIALOG_LISTITEM *items,
@@ -128,12 +155,14 @@ static cl_string_t *get_current_result(DIALOG_LISTITEM *items,
 }
 
 static bool item_value_has_changed(struct xante_app *xpp, struct xante_item *item,
-    const cl_string_t *new_value)
+    const cl_string_t *new_value, const struct dialog_properties *properties)
 {
     cl_string_t *old_value = NULL;
     bool changed = false;
 
-    old_value = cl_stringlist_flat(item->selected_items, ',');
+    old_value = cl_stringlist_flat((item->selected_items != NULL)
+                                        ? item->selected_items
+                                        : properties->default_value, ',');
 
     if (cl_string_cmp(old_value, new_value)) {
         changed = true;
@@ -210,7 +239,9 @@ ui_return_t ui_dialog_buildlist(struct xante_app *xpp, struct xante_item *item)
                     break;
                 }
 
-                value_changed = item_value_has_changed(xpp, item, result);
+                value_changed = item_value_has_changed(xpp, item, result,
+                                                       &properties);
+
                 loop = false;
                 break;
 
