@@ -19,7 +19,7 @@ it may reference an application skeleton.
             "version": string,
             "revision": int,
             "build": int,
-            "beta": bool
+            "beta": boolean
         }
     },
     "general": {
@@ -29,7 +29,12 @@ it may reference an application skeleton.
         "config_pathname": string,
         "log_pathname": string,
         "log_level": string,
-        "company": string
+        "company": string,
+        "blocked_keys": {
+            "esc": boolean,
+            "stop_key": boolean,
+            "suspend_key": boolean
+        }
     },
     "ui": {
         "main_menu": string,
@@ -51,6 +56,10 @@ it may reference an application skeleton.
                     "selected": string,
                     "exit": string,
                 },
+                "geometry": {
+                    "width": int,
+                    "height": int
+                }
                 "items": [
                     {
                         "name": string,
@@ -60,6 +69,10 @@ it may reference an application skeleton.
                         "menu_id": string,
                         "default_value": string,
                         "options": string/array of strings,
+                        "geometry": {
+                            "width": int,
+                            "height": int
+                        },
                         "config": {
                             "block": string,
                             "item": string,

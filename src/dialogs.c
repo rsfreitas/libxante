@@ -203,13 +203,13 @@ __PUB_API__ int xante_dlg_messagebox(struct xante_app *xpp,
 
     real_msg = cl_string_create("%s", msg);
     cl_string_rplchr(real_msg, XANTE_STR_LINE_BREAK, '\n');
-    height = dlgx_count_lines(msg, MINIMUM_WIDTH);
+    height = dlgx_count_lines(msg, DEFAULT_DIALOG_WIDTH);
 
     if (xpp != NULL)
         xante_log_info("MSGBOX: %s", msg);
 
-    ret_dialog = __xante_dlg_messagebox(MINIMUM_WIDTH, height, type, title,
-                                        cl_string_valueof(real_msg));
+    ret_dialog = __xante_dlg_messagebox(DEFAULT_DIALOG_WIDTH, height, type,
+                                        title, cl_string_valueof(real_msg));
 
     if (restore_help_button == true)
         dialog_vars.help_button = 1;

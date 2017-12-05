@@ -76,6 +76,13 @@
 #define DESCRIPTION         "description"
 #define BRIEF               "brief"
 #define MENU_ID             "menu_id"
+#define BLOCKED_KEYS        "blocked_keys"
+#define ESC_KEY             "esc_key"
+#define SUSPEND_KEY         "suspend_key"
+#define STOP_KEY            "stop_key"
+#define GEOMETRY            "geometry"
+#define WIDTH               "width"
+#define HEIGHT              "height"
 
 /*
  *
@@ -230,6 +237,42 @@ static int parse_application_version(cl_json_t *internal,
     return 0;
 }
 
+static void parse_blocked_keys(const cl_json_t *general, struct xante_app *xpp)
+{
+    cl_json_t *blocked_keys;
+
+    /*
+     * Sets the default value of these key or keys combination inside the
+     * application.
+     */
+    xpp->info.esc_key = false;
+    xpp->info.suspend_key = false;
+    xpp->info.stop_key = false;
+
+    blocked_keys = cl_json_get_object_item(general, BLOCKED_KEYS);
+
+    if (NULL == blocked_keys)
+        return;
+
+    if (parse_object_value(blocked_keys, ESC_KEY, CL_JSON_TRUE, false,
+                           (void **)&xpp->info.esc_key) < 0)
+    {
+        return;
+    }
+
+    if (parse_object_value(blocked_keys, SUSPEND_KEY, CL_JSON_TRUE, false,
+                           (void **)&xpp->info.suspend_key) < 0)
+    {
+        return;
+    }
+
+    if (parse_object_value(blocked_keys, STOP_KEY, CL_JSON_TRUE, false,
+                           (void **)&xpp->info.stop_key) < 0)
+    {
+        return;
+    }
+}
+
 static int parse_jtf_info(cl_json_t *jtf, struct xante_app *xpp)
 {
     cl_json_t *general = NULL, *internal = NULL;
@@ -314,6 +357,8 @@ static int parse_jtf_info(cl_json_t *jtf, struct xante_app *xpp)
         xpp->info.description = strdup(cl_string_valueof(tmp));
         cl_string_unref(tmp);
     }
+
+    parse_blocked_keys(general, xpp);
 
     return 0;
 }
@@ -747,6 +792,30 @@ static int parse_ui(cl_json_t *jtf, struct xante_app *xpp)
     return 0;
 }
 
+static int parse_geometry(struct dlg_geometry *geometry, const cl_json_t *node)
+{
+    cl_json_t *jgeometry = NULL;
+
+    jgeometry = cl_json_get_object_item(node, GEOMETRY);
+
+    if (NULL == jgeometry)
+        return 0;
+
+    if (parse_object_value(jgeometry, WIDTH, CL_JSON_NUMBER, false,
+                           (void **)&geometry->width) < 0)
+    {
+        return -1;
+    }
+
+    if (parse_object_value(jgeometry, HEIGHT, CL_JSON_NUMBER, false,
+                           (void **)&geometry->height) < 0)
+    {
+        return -1;
+    }
+
+    return 0;
+}
+
 /*
  *
  * Internal API
@@ -847,6 +916,9 @@ struct xante_item *jtf_parse_item(const cl_json_t *item, bool ignores_object_id)
     if (parse_item_ranges(item, i, &max, &min) < 0)
         return NULL;
 
+    if (parse_geometry(&i->geometry, item) < 0)
+        return NULL;
+
     /* Set up specific item properties */
     if (adjusts_item_info(i, default_value, options, max, min,
                           brief_options_help) < 0)
@@ -907,6 +979,9 @@ struct xante_menu *jtf_parse_menu(const cl_json_t *menu)
     pre_adjust_menu_info(m);
 
     if (parse_dynamic_menu_properties(menu, m, &copies) < 0)
+        return NULL;
+
+    if (parse_geometry(&m->geometry, menu) < 0)
         return NULL;
 
     m->events = cl_json_dup(cl_json_get_object_item(menu, EVENTS));

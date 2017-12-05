@@ -309,14 +309,78 @@ static int inputscroll_check(const char *value, void *data)
     return event_call(EV_VALUE_CHECK, input->xpp, input->item, value);
 }
 
+static int dlgx_passwd(struct xante_item *item, bool edit_value, char *input,
+    unsigned int input_length, const ui_properties_t *properties)
+{
+    DIALOG_FORMITEM fitem;
+    int ret_dialog = DLG_EXIT_OK, form_height = 1, selected = -1;
+
+    dialog_vars.insecure = 1;
+
+    fitem.type = 1;
+    fitem.text_free = 0;
+    fitem.text = input;
+    fitem.text_len = strlen(input);
+    fitem.text_y = 0;
+    fitem.text_x = 0;
+
+    if (edit_value == true)
+        fitem.text_flen = 53;
+    else
+        fitem.text_flen = 0;
+
+    fitem.text_ilen = MAX_INPUT_VALUE;
+    ret_dialog = dlg_form(cl_string_valueof(item->name),
+                          cl_string_valueof(properties->text),
+                          properties->height, properties->width,
+                          form_height, 1, &fitem, &selected);
+
+    if (ret_dialog == DLG_EXIT_OK)
+        snprintf(input, input_length - 1, "%s", fitem.text);
+
+    dialog_vars.insecure = 0;
+
+    return ret_dialog;
+}
+
 /*
  *
  * Internal API
  *
  */
 
+static void build_properties(struct xante_app *xpp,
+    struct xante_item *item, ui_properties_t *properties, char *input,
+    int max_input)
+{
+    cl_string_t *value = NULL;
+
+    /* Adjusts current content */
+    value = cl_object_to_cstring(item_value(item));
+    strncpy(input, cl_string_valueof(value),
+            max(max_input, cl_string_length(value)));
+
+    cl_string_unref(value);
+
+    /* UI properties */
+    properties->text = cl_string_dup(item->options);
+    cl_string_rplchr(properties->text, XANTE_STR_LINE_BREAK, '\n');
+    properties->width = (item->geometry.width == 0) ? dlgx_get_input_window_width(item)
+                                                    : item->geometry.width;
+
+    properties->height = (item->geometry.height == 0)
+                        ? dlgx_count_lines_by_delimiters(cl_string_valueof(properties->text)) +
+                            ((item->dialog_type == XANTE_UI_DIALOG_RANGE) ? 2 : FORM_HEIGHT_WITHOUT_TEXT)
+                        : item->geometry.height;
+
+    if (item->dialog_type == XANTE_UI_DIALOG_INPUTSCROLL) {
+        /* Gets the scrollable text to be displayed from a module function */
+        properties->scroll_content = event_item_custom_data(xpp, item);
+    }
+}
+
 /**
- * @name ui_dialog_input
+ * @name ui_input
  * @brief Creates a dialog to do some data input.
  *
  * @param [in] xpp: The main library object.
@@ -327,19 +391,20 @@ static int inputscroll_check(const char *value, void *data)
  * @return Returns a ui_return_t value indicating if the item's value has been
  *         changed (true) or not (false) with the dialog selected button.
  */
-ui_return_t ui_dialog_input(struct xante_app *xpp, struct xante_item *item,
+ui_return_t ui_input(struct xante_app *xpp, struct xante_item *item,
     bool edit_value)
 {
     bool loop = true, value_changed = false;
-    int ret_dialog = DLG_EXIT_OK, height = 0, width;
-    char input[MAX_INPUT_VALUE] = {0}, *range_value = NULL,
-         *scroll_content = NULL;
-    cl_string_t *text = NULL, *value = NULL;
+    int ret_dialog = DLG_EXIT_OK;
     ui_return_t ret;
+    ui_properties_t properties;
+    char input[MAX_INPUT_VALUE] = {0}, *range_value = NULL;
     struct inputscroll_data input_data = {
         .xpp = xpp,
         .item = item,
     };
+
+    INIT_PROPERTIES(properties);
 
     /* Prepare dialog */
     dlgx_set_backtitle(xpp);
@@ -348,37 +413,23 @@ ui_return_t ui_dialog_input(struct xante_app *xpp, struct xante_item *item,
                                 ? DEFAULT_RANGE_STATUSBAR_TEXT
                                 : DEFAULT_STATUSBAR_TEXT);
 
-    /* Prepares dialog content */
-    value = cl_object_to_cstring(item_value(item));
-    strcpy(input, cl_string_valueof(value));
-    cl_string_unref(value);
+    /* Prepares dialog content and properties */
+    build_properties(xpp, item, &properties, input, sizeof(input));
 
     /* Enables the help button */
     if (item->descriptive_help != NULL)
         dialog_vars.help_button = 1;
 
-    /* Adjusts window width and height */
-    text = cl_string_dup(item->options);
-    cl_string_rplchr(text, XANTE_STR_LINE_BREAK, '\n');
-    width = dlgx_get_input_window_width(item);
-    height = dlgx_count_lines_by_delimiters(cl_string_valueof(text)) +
-        ((item->dialog_type == XANTE_UI_DIALOG_RANGE) ? 2 : FORM_HEIGHT_WITHOUT_TEXT);
-
-    if (item->dialog_type == XANTE_UI_DIALOG_INPUTSCROLL) {
-        /* Gets the scrollable text to be displayed from a module function */
-        scroll_content = event_item_custom_data(xpp, item);
-    }
-
     do {
         if (item->dialog_type == XANTE_UI_DIALOG_INPUT_PASSWD) {
-            ret_dialog = ui_dialog_passwd(item, edit_value, input, sizeof(input),
-                                          height, text);
+            ret_dialog = dlgx_passwd(item, edit_value, input, sizeof(input),
+                                     &properties);
         } else if (item->dialog_type == XANTE_UI_DIALOG_RANGE) {
             dlgx_free_input();
             ret_dialog = dialog_rangebox(cl_string_valueof(item->name),
-                                         cl_string_valueof(text),
-                                         height,
-                                         width,
+                                         cl_string_valueof(properties.text),
+                                         properties.height,
+                                         properties.width,
                                          CL_OBJECT_AS_INT(item->min),
                                          CL_OBJECT_AS_INT(item->max),
                                          strtol(input, NULL, 10));
@@ -393,19 +444,19 @@ ui_return_t ui_dialog_input(struct xante_app *xpp, struct xante_item *item,
 
             free(range_value);
         } else if (item->dialog_type == XANTE_UI_DIALOG_INPUTSCROLL) {
-            ret_dialog = dlgx_inputbox(width, 20,// height,
+            ret_dialog = dlgx_inputbox(properties.width, 20,// height,
                                        cl_string_valueof(item->name),
-                                       cl_string_valueof(item->options),
+                                       cl_string_valueof(properties.text),
                                        cl_tr("Enter value:"),
-                                       scroll_content,
+                                       properties.scroll_content,
                                        get_input_length(item), input,
                                        edit_value, inputscroll_len,
                                        inputscroll_check, &input_data);
         } else {
-            ret_dialog = dlgx_inputbox(width, height,
+            ret_dialog = dlgx_inputbox(properties.width, properties.height,
                                        cl_string_valueof(item->name),
-                                       cl_string_valueof(text), NULL, NULL,
-                                       get_input_length(item), input,
+                                       cl_string_valueof(properties.text), NULL,
+                                       NULL, get_input_length(item), input,
                                        edit_value, NULL, NULL, NULL);
         }
 
@@ -430,6 +481,10 @@ ui_return_t ui_dialog_input(struct xante_app *xpp, struct xante_item *item,
 #endif
 
             case DLG_EXIT_ESC:
+                /* Don't let the user close the dialog */
+                if (xante_runtime_esc_key(xpp))
+                    break;
+
             case DLG_EXIT_CANCEL:
                 loop = false;
                 break;
@@ -444,11 +499,10 @@ ui_return_t ui_dialog_input(struct xante_app *xpp, struct xante_item *item,
         }
     } while (loop);
 
-    if (scroll_content != NULL)
-        free(scroll_content);
-
     if (item->descriptive_help != NULL)
         dialog_vars.help_button = 0;
+
+    UNINIT_PROPERTIES(properties);
 
     ret.selected_button = ret_dialog;
     ret.updated_value = value_changed;

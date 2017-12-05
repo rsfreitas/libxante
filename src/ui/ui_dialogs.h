@@ -36,8 +36,8 @@
 /* Main cancel button label */
 #define MAIN_MENU_CANCEL_LABEL      "Exit"
 
-/* Minimum width of a window */
-#define MINIMUM_WIDTH               60
+/* Default width of a window */
+#define DEFAULT_DIALOG_WIDTH        60
 
 /* Dialog without text */
 #define DIALOG_HEIGHT_WITHOUT_TEXT  6
@@ -48,13 +48,10 @@
 /* Form dialog without text */
 #define FORM_HEIGHT_WITHOUT_TEXT    7
 
-/* Maximum number of items of a dialog */
-#define MAX_DLG_ITEMS               15
-
 /* Window border size */
 #define WINDOW_BORDER_SIZE          10
 
-/* Default columns of a dialog */
+/* Default fixed columns of a dialog */
 #define DIALOG_COLUMNS              4
 
 /* Columns of a dialog with an internal dialog */
@@ -73,72 +70,135 @@ typedef struct {
     bool    updated_value;
 } ui_return_t;
 
-/* menu */
-int ui_dialog_menu(struct xante_app *xpp, cl_list_t *menus,
-                   const struct xante_menu *menu, const char *cancel_label);
+/* A structure to hold properties and information of a supported dialog */
+typedef struct {
+    /* Window size */
+    int                 width;
+    int                 height;
 
-int ui_dialog_item(struct xante_app *xpp, cl_list_t *menus,
-                   struct xante_item *selected_item);
+    int                 number_of_items;    /** Total number of holded items */
+    int                 displayed_items;    /** Number of items available on
+                                                screen each time */
+
+    int                 longest_field_name; /** Mixedform's longest field name */
+    char                *scroll_content;    /** Scrollable UI text content */
+    cl_string_t         *text;              /** A manipulated text to be
+                                                displayed on the dialog */
+
+    /* Items */
+    DIALOG_LISTITEM     *litems;    /** buildlist, checklist, dm_delete, menu */
+    DIALOG_FORMITEM     *fitems;    /** mixedform */
+} ui_properties_t;
+
+/* A macro to initialize some UI properties correctly */
+#define INIT_PROPERTIES(p)                  \
+do {                                        \
+    memset(&p, 0, sizeof(ui_properties_t)); \
+    p.text = NULL;                          \
+    p.litems = NULL;                        \
+    p.fitems = NULL;                        \
+    p.scroll_content = NULL;                \
+} while (0)
+
+/* A macro to release some UI properties correctly */
+#define UNINIT_PROPERTIES(p)                        \
+do {                                                \
+    int i;                                          \
+    DIALOG_LISTITEM *item = NULL;                   \
+    DIALOG_FORMITEM *fitem = NULL;                  \
+                                                    \
+    if (p.text != NULL)                             \
+        cl_string_unref(p.text);                    \
+                                                    \
+    if (p.scroll_content != NULL)                   \
+        free(p.scroll_content);                     \
+                                                    \
+    if (p.litems != NULL) {                         \
+        for (i = 0; i < p.number_of_items; i++) {   \
+            item = &p.litems[i];                    \
+            free(item->text);                       \
+            free(item->name);                       \
+            free(item->help);                       \
+        }                                           \
+                                                    \
+        free(p.litems);                             \
+    }                                               \
+                                                    \
+    if (p.fitems != NULL) {                         \
+        for (i = 0; i < p.number_of_items; i++) {   \
+            fitem = &p.fitems[i];                   \
+            free(fitem->name);                      \
+            free(fitem->text);                      \
+        }                                           \
+                                                    \
+        free(p.fitems);                             \
+    }                                               \
+} while (0)
+
+/* menu */
+int ui_menu(struct xante_app *xpp, cl_list_t *menus,
+            const struct xante_menu *menu, const char *cancel_label);
+
+int ui_item(struct xante_app *xpp, cl_list_t *menus,
+            struct xante_item *selected_item);
 
 /* yesno */
-ui_return_t ui_dialog_yesno(struct xante_app *xpp, struct xante_item *item);
+ui_return_t ui_yesno(struct xante_app *xpp, struct xante_item *item);
 
 /* calendar */
-ui_return_t ui_dialog_calendar(struct xante_app *xpp, struct xante_item *item,
-                               bool edit_value);
+ui_return_t ui_calendar(struct xante_app *xpp, struct xante_item *item,
+                        bool edit_value);
 
 /* timebox */
-ui_return_t ui_dialog_timebox(struct xante_app *xpp, struct xante_item *item,
-                              bool edit_value);
+ui_return_t ui_timebox(struct xante_app *xpp, struct xante_item *item,
+                       bool edit_value);
 
 /* checklist */
-ui_return_t ui_dialog_checklist(struct xante_app *xpp, struct xante_item *item,
-                                bool edit_value);
+ui_return_t ui_checklist(struct xante_app *xpp, struct xante_item *item,
+                         bool edit_value);
 
 /* passwd */
-int ui_dialog_passwd(struct xante_item *item, bool edit_value,
-                     char *input, unsigned int input_length,
-                     int height, cl_string_t *text);
+int ui_passwd(struct xante_item *item, bool edit_value, char *input,
+              unsigned int input_length, int height, cl_string_t *text);
 
 /* input */
-ui_return_t ui_dialog_input(struct xante_app *xpp, struct xante_item *item,
-                            bool edit_value);
+ui_return_t ui_input(struct xante_app *xpp, struct xante_item *item,
+                     bool edit_value);
 
 /* dm_delete */
-ui_return_t ui_dialog_delete_dm(struct xante_app *xpp, struct xante_item *item,
-                                bool edit_value);
+ui_return_t ui_delete_dm(struct xante_app *xpp, struct xante_item *item,
+                         bool edit_value);
 
 /* dm_add */
-ui_return_t ui_dialog_add_dm(struct xante_app *xpp, struct xante_item *item);
+ui_return_t ui_add_dm(struct xante_app *xpp, struct xante_item *item);
 
 /* progress */
-ui_return_t ui_dialog_progress(struct xante_app *xpp, struct xante_item *item);
+ui_return_t ui_progress(struct xante_app *xpp, struct xante_item *item);
 
 /* sync */
-ui_return_t ui_dialog_sync(struct xante_app *xpp, struct xante_item *item);
+ui_return_t ui_sync(struct xante_app *xpp, struct xante_item *item);
 
 /* file-select */
-ui_return_t ui_dialog_fselect(struct xante_app *xpp, struct xante_item *item);
+ui_return_t ui_fselect(struct xante_app *xpp, struct xante_item *item);
 
 /* file-view */
-ui_return_t ui_dialog_file_view(struct xante_app *xpp, struct xante_item *item);
+ui_return_t ui_file_view(struct xante_app *xpp, struct xante_item *item);
 
 /* tailbox */
-ui_return_t ui_dialog_tailbox(struct xante_app *xpp, struct xante_item *item);
+ui_return_t ui_tailbox(struct xante_app *xpp, struct xante_item *item);
 
 /* scrolltext */
-ui_return_t ui_dialog_scrolltext(struct xante_app *xpp, struct xante_item *item);
+ui_return_t ui_scrolltext(struct xante_app *xpp, struct xante_item *item);
 
 /* update-object */
-ui_return_t ui_dialog_update_object(struct xante_app *xpp,
-                                    struct xante_item *item);
+ui_return_t ui_update_object(struct xante_app *xpp, struct xante_item *item);
 
 /* mixedform */
-ui_return_t ui_dialog_mixedform(struct xante_app *xpp, struct xante_item *item);
+ui_return_t ui_mixedform(struct xante_app *xpp, struct xante_item *item);
 void ui_mixedform_load_and_set_value(struct xante_item *item, cl_cfg_file_t *cfg);
 
 /* buildlist */
-ui_return_t ui_dialog_buildlist(struct xante_app *xpp, struct xante_item *item);
+ui_return_t ui_buildlist(struct xante_app *xpp, struct xante_item *item);
 
 #endif
 

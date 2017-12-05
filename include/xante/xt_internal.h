@@ -137,6 +137,10 @@ struct xante_info {
     int     revision;
     int     build;
     bool    beta;
+
+    bool    esc_key;
+    bool    suspend_key;
+    bool    stop_key;
 };
 
 /** Application runtime informations */
@@ -147,6 +151,9 @@ struct xante_runtime {
     bool                        execute_module;
     bool                        user_authentication;
     char                        *caller_name;
+    bool                        esc_key;
+    bool                        suspend_key;        /* Ctrl + Z */
+    bool                        stop_key;           /* Ctrl + C */
 
     /* Read/Write */
     bool                        discard_changes;
@@ -163,6 +170,11 @@ struct flag_parser {
     bool    options;
     bool    menu_id;
     bool    config;
+};
+
+struct dlg_geometry {
+    int width;
+    int height;
 };
 
 /** UI Menu Item informations */
@@ -198,6 +210,7 @@ struct xante_item {
     struct flag_parser      flags;
     struct cl_ref_s         ref;
     bool                    cancel_update;
+    struct dlg_geometry     geometry;
 };
 
 /** UI Menu informations */
@@ -221,6 +234,7 @@ struct xante_menu {
     bool                        move_to_be_released;
     cl_list_t                   *items;
     struct cl_ref_s             ref;
+    struct dlg_geometry         geometry;
 };
 
 /** UI informations */

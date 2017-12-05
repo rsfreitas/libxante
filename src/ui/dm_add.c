@@ -49,13 +49,15 @@ static bool is_input_valid(const char *input)
  *
  */
 
-ui_return_t ui_dialog_add_dm(struct xante_app *xpp, struct xante_item *item)
+ui_return_t ui_add_dm(struct xante_app *xpp, struct xante_item *item)
 {
     bool added = false, loop = true;
-    int ret_dialog = DLG_EXIT_OK, height, width;
+    int ret_dialog = DLG_EXIT_OK;
     char input[MAX_INPUT_VALUE] = {0};
-    cl_string_t *text = NULL;
+    ui_properties_t properties;
     ui_return_t ret;
+
+    INIT_PROPERTIES(properties);
 
     /* Prepare dialog */
     dlgx_set_backtitle(xpp);
@@ -63,21 +65,26 @@ ui_return_t ui_dialog_add_dm(struct xante_app *xpp, struct xante_item *item)
     dlgx_put_statusbar(DEFAULT_STATUSBAR_TEXT);
 
     /* Adjusts window width and height */
-    text = cl_string_dup(item->options);
-    cl_string_rplchr(text, XANTE_STR_LINE_BREAK, '\n');
-    width = dlgx_get_input_window_width(item);
-    height = dlgx_count_lines_by_delimiters(cl_string_valueof(text)) +
-        FORM_HEIGHT_WITHOUT_TEXT;
+    properties.text = cl_string_dup(item->options);
+    cl_string_rplchr(properties.text, XANTE_STR_LINE_BREAK, '\n');
+    properties.width = (item->geometry.width == 0)
+                            ? dlgx_get_input_window_width(item)
+                            : item->geometry.width;
+
+    properties.height = (item->geometry.height == 0)
+                         ? dlgx_count_lines_by_delimiters(cl_string_valueof(properties.text)) +
+                           FORM_HEIGHT_WITHOUT_TEXT
+                         : item->geometry.height;
 
     /* Enables the help button */
     if (item->descriptive_help != NULL)
         dialog_vars.help_button = 1;
 
     do {
-        ret_dialog = dlgx_inputbox(width, height,
+        ret_dialog = dlgx_inputbox(properties.width, properties.height,
                                    cl_string_valueof(item->name),
-                                   cl_string_valueof(text), NULL, NULL,
-                                   sizeof(input) - 1, input,
+                                   cl_string_valueof(properties.text), NULL,
+                                   NULL, sizeof(input) - 1, input,
                                    true, NULL, NULL, NULL);
 
         switch (ret_dialog) {
@@ -106,6 +113,10 @@ ui_return_t ui_dialog_add_dm(struct xante_app *xpp, struct xante_item *item)
 #endif
 
             case DLG_EXIT_ESC:
+                /* Don't let the user close the dialog */
+                if (xante_runtime_esc_key(xpp))
+                    break;
+
             case DLG_EXIT_CANCEL:
                 loop = false;
                 break;
@@ -122,6 +133,8 @@ ui_return_t ui_dialog_add_dm(struct xante_app *xpp, struct xante_item *item)
 
     if (item->descriptive_help != NULL)
         dialog_vars.help_button = 0;
+
+    UNINIT_PROPERTIES(properties);
 
     ret.selected_button = ret_dialog;
     ret.updated_value = added;

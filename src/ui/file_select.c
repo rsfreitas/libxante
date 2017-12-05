@@ -57,17 +57,25 @@ static void set_internal_value(struct xante_item *item, const char *new_value)
  *
  */
 
-ui_return_t ui_dialog_fselect(struct xante_app *xpp, struct xante_item *item)
+ui_return_t ui_fselect(struct xante_app *xpp, struct xante_item *item)
 {
     ui_return_t ret;
     int ret_dialog = DLG_EXIT_OK;
     bool choice_selected = false, loop = true;
     char *chosen_path = NULL;
+    ui_properties_t properties;
+
+    INIT_PROPERTIES(properties);
 
     /* Prepare dialog */
     dlgx_set_backtitle(xpp);
     dlgx_update_cancel_button_label();
     dlgx_put_statusbar(DEFAULT_STATUSBAR_TEXT);
+    properties.width = (item->geometry.width == 0) ? DIALOG_WIDTH
+                                                   : item->geometry.width;
+
+    properties.height = (item->geometry.height == 0) ? DIALOG_HEIGHT
+                                                     : item->geometry.height;
 
     /* Enables the help button */
     if (item->descriptive_help != NULL)
@@ -79,11 +87,11 @@ ui_return_t ui_dialog_fselect(struct xante_app *xpp, struct xante_item *item)
         if (item->dialog_type == XANTE_UI_DIALOG_FILE_SELECT) {
             ret_dialog = dialog_fselect(cl_string_valueof(item->name),
                                         cl_string_valueof(item->options),
-                                        DIALOG_HEIGHT, DIALOG_WIDTH);
+                                        properties.height, properties.width);
         } else {
             ret_dialog = dialog_dselect(cl_string_valueof(item->name),
                                         cl_string_valueof(item->options),
-                                        DIALOG_HEIGHT, DIALOG_WIDTH);
+                                        properties.height, properties.width);
         }
 
         switch (ret_dialog) {
@@ -115,6 +123,10 @@ ui_return_t ui_dialog_fselect(struct xante_app *xpp, struct xante_item *item)
 #endif
 
             case DLG_EXIT_ESC:
+                /* Don't let the user close the dialog */
+                if (xante_runtime_esc_key(xpp))
+                    break;
+
             case DLG_EXIT_CANCEL:
                 loop = false;
                 break;
@@ -131,6 +143,8 @@ ui_return_t ui_dialog_fselect(struct xante_app *xpp, struct xante_item *item)
 
     if (item->descriptive_help != NULL)
         dialog_vars.help_button = 0;
+
+    UNINIT_PROPERTIES(properties);
 
     ret.selected_button = DLG_EXIT_OK;
     ret.updated_value = choice_selected;

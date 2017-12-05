@@ -24,7 +24,7 @@
             {
                 "name": "Main",
                 "object_id": "0",
-                "mode": 1,
+                "mode": 0,
                 "items": [
                     {
                         "name": "Buildlist option",
@@ -79,7 +79,7 @@
                         "name": "File view",
                         "type": "file-view",
                         "object_id": "999",
-                        "options": "/home/rodrigo/green.rc",
+                        "default_value": "/home/rodrigo/green.rc",
                         "help": {
                             "description": "Only a little help"
                         }
@@ -88,7 +88,7 @@
                         "name": "Log monitor",
                         "type": "tailbox",
                         "object_id": "998",
-                        "options": "/tmp/config-test.log",
+                        "default_value": "/tmp/config-test.log",
                         "help": {
                             "description": "Only a little help"
                         }
@@ -189,6 +189,10 @@
                         "options": "Is this a valid question?",
                         "default_value": "1",
                         "object_id": "1",
+                        "geometry": {
+                            "height": 7,
+                            "width": 65
+                        },
                         "help": {
                             "brief": "This is a help description yesno.",
                             "description": "This is a help description."
@@ -257,7 +261,7 @@
                     },
                     {
                         "name": "Checklist option",
-                        "mode": 1,
+                        "mode": 0,
                         "type": "checklist",
                         "options": [ "Option 1", "Option 2", "Option 3" ],
                         "default_value": "6",
@@ -298,7 +302,7 @@
                     },
                     {
                         "name": "Input float",
-                        "mode": 1,
+                        "mode": 0,
                         "type": "input-float",
                         "default_value": "125.25",
                         "object_id": "7",
@@ -317,7 +321,7 @@
                     },
                     {
                         "name": "Input password",
-                        "mode": 1,
+                        "mode": 0,
                         "type": "input-passwd",
                         "default_value": "test",
                         "object_id": "8",
@@ -335,7 +339,7 @@
                     },
                     {
                         "name": "Input string",
-                        "mode": 1,
+                        "mode": 0,
                         "type": "input-string",
                         "default_value": "teste",
                         "options": "This is a little string",
@@ -354,7 +358,7 @@
                     },
                     {
                         "name": "Input date",
-                        "mode": 1,
+                        "mode": 0,
                         "type": "input-date",
                         "default_value": "12/02/2017",
                         "object_id": "10",
@@ -369,7 +373,7 @@
                     },
                     {
                         "name": "Input time",
-                        "mode": 1,
+                        "mode": 0,
                         "type": "input-time",
                         "default_value": "12:32:22",
                         "object_id": "11",
