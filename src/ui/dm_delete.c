@@ -124,7 +124,7 @@ ui_return_t ui_delete_dm(struct xante_app *xpp, struct xante_item *item,
 
     INIT_PROPERTIES(properties);
     dm_menu = xante_menu_search_by_object_id(xpp->ui.menus,
-                                             cl_string_valueof(item->menu_id));
+                                             cl_string_valueof(item->referenced_menu));
 
     if (NULL == dm_menu) {
         xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),

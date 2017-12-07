@@ -240,7 +240,7 @@ static void call_menu_dialog(struct xante_app *xpp,
 
     referenced_menu =
         xante_menu_search_by_object_id(menus,
-                                       cl_string_valueof(selected_item->menu_id));
+                                       cl_string_valueof(selected_item->referenced_menu));
 
     if (NULL == referenced_menu) {
         xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),

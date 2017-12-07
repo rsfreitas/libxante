@@ -62,8 +62,8 @@ static void __destroy_xante_item(const struct cl_ref_s *ref)
     if (item->object_id != NULL)
         cl_string_unref(item->object_id);
 
-    if (item->menu_id != NULL)
-        cl_string_unref(item->menu_id);
+    if (item->referenced_menu != NULL)
+        cl_string_unref(item->referenced_menu);
 
     if (item->config_block != NULL)
         cl_string_unref(item->config_block);
@@ -357,6 +357,22 @@ struct xante_item *xante_item_create(void)
      * desires to block any the JTF must be properly configured.
      */
     item->mode = XANTE_ACCESS_EDIT;
+
+    /*
+     * Every item has, at least, the Ok and the Cancel buttons enabled.
+     */
+    item->button.ok = true;
+    item->button.cancel = true;
+
+    /*
+     * Ensures that every item has its helper variables correctly
+     * initialized.
+     */
+    item->__helper.min = NULL;
+    item->__helper.max = NULL;
+    item->__helper.brief_options_help = NULL;
+    item->__helper.options = NULL;
+    item->__helper.default_value = NULL;
 
     /* Initialize reference count */
     item->ref.count = 1;

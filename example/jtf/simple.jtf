@@ -29,45 +29,55 @@
                     {
                         "name": "Buildlist option",
                         "type": "buildlist",
-                        "options": [ "Option 1", "Option 2", "Option 3", "Option 5", "Option 6", "Option 7",
-                            "Option 8", "Option 9", "Option 10", "Option 11", "Option 12", "Option 13",
-                            "Option 14", "Option 15", "Option 16", "Option 17", "Option 18", "Option 19"
-                        ],
-                        "default_value": "Option 1,Option 16",
                         "object_id": "42",
-                        "config": {
-                            "block": "Main",
-                            "item": "buildlist"
+                        "data": {
+                            "default_value": "Option 1,Option 16",
+                            "options": [ "Option 1", "Option 2", "Option 3", "Option 5", "Option 6", "Option 7",
+                                "Option 8", "Option 9", "Option 10", "Option 11", "Option 12", "Option 13",
+                                "Option 14", "Option 15", "Option 16", "Option 17", "Option 18", "Option 19"
+                            ],
+                            "config": {
+                                "block": "Main",
+                                "item": "buildlist"
+                            }
                         }
                     },
                     {
                         "name": "Mixedform of options",
                         "type": "mixedform",
                         "object_id": "9996",
-                        "options": "{
-                            \"title\": \"Fill the user info\",
-                            \"fields\": [
-                            {\"name\": \"Username\", \"default_value\": \"user\", \"config_block\": \"Mixedform\", \"config_item\": \"Username\", \"read_only\": true},
-                            {\"name\": \"Username2\", \"default_value\": \"user2\", \"config_block\": \"Mixedform\", \"config_item\": \"Username2\", \"password\": true},
-                            {\"name\": \"Real name\", \"default_value\": \"Linux User\", \"config_block\": \"Mixedform\", \"config_item\": \"RealName\"}
-                        ] }"
+                        "data": {
+                            "options": "{
+                                \"title\": \"Fill the user info\",
+                                \"fields\": [
+                                {\"name\": \"Username\", \"default_value\": \"user\", \"config_block\": \"Mixedform\", \"config_item\": \"Username\", \"read_only\": true},
+                                {\"name\": \"Username2\", \"default_value\": \"user2\", \"config_block\": \"Mixedform\", \"config_item\": \"Username2\", \"password\": true},
+                                {\"name\": \"Real name\", \"default_value\": \"Linux User\", \"config_block\": \"Mixedform\", \"config_item\": \"RealName\"}
+                            ] }"
+                        }
                     },
                     {
                         "name": "Input string scroll",
                         "type": "inputscroll",
-                        "default_value": "Olha o conteudo ai...",
-                        "options": "The title of our scroll text:",
                         "object_id": "9",
-                        "help": {
-                            "brief": "This is a help description string.",
-                            "description": "This is a help description."
+                        "data": {
+                            "default_value": "Olha o conteudo ai...",
+                            "options": "The title of our scroll text:",
+                            "ranges": {
+                                "string_length": 128
+                            },
+                            "config": {
+                                "block": "Main",
+                                "item": "input_string_scroll"
+                            }
                         },
-                        "ranges": {
-                            "string_length": 128
-                        },
-                        "config": {
-                            "block": "Main",
-                            "item": "input_string_scroll"
+                        "ui": {
+                            "labels": {
+                                "help": {
+                                    "brief": "This is a help description string.",
+                                    "description": "This is a help description."
+                                }
+                            }
                         },
                         "events": {
                             "item-custom-data": "scroll_content",
@@ -79,9 +89,15 @@
                         "name": "File view",
                         "type": "file-view",
                         "object_id": "999",
-                        "default_value": "/home/rodrigo/green.rc",
-                        "help": {
-                            "description": "Only a little help"
+                        "data": {
+                            "default_value": "/home/rodrigo/green.rc"
+                        },
+                        "ui": {
+                            "labels": {
+                                "help": {
+                                    "description": "Only a little help"
+                                }
+                            }
                         }
                     },
                     {

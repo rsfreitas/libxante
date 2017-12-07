@@ -224,7 +224,7 @@ struct xante_menu *xante_menu_head(const cl_list_t *menus)
  *        name.
  *
  * Remember, when searching a menu pointed by an item, its object_id is located
- * inside the menu_id.
+ * inside the referenced_menu.
  *
  * @param [in] menus: The list of menus.
  * @param [in] menu_name: The menu name which will be used to search.
@@ -259,7 +259,7 @@ struct xante_menu *xante_menu_search_by_name(const cl_list_t *menus,
  *        object_id.
  *
  * Remember, when searching a menu pointed by an item, its object_id is located
- * inside the menu_id.
+ * inside the referenced_menu.
  *
  * @param [in] menus: The list of menus.
  * @param [in] object_id: The menu object_id which will be used to search.

@@ -75,7 +75,7 @@
 #define EVENTS              "events"
 #define DESCRIPTION         "description"
 #define BRIEF               "brief"
-#define MENU_ID             "menu_id"
+#define REFERENCED_MENU     "referenced_menu"
 #define BLOCKED_KEYS        "blocked_keys"
 #define ESC_KEY             "esc_key"
 #define SUSPEND_KEY         "suspend_key"
@@ -83,6 +83,18 @@
 #define GEOMETRY            "geometry"
 #define WIDTH               "width"
 #define HEIGHT              "height"
+#define DATA                "data"
+#define BTN_OK_LABEL        "ok"
+#define BTN_CANCEL_LABEL    "cancel"
+#define BTN_EXTRA_LABEL     "extra"
+#define BTN_HELP_LABEL      "help"
+#define BUTTONS             "buttons"
+#define TITLE               "title"
+#define BTN_OK              "btn_ok"
+#define BTN_CANCEL          "btn_cancel"
+#define BTN_EXTRA           "btn_extra"
+#define BTN_HELP            "btn_help"
+#define LABELS              "labels"
 
 /*
  *
@@ -363,8 +375,7 @@ static int parse_jtf_info(cl_json_t *jtf, struct xante_app *xpp)
     return 0;
 }
 
-static int parse_item_ranges(const cl_json_t *item, struct xante_item *i,
-    void **max, void **min)
+static int parse_item_ranges(const cl_json_t *item, struct xante_item *i)
 {
     cl_json_t *ranges = NULL;
     bool input_string = false, max_range = false, min_range = false;
@@ -422,13 +433,13 @@ static int parse_item_ranges(const cl_json_t *item, struct xante_item *i,
                                                                     : CL_JSON_NUMBER;
 
     if ((parse_object_value(ranges, MIN_RANGE, expected_type, false,
-                            min) < 0) && min_range)
+                            (void **)&i->__helper.min) < 0) && min_range)
     {
         return -1;
     }
 
     if ((parse_object_value(ranges, MAX_RANGE, expected_type, false,
-                            max) < 0) && max_range)
+                            (void **)&i->__helper.max) < 0) && max_range)
     {
         return -1;
     }
@@ -510,7 +521,7 @@ static void pre_adjust_item_info(struct xante_item *item)
     if ((item->dialog_type == XANTE_UI_DIALOG_MENU) ||
         (item->dialog_type == XANTE_UI_DIALOG_DYNAMIC_MENU))
     {
-        item->flags.menu_id = true;
+        item->flags.referenced_menu = true;
     } else {
         if ((item->dialog_type == XANTE_UI_DIALOG_INPUT_INT) ||
             (item->dialog_type == XANTE_UI_DIALOG_INPUT_FLOAT) ||
@@ -532,6 +543,8 @@ static void pre_adjust_item_info(struct xante_item *item)
         /* Almost every item needs to have the "options" object */
         item->flags.options = true;
     }
+
+    item->flags.ranges = item_has_ranges(item->dialog_type);
 }
 
 /**
@@ -542,34 +555,33 @@ static void pre_adjust_item_info(struct xante_item *item)
  * object.
  *
  * @param [in,out] item: The item to be adjusted.
- * @param [in] default_value: A default value loaded from the JTF.
- * @param [in] options: The options value loaded from the JTF.
- * @param [in] max_range: The maximum range of an input item.
- * @param [in] min_range: The minimum range of an input item.
- * @param [in] brief_options_help: A JSON object with checklist options brief
- *                                 help.
  */
-static int adjusts_item_info(struct xante_item *item, cl_string_t *default_value,
-    void *options, void *max_range, void *min_range, void *brief_options_help)
+static int adjusts_item_info(struct xante_item *item)
 {
     int i, t, i_max, i_min;
     float f_max, f_min;
     cl_json_t *node = NULL;
     cl_string_t *value = NULL;
 
-    if (default_value != NULL)
-        item->default_value = cl_object_from_cstring(default_value);
+    /*
+     * We hold the item's default-value as an cl_object_t since we can have
+     * different types of values.
+     */
+    if (item->__helper.default_value != NULL) {
+        item->default_value = cl_object_from_cstring(item->__helper.default_value);
+        cl_string_unref(item->__helper.default_value);
+    }
 
     switch (item->dialog_type) {
         case XANTE_UI_DIALOG_RADIO_CHECKLIST:
         case XANTE_UI_DIALOG_CHECKLIST:
         case XANTE_UI_DIALOG_BUILDLIST:
-            if (options != NULL) {
-                t = cl_json_get_array_size(options);
+            if (item->__helper.options != NULL) {
+                t = cl_json_get_array_size(item->__helper.options);
                 item->list_items = cl_stringlist_create();
 
                 for (i = 0; i < t; i++) {
-                    node = cl_json_get_array_item(options, i);
+                    node = cl_json_get_array_item(item->__helper.options, i);
                     value = cl_json_get_object_value(node);
                     cl_stringlist_add(item->list_items, value);
                 }
@@ -584,12 +596,12 @@ static int adjusts_item_info(struct xante_item *item, cl_string_t *default_value
                 (item->dialog_type == XANTE_UI_DIALOG_CHECKLIST) ? FLAG_CHECK
                                                                  : FLAG_RADIO;
 
-            if (brief_options_help != NULL) {
-                t = cl_json_get_array_size(brief_options_help);
+            if (item->__helper.brief_options_help != NULL) {
+                t = cl_json_get_array_size(item->__helper.brief_options_help);
                 item->checklist_brief_options = cl_stringlist_create();
 
                 for (i = 0; i < t; i++) {
-                    node = cl_json_get_array_item(brief_options_help, i);
+                    node = cl_json_get_array_item(item->__helper.brief_options_help, i);
                     value = cl_json_get_object_value(node);
                     cl_stringlist_add(item->checklist_brief_options, value);
                 }
@@ -607,8 +619,8 @@ static int adjusts_item_info(struct xante_item *item, cl_string_t *default_value
 
         case XANTE_UI_DIALOG_INPUT_INT:
         case XANTE_UI_DIALOG_RANGE:
-            i_min = *(int *)&min_range;
-            i_max = *(int *)&max_range;
+            i_min = *(int *)&item->__helper.min;
+            i_max = *(int *)&item->__helper.max;
             item->min = cl_object_create(CL_INT, i_min);
             item->max = cl_object_create(CL_INT, i_max);
             break;
@@ -616,19 +628,19 @@ static int adjusts_item_info(struct xante_item *item, cl_string_t *default_value
         case XANTE_UI_DIALOG_PROGRESS:
         case XANTE_UI_DIALOG_SPINNER_SYNC:
         case XANTE_UI_DIALOG_DOTS_SYNC:
-            i_max = *(int *)&max_range;
+            i_max = *(int *)&item->__helper.max;
             item->max = cl_object_create(CL_INT, i_max);
             break;
 
         case XANTE_UI_DIALOG_INPUT_FLOAT:
-            f_min = *(float *)&min_range;
-            f_max = *(float *)&max_range;
+            f_min = *(float *)&item->__helper.min;
+            f_max = *(float *)&item->__helper.max;
             item->min = cl_object_create(CL_FLOAT, f_min);
             item->max = cl_object_create(CL_FLOAT, f_max);
             break;
 
         case XANTE_UI_DIALOG_MIXEDFORM:
-            item->mixedform_options = cl_json_parse(options);
+            item->mixedform_options = cl_json_parse(item->__helper.options);
 
             if (NULL == item->mixedform_options) {
                 errno_set(XANTE_ERROR_INVALID_MIXEDFORM_JSON);
@@ -646,8 +658,8 @@ static int adjusts_item_info(struct xante_item *item, cl_string_t *default_value
         (item->dialog_type != XANTE_UI_DIALOG_RADIO_CHECKLIST) &&
         (item->dialog_type != XANTE_UI_DIALOG_MIXEDFORM))
     {
-        if (options != NULL)
-            item->options = options;
+        if (item->__helper.options != NULL)
+            item->options = item->__helper.options;
     }
 
     if (item_has_ranges(item->dialog_type) == true)
@@ -792,7 +804,7 @@ static int parse_ui(cl_json_t *jtf, struct xante_app *xpp)
     return 0;
 }
 
-static int parse_geometry(struct dlg_geometry *geometry, const cl_json_t *node)
+static int parse_geometry(const cl_json_t *node, struct geometry *geometry)
 {
     cl_json_t *jgeometry = NULL;
 
@@ -812,6 +824,187 @@ static int parse_geometry(struct dlg_geometry *geometry, const cl_json_t *node)
     {
         return -1;
     }
+
+    return 0;
+}
+
+/*
+ * Checks if an item must have a data object according its loaded
+ * informations so far.
+ */
+static bool data_object_must_exist(const struct xante_item *item)
+{
+    bool must = false;
+
+    if (item->flags.options ||
+        item->flags.referenced_menu ||
+        item->flags.config)
+    {
+        must = true;
+    }
+
+    return must;
+}
+
+/*
+ * Here we parse the "data" object inside an item.
+ */
+static int parse_item_data(const cl_json_t *root, struct xante_item *item)
+{
+    cl_json_t *data = NULL;
+    enum cl_json_type expected_option = CL_JSON_STRING;
+
+    data = cl_json_get_object_item(root, DATA);
+
+    if (data_object_must_exist(item) && (NULL == data)) {
+        errno_set(XANTE_ERROR_JTF_NO_DATA_OBJECT);
+        return -1;
+    }
+
+    if (parse_object_value(data, DEFAULT_VALUE, CL_JSON_STRING, false,
+                           (void **)&item->__helper.default_value) < 0)
+    {
+        return -1;
+    }
+
+    /* Some dialogs require that the options object to be an array. */
+    if ((item->dialog_type == XANTE_UI_DIALOG_CHECKLIST) ||
+        (item->dialog_type == XANTE_UI_DIALOG_RADIO_CHECKLIST) ||
+        (item->dialog_type == XANTE_UI_DIALOG_BUILDLIST))
+    {
+        expected_option = CL_JSON_ARRAY;
+    }
+
+    if ((parse_object_value(data, OPTIONS, expected_option, false,
+                            (void **)&item->__helper.options) < 0) &&
+        item->flags.options)
+    {
+        return -1;
+    }
+
+    if ((parse_object_value(data, REFERENCED_MENU, CL_JSON_STRING, false,
+                            (void **)&item->referenced_menu) < 0) &&
+        item->flags.referenced_menu)
+    {
+        return -1;
+    }
+
+    if (parse_item_config(data, item) < 0)
+        return -1;
+
+    if (parse_item_ranges(data, item) < 0)
+        return -1;
+
+    return 0;
+}
+
+static int parse_item_button_labels(const cl_json_t *labels,
+    struct xante_item *item)
+{
+    cl_json_t *buttons = NULL;
+
+    buttons = cl_json_get_object_item(labels, BUTTONS);
+
+    if (NULL == buttons)
+        return 0;
+
+    if (parse_object_value(buttons, BTN_OK_LABEL, CL_JSON_STRING, false,
+                           (void **)&item->label.ok) < 0)
+    {
+        return -1;
+    }
+
+    if (parse_object_value(buttons, BTN_CANCEL_LABEL, CL_JSON_STRING, false,
+                           (void **)&item->label.cancel) < 0)
+    {
+        return -1;
+    }
+
+    if (parse_object_value(buttons, BTN_EXTRA_LABEL, CL_JSON_STRING, false,
+                           (void **)&item->label.extra) < 0)
+    {
+        return -1;
+    }
+
+    if (parse_object_value(buttons, BTN_HELP_LABEL, CL_JSON_STRING, false,
+                           (void **)&item->label.help) < 0)
+    {
+        return -1;
+    }
+
+    return 0;
+}
+
+static int parse_item_labels(const cl_json_t *ui, struct xante_item *item)
+{
+    cl_json_t *labels = NULL;
+
+    labels = cl_json_get_object_item(ui, LABELS);
+
+    if (NULL == labels)
+        return 0;
+
+    if (parse_object_value(labels, TITLE, CL_JSON_STRING, false,
+                           (void **)&item->label.title) < 0)
+    {
+        return -1;
+    }
+
+    if (parse_item_help(labels, item, &item->__helper.brief_options_help) < 0)
+        return -1;
+
+    if (parse_item_button_labels(labels, item) < 0)
+        return -1;
+
+    return 0;
+}
+
+/*
+ * Here all informations related the item's UI are parsed.
+ */
+static int parse_item_ui(const cl_json_t *root, struct xante_item *item)
+{
+    cl_json_t *ui = NULL;
+
+    ui = cl_json_get_object_item(root, UI);
+
+    if (NULL == ui) {
+        /*
+         * All ui (object) related informations are not required, so if the
+         * object does not exist we don't care and just return OK.
+         */
+        return 0;
+    }
+
+    if (parse_object_value(ui, BTN_OK, CL_JSON_TRUE, false,
+                           (void **)&item->button.ok) < 0)
+    {
+        return -1;
+    }
+
+    if (parse_object_value(ui, BTN_CANCEL, CL_JSON_TRUE, false,
+                           (void **)&item->button.cancel) < 0)
+    {
+        return -1;
+    }
+
+    if (parse_object_value(ui, BTN_EXTRA, CL_JSON_TRUE, false,
+                           (void **)&item->button.extra) < 0)
+    {
+        return -1;
+    }
+
+    if (parse_object_value(ui, BTN_HELP, CL_JSON_TRUE, false,
+                           (void **)&item->button.help) < 0)
+    {
+        return -1;
+    }
+
+    if (parse_geometry(ui, &item->geometry) < 0)
+        return -1;
+
+    if (parse_item_labels(ui, item) < 0)
+        return -1;
 
     return 0;
 }
@@ -839,15 +1032,16 @@ static int parse_geometry(struct dlg_geometry *geometry, const cl_json_t *node)
 struct xante_item *jtf_parse_item(const cl_json_t *item, bool ignores_object_id)
 {
     struct xante_item *i;
-    cl_string_t *default_value = NULL;
-    void *options = NULL, *max = NULL, *min = NULL, *brief_options_help = NULL;
-    enum cl_json_type expected_option = CL_JSON_STRING;
+//    cl_string_t *default_value = NULL;
+//    void *options = NULL, *max = NULL, *min = NULL, *brief_options_help = NULL;
+//    enum cl_json_type expected_option = CL_JSON_STRING;
 
     i = xante_item_create();
 
     if (NULL == i)
         return NULL;
 
+    /* Objects loaded before pre-adjusment are (almost all) mandatory */
     if (parse_object_value(item, NAME, CL_JSON_STRING, true,
                            (void **)&i->name) < 0)
     {
@@ -878,7 +1072,10 @@ struct xante_item *jtf_parse_item(const cl_json_t *item, bool ignores_object_id)
      */
     pre_adjust_item_info(i);
 
-    if (parse_object_value(item, DEFAULT_VALUE, CL_JSON_STRING, false,
+    if (parse_item_data(item, i) < 0)
+        return NULL;
+
+/*    if (parse_object_value(item, DEFAULT_VALUE, CL_JSON_STRING, false,
                            (void **)&default_value) < 0)
     {
         return NULL;
@@ -898,16 +1095,19 @@ struct xante_item *jtf_parse_item(const cl_json_t *item, bool ignores_object_id)
         return NULL;
     }
 
-    if ((parse_object_value(item, MENU_ID, CL_JSON_STRING, false,
-                            (void **)&i->menu_id) < 0) &&
-        i->flags.menu_id)
+    if ((parse_object_value(item, REFERENCED_MENU, CL_JSON_STRING, false,
+                            (void **)&i->referenced_menu) < 0) &&
+        i->flags.referenced_menu)
     {
         return NULL;
     }
-
+*/
     i->events = cl_json_dup(cl_json_get_object_item(item, EVENTS));
 
-    if (parse_item_help(item, i, &brief_options_help) < 0)
+    if (parse_item_ui(item, i) < 0)
+        return NULL;
+
+/*    if (parse_item_help(item, i, &brief_options_help) < 0)
         return NULL;
 
     if (parse_item_config(item, i) < 0)
@@ -918,16 +1118,13 @@ struct xante_item *jtf_parse_item(const cl_json_t *item, bool ignores_object_id)
 
     if (parse_geometry(&i->geometry, item) < 0)
         return NULL;
-
+*/
     /* Set up specific item properties */
-    if (adjusts_item_info(i, default_value, options, max, min,
-                          brief_options_help) < 0)
-    {
+    if (adjusts_item_info(i))
         return NULL;
-    }
 
-    if (default_value != NULL)
-        cl_string_unref(default_value);
+//    if (default_value != NULL)
+//        cl_string_unref(default_value);
 
     return i;
 }
@@ -981,7 +1178,7 @@ struct xante_menu *jtf_parse_menu(const cl_json_t *menu)
     if (parse_dynamic_menu_properties(menu, m, &copies) < 0)
         return NULL;
 
-    if (parse_geometry(&m->geometry, menu) < 0)
+    if (parse_geometry(menu, &m->geometry) < 0)
         return NULL;
 
     m->events = cl_json_dup(cl_json_get_object_item(menu, EVENTS));
