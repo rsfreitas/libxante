@@ -39,38 +39,43 @@
  *
  */
 
-ui_return_t ui_dialog_file_view(struct xante_app *xpp, struct xante_item *item)
+ui_return_t ui_file_view(struct xante_app *xpp, struct xante_item *item)
 {
     ui_return_t ret;
+    ui_properties_t properties;
     int ret_dialog = DLG_EXIT_OK;
     bool loop = true;
     cl_object_t *value = NULL;
-    char *text = NULL;
+
+    INIT_PROPERTIES(properties);
 
     /* Prepare dialog */
     dlgx_set_backtitle(xpp);
     dlgx_update_ok_button_label();
     dlgx_update_cancel_button_label();
     dlgx_put_statusbar(DEFAULT_STATUSBAR_TEXT);
+    properties.width = (item->geometry.width == 0) ? DIALOG_WIDTH
+                                                   : item->geometry.width;
+
+    properties.height = (item->geometry.height == 0) ? DIALOG_HEIGHT
+                                                     : item->geometry.height;
 
     /* Gets the item voalue */
     value = item_value(item);
 
-    if (value != NULL)
-        text = CL_OBJECT_AS_STRING(value);
-    else
-        text = strdup(cl_string_valueof(item->options));
-
-    if (NULL == text) {
+    if (NULL == value) {
         xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
                              cl_tr("No file was selected to view."));
 
         goto end_block;
     }
 
-    if (file_exists(text) == false) {
+    properties.text = CL_OBJECT_AS_CSTRING(value);
+
+    if (file_exists(cl_string_valueof(properties.text)) == false) {
         xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
-                             cl_tr("File '%s' not found."), text);
+                             cl_tr("File '%s' not found."),
+                             cl_string_valueof(properties.text));
 
         goto end_block;
     }
@@ -80,13 +85,18 @@ ui_return_t ui_dialog_file_view(struct xante_app *xpp, struct xante_item *item)
         dialog_vars.help_button = 1;
 
     do {
-        ret_dialog = dialog_textbox(cl_string_valueof(item->name), text,
-                                    DIALOG_HEIGHT, DIALOG_WIDTH);
+        ret_dialog = dialog_textbox(cl_string_valueof(item->name),
+                                    cl_string_valueof(properties.text),
+                                    properties.height, properties.width);
 
         switch (ret_dialog) {
-            case DLG_EXIT_OK:
             case DLG_EXIT_ESC:
+                /* Don't let the user close the dialog */
+                if (xante_runtime_esc_key(xpp))
+                    break;
+
             case DLG_EXIT_CANCEL:
+            case DLG_EXIT_OK:
                 loop = false;
                 break;
 
@@ -110,6 +120,8 @@ ui_return_t ui_dialog_file_view(struct xante_app *xpp, struct xante_item *item)
         dialog_vars.help_button = 0;
 
 end_block:
+    UNINIT_PROPERTIES(properties);
+
     ret.selected_button = DLG_EXIT_OK;
     ret.updated_value = false;
 

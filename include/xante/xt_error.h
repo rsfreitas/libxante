@@ -84,6 +84,7 @@ enum xante_error_code {
     XANTE_ERROR_MENU_HEAD_NOT_FOUND,
     XANTE_ERROR_ITEM_NOT_FOUND,                     //*
     XANTE_ERROR_INVALID_MIXEDFORM_JSON,             //*
+    XANTE_ERROR_JTF_NO_DATA_OBJECT,
 
     XANTE_MAX_ERROR_CODE
 };

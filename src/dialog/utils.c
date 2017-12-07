@@ -729,15 +729,17 @@ char *dlgx_get_input_result(void)
  */
 int dlgx_get_input_window_width(const struct xante_item *item)
 {
-    int w = 0;
+    int w = 0, item_width;
 
     if (dlgx_count_lines_by_delimiters(cl_string_valueof(item->options)) > 1)
         return get_longest_line_length(item->options) + WINDOW_COLUMNS;
 
     w = cl_string_length(item->options);
+    item_width = (item->geometry.width == 0) ? DEFAULT_DIALOG_WIDTH
+                                             : item->geometry.width;
 
-    if (w < MINIMUM_WIDTH)
-        w = MINIMUM_WIDTH;
+    if (w < item_width)
+        w = item_width;
     else
         w += WINDOW_COLUMNS;
 

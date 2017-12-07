@@ -74,11 +74,11 @@ static char *update_routine(void *arg)
  *
  */
 
-ui_return_t ui_dialog_update_object(struct xante_app *xpp,
+ui_return_t ui_update_object(struct xante_app *xpp,
     struct xante_item *item)
 {
     ui_return_t ret;
-    int ret_dialog = DLG_EXIT_OK;
+    int ret_dialog = DLG_EXIT_OK, width, height;
     bool loop = true;
     struct update_routine_arg user_arg = {
         .xpp = xpp,
@@ -89,21 +89,30 @@ ui_return_t ui_dialog_update_object(struct xante_app *xpp,
     dlgx_set_backtitle(xpp);
     dlgx_update_cancel_button_label();
     dlgx_put_statusbar(DEFAULT_STATUSBAR_TEXT);
+    width = (item->geometry.width == 0) ? DIALOG_WIDTH
+                                        : item->geometry.width;
+
+    height = (item->geometry.height == 0) ? DIALOG_HEIGHT
+                                          : item->geometry.height;
 
     /* Gets the user custom data */
     user_arg.data = event_item_custom_data(xpp, item);
 
     do {
-        ret_dialog = dlgx_update_object(DIALOG_WIDTH, DIALOG_HEIGHT,
+        ret_dialog = dlgx_update_object(width, height,
                                         cl_string_valueof(item->name),
                                         cl_string_valueof(item->options),
                                         DIALOG_UPDATE_INTERVAL,
                                         update_routine, &user_arg);
 
         switch (ret_dialog) {
-            case DLG_EXIT_OK:
             case DLG_EXIT_ESC:
+                /* Don't let the user close the dialog */
+                if (xante_runtime_esc_key(xpp))
+                    break;
+
             case DLG_EXIT_CANCEL:
+            case DLG_EXIT_OK:
                 loop = false;
                 break;
 

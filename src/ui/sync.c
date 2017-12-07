@@ -145,12 +145,14 @@ static void *make_sync(cl_thread_t *thread)
     struct xante_app *xpp = sync->xpp;
     struct xante_item *item = sync->item;
     struct sync *sync_model;
-    cl_string_t *text = NULL;
     cl_thread_t *task = NULL;
+    cl_string_t *text = NULL;
+    ui_properties_t properties;
     int stepbar = 0;
     char *tmp = NULL;
 
     cl_thread_set_state(thread, CL_THREAD_ST_CREATED);
+    INIT_PROPERTIES(properties);
     sync_model = get_sync(item->dialog_type);
 
     /* Creates a thread to run the user task (event) */
@@ -177,6 +179,12 @@ static void *make_sync(cl_thread_t *thread)
     sync->tm_task = cl_timeout_create(CL_OBJECT_AS_INT(item->max),
                                       CL_TM_SECONDS);
 
+    properties.width = (item->geometry.width == 0) ? DIALOG_WIDTH
+                                                   : item->geometry.width;
+
+    properties.height = (item->geometry.height == 0) ? DIALOG_HEIGHT
+                                                     : item->geometry.height;
+
     cl_thread_set_state(thread, CL_THREAD_ST_INITIALIZED);
     xante_log_debug("%s: started sync thread", __FUNCTION__);
 
@@ -195,7 +203,7 @@ static void *make_sync(cl_thread_t *thread)
 
         update_synctext(text, stepbar, sync_model->type);
         dialog_msgbox(cl_string_valueof(item->name), cl_string_valueof(text),
-                      DIALOG_HEIGHT, DIALOG_WIDTH, 0);
+                      properties.height, properties.width, 0);
 
         stepbar++;
 
@@ -219,6 +227,7 @@ static void *make_sync(cl_thread_t *thread)
     } while (item->cancel_update == false);
 
     cl_thread_destroy(task);
+    UNINIT_PROPERTIES(properties);
     xante_log_debug("%s: finish sync thread", __FUNCTION__);
 
     return NULL;
@@ -231,7 +240,7 @@ static void *make_sync(cl_thread_t *thread)
  */
 
 /**
- * @name ui_dialog_sync
+ * @name ui_sync
  * @brief Creates a dialog of sync type.
  *
  * This dialog runs a task with a specific ending delimiter and shows a
@@ -244,7 +253,7 @@ static void *make_sync(cl_thread_t *thread)
  * @return Returns a ui_return_t value indicating if the item's value has been
  *         changed (true) or not (false) with the dialog selected button.
  */
-ui_return_t ui_dialog_sync(struct xante_app *xpp, struct xante_item *item)
+ui_return_t ui_sync(struct xante_app *xpp, struct xante_item *item)
 {
     ui_return_t ret;
     void *data;

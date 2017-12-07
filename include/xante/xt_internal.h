@@ -137,6 +137,10 @@ struct xante_info {
     int     revision;
     int     build;
     bool    beta;
+
+    bool    esc_key;
+    bool    suspend_key;
+    bool    stop_key;
 };
 
 /** Application runtime informations */
@@ -147,6 +151,9 @@ struct xante_runtime {
     bool                        execute_module;
     bool                        user_authentication;
     char                        *caller_name;
+    bool                        esc_key;
+    bool                        suspend_key;        /* Ctrl + Z */
+    bool                        stop_key;           /* Ctrl + C */
 
     /* Read/Write */
     bool                        discard_changes;
@@ -161,8 +168,42 @@ struct xante_runtime {
 /** XanteItem's flag to be validated when parsed from a JTF file */
 struct flag_parser {
     bool    options;
-    bool    menu_id;
+    bool    referenced_menu;
     bool    config;
+    bool    ranges;
+};
+
+struct geometry {
+    int width;
+    int height;
+};
+
+struct window_labels {
+    cl_string_t *ok;
+    cl_string_t *cancel;
+    cl_string_t *extra;
+    cl_string_t *help;
+    cl_string_t *title;
+};
+
+struct window_buttons {
+    bool    ok;
+    bool    cancel;
+    bool    extra;
+    bool    help;
+};
+
+/*
+ * This structure must hold every needed state while parsing a JTF file
+ * to avoid creating internal (unnecessary) variables and increasing too
+ * much the number of function arguments.
+ */
+struct parser_helper {
+    void        *min;
+    void        *max;
+    void        *brief_options_help;
+    void        *options;
+    cl_string_t *default_value;
 };
 
 /** UI Menu Item informations */
@@ -176,7 +217,7 @@ struct xante_item {
     cl_string_t             *config_item;
     cl_string_t             *brief_help;
     cl_string_t             *descriptive_help;
-    cl_string_t             *menu_id;
+    cl_string_t             *referenced_menu;
     cl_object_t             *default_value;
     cl_json_t               *events;
 
@@ -198,6 +239,10 @@ struct xante_item {
     struct flag_parser      flags;
     struct cl_ref_s         ref;
     bool                    cancel_update;
+    struct geometry         geometry;
+    struct window_labels    label;
+    struct window_buttons   button;
+    struct parser_helper    __helper;
 };
 
 /** UI Menu informations */
@@ -221,6 +266,7 @@ struct xante_menu {
     bool                        move_to_be_released;
     cl_list_t                   *items;
     struct cl_ref_s             ref;
+    struct geometry             geometry;
 };
 
 /** UI informations */

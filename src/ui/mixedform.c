@@ -31,15 +31,6 @@
 
 #define DIALOG_WIDTH                55
 
-struct dialog_properties {
-    int width;
-    int height;
-    int form_height;
-    int number_of_items;        //Number of items on screen
-    int longest_name_length;
-    int total_fields;
-};
-
 /*
  *
  * Internal functions
@@ -180,37 +171,24 @@ static int get_longest_element_name(const cl_json_t *fields, int total_fields)
     return max;
 }
 
-static void release_dialog_content(DIALOG_FORMITEM *items, int total_items)
+static int prepare_content(const cl_json_t *fields, ui_properties_t *properties)
 {
-    int i;
-
-    for (i = 0; i < total_items; i++) {
-        free(items[i].name);
-        free(items[i].text);
-    }
-
-    free(items);
-}
-
-static DIALOG_FORMITEM *prepare_dialog_content(const cl_json_t *fields,
-    const struct dialog_properties *properties)
-{
-    DIALOG_FORMITEM *fitems = NULL, *item = NULL;
+    DIALOG_FORMITEM *item = NULL;
     int i;
     char fmt[8] = {0};
     cl_json_t *field;
 
-    fitems = calloc(properties->total_fields, sizeof(DIALOG_FORMITEM));
+    properties->fitems = calloc(properties->number_of_items, sizeof(DIALOG_FORMITEM));
 
-    if (NULL == fitems) {
+    if (NULL == properties->fitems) {
         errno_set(XANTE_ERROR_NO_MEMORY);
-        return NULL;
+        return -1;
     }
 
-    sprintf(fmt, "%%-%ds:", properties->longest_name_length);
+    sprintf(fmt, "%%-%ds:", properties->longest_field_name);
 
-    for (i = 0; i < properties->total_fields; i++) {
-        item = &fitems[i];
+        for (i = 0; i < properties->number_of_items; i++) {
+        item = &properties->fitems[i];
         field = cl_json_get_array_item(fields, i);
 
         asprintf(&item->name, fmt,
@@ -224,7 +202,7 @@ static DIALOG_FORMITEM *prepare_dialog_content(const cl_json_t *fields,
 
         item->name_x = 0;
         item->name_y = i;
-        item->text_x = properties->longest_name_length + 2;
+        item->text_x = properties->longest_field_name + 2;
         item->text_y = i;
 
         if (get_element_read_only(field))
@@ -240,23 +218,27 @@ static DIALOG_FORMITEM *prepare_dialog_content(const cl_json_t *fields,
         item->text_flen = 30;
     }
 
-    return fitems;
+    return 0;
 }
 
-static void calc_dialog_limits(const cl_json_t *fields,
-    struct dialog_properties *properties)
+static void build_properties(const struct xante_item *item,
+    const cl_json_t *fields, ui_properties_t *properties)
 {
-    properties->width = DIALOG_WIDTH;
-    properties->total_fields = cl_json_get_array_size(fields);
-    properties->longest_name_length = get_longest_element_name(fields,
-                                                               properties->total_fields);
+    properties->width = (item->geometry.width == 0) ? DIALOG_WIDTH
+                                                    : item->geometry.width;
 
-    properties->form_height = cl_json_get_array_size(fields);
-    properties->number_of_items = dialog_get_dlg_items(properties->form_height);
+    properties->number_of_items = cl_json_get_array_size(fields);
+    properties->longest_field_name =
+        get_longest_element_name(fields, properties->number_of_items);
+
+    properties->displayed_items = dlgx_get_dlg_items(properties->number_of_items);
 
     /* XXX: This 1 is from the dialog text message. */
-    properties->height = properties->number_of_items +
-                         DIALOG_HEIGHT_WITHOUT_TEXT + 1;
+    properties->height = (item->geometry.height == 0)
+                            ? (properties->number_of_items + DIALOG_HEIGHT_WITHOUT_TEXT + 1)
+                            : item->geometry.height;
+
+    prepare_content(fields, properties);
 }
 
 static char *get_current_result(DIALOG_FORMITEM *items, int number_of_items)
@@ -424,16 +406,17 @@ void ui_mixedform_load_and_set_value(struct xante_item *item, cl_cfg_file_t *cfg
     }
 }
 
-ui_return_t ui_dialog_mixedform(struct xante_app *xpp, struct xante_item *item)
+ui_return_t ui_mixedform(struct xante_app *xpp, struct xante_item *item)
 {
     bool value_changed = false, loop = true;
-    struct dialog_properties properties;
+    ui_properties_t properties;
     int ret_dialog = DLG_EXIT_OK, selected_item = 0;
     cl_string_t *form_title = NULL;
-    DIALOG_FORMITEM *items = NULL;
     cl_json_t *fields = NULL;
     char *result = NULL;
     ui_return_t ret;
+
+    INIT_PROPERTIES(properties);
 
     /* Prepare dialog */
     dlgx_set_backtitle(xpp);
@@ -446,8 +429,7 @@ ui_return_t ui_dialog_mixedform(struct xante_app *xpp, struct xante_item *item)
     /* Prepares dialog content */
     fields = get_fields_node(item);
     form_title = get_title(item);
-    calc_dialog_limits(fields, &properties);
-    items = prepare_dialog_content(fields, &properties);
+    build_properties(item, fields, &properties);
 
     /* Enables the help button */
     if (item->descriptive_help != NULL)
@@ -462,19 +444,21 @@ ui_return_t ui_dialog_mixedform(struct xante_app *xpp, struct xante_item *item)
         ret_dialog = dlg_form(cl_string_valueof(item->name),
                               cl_string_valueof(form_title),
                               properties.height, properties.width,
-                              properties.form_height,
-                              properties.number_of_items, items,
+                              properties.displayed_items,
+                              properties.number_of_items,
+                              properties.fitems,
                               &selected_item);
 
         switch (ret_dialog) {
             case DLG_EXIT_OK:
-                result = get_current_result(items, properties.total_fields);
+                result = get_current_result(properties.fitems,
+                                            properties.number_of_items);
 
                 if (event_call(EV_ITEM_VALUE_CONFIRM, xpp, item, result) < 0)
                     break;
 
                 value_changed = item_values_have_changed(xpp, item, fields,
-                                                         properties.total_fields,
+                                                         properties.number_of_items,
                                                          result);
 
                 loop = false;
@@ -487,6 +471,10 @@ ui_return_t ui_dialog_mixedform(struct xante_app *xpp, struct xante_item *item)
 #endif
 
             case DLG_EXIT_ESC:
+                /* Don't let the user close the dialog */
+                if (xante_runtime_esc_key(xpp))
+                    break;
+
             case DLG_EXIT_CANCEL:
                 loop = false;
                 break;
@@ -508,7 +496,7 @@ ui_return_t ui_dialog_mixedform(struct xante_app *xpp, struct xante_item *item)
         free(result);
 
     dialog_vars.insecure = 0;
-    release_dialog_content(items, properties.total_fields);
+    UNINIT_PROPERTIES(properties);
 
     ret.selected_button = ret_dialog;
     ret.updated_value = value_changed;

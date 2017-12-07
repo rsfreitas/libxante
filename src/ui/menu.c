@@ -29,6 +29,9 @@
 #define DEFAULT_STATUSBAR_TEXT          \
     "[ESC] Exit [Enter] Select an option [Up/Down] Move [TAB/Left/Right] Choose option"
 
+#define DEFAULT_HEIGHT                  \
+    (DIALOG_HEIGHT_WITHOUT_TEXT + MAX_DLG_ITEMS)
+
 /*
  *
  * Internal functions
@@ -124,7 +127,7 @@ static int check_item_width(cl_list_node_t *node, void *a)
 
 static int calc_menu_width(const struct xante_menu *menu)
 {
-    int w = 0;
+    int w = 0, menu_width;
     struct list_data ld = {
         .name_size = 0,
         .item_size = 0,
@@ -132,20 +135,13 @@ static int calc_menu_width(const struct xante_menu *menu)
 
     cl_list_map(menu->items, check_item_width, &ld);
     w = (ld.name_size + ld.item_size) + WINDOW_BORDER_SIZE;
+    menu_width = (menu->geometry.width == 0) ? DEFAULT_DIALOG_WIDTH
+                                             : menu->geometry.width;
 
-    if (w < MINIMUM_WIDTH)
-        w = MINIMUM_WIDTH;
+    if (w < menu_width)
+        w = menu_width;
 
-    return (w == 0) ? MINIMUM_WIDTH : w;
-}
-
-static void calc_menu_limits(const struct xante_menu *menu, int *lines,
-    int *width, int *items, int *total)
-{
-    *total = calc_menu_items(menu);
-    *items = dialog_get_dlg_items(*total);
-    *width = calc_menu_width(menu);
-    *lines = *items + DIALOG_HEIGHT_WITHOUT_TEXT;
+    return (w == 0) ? menu_width: w;
 }
 
 static int add_item_content(unsigned int index, cl_list_node_t *node, void *a)
@@ -175,21 +171,41 @@ static int add_item_content(unsigned int index, cl_list_node_t *node, void *a)
     return 0;
 }
 
-static DIALOG_LISTITEM *prepare_dialog_content(const struct xante_menu *menu,
-    int total_items)
+static int prepare_content(const struct xante_menu *menu,
+    ui_properties_t *properties)
 {
-    DIALOG_LISTITEM *litems = NULL;
+    properties->litems = calloc(properties->number_of_items,
+                                sizeof(DIALOG_LISTITEM));
 
-    litems = calloc(total_items, sizeof(DIALOG_LISTITEM));
-
-    if (NULL == litems) {
+    if (NULL == properties->litems) {
         errno_set(XANTE_ERROR_NO_MEMORY);
-        return NULL;
+        return -1;
     }
 
-    cl_list_map_indexed(menu->items, add_item_content, litems);
+    cl_list_map_indexed(menu->items, add_item_content, properties->litems);
 
-    return litems;
+    return 0;
+}
+
+static void build_properties(const struct xante_menu *menu,
+    ui_properties_t *properties)
+{
+    properties->number_of_items = calc_menu_items(menu);
+
+    /*
+     * We don't have a default width because we need to display the full item
+     * name to the user.
+     */
+    properties->width = (menu->geometry.width == 0) ? calc_menu_width(menu)
+                                                    : menu->geometry.width;
+
+    properties->height = (menu->geometry.height == 0) ? DEFAULT_HEIGHT
+                                                      : menu->geometry.height;
+
+    properties->displayed_items = properties->height - DIALOG_HEIGHT_WITHOUT_TEXT;
+
+    /* Creates the UI content */
+    prepare_content(menu, properties);
 }
 
 static void prepare_dialog_look(struct xante_app *xpp,
@@ -215,19 +231,6 @@ static void release_dialog_labels(void)
     }
 }
 
-static void release_dialog_content(DIALOG_LISTITEM *listitem, int total_items)
-{
-    int i;
-
-    for (i = 0; i < total_items; i++) {
-        free(listitem[i].name);
-        free(listitem[i].help);
-        free(listitem[i].text);
-    }
-
-    free(listitem);
-}
-
 /* Rename menus to something better */
 static void call_menu_dialog(struct xante_app *xpp,
     cl_list_t *menus, struct xante_item *selected_item)
@@ -237,7 +240,7 @@ static void call_menu_dialog(struct xante_app *xpp,
 
     referenced_menu =
         xante_menu_search_by_object_id(menus,
-                                       cl_string_valueof(selected_item->menu_id));
+                                       cl_string_valueof(selected_item->referenced_menu));
 
     if (NULL == referenced_menu) {
         xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
@@ -248,7 +251,7 @@ static void call_menu_dialog(struct xante_app *xpp,
     }
 
     btn_cancel_label = strdup(cl_tr("Back"));
-    ui_dialog_menu(xpp, menus, referenced_menu, btn_cancel_label);
+    ui_menu(xpp, menus, referenced_menu, btn_cancel_label);
     free(btn_cancel_label);
 }
 
@@ -309,7 +312,7 @@ static void update_menu_item_brief(int current_item, void *a)
  */
 
 /**
- * @name ui_dialog_item
+ * @name ui_item
  * @brief Create and run a dialog according to the item passed as argument.
  *
  * @param [in,out] xpp: The library main object.
@@ -318,7 +321,7 @@ static void update_menu_item_brief(int current_item, void *a)
  *
  * @return Returns the button used by the user to end the dialog.
  */
-int ui_dialog_item(struct xante_app *xpp, cl_list_t *menus,
+int ui_item(struct xante_app *xpp, cl_list_t *menus,
     struct xante_item *selected_item)
 {
     ui_return_t ret_dialog;
@@ -358,31 +361,25 @@ int ui_dialog_item(struct xante_app *xpp, cl_list_t *menus,
         case XANTE_UI_DIALOG_INPUT_PASSWD:
         case XANTE_UI_DIALOG_RANGE:
         case XANTE_UI_DIALOG_INPUTSCROLL:
-            ret_dialog = ui_dialog_input(xpp, selected_item, edit_item_value);
+            ret_dialog = ui_input(xpp, selected_item, edit_item_value);
             break;
 
         case XANTE_UI_DIALOG_CALENDAR:
-            ret_dialog = ui_dialog_calendar(xpp, selected_item,
-                                            edit_item_value);
-
+            ret_dialog = ui_calendar(xpp, selected_item, edit_item_value);
             break;
 
         case XANTE_UI_DIALOG_TIMEBOX:
-            ret_dialog = ui_dialog_timebox(xpp, selected_item,
-                                           edit_item_value);
-
+            ret_dialog = ui_timebox(xpp, selected_item, edit_item_value);
             break;
 
         case XANTE_UI_DIALOG_RADIO_CHECKLIST:
         case XANTE_UI_DIALOG_CHECKLIST:
-            ret_dialog = ui_dialog_checklist(xpp, selected_item,
-                                             edit_item_value);
-
+            ret_dialog = ui_checklist(xpp, selected_item, edit_item_value);
             break;
 
         case XANTE_UI_DIALOG_YES_NO:
             if (edit_item_value == true)
-                ret_dialog = ui_dialog_yesno(xpp, selected_item);
+                ret_dialog = ui_yesno(xpp, selected_item);
             else {
                 xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
                                      cl_tr("Cannot change the value of this item!"));
@@ -391,12 +388,12 @@ int ui_dialog_item(struct xante_app *xpp, cl_list_t *menus,
             break;
 
         case XANTE_UI_DIALOG_DELETE_DYNAMIC_MENU_ITEM:
-            ui_dialog_delete_dm(xpp, selected_item, edit_item_value);
+            ui_delete_dm(xpp, selected_item, edit_item_value);
             break;
 
         case XANTE_UI_DIALOG_ADD_DYNAMIC_MENU_ITEM:
             if (edit_item_value == true)
-                ui_dialog_add_dm(xpp, selected_item);
+                ui_add_dm(xpp, selected_item);
             else {
                 xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
                                      cl_tr("Cannot add item!"));
@@ -414,41 +411,41 @@ int ui_dialog_item(struct xante_app *xpp, cl_list_t *menus,
             break;
 
         case XANTE_UI_DIALOG_PROGRESS:
-            ret_dialog = ui_dialog_progress(xpp, selected_item);
+            ret_dialog = ui_progress(xpp, selected_item);
             break;
 
         case XANTE_UI_DIALOG_SPINNER_SYNC:
         case XANTE_UI_DIALOG_DOTS_SYNC:
-            ret_dialog = ui_dialog_sync(xpp, selected_item);
+            ret_dialog = ui_sync(xpp, selected_item);
             break;
 
         case XANTE_UI_DIALOG_FILE_SELECT:
         case XANTE_UI_DIALOG_DIR_SELECT:
-            ret_dialog = ui_dialog_fselect(xpp, selected_item);
+            ret_dialog = ui_fselect(xpp, selected_item);
             break;
 
         case XANTE_UI_DIALOG_FILE_VIEW:
-            ret_dialog = ui_dialog_file_view(xpp, selected_item);
+            ret_dialog = ui_file_view(xpp, selected_item);
             break;
 
         case XANTE_UI_DIALOG_TAILBOX:
-            ret_dialog = ui_dialog_tailbox(xpp, selected_item);
+            ret_dialog = ui_tailbox(xpp, selected_item);
             break;
 
         case XANTE_UI_DIALOG_SCROLLTEXT:
-            ret_dialog = ui_dialog_scrolltext(xpp, selected_item);
+            ret_dialog = ui_scrolltext(xpp, selected_item);
             break;
 
         case XANTE_UI_DIALOG_UPDATE_OBJECT:
-            ret_dialog = ui_dialog_update_object(xpp, selected_item);
+            ret_dialog = ui_update_object(xpp, selected_item);
             break;
 
         case XANTE_UI_DIALOG_MIXEDFORM:
-            ret_dialog = ui_dialog_mixedform(xpp, selected_item);
+            ret_dialog = ui_mixedform(xpp, selected_item);
             break;
 
         case XANTE_UI_DIALOG_BUILDLIST:
-            ret_dialog = ui_dialog_buildlist(xpp, selected_item);
+            ret_dialog = ui_buildlist(xpp, selected_item);
             break;
 
         default:
@@ -471,7 +468,7 @@ int ui_dialog_item(struct xante_app *xpp, cl_list_t *menus,
 }
 
 /**
- * @name ui_dialog_menu
+ * @name ui_menu
  * @brief Creates a dialog of menu type.
  *
  * @param [in,out] xpp: The main library object.
@@ -481,13 +478,12 @@ int ui_dialog_item(struct xante_app *xpp, cl_list_t *menus,
  *
  * @return Returns the libdialog type of return value.
  */
-int ui_dialog_menu(struct xante_app *xpp, cl_list_t *menus,
+int ui_menu(struct xante_app *xpp, cl_list_t *menus,
     const struct xante_menu *entry_menu, const char *cancel_label)
 {
-    DIALOG_LISTITEM *dlg_items = NULL;
     bool loop = true;
-    int ret_dialog = DLG_EXIT_OK, items_to_select = 0, total_items = 0,
-        dlg_width = 0, selected_index = -1, dlg_lines = 0;
+    ui_properties_t properties;
+    int ret_dialog = DLG_EXIT_OK, selected_index = -1;
 
     release_dialog_labels();
 
@@ -495,27 +491,29 @@ int ui_dialog_menu(struct xante_app *xpp, cl_list_t *menus,
         if (xante_runtime_close_ui(xpp) == true)
             break;
 
-        calc_menu_limits(entry_menu, &dlg_lines, &dlg_width, &items_to_select,
-                         &total_items);
-
-        dlg_items = prepare_dialog_content(entry_menu, total_items);
+        INIT_PROPERTIES(properties);
+        build_properties(entry_menu, &properties);
         prepare_dialog_look(xpp, cancel_label);
 
 #ifdef ALTERNATIVE_DIALOG
-        ret_dialog = dlg_menu(cl_string_valueof(entry_menu->name), "", dlg_lines,
-                              dlg_width, items_to_select, total_items,
-                              dlg_items, &selected_index, NULL,
+        ret_dialog = dlg_menu(cl_string_valueof(entry_menu->name), "",
+                              properties.height, properties.width,
+                              properties.displayed_items,
+                              properties.number_of_items,
+                              properties.litems, &selected_index, NULL,
                               update_menu_item_brief, (void *)entry_menu);
 #else
-        ret_dialog = dlg_menu(cl_string_valueof(entry_menu->name), "", dlg_lines,
-                              dlg_width, items_to_select, total_items,
-                              dlg_items, &selected_index, NULL);
+        ret_dialog = dlg_menu(cl_string_valueof(entry_menu->name), "",
+                              properties.height, properties.width,
+                              properties.displayed_items,
+                              properties.number_of_items,
+                              properties.litems, &selected_index, NULL);
 #endif
 
         switch (ret_dialog) {
             case DLG_EXIT_OK:
-                ui_dialog_item(xpp, menus, get_item_at(entry_menu->items,
-                                                       selected_index));
+                ui_item(xpp, menus, get_item_at(entry_menu->items,
+                                                selected_index));
 
                 break;
 
@@ -527,6 +525,10 @@ int ui_dialog_menu(struct xante_app *xpp, cl_list_t *menus,
 #endif
 
             case DLG_EXIT_ESC:
+                /* Don't let the user close the dialog */
+                if (xante_runtime_esc_key(xpp))
+                    break;
+
             case DLG_EXIT_CANCEL:
                 /* Are we leaving the application? */
                 if (strcmp(cancel_label, MAIN_MENU_CANCEL_LABEL) == 0) {
@@ -552,7 +554,7 @@ int ui_dialog_menu(struct xante_app *xpp, cl_list_t *menus,
         }
 
         release_dialog_labels();
-        release_dialog_content(dlg_items, total_items);
+        UNINIT_PROPERTIES(properties);
     } while (loop);
 
     return ret_dialog;

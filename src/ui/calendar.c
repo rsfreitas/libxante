@@ -32,6 +32,9 @@
 #define DEFAULT_NOT_EDIT_STATUSBAR_TEXT \
     "[ESC] Cancel [TAB] Select an option [Enter] Confirm"
 
+#define DEFAULT_WIDTH                       DEFAULT_DIALOG_WIDTH
+#define DEFAULT_HEIGHT                      3
+
 /*
  *
  * Internal functions
@@ -105,7 +108,7 @@ static bool item_value_has_changed(struct xante_app *xpp,
  */
 
 /**
- * @name ui_dialog_calendar
+ * @name ui_calendar
  * @brief Creates a dialog to choose a date in a calendar.
  *
  * @param [in] xpp: The main library object.
@@ -116,28 +119,36 @@ static bool item_value_has_changed(struct xante_app *xpp,
  * @return Returns a ui_return_t value indicating if the item's value has been
  *         changed (true) or not (false) with the dialog selected button.
  */
-ui_return_t ui_dialog_calendar(struct xante_app *xpp, struct xante_item *item,
+ui_return_t ui_calendar(struct xante_app *xpp, struct xante_item *item,
     bool edit_value)
 {
     bool value_changed = false, loop = true;
-    cl_string_t *text = NULL;
     int ret_dialog = DLG_EXIT_OK, day = 0, month = 0, year = 0;
     char *result = NULL;
     ui_return_t ret;
+    ui_properties_t properties;
 
-    /* Prepare dialog */
+    INIT_PROPERTIES(properties);
+
+    /* Prepare dialog and its properties */
     dlgx_set_backtitle(xpp);
     dlgx_update_cancel_button_label();
     dlgx_alloc_input(64);
     dlgx_put_statusbar((edit_value == true) ? DEFAULT_STATUSBAR_TEXT
                                             : DEFAULT_NOT_EDIT_STATUSBAR_TEXT);
 
+    properties.width = (item->geometry.width == 0) ? DEFAULT_WIDTH
+                                                   : item->geometry.width;
+
+    properties.height = (item->geometry.height == 0) ? DEFAULT_HEIGHT
+                                                     : item->geometry.height;
+
     /* Adjusts the dialog content using the item content */
     split_item_value(item, &day, &month, &year);
 
     /* Adjusts the window message */
-    text = cl_string_dup(item->options);
-    cl_string_rplchr(text, XANTE_STR_LINE_BREAK, '\n');
+    properties.text = cl_string_dup(item->options);
+    cl_string_rplchr(properties.text, XANTE_STR_LINE_BREAK, '\n');
 
     /* Enables the help button */
     if (item->descriptive_help != NULL)
@@ -146,13 +157,14 @@ ui_return_t ui_dialog_calendar(struct xante_app *xpp, struct xante_item *item,
     do {
 #ifdef ALTERNATIVE_DIALOG
         ret_dialog = dialog_calendar(cl_string_valueof(item->name),
-                                     cl_string_valueof(text), 3,
-                                     MINIMUM_WIDTH, day, month, year,
-                                     edit_value);
+                                     cl_string_valueof(properties.text),
+                                     properties.height, properties.width,
+                                     day, month, year, edit_value);
 #else
         ret_dialog = dialog_calendar(cl_string_valueof(item->name),
-                                     cl_string_valueof(text), 3,
-                                     MINIMUM_WIDTH, day, month, year);
+                                     cl_string_valueof(properties.text),
+                                     properties.height, properties.width,
+                                     day, month, year);
 #endif
 
         switch (ret_dialog) {
@@ -186,6 +198,10 @@ ui_return_t ui_dialog_calendar(struct xante_app *xpp, struct xante_item *item,
 #endif
 
             case DLG_EXIT_ESC:
+                /* Don't let the user close the dialog */
+                if (xante_runtime_esc_key(xpp))
+                    break;
+
             case DLG_EXIT_CANCEL:
                 loop = false;
                 break;
@@ -208,10 +224,8 @@ ui_return_t ui_dialog_calendar(struct xante_app *xpp, struct xante_item *item,
     if (item->descriptive_help != NULL)
         dialog_vars.help_button = 0;
 
-    if (text != NULL)
-        cl_string_unref(text);
-
     dlgx_free_input();
+    UNINIT_PROPERTIES(properties);
 
     ret.selected_button = ret_dialog;
     ret.updated_value = value_changed;

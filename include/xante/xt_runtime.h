@@ -42,6 +42,9 @@ void runtime_set_exit_value(struct xante_app *xpp, int exit_value);
 void runtime_set_ui_active(struct xante_app *xpp, bool ui_active);
 void runtime_set_execute_module(struct xante_app *xpp, bool execute_module);
 void runtime_set_user_authentication(struct xante_app *xpp, bool auth);
+void runtime_set_esc_key(struct xante_app *xpp, bool enabled);
+void runtime_set_suspend_key(struct xante_app *xpp, bool enabled);
+void runtime_set_stop_key(struct xante_app *xpp, bool enabled);
 
 #endif
 
@@ -249,6 +252,38 @@ bool xante_runtime_user_authentication(const xante_t *xpp);
  * @return On success returns the caller name or NULL otherwise.
  */
 const char *xante_runtime_caller_name(const xante_t *xpp);
+
+/**
+ * @name xante_runtime_esc_key
+ * @brief Retrieves if the ESC key is blocked or not.
+ *
+ * @param [in] xpp: The library main object.
+ *
+ * @return Returns true/false if the ESC key is blocked or not.
+ */
+bool xante_runtime_esc_key(const xante_t *xpp);
+
+/**
+ * @name xante_runtime_suspend_key
+ * @brief Retrieves if the application can be suspended through a key
+ *        combination.
+ *
+ * @param [in] xpp: The library main object.
+ *
+ * @return Returns true/false if the application can be suspended or not.
+ */
+bool xante_runtime_suspend_key(const xante_t *xpp);
+
+/**
+ * @name xante_runtime_suspend_key
+ * @brief Retrieves if the application can be suspended through a key
+ *        combination.
+ *
+ * @param [in] xpp: The library main object.
+ *
+ * @return Returns true/false if the application can be suspended or not.
+ */
+bool xante_runtime_stop_key(const xante_t *xpp);
 
 #endif
 

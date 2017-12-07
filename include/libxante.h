@@ -165,7 +165,7 @@ struct xante_change_entry {
 #ifdef LIBXANTE_COMPILE
 # define MAJOR_VERSION  0
 # define MINOR_VERSION  0
-# define RELEASE        7
+# define RELEASE        8
 
 # include "xante/xt_internal.h"
 #endif

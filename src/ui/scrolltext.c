@@ -39,34 +39,39 @@
  *
  */
 
-ui_return_t ui_dialog_scrolltext(struct xante_app *xpp, struct xante_item *item)
+ui_return_t ui_scrolltext(struct xante_app *xpp, struct xante_item *item)
 {
     ui_return_t ret;
     int ret_dialog = DLG_EXIT_OK;
     bool loop = true;
     cl_object_t *value = NULL;
-    char *text = NULL;
+    ui_properties_t properties;
+
+    INIT_PROPERTIES(properties);
 
     /* Prepare dialog */
     dlgx_set_backtitle(xpp);
     dlgx_update_cancel_button_label();
     dlgx_put_statusbar(DEFAULT_STATUSBAR_TEXT);
+    properties.width = (item->geometry.width == 0) ? DIALOG_WIDTH
+                                                   : item->geometry.width;
+
+    properties.height = (item->geometry.height == 0) ? DIALOG_HEIGHT
+                                                     : item->geometry.height;
 
     /* Gets the item voalue */
     value = item_value(item);
-    text = CL_OBJECT_AS_STRING(value);
+    properties.text = CL_OBJECT_AS_CSTRING(value);
 
     /* Enables the help button */
     if (item->descriptive_help != NULL)
         dialog_vars.help_button = 1;
 
-    xante_log_info("%s: '%s' '%s'", __FUNCTION__, text,
-                    cl_string_valueof(item->options));
     do {
-        ret_dialog = dlgx_scrolltext(DIALOG_WIDTH, DIALOG_HEIGHT,
+        ret_dialog = dlgx_scrolltext(properties.width, properties.height,
                                      cl_string_valueof(item->name),
                                      cl_string_valueof(item->options),
-                                     text);
+                                     properties.text);
 
         switch (ret_dialog) {
             case DLG_EXIT_OK:
@@ -80,6 +85,10 @@ ui_return_t ui_dialog_scrolltext(struct xante_app *xpp, struct xante_item *item)
 #endif
 
             case DLG_EXIT_ESC:
+                /* Don't let the user close the dialog */
+                if (xante_runtime_esc_key(xpp))
+                    break;
+
             case DLG_EXIT_CANCEL:
                 loop = false;
                 break;
@@ -97,8 +106,7 @@ ui_return_t ui_dialog_scrolltext(struct xante_app *xpp, struct xante_item *item)
     if (item->descriptive_help != NULL)
         dialog_vars.help_button = 0;
 
-    if (text != NULL)
-        free(text);
+    UNINIT_PROPERTIES(properties);
 
     ret.selected_button = DLG_EXIT_OK;
     ret.updated_value = false;

@@ -80,6 +80,9 @@ void runtime_start(struct xante_app *xpp, const char *caller_name)
     runtime_set_ui_active(xpp, false);
     runtime_set_user_authentication(xpp, true);
     runtime_set_caller_name(xpp, caller_name);
+    runtime_set_esc_key(xpp, xpp->info.esc_key);
+    runtime_set_suspend_key(xpp, xpp->info.suspend_key);
+    runtime_set_stop_key(xpp, xpp->info.stop_key);
 }
 
 void runtime_stop(struct xante_app *xpp)
@@ -135,6 +138,45 @@ void runtime_set_execute_module(struct xante_app *xpp, bool execute_module)
 void runtime_set_user_authentication(struct xante_app *xpp, bool auth)
 {
     xpp->runtime.user_authentication = auth;
+}
+
+/**
+ * @name runtime_set_esc_key
+ * @brief Sets/Unsets if the ESC key will be used to exit a dialog or not.
+ *
+ * @param [in] xpp: The library main object.
+ * @param [in] enabled: The boolean flag to set/unset the ESC key.
+ */
+void runtime_set_esc_key(struct xante_app *xpp, bool enabled)
+{
+    xpp->runtime.esc_key = enabled;
+}
+
+/**
+ * @name runtime_set_suspend_key
+ * @brief Sets/Unsets if the execution of an application will be able to be
+ *        suspended through a keyboard combination (CTRL + Z).
+ *
+ * @param [in] xpp: The library main object.
+ * @param [in] enabled: The boolean flag to set/unset the suspend combination
+ *                      key.
+ */
+void runtime_set_suspend_key(struct xante_app *xpp, bool enabled)
+{
+    xpp->runtime.suspend_key = enabled;
+}
+
+/**
+ * @name runtime_set_suspend_key
+ * @brief Sets/Unsets if the execution of an application will be able to be
+ *        stopped through a keyboard combination (CTRL + C).
+ *
+ * @param [in] xpp: The library main object.
+ * @param [in] enabled: The boolean flag to set/unset the stop combination key.
+ */
+void runtime_set_stop_key(struct xante_app *xpp, bool enabled)
+{
+    xpp->runtime.stop_key = enabled;
 }
 
 /*
@@ -427,5 +469,47 @@ __PUB_API__ const char *xante_runtime_caller_name(const xante_t *xpp)
     }
 
     return x->runtime.caller_name;
+}
+
+__PUB_API__ bool xante_runtime_esc_key(const xante_t *xpp)
+{
+    struct xante_app *x = (struct xante_app *)xpp;
+
+    errno_clear();
+
+    if (NULL == xpp) {
+        errno_set(XANTE_ERROR_NULL_ARG);
+        return false;
+    }
+
+    return x->runtime.esc_key;
+}
+
+__PUB_API__ bool xante_runtime_suspend_key(const xante_t *xpp)
+{
+    struct xante_app *x = (struct xante_app *)xpp;
+
+    errno_clear();
+
+    if (NULL == xpp) {
+        errno_set(XANTE_ERROR_NULL_ARG);
+        return false;
+    }
+
+    return x->runtime.suspend_key;
+}
+
+__PUB_API__ bool xante_runtime_stop_key(const xante_t *xpp)
+{
+    struct xante_app *x = (struct xante_app *)xpp;
+
+    errno_clear();
+
+    if (NULL == xpp) {
+        errno_set(XANTE_ERROR_NULL_ARG);
+        return false;
+    }
+
+    return x->runtime.stop_key;
 }
 

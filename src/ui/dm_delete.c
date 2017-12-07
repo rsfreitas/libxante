@@ -32,28 +32,35 @@
 #define DEFAULT_NOT_EDIT_STATUSBAR_TEXT \
     "[ESC] Cancel [Enter] Confirm a selection [Up/Down] Move [TAB/Left/Right] Choose option"
 
+#define DEFAULT_WIDTH                   DEFAULT_DIALOG_WIDTH
+
+/* XXX: The +1 is because of the window subtitle. */
+#define DEFAULT_HEIGHT                  \
+    (DIALOG_HEIGHT_WITHOUT_TEXT + MAX_DLG_ITEMS + 1)
+
 /*
  *
  * Internal functions
  *
  */
 
-static DIALOG_LISTITEM *prepare_dialog_content(struct xante_menu *dm_menu,
-    int total_items)
+static int prepare_content(const struct xante_menu *dm_menu,
+    ui_properties_t *properties)
 {
     DIALOG_LISTITEM *litems = NULL, *listitem = NULL;
     int index;
     cl_list_node_t *node = NULL;
     struct xante_item *item = NULL;
 
-    litems = calloc(total_items, sizeof(DIALOG_LISTITEM));
+    properties->litems = calloc(properties->number_of_items,
+                                sizeof(DIALOG_LISTITEM));
 
-    if (NULL == litems) {
+    if (NULL == properties->litems) {
         errno_set(XANTE_ERROR_NO_MEMORY);
-        return NULL;
+        return -1;
     }
 
-    for (index = 0; index < total_items; index++) {
+    for (index = 0; index < properties->number_of_items; index++) {
         node = cl_list_at(dm_menu->items, index);
         item = cl_list_node_content(node);
 
@@ -68,30 +75,23 @@ static DIALOG_LISTITEM *prepare_dialog_content(struct xante_menu *dm_menu,
     /* Let the first option selected */
     litems[0].state = 1;
 
-    return litems;
+    return 0;
 }
 
-static void release_dialog_content(DIALOG_LISTITEM *listitem, int total_items)
+static void build_properties(const struct xante_menu *dm_menu,
+    ui_properties_t *properties)
 {
-    int i;
+    properties->number_of_items = cl_stringlist_size(dm_menu->items);
+    properties->width = (dm_menu->geometry.width == 0) ? DEFAULT_WIDTH
+                                                       : dm_menu->geometry.width;
 
-    for (i = 0; i < total_items; i++) {
-        free(listitem[i].text);
-        free(listitem[i].name);
-        free(listitem[i].help);
-    }
+    properties->height = (dm_menu->geometry.height == 0) ? DEFAULT_HEIGHT
+                                                         : dm_menu->geometry.height;
 
-    free(listitem);
-}
+    properties->displayed_items = properties->height - DIALOG_HEIGHT_WITHOUT_TEXT;
 
-static void calc_checklist_limits(const struct xante_menu *dm_menu,
-    int *options, int *height, int *list_height)
-{
-    *list_height = cl_list_size(dm_menu->items);
-    *options = dialog_get_dlg_items(*list_height);
-
-    /* XXX: This 1 is from the dialog text message. */
-    *height = *options + DIALOG_HEIGHT_WITHOUT_TEXT + 1;
+    /* Creates the UI content */
+    prepare_content(dm_menu, properties);
 }
 
 /*
@@ -101,7 +101,7 @@ static void calc_checklist_limits(const struct xante_menu *dm_menu,
  */
 
 /**
- * @name ui_dialog_delete_dm
+ * @name ui_delete_dm
  * @brief Creates a dialog to delete entries from a dynamic menu.
  *
  * The dialog will be a radio-checklist with the current dynamic menu options.
@@ -113,18 +113,18 @@ static void calc_checklist_limits(const struct xante_menu *dm_menu,
  *
  * @return Returns a ui_return_t value indicating if an item was deleted or not.
  */
-ui_return_t ui_dialog_delete_dm(struct xante_app *xpp, struct xante_item *item,
+ui_return_t ui_delete_dm(struct xante_app *xpp, struct xante_item *item,
     bool edit_value)
 {
     bool deleted = false, loop = true;
     struct xante_menu *dm_menu = NULL;
-    DIALOG_LISTITEM *dlg_items = NULL;
+    int ret_dialog = DLG_EXIT_OK, selected_index = -1;
+    ui_properties_t properties;
     ui_return_t ret;
-    int ret_dialog = DLG_EXIT_OK, list_options_height = 0, height = 0,
-        number_of_options = 0, selected_index = -1;
 
+    INIT_PROPERTIES(properties);
     dm_menu = xante_menu_search_by_object_id(xpp->ui.menus,
-                                             cl_string_valueof(item->menu_id));
+                                             cl_string_valueof(item->referenced_menu));
 
     if (NULL == dm_menu) {
         xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
@@ -154,10 +154,7 @@ ui_return_t ui_dialog_delete_dm(struct xante_app *xpp, struct xante_item *item,
                                             : DEFAULT_NOT_EDIT_STATUSBAR_TEXT);
 
     /* Prepare dialog content */
-    calc_checklist_limits(dm_menu, &number_of_options, &height,
-                          &list_options_height);
-
-    dlg_items = prepare_dialog_content(dm_menu, list_options_height);
+    build_properties(dm_menu, &properties);
 
     /* Enables the help button */
     if (item->descriptive_help != NULL)
@@ -167,16 +164,20 @@ ui_return_t ui_dialog_delete_dm(struct xante_app *xpp, struct xante_item *item,
 #ifdef ALTERNATIVE_DIALOG
         ret_dialog = dlg_checklist(cl_string_valueof(item->name),
                                    cl_string_valueof(item->options),
-                                   height, MINIMUM_WIDTH, list_options_height,
-                                   number_of_options, dlg_items, " X",
+                                   properties.height, properties.width,
+                                   properties.displayed_items,
+                                   properties.number_of_items,
+                                   properties.litems, " X",
                                    item->dialog_checklist_type,
                                    &selected_index, NULL, NULL,
                                    edit_value);
 #else
         ret_dialog = dlg_checklist(cl_string_valueof(item->name),
-                                   cl_string_valueof(item->options), height,
-                                   MINIMUM_WIDTH, list_options_height,
-                                   number_of_options, dlg_items, " X",
+                                   cl_string_valueof(item->options),
+                                   properties.height, properties.width,
+                                   properties.displayed_items,
+                                   properties.number_of_items,
+                                   properties.litems, " X",
                                    item->dialog_checklist_type,
                                    &selected_index);
 #endif
@@ -199,6 +200,10 @@ ui_return_t ui_dialog_delete_dm(struct xante_app *xpp, struct xante_item *item,
 #endif
 
             case DLG_EXIT_ESC:
+                /* Don't let the user close the dialog */
+                if (xante_runtime_esc_key(xpp))
+                    break;
+
             case DLG_EXIT_CANCEL:
                 loop = false;
                 break;
@@ -216,7 +221,7 @@ ui_return_t ui_dialog_delete_dm(struct xante_app *xpp, struct xante_item *item,
     if (item->descriptive_help != NULL)
         dialog_vars.help_button = 0;
 
-    release_dialog_content(dlg_items, list_options_height);
+    UNINIT_PROPERTIES(properties);
 
     ret.selected_button = ret_dialog;
     ret.updated_value = deleted;

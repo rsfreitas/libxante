@@ -36,104 +36,70 @@
 #define DIALOG_WIDTH                60
 #define DIALOG_HEIGHT               22
 
-struct dialog_properties {
-    int             width;
-    int             height;
-    int             list_height;
-    int             number_of_options;
-    cl_stringlist_t *default_value;
-};
-
 /*
  *
  * Internal functions
  *
  */
 
-static void build_dialog_properties(const struct xante_item *item,
-    struct dialog_properties *properties)
+static int prepare_content(struct xante_item *item,
+    ui_properties_t *properties)
 {
-    properties->default_value = NULL;
-    properties->width = DIALOG_WIDTH;
-    properties->height = DIALOG_HEIGHT;
-    properties->number_of_options = cl_stringlist_size(item->list_items);
-    properties->list_height = dialog_get_dlg_items(properties->number_of_options);
-}
-
-static cl_stringlist_t *get_default_value(const struct xante_item *item)
-{
-    cl_stringlist_t *l = NULL;
-    cl_string_t *s = NULL;
-
-    if (NULL == item->default_value)
-        return NULL;
-
-    s = CL_OBJECT_AS_CSTRING(item->default_value);
-    l = cl_string_split(s, ",");
-    cl_string_unref(s);
-
-    return l;
-}
-
-static DIALOG_LISTITEM *prepare_dialog_content(const struct xante_item *item,
-    struct dialog_properties *properties)
-{
-    DIALOG_LISTITEM *litems = NULL, *listitem = NULL;
-    cl_string_t *option = NULL;
-    cl_stringlist_t *slist = NULL;
+    DIALOG_LISTITEM *listitem = NULL;
+    cl_string_t *p = NULL;
     int index;
 
-    if (NULL == item->selected_items) {
-        properties->default_value = get_default_value(item);
-        slist = properties->default_value;
-    } else
-        slist = item->selected_items;
+    properties->litems = calloc(properties->number_of_items,
+                                sizeof(DIALOG_LISTITEM));
 
-    litems = calloc(properties->number_of_options, sizeof(DIALOG_LISTITEM));
-
-    if (NULL == litems) {
+    if (NULL == properties->litems) {
         errno_set(XANTE_ERROR_NO_MEMORY);
-        return NULL;
+        return -1;
     }
 
-    for (index = 0; index < properties->number_of_options; index++) {
-        listitem = &litems[index];
-        option = cl_stringlist_get(item->list_items, index);
+    /* Use the default value if we don't have already selected_items */
+    if (NULL == item->selected_items) {
+        p = CL_OBJECT_AS_CSTRING(item->default_value);
+        item->selected_items = cl_string_split(p, ",");
+        cl_string_unref(p);
+    }
 
-        listitem->text = strdup(cl_string_valueof(option));
+    for (index = 0; index < properties->number_of_items; index++) {
+        listitem = &properties->litems[index];
+        p = cl_stringlist_get(item->list_items, index);
+
+        listitem->text = strdup(cl_string_valueof(p));
         listitem->name = strdup("");
         listitem->help = strdup("");
 
-        if (cl_stringlist_contains(slist, option))
+        if (cl_stringlist_contains(item->selected_items, p))
             listitem->state = 1;
         else
             listitem->state = 0;
 
-        cl_string_unref(option);
+        cl_string_unref(p);
     }
 
-    return litems;
+    return 0;
 }
 
-static void release_dialog_content(DIALOG_LISTITEM *listitem,
-    struct dialog_properties *properties)
+static void build_properties(struct xante_item *item,
+    ui_properties_t *properties)
 {
-    int i;
+    properties->width = (item->geometry.width == 0) ? DIALOG_WIDTH
+                                                    : item->geometry.width;
 
-    for (i = 0; i < properties->number_of_options; i++) {
-        free(listitem[i].text);
-        free(listitem[i].name);
-        free(listitem[i].help);
-    }
+    properties->height = (item->geometry.height == 0) ? DIALOG_HEIGHT
+                                                      : item->geometry.height;
 
-    free(listitem);
+    properties->number_of_items = cl_stringlist_size(item->list_items);
+    properties->displayed_items = dlgx_get_dlg_items(properties->number_of_items);
 
-    if (properties->default_value != NULL)
-        cl_stringlist_destroy(properties->default_value);
+    /* Creates the UI content */
+    prepare_content(item, properties);
 }
 
-static cl_string_t *get_current_result(DIALOG_LISTITEM *items,
-    const struct dialog_properties *properties)
+static cl_string_t *get_current_result(const ui_properties_t *properties)
 {
     int i;
     cl_string_t *ret = NULL;
@@ -141,8 +107,8 @@ static cl_string_t *get_current_result(DIALOG_LISTITEM *items,
 
     ret = cl_string_create_empty(0);
 
-    for (i = 0; i < properties->number_of_options; i++) {
-        item = &items[i];
+    for (i = 0; i < properties->number_of_items; i++) {
+        item = &properties->litems[i];
 
         if (item->state == 1)
             cl_string_cat(ret, "%s,", item->text);
@@ -189,14 +155,15 @@ static bool item_value_has_changed(struct xante_app *xpp, struct xante_item *ite
  *
  */
 
-ui_return_t ui_dialog_buildlist(struct xante_app *xpp, struct xante_item *item)
+ui_return_t ui_buildlist(struct xante_app *xpp, struct xante_item *item)
 {
     int ret_dialog = DLG_EXIT_OK, selected_item = 0;;
     bool loop = true, value_changed = false;
     ui_return_t ret;
-    struct dialog_properties properties;
-    DIALOG_LISTITEM *items;
+    ui_properties_t properties;
     cl_string_t *cprompt = NULL, *result = NULL;
+
+    INIT_PROPERTIES(properties);
 
     /* Prepare dialog */
     dlgx_set_backtitle(xpp);
@@ -204,8 +171,7 @@ ui_return_t ui_dialog_buildlist(struct xante_app *xpp, struct xante_item *item)
     dlgx_put_statusbar(DEFAULT_STATUSBAR_TEXT);
 
     /* Prepares dialog content */
-    build_dialog_properties(item, &properties);
-    items = prepare_dialog_content(item, &properties);
+    build_properties(item, &properties);
 
     /* Enables the help button */
     if (item->descriptive_help != NULL)
@@ -225,13 +191,13 @@ ui_return_t ui_dialog_buildlist(struct xante_app *xpp, struct xante_item *item)
         ret_dialog = dlg_buildlist(cl_string_valueof(item->name),
                                    cl_string_valueof(cprompt),
                                    properties.height, properties.width,
-                                   properties.list_height,
-                                   properties.number_of_options,
-                                   items, NULL, 0, &selected_item);
+                                   properties.displayed_items,
+                                   properties.number_of_items,
+                                   properties.litems, NULL, 0, &selected_item);
 
         switch (ret_dialog) {
             case DLG_EXIT_OK:
-                result = get_current_result(items, &properties);
+                result = get_current_result(&properties);
 
                 if (event_call(EV_ITEM_VALUE_CONFIRM, xpp, item,
                                cl_string_valueof(result)) < 0)
@@ -252,6 +218,10 @@ ui_return_t ui_dialog_buildlist(struct xante_app *xpp, struct xante_item *item)
 #endif
 
             case DLG_EXIT_ESC:
+                /* Don't let the user close the dialog */
+                if (xante_runtime_esc_key(xpp))
+                    break;
+
             case DLG_EXIT_CANCEL:
                 loop = false;
                 break;
@@ -273,7 +243,8 @@ ui_return_t ui_dialog_buildlist(struct xante_app *xpp, struct xante_item *item)
         cl_string_unref(result);
 
     cl_string_unref(cprompt);
-    release_dialog_content(items, &properties);
+    UNINIT_PROPERTIES(properties);
+
     ret.selected_button = ret_dialog;
     ret.updated_value = value_changed;
 
