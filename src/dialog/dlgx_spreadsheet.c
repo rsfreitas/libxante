@@ -368,6 +368,14 @@ int spreadsheet_st_add_data(struct dlgx_spreadsheet_st *sheet, int pos,
     return 0;
 }
 
+const char *spreadsheet_st_get_data(struct dlgx_spreadsheet_st *sheet, int pos)
+{
+    if ((pos < 0) || (pos > sheet->cells))
+        return NULL;
+
+    return sheet->cell[pos].data;
+}
+
 /**
  * @name dlg_spreadsheet
  * @brief Creates a spreadsheet dialog.
@@ -381,7 +389,7 @@ int spreadsheet_st_add_data(struct dlgx_spreadsheet_st *sheet, int pos,
  *
  * @return Returns libdialog's default return values of a selected button.
  */
-int dlg_spreadsheet(const char *title, const char *subtitle,
+int dlgx_spreadsheet(const char *title, const char *subtitle,
     struct dlgx_spreadsheet_st *sheet)
 {
     static DLG_KEYS_BINDING dialog_b[] = {

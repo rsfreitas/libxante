@@ -39,14 +39,14 @@
 
 static cl_json_t *get_fields_node(const struct xante_item *item)
 {
-    return cl_json_get_object_item(item->mixedform_options, "fields");
+    return cl_json_get_object_item(item->form_options, "fields");
 }
 
 static cl_string_t *get_title(const struct xante_item *item)
 {
     cl_json_t *node;
 
-    node = cl_json_get_object_item(item->mixedform_options, "title");
+    node = cl_json_get_object_item(item->form_options, "title");
 
     if (NULL == node)
         return NULL;
@@ -343,7 +343,8 @@ static bool item_values_have_changed(struct xante_app *xpp,
         field = get_field_by_name(fields, total_fields,
                                   get_element_name(rfield));
 
-        changed = compare_elements(xpp, item, field, rfield);
+        if (compare_elements(xpp, item, field, rfield))
+            changed = true;
     }
 
 end_block:
@@ -351,6 +352,41 @@ end_block:
         cl_json_delete(jresult);
 
     return changed;
+}
+
+static void save_mixedform_field(struct xante_app *xpp, cl_json_t *field)
+{
+    cl_json_t *node;
+    cl_string_t *config_block, *config_item, *value;
+
+    node = cl_json_get_object_item(field, "config_block");
+
+    if (NULL == node)
+        return;
+
+    config_block = cl_json_get_object_value(node);
+    node = cl_json_get_object_item(field, "config_item");
+
+    if (NULL == node)
+        return;
+
+    config_item = cl_json_get_object_value(node);
+    node = cl_json_get_object_item(field, "value");
+
+    if (NULL == node) {
+        node = cl_json_get_object_item(field, "default_value");
+
+        if (NULL == node)
+            return;
+    }
+
+    value = cl_json_get_object_value(node);
+    cl_cfg_set_value(xpp->config.cfg_file,
+                     cl_string_valueof(config_block),
+                     cl_string_valueof(config_item),
+                     "%s", cl_string_valueof(value));
+
+    xante_log_debug("saving item: %s", cl_string_valueof(value));
 }
 
 /*
@@ -404,6 +440,27 @@ void ui_mixedform_load_and_set_value(struct xante_item *item, cl_cfg_file_t *cfg
         cl_object_unref(value);
         free(tmp);
     }
+}
+
+/*
+ * A mixedform item has some peculiar differences from a standard item. It has
+ * its values stored inside a JSON object, which should be individually written
+ * into the file.
+ */
+void ui_save_mixedform_item(struct xante_app *xpp, struct xante_item *item)
+{
+    int total_fields = 0, i;
+    cl_json_t *fields = NULL;
+
+    fields = cl_json_get_object_item(item->form_options, "fields");
+
+    if (NULL == fields)
+        return;
+
+    total_fields = cl_json_get_array_size(fields);
+
+    for (i = 0; i < total_fields; i++)
+        save_mixedform_field(xpp, cl_json_get_array_item(fields, i));
 }
 
 ui_return_t ui_mixedform(struct xante_app *xpp, struct xante_item *item)

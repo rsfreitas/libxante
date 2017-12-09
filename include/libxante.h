@@ -65,7 +65,8 @@ enum xante_ui_dialog {
     XANTE_UI_DIALOG_UPDATE_OBJECT,
     XANTE_UI_DIALOG_INPUTSCROLL,
     XANTE_UI_DIALOG_MIXEDFORM,
-    XANTE_UI_DIALOG_BUILDLIST
+    XANTE_UI_DIALOG_BUILDLIST,
+    XANTE_UI_DIALOG_SPREADSHEET
 };
 
 /** An access mode from a menu or a menu item */

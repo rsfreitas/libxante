@@ -97,8 +97,8 @@ static const char *__description[] = {
     cl_tr_noop("Menu was not found"),                                   //*
     cl_tr_noop("The head of menu list was not found"),
     cl_tr_noop("Item was not found"),                                   //*
-    cl_tr_noop("Invalid mixedform JSON"),                               //*
-    cl_tr_noop("Item has no data object"),
+    cl_tr_noop("Invalid form JSON"),                                    //*
+    cl_tr_noop("Item has no data object"),                              //*
 };
 
 static const char *__unknown_error = cl_tr_noop("Unknown error");

@@ -56,6 +56,10 @@ static int check_item_availability(cl_list_node_t *node, void *a)
     return 0;
 }
 
+/*
+ * We need to "manually" calculate the number of items of the menu because some
+ * of them must have been hidden with the JTF mode attribute.
+ */
 static int calc_menu_items(const struct xante_menu *menu)
 {
     struct list_data ld = {
@@ -446,6 +450,10 @@ int ui_item(struct xante_app *xpp, cl_list_t *menus,
 
         case XANTE_UI_DIALOG_BUILDLIST:
             ret_dialog = ui_buildlist(xpp, selected_item);
+            break;
+
+        case XANTE_UI_DIALOG_SPREADSHEET:
+            ret_dialog = ui_spreadsheet(xpp, selected_item);
             break;
 
         default:

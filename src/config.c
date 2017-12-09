@@ -83,6 +83,8 @@ static int load_item_config(cl_list_node_t *node, void *a)
         ui_mixedform_load_and_set_value(item, cfg_file);
     else if (item->dialog_type == XANTE_UI_DIALOG_BUILDLIST)
         load_buildlist_item(item, cfg_file);
+    else if (item->dialog_type == XANTE_UI_DIALOG_SPREADSHEET)
+        ui_spreadsheet_load_and_set_value(item, cfg_file);
     else {
         key = cl_cfg_entry(cfg_file, cl_string_valueof(item->config_block),
                            cl_string_valueof(item->config_item));
@@ -177,62 +179,6 @@ static bool need_to_write_config_file(struct xante_app *xpp,
     return true;
 }
 
-static void save_mixedform_field(struct xante_app *xpp, cl_json_t *field)
-{
-    cl_json_t *node;
-    cl_string_t *config_block, *config_item, *value;
-
-    node = cl_json_get_object_item(field, "config_block");
-
-    if (NULL == node)
-        return;
-
-    config_block = cl_json_get_object_value(node);
-    node = cl_json_get_object_item(field, "config_item");
-
-    if (NULL == node)
-        return;
-
-    config_item = cl_json_get_object_value(node);
-    node = cl_json_get_object_item(field, "value");
-
-    if (NULL == node) {
-        node = cl_json_get_object_item(field, "default_value");
-
-        if (NULL == node)
-            return;
-    }
-
-    value = cl_json_get_object_value(node);
-    cl_cfg_set_value(xpp->config.cfg_file,
-                     cl_string_valueof(config_block),
-                     cl_string_valueof(config_item),
-                     "%s", cl_string_valueof(value));
-
-    xante_log_debug("saving item: %s", cl_string_valueof(value));
-}
-
-/*
- * A mixedform item has some peculiar differences from a standard item. It has
- * its values stored inside a JSON object, which should be individually written
- * into the file.
- */
-static void save_mixedform_item(struct xante_app *xpp, struct xante_item *item)
-{
-    int total_fields = 0, i;
-    cl_json_t *fields = NULL;
-
-    fields = cl_json_get_object_item(item->mixedform_options, "fields");
-
-    if (NULL == fields)
-        return;
-
-    total_fields = cl_json_get_array_size(fields);
-
-    for (i = 0; i < total_fields; i++)
-        save_mixedform_field(xpp, cl_json_get_array_item(fields, i));
-}
-
 static void save_buildlist_item(struct xante_app *xpp, struct xante_item *item)
 {
     cl_string_t *value;
@@ -258,9 +204,11 @@ static int save_item_config(cl_list_node_t *node, void *a)
     cl_string_t *value = NULL;
 
     if (item->dialog_type == XANTE_UI_DIALOG_MIXEDFORM)
-        save_mixedform_item(xpp, item);
+        ui_save_mixedform_item(xpp, item);
     else if (item->dialog_type == XANTE_UI_DIALOG_BUILDLIST)
         save_buildlist_item(xpp, item);
+    else if (item->dialog_type == XANTE_UI_DIALOG_SPREADSHEET)
+        ui_save_spreadsheet_item(xpp, item);
     else {
         /* Checks if we can save the item */
         if (item->flags.config == false)

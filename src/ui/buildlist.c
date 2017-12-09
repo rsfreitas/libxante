@@ -121,14 +121,12 @@ static cl_string_t *get_current_result(const ui_properties_t *properties)
 }
 
 static bool item_value_has_changed(struct xante_app *xpp, struct xante_item *item,
-    const cl_string_t *new_value, const struct dialog_properties *properties)
+    const cl_string_t *new_value)
 {
     cl_string_t *old_value = NULL;
     bool changed = false;
 
-    old_value = cl_stringlist_flat((item->selected_items != NULL)
-                                        ? item->selected_items
-                                        : properties->default_value, ',');
+    old_value = cl_stringlist_flat(item->selected_items, ',');
 
     if (cl_string_cmp(old_value, new_value)) {
         changed = true;
@@ -205,9 +203,7 @@ ui_return_t ui_buildlist(struct xante_app *xpp, struct xante_item *item)
                     break;
                 }
 
-                value_changed = item_value_has_changed(xpp, item, result,
-                                                       &properties);
-
+                value_changed = item_value_has_changed(xpp, item, result);
                 loop = false;
                 break;
 

@@ -535,13 +535,15 @@ static void pre_adjust_item_info(struct xante_item *item)
             (item->dialog_type == XANTE_UI_DIALOG_YES_NO) ||
             (item->dialog_type == XANTE_UI_DIALOG_RANGE) ||
             (item->dialog_type == XANTE_UI_DIALOG_INPUTSCROLL) ||
-            (item->dialog_type == XANTE_UI_DIALOG_BUILDLIST))
+            (item->dialog_type == XANTE_UI_DIALOG_BUILDLIST) ||
+            (item->dialog_type == XANTE_UI_DIALOG_SPREADSHEET))
         {
             item->flags.config = true;
         }
 
         /* Almost every item needs to have the "options" object */
-        item->flags.options = true;
+        if (item->dialog_type != XANTE_UI_DIALOG_CUSTOM)
+            item->flags.options = true;
     }
 
     item->flags.ranges = item_has_ranges(item->dialog_type);
@@ -640,10 +642,11 @@ static int adjusts_item_info(struct xante_item *item)
             break;
 
         case XANTE_UI_DIALOG_MIXEDFORM:
-            item->mixedform_options = cl_json_parse(item->__helper.options);
+        case XANTE_UI_DIALOG_SPREADSHEET:
+            item->form_options = cl_json_parse(item->__helper.options);
 
-            if (NULL == item->mixedform_options) {
-                errno_set(XANTE_ERROR_INVALID_MIXEDFORM_JSON);
+            if (NULL == item->form_options) {
+                errno_set(XANTE_ERROR_INVALID_FORM_JSON);
                 errno_store_additional_content(cl_string_valueof(item->name));
                 return -1;
             }
@@ -656,7 +659,8 @@ static int adjusts_item_info(struct xante_item *item)
 
     if ((item->dialog_type != XANTE_UI_DIALOG_CHECKLIST) &&
         (item->dialog_type != XANTE_UI_DIALOG_RADIO_CHECKLIST) &&
-        (item->dialog_type != XANTE_UI_DIALOG_MIXEDFORM))
+        (item->dialog_type != XANTE_UI_DIALOG_MIXEDFORM) &&
+        (item->dialog_type != XANTE_UI_DIALOG_SPREADSHEET))
     {
         if (item->__helper.options != NULL)
             item->options = item->__helper.options;
@@ -858,6 +862,7 @@ static int parse_item_data(const cl_json_t *root, struct xante_item *item)
 
     if (data_object_must_exist(item) && (NULL == data)) {
         errno_set(XANTE_ERROR_JTF_NO_DATA_OBJECT);
+        errno_store_additional_content(cl_string_valueof(item->name));
         return -1;
     }
 
@@ -1032,9 +1037,6 @@ static int parse_item_ui(const cl_json_t *root, struct xante_item *item)
 struct xante_item *jtf_parse_item(const cl_json_t *item, bool ignores_object_id)
 {
     struct xante_item *i;
-//    cl_string_t *default_value = NULL;
-//    void *options = NULL, *max = NULL, *min = NULL, *brief_options_help = NULL;
-//    enum cl_json_type expected_option = CL_JSON_STRING;
 
     i = xante_item_create();
 
@@ -1075,56 +1077,14 @@ struct xante_item *jtf_parse_item(const cl_json_t *item, bool ignores_object_id)
     if (parse_item_data(item, i) < 0)
         return NULL;
 
-/*    if (parse_object_value(item, DEFAULT_VALUE, CL_JSON_STRING, false,
-                           (void **)&default_value) < 0)
-    {
-        return NULL;
-    }
-
-    if ((i->dialog_type == XANTE_UI_DIALOG_CHECKLIST) ||
-        (i->dialog_type == XANTE_UI_DIALOG_RADIO_CHECKLIST) ||
-        (i->dialog_type == XANTE_UI_DIALOG_BUILDLIST))
-    {
-        expected_option = CL_JSON_ARRAY;
-    }
-
-    if ((parse_object_value(item, OPTIONS, expected_option, false,
-                            (void **)&options) < 0) &&
-        i->flags.options)
-    {
-        return NULL;
-    }
-
-    if ((parse_object_value(item, REFERENCED_MENU, CL_JSON_STRING, false,
-                            (void **)&i->referenced_menu) < 0) &&
-        i->flags.referenced_menu)
-    {
-        return NULL;
-    }
-*/
     i->events = cl_json_dup(cl_json_get_object_item(item, EVENTS));
 
     if (parse_item_ui(item, i) < 0)
         return NULL;
 
-/*    if (parse_item_help(item, i, &brief_options_help) < 0)
-        return NULL;
-
-    if (parse_item_config(item, i) < 0)
-        return NULL;
-
-    if (parse_item_ranges(item, i, &max, &min) < 0)
-        return NULL;
-
-    if (parse_geometry(&i->geometry, item) < 0)
-        return NULL;
-*/
     /* Set up specific item properties */
     if (adjusts_item_info(i))
         return NULL;
-
-//    if (default_value != NULL)
-//        cl_string_unref(default_value);
 
     return i;
 }

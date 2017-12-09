@@ -157,6 +157,7 @@ void spreadsheet_st_destroy(struct dlgx_spreadsheet_st *table);
 int spreadsheet_st_add_data(struct dlgx_spreadsheet_st *table, int pos,
                             const char *fmt, ...);
 
+const char *spreadsheet_st_get_data(struct dlgx_spreadsheet_st *table, int pos);
 int dlgx_spreadsheet(const char *title, const char *subtitle,
                      struct dlgx_spreadsheet_st *table);
 

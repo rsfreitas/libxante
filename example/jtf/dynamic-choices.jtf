@@ -30,22 +30,31 @@
                         "name": "Weekdays",
                         "mode": 1,
                         "type": "menu",
-                        "object_id": "3",
-                        "menu_id": "3"
+                        "object_id": "1.1",
+                        "data": {
+                            "referenced_menu": "3"
+                        }
                     },
                     {
                         "name": "Yes no option",
                         "mode": 1,
                         "type": "yesno",
-                        "options": "Is this a valid question?",
-                        "default_value": "1",
-                        "help": {
-                            "brief": "This is a help description yesno.",
-                            "description": "This is a help description."
+                        "object_id": "1.2",
+                        "data": {
+                            "options": "Is this a valid question?",
+                            "default_value": "1",
+                            "config": {
+                                "block": "Main",
+                                "item": "yesno"
+                            }
                         },
-                        "config": {
-                            "block": "Main",
-                            "item": "yesno"
+                        "ui": {
+                            "labels": {
+                                "help": {
+                                    "brief": "This is a help description yesno.",
+                                    "description": "This is a help description."
+                                }
+                            }
                         },
                         "events": {
                             "item-selected": "yesno_selected",
@@ -58,179 +67,255 @@
                         "name": "Calendar option",
                         "mode": 1,
                         "type": "calendar",
-                        "default_value": "08/05/2017",
-                        "options": "Select a date",
-                        "help": {
-                            "brief": "This is a help description calendar.",
-                            "description": "This is a help description."
+                        "object_id": "1.3",
+                        "data": {
+                            "default_value": "08/05/2017",
+                            "options": "Select a date",
+                            "config": {
+                                "block": "Main",
+                                "item": "calendar"
+                            }
                         },
-                        "config": {
-                            "block": "Main",
-                            "item": "calendar"
+                        "ui": {
+                            "labels": {
+                                "help": {
+                                    "brief": "This is a help description calendar.",
+                                    "description": "This is a help description."
+                                }
+                            }
                         }
                     },
                     {
                         "name": "Timebox option",
                         "mode": 1,
                         "type": "timebox",
-                        "default_value": "22:03:44",
-                        "options": "Select a time inside the box",
-                        "help": {
-                            "brief": "This is a help description timebox.",
-                            "description": "This is a help description."
+                        "object_id": "1.4",
+                        "data": {
+                            "default_value": "22:03:44",
+                            "options": "Select a time inside the box",
+                            "config": {
+                                "block": "Main",
+                                "item": "timebox"
+                            }
                         },
-                        "config": {
-                            "block": "Main",
-                            "item": "timebox"
+                        "ui": {
+                            "labels": {
+                                "help": {
+                                    "brief": "This is a help description timebox.",
+                                    "description": "This is a help description."
+                                }
+                            }
                         }
                     },
                     {
                         "name": "Radio checklist option",
                         "mode": 1,
                         "type": "radio-checklist",
-                        "options": [ "Option 1", "Option 2", "Option 3" ],
-                        "default_value": "0",
-                        "help": {
-                            "brief": "This is a help description radio.",
-                            "description": "This is a help description."
+                        "object_id": "1.5",
+                        "data": {
+                            "options": [ "Option 1", "Option 2", "Option 3" ],
+                            "default_value": "0",
+                            "config": {
+                                "block": "Main",
+                                "item": "radio_checklist"
+                            }
                         },
-                        "config": {
-                            "block": "Main",
-                            "item": "radio_checklist"
+                        "ui": {
+                            "labels": {
+                                "help": {
+                                    "brief": "This is a help description radio.",
+                                    "description": "This is a help description."
+                                }
+                            }
                         }
                     },
                     {
                         "name": "Checklist option",
                         "mode": 1,
                         "type": "checklist",
-                        "options": [ "Option 1", "Option 2", "Option 3" ],
-                        "default_value": "6",
-                        "help": {
-                            "brief": "This is a help description checklist.",
-                            "description": "This is a help description.",
-                            "options": [
-                                "Brief of option 1",
-                                "Brief of option 2",
-                                "Brief of option 3"
-                            ]
+                        "object_id": "1.6",
+                        "data": {
+                            "options": [ "Option 1", "Option 2", "Option 3" ],
+                            "default_value": "6",
+                            "config": {
+                                "block": "Main",
+                                "item": "checklist"
+                            }
                         },
-                        "config": {
-                            "block": "Main",
-                            "item": "checklist"
+                        "ui": {
+                            "labels": {
+                                "help": {
+                                    "brief": "This is a help description checklist.",
+                                    "description": "This is a help description.",
+                                    "options": [
+                                        "Brief of option 1",
+                                        "Brief of option 2",
+                                        "Brief of option 3"
+                                    ]
+                                }
+                            }
                         }
                     },
                     {
                         "name": "Input int",
                         "mode": 1,
                         "type": "input-int",
-                        "default_value": "5",
-                        "options": "Just a simple text to show...",
-                        "help": {
-                            "brief": "This is a help description input.",
-                            "description": "This is a help description."
+                        "object_id": "1.7",
+                        "data": {
+                            "default_value": "5",
+                            "options": "Just a simple text to show...",
+                            "ranges": {
+                                "max": 300,
+                                "min": 10
+                            },
+                            "config": {
+                                "block": "Main",
+                                "item": "input_int"
+                            }
                         },
-                        "ranges": {
-                            "max": 300,
-                            "min": 10
-                        },
-                        "config": {
-                            "block": "Main",
-                            "item": "input_int"
+                        "ui": {
+                            "labels": {
+                                "help": {
+                                    "brief": "This is a help description input.",
+                                    "description": "This is a help description."
+                                }
+                            }
                         }
                     },
                     {
                         "name": "Input float",
                         "mode": 1,
                         "type": "input-float",
-                        "default_value": "125.25",
-                        "help": {
-                            "brief": "This is a help description float.",
-                            "description": "This is a help description."
+                        "object_id": "1.8",
+                        "data": {
+                            "default_value": "125.25",
+                            "ranges": {
+                                "max": 34.5,
+                                "min": 1.0
+                            },
+                            "config": {
+                                "block": "Main",
+                                "item": "input_float"
+                            }
                         },
-                        "ranges": {
-                            "max": 34.5,
-                            "min": 1.0
-                        },
-                        "config": {
-                            "block": "Main",
-                            "item": "input_float"
+                        "ui": {
+                            "labels": {
+                                "help": {
+                                    "brief": "This is a help description float.",
+                                    "description": "This is a help description."
+                                }
+                            }
                         }
                     },
                     {
                         "name": "Input password",
                         "mode": 1,
                         "type": "input-passwd",
-                        "default_value": "test",
-                        "help": {
-                            "brief": "This is a help description passwd.",
-                            "description": "This is a help description."
+                        "object_id": "1.9",
+                        "data": {
+                            "default_value": "test",
+                            "ranges": {
+                                "string_length": 16
+                            },
+                            "config": {
+                                "block": "Main",
+                                "item": "input_password"
+                            }
                         },
-                        "ranges": {
-                            "string_length": 16
-                        },
-                        "config": {
-                            "block": "Main",
-                            "item": "input_password"
+                        "ui": {
+                            "labels": {
+                                "help": {
+                                    "brief": "This is a help description passwd.",
+                                    "description": "This is a help description."
+                                }
+                            }
                         }
                     },
                     {
                         "name": "Input string",
                         "mode": 1,
                         "type": "input-string",
-                        "default_value": "",
-                        "help": {
-                            "brief": "This is a help description string.",
-                            "description": "This is a help description."
+                        "object_id": "1.10",
+                        "data": {
+                            "default_value": "",
+                            "ranges": {
+                                "string_length": 32
+                            },
+                            "config": {
+                                "block": "Main",
+                                "item": "input_string"
+                            }
                         },
-                        "ranges": {
-                            "string_length": 32
-                        },
-                        "config": {
-                            "block": "Main",
-                            "item": "input_string"
+                        "ui": {
+                            "labels": {
+                                "help": {
+                                    "brief": "This is a help description string.",
+                                    "description": "This is a help description."
+                                }
+                            }
                         }
                     },
                     {
                         "name": "Input date",
                         "mode": 1,
                         "type": "input-date",
-                        "default_value": "12/02/2017",
-                        "help": {
-                            "brief": "This is a help description date.",
-                            "description": "This is a help description."
+                        "object_id": "1.11",
+                        "data": {
+                            "default_value": "12/02/2017",
+                            "config": {
+                                "block": "Main",
+                                "item": "input_date"
+                            }
                         },
-                        "config": {
-                            "block": "Main",
-                            "item": "input_date"
+                        "ui": {
+                            "labels": {
+                                "help": {
+                                    "brief": "This is a help description date.",
+                                    "description": "This is a help description."
+                                }
+                            }
                         }
                     },
                     {
                         "name": "Input time",
                         "mode": 1,
                         "type": "input-time",
-                        "default_value": "12:32:22",
-                        "help": {
-                            "brief": "This is a help description time.",
-                            "description": "This is a help description."
+                        "object_id": "1.12",
+                        "data": {
+                            "default_value": "12:32:22",
+                            "config": {
+                                "block": "Main",
+                                "item": "input_time"
+                            }
                         },
-                        "config": {
-                            "block": "Main",
-                            "item": "input_time"
+                        "ui": {
+                            "labels": {
+                                "help": {
+                                    "brief": "This is a help description time.",
+                                    "description": "This is a help description."
+                                }
+                            }
                         }
                     },
                     {
                         "name": "Remove weekday",
                         "mode": 2,
                         "type": "delete-dynamic-menu",
-                        "options": "Select a day to be removed",
-                        "menu_id": "3"
+                        "object_id": "1.13",
+                        "data": {
+                            "options": "Select a day to be removed",
+                            "referenced_menu": "3"
+                        }
                     },
                     {
                         "name": "Add weekday?",
                         "mode": 2,
                         "type": "add-dynamic-menu",
-                        "options": "Insert the day name to be added:",
-                        "menu_id": "3"
+                        "object_id": "1.14",
+                        "data": {
+                            "options": "Insert the day name to be added:",
+                            "referenced_menu": "3"
+                        }
                     }
                 ]
             },
@@ -247,24 +332,30 @@
                         "name": "Input string",
                         "mode": 1,
                         "type": "input-string",
-                        "default_value": "",
-                        "ranges": {
-                            "string_length": 32
-                        },
-                        "config": {
-                            "item": "input_string_1"
-                        }
+                        "object_id": "2.1",
+                        "data": {
+                            "default_value": "",
+                            "ranges": {
+                                "string_length": 32
+                            },
+                            "config": {
+                                "item": "input_string_1"
+                            }
+                            }
                     },
                     {
                         "name": "Input string",
                         "mode": 1,
                         "type": "input-string",
-                        "default_value": "",
-                        "ranges": {
-                            "string_length": 32
-                        },
-                        "config": {
-                            "item": "input_string_2"
+                        "object_id": "2.2",
+                        "data": {
+                            "default_value": "",
+                            "ranges": {
+                                "string_length": 32
+                            },
+                            "config": {
+                                "item": "input_string_2"
+                            }
                         }
                     }
                 ]

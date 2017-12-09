@@ -85,6 +85,12 @@ typedef struct {
     cl_string_t         *text;              /** A manipulated text to be
                                                 displayed on the dialog */
 
+    /* spreadsheet properties */
+    cl_string_t                 *title;
+    cl_string_t                 *row_title;
+    cl_string_t                 *column_title;
+    struct dlgx_spreadsheet_st  *sheet;
+
     /* Items */
     DIALOG_LISTITEM     *litems;    /** buildlist, checklist, dm_delete, menu */
     DIALOG_FORMITEM     *fitems;    /** mixedform */
@@ -98,6 +104,10 @@ do {                                        \
     p.litems = NULL;                        \
     p.fitems = NULL;                        \
     p.scroll_content = NULL;                \
+    p.title = NULL;                         \
+    p.row_title = NULL;                     \
+    p.column_title = NULL;                  \
+    p.sheet = NULL;                         \
 } while (0)
 
 /* A macro to release some UI properties correctly */
@@ -133,6 +143,18 @@ do {                                                \
                                                     \
         free(p.fitems);                             \
     }                                               \
+                                                    \
+    if (p.title != NULL)                            \
+        cl_string_unref(p.title);                   \
+                                                    \
+    if (p.row_title != NULL)                        \
+        cl_string_unref(p.row_title);               \
+                                                    \
+    if (p.column_title != NULL)                     \
+        cl_string_unref(p.column_title);            \
+                                                    \
+    if (p.sheet != NULL)                            \
+        spreadsheet_st_destroy(p.sheet);            \
 } while (0)
 
 /* menu */
@@ -156,10 +178,6 @@ ui_return_t ui_timebox(struct xante_app *xpp, struct xante_item *item,
 /* checklist */
 ui_return_t ui_checklist(struct xante_app *xpp, struct xante_item *item,
                          bool edit_value);
-
-/* passwd */
-int ui_passwd(struct xante_item *item, bool edit_value, char *input,
-              unsigned int input_length, int height, cl_string_t *text);
 
 /* input */
 ui_return_t ui_input(struct xante_app *xpp, struct xante_item *item,
@@ -195,10 +213,16 @@ ui_return_t ui_update_object(struct xante_app *xpp, struct xante_item *item);
 
 /* mixedform */
 ui_return_t ui_mixedform(struct xante_app *xpp, struct xante_item *item);
+void ui_save_mixedform_item(struct xante_app *xpp, struct xante_item *item);
 void ui_mixedform_load_and_set_value(struct xante_item *item, cl_cfg_file_t *cfg);
 
 /* buildlist */
 ui_return_t ui_buildlist(struct xante_app *xpp, struct xante_item *item);
+
+/* spreadsheet */
+void ui_spreadsheet_load_and_set_value(struct xante_item *item, cl_cfg_file_t *cfg);
+void ui_save_spreadsheet_item(struct xante_app *xpp, struct xante_item *item);
+ui_return_t ui_spreadsheet(struct xante_app *xpp, struct xante_item *item);
 
 #endif
 

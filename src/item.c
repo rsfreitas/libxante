@@ -104,6 +104,12 @@ static void __destroy_xante_item(const struct cl_ref_s *ref)
     if (item->events != NULL)
         cl_json_delete(item->events);
 
+    if (item->form_options != NULL)
+        cl_json_delete(item->form_options);
+
+    if (item->selected_items != NULL)
+        cl_stringlist_destroy(item->selected_items);
+
     free(item);
 }
 
