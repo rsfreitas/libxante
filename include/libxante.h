@@ -56,7 +56,17 @@ enum xante_ui_dialog {
     XANTE_UI_DIALOG_PROGRESS,
     XANTE_UI_DIALOG_SPINNER_SYNC,
     XANTE_UI_DIALOG_DOTS_SYNC,
-    XANTE_UI_DIALOG_RANGE
+    XANTE_UI_DIALOG_RANGE,
+    XANTE_UI_DIALOG_FILE_SELECT,
+    XANTE_UI_DIALOG_DIR_SELECT,
+    XANTE_UI_DIALOG_FILE_VIEW,
+    XANTE_UI_DIALOG_TAILBOX,
+    XANTE_UI_DIALOG_SCROLLTEXT,
+    XANTE_UI_DIALOG_UPDATE_OBJECT,
+    XANTE_UI_DIALOG_INPUTSCROLL,
+    XANTE_UI_DIALOG_MIXEDFORM,
+    XANTE_UI_DIALOG_BUILDLIST,
+    XANTE_UI_DIALOG_SPREADSHEET
 };
 
 /** An access mode from a menu or a menu item */
@@ -128,6 +138,14 @@ enum xante_return_value {
     XANTE_RETURN_TIMEOUT            //** Application ended by timeout.
 };
 
+/** Modes to search for an item */
+enum xante_item_search_mode {
+    XANTE_ITEM_INVALID_SEARCH,
+    XANTE_ITEM_SEARCH_BY_NAME,
+    XANTE_ITEM_SEARCH_BY_CONFIG_NAME,
+    XANTE_ITEM_SEARCH_BY_OBJECT_ID
+};
+
 /** Main library object */
 typedef void    xante_t;
 
@@ -147,8 +165,8 @@ struct xante_change_entry {
 
 #ifdef LIBXANTE_COMPILE
 # define MAJOR_VERSION  0
-# define MINOR_VERSION  1
-# define RELEASE        3
+# define MINOR_VERSION  0
+# define RELEASE        8
 
 # include "xante/xt_internal.h"
 #endif

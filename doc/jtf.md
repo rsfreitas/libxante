@@ -19,7 +19,7 @@ it may reference an application skeleton.
             "version": string,
             "revision": int,
             "build": int,
-            "beta": bool
+            "beta": boolean
         }
     },
     "general": {
@@ -29,7 +29,12 @@ it may reference an application skeleton.
         "config_pathname": string,
         "log_pathname": string,
         "log_level": string,
-        "company": string
+        "company": string,
+        "blocked_keys": {
+            "esc": boolean,
+            "stop_key": boolean,
+            "suspend_key": boolean
+        }
     },
     "ui": {
         "main_menu": string,
@@ -44,12 +49,16 @@ it may reference an application skeleton.
                     "block_prefix": string,
                     "origin": {
                         "block": string,
-                        "item": string,
+                        "item": string
                     }
                 },
                 "events": {
                     "selected": string,
-                    "exit": string,
+                    "exit": string
+                },
+                "geometry": {
+                    "width": int,
+                    "height": int
                 },
                 "items": [
                     {
@@ -57,22 +66,40 @@ it may reference an application skeleton.
                         "object_id": string,
                         "type": string,
                         "mode": int,
-                        "menu_id": string,
-                        "default_value": string,
-                        "options": string/array of strings,
-                        "config": {
-                            "block": string,
-                            "item": string,
+                        "data": {
+                            "referenced_menu": string,
+                            "options": string/array of strings,
+                            "default_value": string
+                            "ranges": {
+                                "string_length": int,
+                                "max": int/float,
+                                "min": int/float
+                            },
+                            "config": {
+                                "block": string,
+                                "item": string
+                            }
                         },
-                        "help": {
-                            "brief": string,
-                            "description": string,
-                            "options": array of strings
-                        },
-                        "ranges": {
-                            "string_length": int,
-                            "max": int/float,
-                            "min": int/float,
+                        "ui": {
+                            "btn_extra": boolean,
+                            "labels": {
+                                "title": string,
+                                "buttons": {
+                                    "ok": string,
+                                    "cancel": string,
+                                    "help": string,
+                                    "extra": string
+                                },
+                                "help": {
+                                    "brief": string,
+                                    "description": string,
+                                    "options": array of strings
+                                }
+                            },
+                            "geometry": {
+                                "width": int,
+                                "height": int
+                            }
                         },
                         "events": {
                             "selected": string,

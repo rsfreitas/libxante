@@ -48,12 +48,29 @@ static cl_cfg_file_t *load_cfg_file(struct xante_app *xpp)
 
     free(pathname);
 
-    if (access(xpp->config.filename, 0x00) == -1)
+    if (file_exists(xpp->config.filename) == false)
         return NULL;
 
     cfg = cl_cfg_load(xpp->config.filename);
 
     return cfg;
+}
+
+static void load_buildlist_item(struct xante_item *item,
+    cl_cfg_file_t *cfg)
+{
+    cl_cfg_entry_t *key = NULL;
+    cl_object_t *value = NULL;
+    cl_string_t *s = NULL;
+
+    key = cl_cfg_entry(cfg, cl_string_valueof(item->config_block),
+                       cl_string_valueof(item->config_item));
+
+    value = cl_cfg_entry_value(key);
+    s = CL_OBJECT_AS_CSTRING(value);
+    item->selected_items = cl_string_split(s, ",");
+    cl_string_unref(s);
+    cl_object_unref(value);
 }
 
 static int load_item_config(cl_list_node_t *node, void *a)
@@ -62,14 +79,22 @@ static int load_item_config(cl_list_node_t *node, void *a)
     cl_cfg_file_t *cfg_file = (cl_cfg_file_t *)a;
     cl_cfg_entry_t *key = NULL;
 
-    key = cl_cfg_entry(cfg_file, cl_string_valueof(item->config_block),
-                       cl_string_valueof(item->config_item));
+    if (item->dialog_type == XANTE_UI_DIALOG_MIXEDFORM)
+        ui_mixedform_load_and_set_value(item, cfg_file);
+    else if (item->dialog_type == XANTE_UI_DIALOG_BUILDLIST)
+        load_buildlist_item(item, cfg_file);
+    else if (item->dialog_type == XANTE_UI_DIALOG_SPREADSHEET)
+        ui_spreadsheet_load_and_set_value(item, cfg_file);
+    else {
+        key = cl_cfg_entry(cfg_file, cl_string_valueof(item->config_block),
+                           cl_string_valueof(item->config_item));
 
-    /* Work with the item's default value */
-    if (NULL == key)
-        return 0;
+        /* Work with the item's default value */
+        if (NULL == key)
+            return 0;
 
-    item->value = cl_cfg_entry_value(key);
+        item->value = cl_cfg_entry_value(key);
+    }
 
     return 0;
 }
@@ -154,17 +179,15 @@ static bool need_to_write_config_file(struct xante_app *xpp,
     return true;
 }
 
-static int save_item_config(cl_list_node_t *node, void *a)
+static void save_buildlist_item(struct xante_app *xpp, struct xante_item *item)
 {
-    struct xante_item *item = cl_list_node_content(node);
-    struct xante_app *xpp = (struct xante_app *)a;
-    cl_string_t *value = NULL;
+    cl_string_t *value;
 
-    /* Checks if we can save the item */
-    if (item->flags.config == false)
-        return 0;
+    value = cl_stringlist_flat(item->selected_items, ',');
 
-    value = cl_object_to_cstring(item_value(item));
+    if (NULL == value)
+        return;
+
     cl_cfg_set_value(xpp->config.cfg_file,
                      cl_string_valueof(item->config_block),
                      cl_string_valueof(item->config_item),
@@ -172,6 +195,34 @@ static int save_item_config(cl_list_node_t *node, void *a)
 
     xante_log_debug("saving item: %s", cl_string_valueof(value));
     cl_string_unref(value);
+}
+
+static int save_item_config(cl_list_node_t *node, void *a)
+{
+    struct xante_item *item = cl_list_node_content(node);
+    struct xante_app *xpp = (struct xante_app *)a;
+    cl_string_t *value = NULL;
+
+    if (item->dialog_type == XANTE_UI_DIALOG_MIXEDFORM)
+        ui_save_mixedform_item(xpp, item);
+    else if (item->dialog_type == XANTE_UI_DIALOG_BUILDLIST)
+        save_buildlist_item(xpp, item);
+    else if (item->dialog_type == XANTE_UI_DIALOG_SPREADSHEET)
+        ui_save_spreadsheet_item(xpp, item);
+    else {
+        /* Checks if we can save the item */
+        if (item->flags.config == false)
+            return 0;
+
+        value = cl_object_to_cstring(item_value(item));
+        cl_cfg_set_value(xpp->config.cfg_file,
+                         cl_string_valueof(item->config_block),
+                         cl_string_valueof(item->config_item),
+                         "%s", cl_string_valueof(value));
+
+        xante_log_debug("saving item: %s", cl_string_valueof(value));
+        cl_string_unref(value);
+    }
 
     return 0;
 }
@@ -200,7 +251,6 @@ static int write_config(struct xante_app *xpp)
         {
             runtime_set_exit_value(xpp, XANTE_RETURN_CONFIG_UNSAVED);
             xante_log_info(cl_tr("User chose not to save internal modifications"));
-
             goto end_block;
         }
     }

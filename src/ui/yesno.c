@@ -29,6 +29,8 @@
 #define DEFAULT_STATUSBAR_TEXT              \
     "[ESC] Cancel [Enter] Confirm a selected option [Tab/Left/Right] Select an option"
 
+#define DEFAULT_WIDTH                       DEFAULT_DIALOG_WIDTH
+
 /*
  *
  * Internal API
@@ -36,7 +38,7 @@
  */
 
 /**
- * @name ui_dialog_yesno
+ * @name ui_yesno
  * @brief Creates a dialog to choose between two options.
  *
  * @param [in] xpp: The main library object.
@@ -45,14 +47,16 @@
  * @return Returns a ui_return_t value indicating if the item's value has been
  *         changed (true) or not (false) with the dialog selected button.
  */
-ui_return_t ui_dialog_yesno(struct xante_app *xpp, struct xante_item *item)
+ui_return_t ui_yesno(struct xante_app *xpp, struct xante_item *item)
 {
     const char *yes = cl_tr("Yes"), *no = cl_tr("No");
     bool value_changed = false, loop = true;
     cl_object_t *value = NULL;
-    cl_string_t *text = NULL;
-    int choice = -1, height, ret_dialog = DLG_EXIT_OK;
+    int choice = -1, ret_dialog = DLG_EXIT_OK;
     ui_return_t ret;
+    ui_properties_t properties;
+
+    INIT_PROPERTIES(properties);
 
     /* Prepare dialog */
     dlgx_set_backtitle(xpp);
@@ -66,9 +70,16 @@ ui_return_t ui_dialog_yesno(struct xante_app *xpp, struct xante_item *item)
     dialog_vars.no_label = (choice == 0 ? (char *)no : (char *)yes);
 
     /* Adjusts the window message */
-    text = cl_string_dup(item->options);
-    height = dlgx_count_lines(cl_string_valueof(text), MINIMUM_WIDTH);
-    cl_string_rplchr(text, XANTE_STR_LINE_BREAK, '\n');
+    properties.text = cl_string_dup(item->options);
+    properties.width = (item->geometry.width == 0) ? DEFAULT_WIDTH
+                                                   : item->geometry.width;
+
+    properties.height = (item->geometry.height == 0)
+                             ? dlgx_count_lines(cl_string_valueof(properties.text),
+                                                properties.width)
+                             : item->geometry.height;
+
+    cl_string_rplchr(properties.text, XANTE_STR_LINE_BREAK, '\n');
 
     /* Enables the help button */
     if (item->descriptive_help != NULL)
@@ -76,8 +87,8 @@ ui_return_t ui_dialog_yesno(struct xante_app *xpp, struct xante_item *item)
 
     do {
         ret_dialog = dialog_yesno(cl_string_valueof(item->name),
-                                  cl_string_valueof(text), height,
-                                  MINIMUM_WIDTH);
+                                  cl_string_valueof(properties.text),
+                                  properties.height, properties.width);
 
         switch (ret_dialog) {
             case DLG_EXIT_OK:
@@ -106,6 +117,10 @@ ui_return_t ui_dialog_yesno(struct xante_app *xpp, struct xante_item *item)
 #endif
 
             case DLG_EXIT_ESC:
+                /* Don't let the user close the dialog */
+                if (xante_runtime_esc_key(xpp))
+                    break;
+
             case DLG_EXIT_CANCEL:
                 loop = false;
                 break;
@@ -123,8 +138,7 @@ ui_return_t ui_dialog_yesno(struct xante_app *xpp, struct xante_item *item)
     if (item->descriptive_help != NULL)
         dialog_vars.help_button = 0;
 
-    if (text != NULL)
-        cl_string_unref(text);
+    UNINIT_PROPERTIES(properties);
 
     ret.selected_button = ret_dialog;
     ret.updated_value = value_changed;

@@ -88,6 +88,19 @@ static struct xante_app *new_xante_app(void)
 }
 
 /*
+ * Function to execute any task after all initialization has been made.
+ */
+static void post_init(struct xante_app *xpp)
+{
+    /* Block system keys */
+    if (xante_runtime_suspend_key(xpp))
+        cl_trap(SIGTSTP, NULL);
+
+    if (xante_runtime_stop_key(xpp))
+        cl_trap(SIGINT, NULL);
+}
+
+/*
  *
  * API
  *
@@ -156,6 +169,7 @@ __PUB_API__ xante_t *xante_init(const char *caller_name, const char *jtf_pathnam
     if (event_init(xpp, bit_test(flags, XANTE_USE_MODULE)) < 0)
         goto error_block;
 
+    post_init(xpp);
     xante_log_info(cl_tr("Initializing application - %s"),
                    xpp->info.application_name);
 

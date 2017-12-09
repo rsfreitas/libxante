@@ -24,14 +24,199 @@
             {
                 "name": "Main",
                 "object_id": "0",
-                "mode": 1,
+                "mode": 0,
                 "items": [
+                    {
+                        "name": "Table of something",
+                        "type": "spreadsheet",
+                        "object_id": "42",
+                        "data": {
+                            "config": {
+                                "block": "Main",
+                                "item": "Sheet"
+                            },
+                            "options": "{
+                                \"title\": \"Edit the cells\",
+                                \"sheet\": [
+                                    {
+                                        \"title\": \"Line 1\",
+                                        \"column\": [
+                                            {
+                                                \"title\": \"Column 1\",
+                                                \"default_value\": \"1\"
+                                            },
+                                            {
+                                                \"title\": \"Column 2\",
+                                                \"default_value\": \"2\"
+                                            },
+                                            {
+                                                \"title\": \"Column 3\",
+                                                \"default_value\": \"3\"
+                                            },
+                                            {
+                                                \"title\": \"Column 4\",
+                                                \"default_value\": \"4\"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        \"title\": \"Line 2\",
+                                        \"column\": [
+                                            {
+                                                \"default_value\": \"1\"
+                                            },
+                                            {
+                                                \"default_value\": \"2\"
+                                            },
+                                            {
+                                                \"default_value\": \"3\"
+                                            },
+                                            {
+                                                \"default_value\": \"4\"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        \"title\": \"Line 3\",
+                                        \"column\": [
+                                            {
+                                                \"default_value\": \"1\"
+                                            },
+                                            {
+                                                \"default_value\": \"2\"
+                                            },
+                                            {
+                                                \"default_value\": \"3\"
+                                            },
+                                            {
+                                                \"default_value\": \"4\"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }"
+                        }
+                    },
+                    {
+                        "name": "Buildlist option",
+                        "type": "buildlist",
+                        "object_id": "42",
+                        "data": {
+                            "default_value": "Option 1,Option 16",
+                            "options": [ "Option 1", "Option 2", "Option 3", "Option 5", "Option 6", "Option 7",
+                                "Option 8", "Option 9", "Option 10", "Option 11", "Option 12", "Option 13",
+                                "Option 14", "Option 15", "Option 16", "Option 17", "Option 18", "Option 19"
+                            ],
+                            "config": {
+                                "block": "Main",
+                                "item": "buildlist"
+                            }
+                        }
+                    },
+                    {
+                        "name": "Mixedform of options",
+                        "type": "mixedform",
+                        "object_id": "9996",
+                        "data": {
+                            "options": "{
+                                \"title\": \"Fill the user info\",
+                                \"fields\": [
+                                {\"name\": \"Username\", \"default_value\": \"user\", \"config_block\": \"Mixedform\", \"config_item\": \"Username\", \"read_only\": true},
+                                {\"name\": \"Username2\", \"default_value\": \"user2\", \"config_block\": \"Mixedform\", \"config_item\": \"Username2\", \"password\": true},
+                                {\"name\": \"Real name\", \"default_value\": \"Linux User\", \"config_block\": \"Mixedform\", \"config_item\": \"RealName\"}
+                            ] }"
+                        }
+                    },
+                    {
+                        "name": "Input string scroll",
+                        "type": "inputscroll",
+                        "object_id": "9",
+                        "data": {
+                            "default_value": "Look out the content...",
+                            "options": "The title of our scroll text:",
+                            "ranges": {
+                                "string_length": 128
+                            },
+                            "config": {
+                                "block": "Main",
+                                "item": "input_string_scroll"
+                            }
+                        },
+                        "ui": {
+                            "labels": {
+                                "help": {
+                                    "brief": "This is a help description string.",
+                                    "description": "This is a help description."
+                                }
+                            }
+                        },
+                        "events": {
+                            "item-custom-data": "scroll_content",
+                            "value-strlen": "scroll_strlen",
+                            "value-check": "scroll_check"
+                        }
+                    },
+                    {
+                        "name": "File view",
+                        "type": "file-view",
+                        "object_id": "999",
+                        "data": {
+                            "default_value": "/home/rodrigo/green.rc"
+                        },
+                        "ui": {
+                            "labels": {
+                                "help": {
+                                    "description": "Only a little help"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "name": "Log monitor",
+                        "type": "tailbox",
+                        "object_id": "998",
+                        "data": {
+                            "default_value": "/tmp/config-test.log"
+                        },
+                        "ui": {
+                            "labels": {
+                                "help": {
+                                    "description": "Only a little help"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "name": "Scrolltext from var",
+                        "type": "scrolltext",
+                        "object_id": "997",
+                        "data": {
+                            "options": "This is my text",
+                            "default_value": "Or maybe this?"
+                        }
+                    },
+                    {
+                        "name": "Update object",
+                        "type": "update-object",
+                        "object_id": "996",
+                        "data": {
+                            "options": "The CLOCK"
+                        },
+                        "events": {
+                            "item-custom-data": "pb_data",
+                            "update-routine": "clock_module"
+                        }
+                    },
                     {
                         "name": "Custom",
                         "type": "custom",
                         "object_id": "1001",
-                        "help": {
-                            "brief": "This is a help description to the custom option."
+                        "ui": {
+                            "labels": {
+                                "help": {
+                                    "brief": "This is a help description to the custom option."
+                                }
+                            }
                         },
                         "events": {
                             "custom-event": "foo_custom"
@@ -41,12 +226,14 @@
                         "name": "Progress bar",
                         "type": "progress-bar",
                         "object_id": "10002",
-                        "options": "Look at the progress bar",
-                        "ranges": {
-                            "max": 100
+                        "data": {
+                            "options": "Look at the progress bar",
+                            "ranges": {
+                                "max": 100
+                            }
                         },
                         "events": {
-                            "update-routine-data": "pb_data",
+                            "item-custom-data": "pb_data",
                             "update-routine": "progress"
                         }
                     },
@@ -54,12 +241,14 @@
                         "name": "Spinner sync",
                         "type": "dots-sync",
                         "object_id": "10003",
-                        "options": "Copying files (wait for about 20 seconds)",
-                        "ranges": {
-                            "max": 10
+                        "data": {
+                            "options": "Copying files (wait for about 20 seconds)",
+                            "ranges": {
+                                "max": 10
+                            }
                         },
                         "events": {
-                            "update-routine-data": "pb_data",
+                            "item-custom-data": "pb_data",
                             "sync-routine": "foo_sync"
                         }
                     },
@@ -67,31 +256,67 @@
                         "name": "Ranges",
                         "type": "range",
                         "object_id": "10004",
-                        "options": "Select interval",
-                        "default_value": "55",
-                        "ranges": {
-                            "min": 0,
-                            "max": 255
+                        "data": {
+                            "options": "Select interval",
+                            "default_value": "55",
+                            "ranges": {
+                                "min": 0,
+                                "max": 255
+                            },
+                            "config": {
+                                "block": "Main",
+                                "item": "range"
+                            }
+                        }
+                    },
+                    {
+                        "name": "File select",
+                        "type": "file-select",
+                        "object_id": "10005",
+                        "data": {
+                            "options": "/home/rodrigo"
                         },
-                        "config": {
-                            "block": "Main",
-                            "item": "range"
+                        "events": {
+                            "item-value-confirm": "validate_file",
+                            "item-value-updated": "confirm_file"
+                        }
+                    },
+                    {
+                        "name": "Directory select",
+                        "type": "dir-select",
+                        "object_id": "10006",
+                        "data": {
+                            "options": "/home"
+                        },
+                        "events": {
+                            "item-value-confirm": "validate_dir",
+                            "item-value-updated": "confirm_dir"
                         }
                     },
                     {
                         "name": "Yes no option",
                         "mode": 2,
                         "type": "yesno",
-                        "options": "Is this a valid question?",
-                        "default_value": "1",
                         "object_id": "1",
-                        "help": {
-                            "brief": "This is a help description yesno.",
-                            "description": "This is a help description."
+                        "data": {
+                            "options": "Is this a valid question?",
+                            "default_value": "1",
+                            "geometry": {
+                                "height": 7,
+                                "width": 65
+                            },
+                            "config": {
+                                "block": "Main",
+                                "item": "yesno"
+                            }
                         },
-                        "config": {
-                            "block": "Main",
-                            "item": "yesno"
+                        "ui": {
+                            "labels": {
+                                "help": {
+                                    "brief": "This is a help description yesno.",
+                                    "description": "This is a help description."
+                                }
+                            }
                         },
                         "events": {
                             "item-selected": "yesno_selected",
@@ -104,174 +329,238 @@
                         "name": "Calendar option",
                         "mode": 2,
                         "type": "calendar",
-                        "default_value": "08/05/2017",
-                        "options": "Select a date",
                         "object_id": "2",
-                        "help": {
-                            "brief": "This is a help description calendar.",
-                            "description": "This is a help description."
+                        "data": {
+                            "default_value": "08/05/2017",
+                            "options": "Select a date",
+                            "config": {
+                                "block": "Main",
+                                "item": "calendar"
+                            }
                         },
-                        "config": {
-                            "block": "Main",
-                            "item": "calendar"
+                        "ui": {
+                            "labels": {
+                                "help": {
+                                    "brief": "This is a help description calendar.",
+                                    "description": "This is a help description."
+                                }
+                            }
                         }
                     },
                     {
                         "name": "Timebox option",
                         "mode": 2,
                         "type": "timebox",
-                        "default_value": "22:03:44",
-                        "options": "Select a time inside the box",
                         "object_id": "3",
-                        "help": {
-                            "brief": "This is a help description timebox.",
-                            "description": "This is a help description."
+                        "data": {
+                            "default_value": "22:03:44",
+                            "options": "Select a time inside the box",
+                            "config": {
+                                "block": "Main",
+                                "item": "timebox"
+                            }
                         },
-                        "config": {
-                            "block": "Main",
-                            "item": "timebox"
+                        "ui": {
+                            "labels": {
+                                "help": {
+                                    "brief": "This is a help description timebox.",
+                                    "description": "This is a help description."
+                                }
+                            }
                         }
                     },
                     {
                         "name": "Radio checklist option",
                         "mode": 2,
                         "type": "radio-checklist",
-                        "options": [ "Option 1", "Option 2", "Option 3" ],
-                        "default_value": "0",
                         "object_id": "4",
-                        "help": {
-                            "brief": "This is a help description radio.",
-                            "description": "This is a help description."
+                        "data": {
+                            "options": [ "Option 1", "Option 2", "Option 3", "Option 5", "Option 6", "Option 7",
+                                "Option 8", "Option 9", "Option 10", "Option 11", "Option 12", "Option 13",
+                                "Option 14", "Option 15", "Option 16", "Option 17", "Option 18", "Option 19"
+                            ],
+                            "default_value": "0",
+                            "config": {
+                                "block": "Main",
+                                "item": "radio_checklist"
+                            }
                         },
-                        "config": {
-                            "block": "Main",
-                            "item": "radio_checklist"
+                        "ui": {
+                            "labels": {
+                                "help": {
+                                    "brief": "This is a help description radio.",
+                                    "description": "This is a help description."
+                                }
+                            }
                         }
                     },
                     {
                         "name": "Checklist option",
-                        "mode": 1,
+                        "mode": 2,
                         "type": "checklist",
-                        "options": [ "Option 1", "Option 2", "Option 3" ],
-                        "default_value": "6",
                         "object_id": "5",
-                        "help": {
-                            "brief": "This is a help description checklist.",
-                            "description": "This is a help description.",
-                            "options": [
-                                "Brief of option 1",
-                                "Brief of option 2",
-                                "Brief of option 3"
-                            ]
+                        "data": {
+                            "options": [ "Option 1", "Option 2", "Option 3" ],
+                            "default_value": "6",
+                            "config": {
+                                "block": "Main",
+                                "item": "checklist"
+                            }
                         },
-                        "config": {
-                            "block": "Main",
-                            "item": "checklist"
+                        "ui": {
+                            "labels": {
+                                "help": {
+                                    "brief": "This is a help description checklist.",
+                                    "description": "This is a help description.",
+                                    "options": [
+                                        "Brief of option 1",
+                                        "Brief of option 2",
+                                        "Brief of option 3"
+                                    ]
+                                }
+                            }
                         }
                     },
                     {
                         "name": "Input int",
                         "mode": 2,
                         "type": "input-int",
-                        "default_value": "5",
-                        "options": "Just a simple text to show...",
                         "object_id": "6",
-                        "help": {
-                            "brief": "This is a help description input.",
-                            "description": "This is a help description."
+                        "data": {
+                            "default_value": "5",
+                            "options": "Just a simple text to show...",
+                            "ranges": {
+                                "max": 300,
+                                "min": 10
+                            },
+                            "config": {
+                                "block": "Main",
+                                "item": "input_int"
+                            }
                         },
-                        "ranges": {
-                            "max": 300,
-                            "min": 10
-                        },
-                        "config": {
-                            "block": "Main",
-                            "item": "input_int"
+                        "ui": {
+                            "labels": {
+                                "help": {
+                                    "brief": "This is a help description input.",
+                                    "description": "This is a help description."
+                                }
+                            }
                         }
                     },
                     {
                         "name": "Input float",
                         "mode": 1,
                         "type": "input-float",
-                        "default_value": "125.25",
                         "object_id": "7",
-                        "help": {
-                            "brief": "This is a help description float.",
-                            "description": "This is a help description."
+                        "data": {
+                            "default_value": "125.25",
+                            "ranges": {
+                                "max": 34.5,
+                                "min": 1.0
+                            },
+                            "config": {
+                                "block": "Main",
+                                "item": "input_float"
+                            }
                         },
-                        "ranges": {
-                            "max": 34.5,
-                            "min": 1.0
-                        },
-                        "config": {
-                            "block": "Main",
-                            "item": "input_float"
+                        "ui": {
+                            "labels": {
+                                "help": {
+                                    "brief": "This is a help description float.",
+                                    "description": "This is a help description."
+                                }
+                            }
                         }
                     },
                     {
                         "name": "Input password",
-                        "mode": 1,
+                        "mode": 2,
                         "type": "input-passwd",
-                        "default_value": "test",
                         "object_id": "8",
-                        "help": {
-                            "brief": "This is a help description passwd.",
-                            "description": "This is a help description."
+                        "data": {
+                            "default_value": "test",
+                            "ranges": {
+                                "string_length": 16
+                            },
+                            "config": {
+                                "block": "Main",
+                                "item": "input_password"
+                            }
                         },
-                        "ranges": {
-                            "string_length": 16
-                        },
-                        "config": {
-                            "block": "Main",
-                            "item": "input_password"
+                        "ui": {
+                            "labels": {
+                                "help": {
+                                    "brief": "This is a help description passwd.",
+                                    "description": "This is a help description."
+                                }
+                            }
                         }
                     },
                     {
                         "name": "Input string",
-                        "mode": 1,
+                        "mode": 2,
                         "type": "input-string",
-                        "default_value": "",
                         "object_id": "9",
-                        "help": {
-                            "brief": "This is a help description string.",
-                            "description": "This is a help description."
+                        "data": {
+                            "default_value": "teste",
+                            "options": "This is a little string",
+                            "ranges": {
+                                "string_length": 32
+                            },
+                            "config": {
+                                "block": "Main",
+                                "item": "input_string"
+                            }
                         },
-                        "ranges": {
-                            "string_length": 32
-                        },
-                        "config": {
-                            "block": "Main",
-                            "item": "input_string"
+                        "ui": {
+                            "labels": {
+                                "help": {
+                                    "brief": "This is a help description string.",
+                                    "description": "This is a help description."
+                                }
+                            }
                         }
                     },
                     {
                         "name": "Input date",
-                        "mode": 1,
+                        "mode": 2,
                         "type": "input-date",
-                        "default_value": "12/02/2017",
                         "object_id": "10",
-                        "help": {
-                            "brief": "This is a help description date.",
-                            "description": "This is a help description."
+                        "data": {
+                            "default_value": "12/02/2017",
+                            "config": {
+                                "block": "Main",
+                                "item": "input_date"
+                            }
                         },
-                        "config": {
-                            "block": "Main",
-                            "item": "input_date"
+                        "ui": {
+                            "labels": {
+                                "help": {
+                                    "brief": "This is a help description date.",
+                                    "description": "This is a help description."
+                                }
+                            }
                         }
                     },
                     {
                         "name": "Input time",
-                        "mode": 1,
+                        "mode": 2,
                         "type": "input-time",
-                        "default_value": "12:32:22",
                         "object_id": "11",
-                        "help": {
-                            "brief": "This is a help description time.",
-                            "description": "This is a help description."
+                        "data": {
+                            "default_value": "12:32:22",
+                            "config": {
+                                "block": "Main",
+                                "item": "input_time"
+                            }
                         },
-                        "config": {
-                            "block": "Main",
-                            "item": "input_time"
+                        "ui": {
+                            "labels": {
+                                "help": {
+                                    "brief": "This is a help description time.",
+                                    "description": "This is a help description."
+                                }
+                            }
                         }
                     }
                 ]

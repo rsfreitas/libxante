@@ -196,15 +196,15 @@ static struct xante_item *dup_item(struct xante_menu *menu, int item_index,
     d_item->options = cl_string_dup(item->options);
     d_item->object_id = cl_string_dup(item->object_id);
     cl_string_cat(d_item->object_id, "_%d", menu_index);
-    d_item->menu_id = cl_string_dup(item->menu_id);
-    cl_string_cat(d_item->menu_id, "_%d", menu_index);
+    d_item->referenced_menu = cl_string_dup(item->referenced_menu);
+    cl_string_cat(d_item->referenced_menu, "_%d", menu_index);
 
     d_item->mode = item->mode;
     d_item->dialog_type = item->dialog_type;
     d_item->dialog_checklist_type = item->dialog_checklist_type;
     d_item->string_length = item->string_length;
 
-    d_item->checklist_options = cl_stringlist_dup(item->checklist_options);
+    d_item->list_items = cl_stringlist_dup(item->list_items);
     d_item->default_value = cl_object_dup(item->default_value);
     d_item->min = cl_object_dup(item->min);
     d_item->max = cl_object_dup(item->max);
@@ -279,8 +279,8 @@ static int find_submenu_to_replicate(cl_list_node_t *a, void *b)
 
     /* Is this a submenu? */
     if (item->dialog_type == XANTE_UI_DIALOG_MENU) {
-        menu = ui_search_menu_by_object_id(ld->xpp->ui.menus,
-                                           cl_string_valueof(item->menu_id));
+        menu = xante_menu_search_by_object_id(ld->xpp->ui.menus,
+                                              cl_string_valueof(item->referenced_menu));
 
         if (dm_replicate(ld->xpp, menu, ld->number_of_copies,
                          ld->first_copy_index, ld->input_name) < 0)
@@ -343,7 +343,7 @@ static struct xante_item *create_rme_item(struct xante_menu *menu,
                                        cl_string_valueof(menu->object_id),
                                        item_index);
 
-    item->menu_id = cl_string_dup(item->object_id);
+    item->referenced_menu = cl_string_dup(item->object_id);
     item->type = cl_string_create(XANTE_UI_STR_DIALOG_MENU);
     item->mode = XANTE_ACCESS_VIEW;
     item->dialog_type = XANTE_UI_DIALOG_MENU;
@@ -572,8 +572,8 @@ void dm_update(struct xante_app *xpp, struct xante_item *selected_item)
     }
 
     rme_menu =
-        ui_search_menu_by_object_id(xpp->ui.menus,
-                                    cl_string_valueof(unref_menu->object_id));
+        xante_menu_search_by_object_id(xpp->ui.menus,
+                                       cl_string_valueof(unref_menu->object_id));
 
     if (NULL == rme_menu) {
         // error msg
@@ -624,24 +624,24 @@ bool dm_insert(struct xante_app *xpp, struct xante_item *item,
     const char *new_entry_name)
 {
     struct xante_menu *unref_menu = NULL, *rme_menu = NULL;
-    const char *menu_id = cl_string_valueof(item->menu_id);
+    const char *referenced_menu = cl_string_valueof(item->referenced_menu);
 
-    unref_menu = ui_search_menu_by_object_id(xpp->ui.unreferenced_menus,
-                                             menu_id);
+    unref_menu = xante_menu_search_by_object_id(xpp->ui.unreferenced_menus,
+                                                referenced_menu);
 
     if (NULL == unref_menu) {
         xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
-                             cl_tr("The menu '%s' was not found!"), menu_id);
+                             cl_tr("The menu '%s' was not found!"), referenced_menu);
 
         return false;
     }
 
-    rme_menu = ui_search_menu_by_object_id(xpp->ui.menus, menu_id);
+    rme_menu = xante_menu_search_by_object_id(xpp->ui.menus, referenced_menu);
 
     if (NULL == rme_menu) {
         xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
                              cl_tr("A reference for the menu '%s' was not found!"),
-                             menu_id);
+                             referenced_menu);
 
         return false;
     }

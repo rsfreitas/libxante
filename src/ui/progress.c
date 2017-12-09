@@ -30,8 +30,8 @@
     "Wait the process to end."
 
 /* The dialog size onto the screen */
-#define PROGRESS_DIALOG_HEIGHT          7
-#define PROGRESS_DIALOG_WIDTH           60
+#define DIALOG_HEIGHT                   7
+#define DIALOG_WIDTH                    60
 
 struct progress_thread {
     struct xante_app    *xpp;
@@ -53,16 +53,24 @@ static void *make_progress(cl_thread_t *thread)
     struct progress_thread *progress = cl_thread_get_user_data(thread);
     struct xante_app *xpp = progress->xpp;
     struct xante_item *item = progress->item;
+    ui_properties_t properties;
     int percent;
 
     cl_thread_set_state(thread, CL_THREAD_ST_CREATED);
+    INIT_PROPERTIES(properties);
+    properties.width = (item->geometry.width == 0) ? DIALOG_WIDTH
+                                                   : item->geometry.width;
+
+    properties.height = (item->geometry.height == 0) ? DIALOG_HEIGHT
+                                                     : item->geometry.height;
+
     cl_thread_set_state(thread, CL_THREAD_ST_INITIALIZED);
 
     do {
         percent = event_call(EV_UPDATE_ROUTINE, xpp, item, progress->data);
         dlgx_simple_progress(cl_string_valueof(item->name),
                              cl_string_valueof(item->options),
-                             PROGRESS_DIALOG_HEIGHT, PROGRESS_DIALOG_WIDTH,
+                             properties.height, properties.width,
                              percent);
 
         /* Abort if we caught a invalid value */
@@ -72,6 +80,8 @@ static void *make_progress(cl_thread_t *thread)
         cl_msleep(100);
     } while (((percent + 1) < CL_OBJECT_AS_INT(item->max)) &&
              (item->cancel_update == false));
+
+    UNINIT_PROPERTIES(properties);
 
     return NULL;
 }
@@ -83,7 +93,7 @@ static void *make_progress(cl_thread_t *thread)
  */
 
 /**
- * @name ui_dialog_progress
+ * @name ui_progress
  * @brief Creates a dialog of progress type.
  *
  * This dialog runs a task with a specific ending delimiter and shows a
@@ -91,8 +101,8 @@ static void *make_progress(cl_thread_t *thread)
  *
  * The \a item must have two events filled:
  *
- * EV_UPDATE_ROUTINE_DATA: which must return a pointer to a specific data
- *                         which will passed to the update-routine.
+ * EV_ITEM_CUSTOM_DATA: which must return a pointer to a specific data
+ *                      which will passed to the update-routine.
  *
  * EV_UPDATE_ROUTINE: which must return the new stage to be updated to the
  *                    user.
@@ -106,10 +116,9 @@ static void *make_progress(cl_thread_t *thread)
  * @return Returns a ui_return_t value indicating if the item's value has been
  *         changed (true) or not (false) with the dialog selected button.
  */
-ui_return_t ui_dialog_progress(struct xante_app *xpp, struct xante_item *item)
+ui_return_t ui_progress(struct xante_app *xpp, struct xante_item *item)
 {
     ui_return_t ret;
-    void *data;
     cl_thread_t *thread;
     struct progress_thread progress = {
         .xpp = xpp,
@@ -122,8 +131,7 @@ ui_return_t ui_dialog_progress(struct xante_app *xpp, struct xante_item *item)
 
     /* Assures that we will be able to, at least, start the progress */
     item->cancel_update = false;
-    data = event_update_routine_data(xpp, item);
-    progress.data = data;
+    progress.data = event_item_custom_data(xpp, item);
     thread = cl_thread_spawn(CL_THREAD_JOINABLE, make_progress, &progress);
 
     if (NULL == thread) {

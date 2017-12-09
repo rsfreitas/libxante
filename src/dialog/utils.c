@@ -488,6 +488,7 @@ char *dlgx_get_item_value_as_text(const struct xante_item *item)
         case XANTE_UI_DIALOG_TIMEBOX:
         case XANTE_UI_DIALOG_INPUT_STRING:
         case XANTE_UI_DIALOG_RANGE:
+        case XANTE_UI_DIALOG_INPUTSCROLL:
             value = cl_object_to_cstring(item_value(item));
 
             if ((value != NULL) && (cl_string_length(value) > 0))
@@ -497,7 +498,7 @@ char *dlgx_get_item_value_as_text(const struct xante_item *item)
 
         case XANTE_UI_DIALOG_RADIO_CHECKLIST:
             index = CL_OBJECT_AS_INT(item_value(item));
-            value = cl_stringlist_get(item->checklist_options, index);
+            value = cl_stringlist_get(item->list_items, index);
 
             if (value != NULL)
                 text = strdup(cl_string_valueof(value));
@@ -650,6 +651,18 @@ void dlgx_update_cancel_button_label(void)
 }
 
 /**
+ * @name dlgx_update_ok_button_label
+ * @brief Sets a default value to the ok button label used inside dialogs.
+ */
+void dlgx_update_ok_button_label(void)
+{
+    if (dialog_vars.ok_label != NULL)
+        free(dialog_vars.ok_label);
+
+    dialog_vars.ok_label = strdup(cl_tr("Ok"));
+}
+
+/**
  * @name dlgx_free_input
  * @brief Releases the dialog input buffer previously allocated.
  */
@@ -685,15 +698,21 @@ void dlgx_alloc_input(unsigned int bytes)
 char *dlgx_get_input_result(void)
 {
     char *result = NULL;
+    size_t size;
+    unsigned int last_position;
 
     result = calloc(1, strlen(dialog_vars.input_result));
 
     if (NULL == result)
         return NULL;
 
-    /* Removes an invalid char at the input end */
+    /* Removes an invalid char at the input end if there is one there */
+    size = strlen(dialog_vars.input_result);
+    last_position = size - 1;
+
     strncpy(result, dialog_vars.input_result,
-            strlen(dialog_vars.input_result) - 1);
+            (isalnum(dialog_vars.input_result[last_position]) ? size
+                                                              : last_position));
 
     return result;
 }
@@ -710,15 +729,17 @@ char *dlgx_get_input_result(void)
  */
 int dlgx_get_input_window_width(const struct xante_item *item)
 {
-    int w = 0;
+    int w = 0, item_width;
 
     if (dlgx_count_lines_by_delimiters(cl_string_valueof(item->options)) > 1)
         return get_longest_line_length(item->options) + WINDOW_COLUMNS;
 
     w = cl_string_length(item->options);
+    item_width = (item->geometry.width == 0) ? DEFAULT_DIALOG_WIDTH
+                                             : item->geometry.width;
 
-    if (w < MINIMUM_WIDTH)
-        w = MINIMUM_WIDTH;
+    if (w < item_width)
+        w = item_width;
     else
         w += WINDOW_COLUMNS;
 

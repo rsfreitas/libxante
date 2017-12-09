@@ -39,6 +39,11 @@ void xante_menu_unref(struct xante_menu *menu);
 void xante_menu_destroy(void *a);
 struct xante_menu *xante_menu_create(enum xante_menu_creator creator);
 struct xante_menu *xante_menu_head(const cl_list_t *menus);
+struct xante_menu *xante_menu_search_by_name(const cl_list_t *menus,
+                                             const char *menu_name);
+
+struct xante_menu *xante_menu_search_by_object_id(const cl_list_t *menus,
+                                                  const char *object_id);
 
 #endif
 

@@ -35,17 +35,6 @@
  *
  */
 
-static int __search_menu_by_object_id(cl_list_node_t *node, void *a)
-{
-    struct xante_menu *menu = cl_list_node_content(node);
-    char *object_id = (char *)a;
-
-    if (strcmp(cl_string_valueof(menu->object_id), object_id) == 0)
-        return 1;
-
-    return 0;
-}
-
 static void ui_init(struct xante_app *xpp)
 {
     runtime_set_ui_active(xpp, true);
@@ -70,11 +59,11 @@ static int ui_run_mjtf(struct xante_app *xpp, struct xante_mjtf *mjtf)
     if (mjtf->menus != NULL) {
         btn_cancel_label = strdup(cl_tr("Back"));
         first = xante_menu_head(mjtf->menus);
-        ret_dialog = ui_dialog_menu(xpp, mjtf->menus, first, btn_cancel_label);
+        ret_dialog = ui_menu(xpp, mjtf->menus, first, btn_cancel_label);
         xante_menu_unref(first);
         free(btn_cancel_label);
     } else /* Or a single item? */
-        ret_dialog = ui_dialog_item(xpp, NULL, mjtf->object);
+        ret_dialog = ui_item(xpp, NULL, mjtf->object);
 
     return ret_dialog;
 }
@@ -117,42 +106,6 @@ void ui_data_uninit(struct xante_app *xpp)
         cl_list_destroy(xpp->ui.menus);
 
     dm_uninit(xpp);
-}
-
-/**
- * @name ui_search_menu_by_object_id
- * @brief Searches a xante_menu structure inside a menu list which has a specific
- *        object_id.
- *
- * Remember, when searching a menu pointed by an item, its object_id is located
- * inside the menu_id.
- *
- * @param [in] menus: The list of menus.
- * @param [in] object_it_to_search: The menu object_id which will be used to
- *                                  search.
- *
- * @return On success, i.e, the menu is found, returns a pointer to its
- *         xante_menu structure or NULL otherwise.
- */
-struct xante_menu *ui_search_menu_by_object_id(const cl_list_t *menus,
-    const char *object_id_to_search)
-{
-    cl_list_node_t *node = NULL;
-    struct xante_menu *menu = NULL;
-
-    node = cl_list_map(menus, __search_menu_by_object_id,
-                       (void *)object_id_to_search);
-
-    if (NULL == node) {
-        errno_set(XANTE_ERROR_MENU_NOT_FOUND);
-        errno_store_additional_content(object_id_to_search);
-        return NULL;
-    }
-
-    menu = cl_list_node_content(node);
-    cl_list_node_unref(node);
-
-    return menu;
 }
 
 // DEBUG
@@ -207,8 +160,8 @@ __PUB_API__ enum xante_return_value xante_ui_run(xante_t *xpp)
 
     ui_init(xpp);
     btn_cancel_label = strdup(cl_tr(MAIN_MENU_CANCEL_LABEL));
-    root = ui_search_menu_by_object_id(x->ui.menus,
-                                       cl_string_valueof(x->ui.main_menu_object_id));
+    root = xante_menu_search_by_object_id(x->ui.menus,
+                                          cl_string_valueof(x->ui.main_menu_object_id));
 
     if (NULL == root) {
         xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
@@ -218,7 +171,7 @@ __PUB_API__ enum xante_return_value xante_ui_run(xante_t *xpp)
         goto end_block;
     }
 
-    ret_dialog = ui_dialog_menu(xpp, x->ui.menus, root, btn_cancel_label);
+    ret_dialog = ui_menu(xpp, x->ui.menus, root, btn_cancel_label);
 
 end_block:
     if (btn_cancel_label != NULL)

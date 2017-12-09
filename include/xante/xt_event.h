@@ -37,7 +37,7 @@
 int event_init(struct xante_app *xpp, bool use_event);
 void event_uninit(struct xante_app *xpp);
 int event_call(const char *event_name, struct xante_app *xpp, ...);
-void *event_update_routine_data(struct xante_app *xpp, struct xante_item *item);
+void *event_item_custom_data(struct xante_app *xpp, struct xante_item *item);
 int event_update_routine(struct xante_app *xpp, struct xante_item *item,
                          void *data);
 

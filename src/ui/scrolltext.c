@@ -3,7 +3,7 @@
  * Description:
  *
  * Author: Rodrigo Freitas
- * Created at: Thu Jun  1 12:53:40 2017
+ * Created at: Mon Nov 27 15:10:12 2017
  * Project: libxante
  *
  * Copyright (C) 2017 Rodrigo Freitas
@@ -27,21 +27,11 @@
 #include "libxante.h"
 
 #define DEFAULT_STATUSBAR_TEXT              \
-    "[ESC] Cancel [Enter] Confirm a selected option [Tab/Left/Right] Select an option"
+    "[ESC] Cancel [Enter] Confirm selected button [Up/Down/Pg Up/Pg Down] Navigate through the text"
 
-/*
- *
- * Internal functions
- *
- */
-
-static bool is_input_valid(const char *input)
-{
-    if (strlen(input) == 0)
-        return false;
-
-    return true;
-}
+/* The dialog size onto the screen */
+#define DIALOG_HEIGHT                       14
+#define DIALOG_WIDTH                        60
 
 /*
  *
@@ -49,13 +39,13 @@ static bool is_input_valid(const char *input)
  *
  */
 
-ui_return_t ui_add_dm(struct xante_app *xpp, struct xante_item *item)
+ui_return_t ui_scrolltext(struct xante_app *xpp, struct xante_item *item)
 {
-    bool added = false, loop = true;
-    int ret_dialog = DLG_EXIT_OK;
-    char input[MAX_INPUT_VALUE] = {0};
-    ui_properties_t properties;
     ui_return_t ret;
+    int ret_dialog = DLG_EXIT_OK;
+    bool loop = true;
+    cl_object_t *value = NULL;
+    ui_properties_t properties;
 
     INIT_PROPERTIES(properties);
 
@@ -63,47 +53,29 @@ ui_return_t ui_add_dm(struct xante_app *xpp, struct xante_item *item)
     dlgx_set_backtitle(xpp);
     dlgx_update_cancel_button_label();
     dlgx_put_statusbar(DEFAULT_STATUSBAR_TEXT);
+    properties.width = (item->geometry.width == 0) ? DIALOG_WIDTH
+                                                   : item->geometry.width;
 
-    /* Adjusts window width and height */
-    properties.text = cl_string_dup(item->options);
-    cl_string_rplchr(properties.text, XANTE_STR_LINE_BREAK, '\n');
-    properties.width = (item->geometry.width == 0)
-                            ? dlgx_get_input_window_width(item)
-                            : item->geometry.width;
+    properties.height = (item->geometry.height == 0) ? DIALOG_HEIGHT
+                                                     : item->geometry.height;
 
-    properties.height = (item->geometry.height == 0)
-                         ? dlgx_count_lines_by_delimiters(cl_string_valueof(properties.text)) +
-                           FORM_HEIGHT_WITHOUT_TEXT
-                         : item->geometry.height;
+    /* Gets the item voalue */
+    value = item_value(item);
+    properties.text = CL_OBJECT_AS_CSTRING(value);
 
     /* Enables the help button */
     if (item->descriptive_help != NULL)
         dialog_vars.help_button = 1;
 
     do {
-        ret_dialog = dlgx_inputbox(properties.width, properties.height,
-                                   cl_string_valueof(item->name),
-                                   cl_string_valueof(properties.text), NULL,
-                                   NULL, sizeof(input) - 1, input,
-                                   true, NULL, NULL, NULL);
+        ret_dialog = dlgx_scrolltext(properties.width, properties.height,
+                                     cl_string_valueof(item->name),
+                                     cl_string_valueof(item->options),
+                                     properties.text);
 
         switch (ret_dialog) {
             case DLG_EXIT_OK:
-                if (is_input_valid(input) == true) {
-                    /*
-                     * We insert the new dynamic menu entry and set this as an
-                     * internal change, so it will ask the user to save into
-                     * the configuration file.
-                     */
-                    if (dm_insert(xpp, item, input)) {
-                        change_add(xpp, "New dynamic menu entry", "EMPTY", input);
-                        added = true;
-                        loop = false;
-                    }
-                } else
-                    xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
-                                         "%s", cl_tr("An invalid input was entered!"));
-
+                loop = false;
                 break;
 
 #ifdef ALTERNATIVE_DIALOG
@@ -136,8 +108,8 @@ ui_return_t ui_add_dm(struct xante_app *xpp, struct xante_item *item)
 
     UNINIT_PROPERTIES(properties);
 
-    ret.selected_button = ret_dialog;
-    ret.updated_value = added;
+    ret.selected_button = DLG_EXIT_OK;
+    ret.updated_value = false;
 
     return ret;
 }

@@ -126,7 +126,8 @@ static int is_moving_key(int c)
     return 0;
 }
 
-static int calc_string_length(const char *s, int (*input_len)(const char *))
+static int calc_string_length(const char *s,
+    int (*input_len)(const char *, void *), void *data)
 {
     int len=0;
 
@@ -134,7 +135,7 @@ static int calc_string_length(const char *s, int (*input_len)(const char *))
     if (NULL == input_len)
         len = strlen(s);
     else
-        len = (input_len)(s);
+        len = (input_len)(s, data);
 
     return len;
 }
@@ -147,12 +148,22 @@ static int calc_string_length(const char *s, int (*input_len)(const char *))
 
 /**
  * @name dlg_inputbox
- * @brief Creates a widget of input kind with the possibility of show a variable
- *        text size, as an editor, allowing one the scroll it with the keyboard.
+ * @brief Creates a widget of input kind with the possibility of showing a
+ *        fixed text, allowing scroll it with the keyboard.
  *
- * IMPORTANTE: To use the scroll feature, the subtitle width cannot be larger
- *             to have a line break. This widget is not ready yet for a dynamic
- *             resizing.
+ * To use the scroll feature, the subtitle width cannot be larger to have a
+ * line break. This widget is not ready yet for a dynamic resizing.
+ *
+ * This dialog can also validate the input text by showing to the user a
+ * wrong status, changing the text color. This feature is enabled when using
+ * \a input_check.
+ *
+ * At the inputbox line is displayed the maximum number of input characters
+ * and the number of "consumed" characters (as the user types inside it).
+ *
+ * By default, to calculate the number of consumed characters a simple
+ * strlen call is made, but an alternative fuction to do this task may be
+ * passed.
  *
  * @param [in] width: The window width.
  * @param [in] height: The window height.
@@ -165,13 +176,16 @@ static int calc_string_length(const char *s, int (*input_len)(const char *))
  * @param [in] edit: A boolean flag to edit the item or not.
  * @param [in] input_len: A custom function to calculate the input length.
  * @param [in] input_check: A custom function to validate the input.
+ * @param [in] data: A custom data to be passed to \a input_len and to
+ *                   \a input_check.
  *
  * @return Returns libdialog's default return values of a selected button.
  */
 int dlgx_inputbox(int width, int height, const char *title,
     const char *subtitle, const char *input_title, const char *text,
     unsigned int max_len, char *input_s, bool edit,
-    int (*input_len)(const char *), int (*input_check)(const char *))
+    int (*input_len)(const char *, void *),
+    int (*input_check)(const char *, void *), void *data)
 {
     static DLG_KEYS_BINDING dialog_b[] = {
         VIEW_BINDINGS,
@@ -268,12 +282,12 @@ int dlgx_inputbox(int width, int height, const char *title,
                              dlg_x + 3);
 
     getyx(dialog, cur_y, cur_x);
-    len = calc_string_length(input_s, input_len);
+    len = calc_string_length(input_s, input_len, data);
     max_len += 1;
 
     if (len > max_len) {
         input_s[max_len - 1] = '\0';
-        len = calc_string_length(input_s, input_len);
+        len = calc_string_length(input_s, input_len, data);
     }
 
     if (edit == true) {
@@ -331,7 +345,7 @@ int dlgx_inputbox(int width, int height, const char *title,
             sprintf(tmp, "%s", input_s);
 
             if (dlg_edit_string(input_s, &chr_offset, key, fkey, first)) {
-                len = calc_string_length(input_s, input_len);
+                len = calc_string_length(input_s, input_len, data);
 
                 if ((len >= max_len) && is_only_char(key)) {
                     /*
@@ -348,7 +362,7 @@ int dlgx_inputbox(int width, int height, const char *title,
                      * If we detect something invalid inside the string we can
                      * change its color.
                      */
-                    if ((input_check)(input_s) < -1)
+                    if ((input_check)(input_s, data) < 0)
                         form_attr = inputbox_error_attr;
                     else
                         form_attr = form_active_text_attr;

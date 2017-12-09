@@ -421,7 +421,7 @@ static cl_string_t *auth_build_db_filename(const char *pathname)
 
 static bool auth_db_exists(cl_string_t *db_pathname)
 {
-    if (access(cl_string_valueof(db_pathname), 0x00) == -1) {
+    if (file_exists(cl_string_valueof(db_pathname)) == false) {
         errno_set(XANTE_ERROR_DB_ACCESS_FAILED);
         return false;
     }

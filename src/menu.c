@@ -70,6 +70,28 @@ static void __xante_menu_destroy(const struct cl_ref_s *ref)
     free(menu);
 }
 
+static int __search_menu_by_object_id(cl_list_node_t *node, void *a)
+{
+    struct xante_menu *menu = cl_list_node_content(node);
+    char *object_id = (char *)a;
+
+    if (strcmp(cl_string_valueof(menu->object_id), object_id) == 0)
+        return 1;
+
+    return 0;
+}
+
+static int __search_menu_by_name(cl_list_node_t *node, void *a)
+{
+    struct xante_menu *menu = cl_list_node_content(node);
+    char *name= (char *)a;
+
+    if (strcmp(cl_string_valueof(menu->name), name) == 0)
+        return 1;
+
+    return 0;
+}
+
 /*
  *
  * Internal API
@@ -194,6 +216,76 @@ struct xante_menu *xante_menu_head(const cl_list_t *menus)
     cl_list_node_unref(node);
 
     return head;
+}
+
+/**
+ * @name xante_menu_search_by_name
+ * @brief Searches a xante_menu structure inside a menu list which has a specific
+ *        name.
+ *
+ * Remember, when searching a menu pointed by an item, its object_id is located
+ * inside the referenced_menu.
+ *
+ * @param [in] menus: The list of menus.
+ * @param [in] menu_name: The menu name which will be used to search.
+ *
+ * @return On success, i.e, the menu is found, returns a pointer to its
+ *         xante_menu structure or NULL otherwise.
+ */
+struct xante_menu *xante_menu_search_by_name(const cl_list_t *menus,
+    const char *menu_name)
+{
+    cl_list_node_t *node = NULL;
+    struct xante_menu *menu = NULL;
+
+    node = cl_list_map(menus, __search_menu_by_name,
+                       (void *)menu_name);
+
+    if (NULL == node) {
+        errno_set(XANTE_ERROR_MENU_NOT_FOUND);
+        errno_store_additional_content(menu_name);
+        return NULL;
+    }
+
+    menu = cl_list_node_content(node);
+    cl_list_node_unref(node);
+
+    return menu;
+}
+
+/**
+ * @name xante_menu_search_by_object_id
+ * @brief Searches a xante_menu structure inside a menu list which has a specific
+ *        object_id.
+ *
+ * Remember, when searching a menu pointed by an item, its object_id is located
+ * inside the referenced_menu.
+ *
+ * @param [in] menus: The list of menus.
+ * @param [in] object_id: The menu object_id which will be used to search.
+ *
+ * @return On success, i.e, the menu is found, returns a pointer to its
+ *         xante_menu structure or NULL otherwise.
+ */
+struct xante_menu *xante_menu_search_by_object_id(const cl_list_t *menus,
+    const char *object_id)
+{
+    cl_list_node_t *node = NULL;
+    struct xante_menu *menu = NULL;
+
+    node = cl_list_map(menus, __search_menu_by_object_id,
+                       (void *)object_id);
+
+    if (NULL == node) {
+        errno_set(XANTE_ERROR_MENU_NOT_FOUND);
+        errno_store_additional_content(object_id);
+        return NULL;
+    }
+
+    menu = cl_list_node_content(node);
+    cl_list_node_unref(node);
+
+    return menu;
 }
 
 /*

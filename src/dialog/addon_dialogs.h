@@ -35,12 +35,12 @@
 
 #define MAX_CELL_DATA                       512
 
-/* Gets the number of items from a dialog */
-#define dialog_get_dlg_items(a)     ((a) > MAX_DLG_ITEMS ? MAX_DLG_ITEMS : (a))
+/* Default maximum number of items of a dialog */
+#define MAX_DLG_ITEMS                       15
 
-/* Just gives us the right item value */
-#define item_value(item)            \
-    ((item->value != NULL) ? item->value : item->default_value)
+/* Gets the number of items from a dialog */
+#define dlgx_get_dlg_items(a)               \
+    ((a) > MAX_DLG_ITEMS ? MAX_DLG_ITEMS : (a))
 
 enum dlgx_text_print_position {
     PRINT_FIRST,
@@ -128,6 +128,7 @@ bool dlgx_question(struct xante_app *xpp, const char *title, const char *msg,
                      const char *statusbar_text);
 
 void dlgx_update_cancel_button_label(void);
+void dlgx_update_ok_button_label(void);
 void dlgx_free_input(void);
 void dlgx_alloc_input(unsigned int bytes);
 char *dlgx_get_input_result(void);
@@ -145,8 +146,8 @@ int dlgx_scrolltext(int width, int height, const char *title,
 int dlgx_inputbox(int width, int height, const char *title,
                   const char *subtitle, const char *input_title,
                   const char *text, unsigned int max_len, char *input_s,
-                  bool edit, int (*input_len)(const char *),
-                  int (*input_check)(const char *));
+                  bool edit, int (*input_len)(const char *, void *),
+                  int (*input_check)(const char *, void *), void *data);
 
 /* spreadsheet */
 struct dlgx_spreadsheet_st *spreadsheet_st_init(const char *row_text,
@@ -156,14 +157,14 @@ void spreadsheet_st_destroy(struct dlgx_spreadsheet_st *table);
 int spreadsheet_st_add_data(struct dlgx_spreadsheet_st *table, int pos,
                             const char *fmt, ...);
 
+const char *spreadsheet_st_get_data(struct dlgx_spreadsheet_st *table, int pos);
 int dlgx_spreadsheet(const char *title, const char *subtitle,
                      struct dlgx_spreadsheet_st *table);
 
 /* update object */
 int dlgx_update_object(int width, int height, const char *title,
                        const char *subtitle, int update_interval,
-                       char *(*update_routine)(void *, int *), void *arg,
-                       int *status);
+                       char *(*update_routine)(void *), void *arg);
 
 #endif
 

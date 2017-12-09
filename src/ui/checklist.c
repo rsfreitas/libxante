@@ -32,32 +32,38 @@
 #define DEFAULT_NOT_EDIT_STATUSBAR_TEXT \
     "[ESC] Cancel [Enter] Confirm a selection [Up/Down] Move [TAB/Left/Right] Choose option"
 
+#define DEFAULT_WIDTH                   DEFAULT_DIALOG_WIDTH
+
+/* XXX: The +1 is because of the window subtitle. */
+#define DEFAULT_HEIGHT                  \
+    (DIALOG_HEIGHT_WITHOUT_TEXT + MAX_DLG_ITEMS + 1)
+
 /*
  *
  * Internal functions
  *
  */
 
-static DIALOG_LISTITEM *prepare_dialog_content(struct xante_item *item,
-    int total_items)
+static int prepare_content(const struct xante_item *item,
+    ui_properties_t *properties)
 {
-    DIALOG_LISTITEM *litems = NULL, *listitem = NULL;
-    int index, total, current_value;
+    DIALOG_LISTITEM *listitem = NULL;
+    int index, current_value;
     cl_string_t *option = NULL;
 
-    litems = calloc(total_items, sizeof(DIALOG_LISTITEM));
+    properties->litems = calloc(properties->number_of_items,
+                                sizeof(DIALOG_LISTITEM));
 
-    if (NULL == litems) {
+    if (NULL == properties->litems) {
         errno_set(XANTE_ERROR_NO_MEMORY);
-        return NULL;
+        return -1;
     }
 
     current_value = CL_OBJECT_AS_INT(item_value(item));
-    total = cl_stringlist_size(item->checklist_options);
 
-    for (index = 0; index < total; index++) {
-        listitem = &litems[index];
-        option = cl_stringlist_get(item->checklist_options, index);
+    for (index = 0; index < properties->number_of_items; index++) {
+        listitem = &properties->litems[index];
+        option = cl_stringlist_get(item->list_items, index);
 
         listitem->name = strdup("");
         listitem->help = strdup("");
@@ -75,30 +81,23 @@ static DIALOG_LISTITEM *prepare_dialog_content(struct xante_item *item,
         cl_string_unref(option);
     }
 
-    return litems;
+    return 0;
 }
 
-static void release_dialog_content(DIALOG_LISTITEM *listitem, int total_items)
+static void build_properties(const struct xante_item *item,
+    ui_properties_t *properties)
 {
-    int i;
+    properties->number_of_items = cl_stringlist_size(item->list_items);
+    properties->width = (item->geometry.width == 0) ? DEFAULT_WIDTH
+                                                    : item->geometry.width;
 
-    for (i = 0; i < total_items; i++) {
-        free(listitem[i].text);
-        free(listitem[i].name);
-        free(listitem[i].help);
-    }
+    properties->height = (item->geometry.height == 0) ? DEFAULT_HEIGHT
+                                                      : item->geometry.height;
 
-    free(listitem);
-}
+    properties->displayed_items = properties->height - DIALOG_HEIGHT_WITHOUT_TEXT;
 
-static void calc_checklist_limits(const struct xante_item *item, int *options,
-    int *height, int *list_height)
-{
-    *list_height = cl_stringlist_size(item->checklist_options);
-    *options = dialog_get_dlg_items(*list_height);
-
-    /* XXX: This 1 is from the dialog text message. */
-    *height = *options + DIALOG_HEIGHT_WITHOUT_TEXT + 1;
+    /* Creates the UI content */
+    prepare_content(item, properties);
 }
 
 static cl_stringlist_t *get_checklist_entries(DIALOG_LISTITEM *dlg_items,
@@ -229,7 +228,7 @@ static void update_item_brief(int current_index, void *a)
  */
 
 /**
- * @name ui_dialog_checklist
+ * @name ui_checklist
  * @brief Creates a dialog to choose an option inside a list of options.
  *
  * Since we (and libdialog) use an int variable to store the selected options,
@@ -243,14 +242,15 @@ static void update_item_brief(int current_index, void *a)
  * @return Returns a ui_return_t value indicating if the item's value has been
  *         changed (true) or not (false) with the dialog selected button.
  */
-ui_return_t ui_dialog_checklist(struct xante_app *xpp, struct xante_item *item,
+ui_return_t ui_checklist(struct xante_app *xpp, struct xante_item *item,
     bool edit_value)
 {
+    int ret_dialog = DLG_EXIT_OK, selected_index = -1, selected_items;
     bool loop = true, value_changed = false;
-    int ret_dialog = DLG_EXIT_OK, list_options_height = 0, height = 0,
-        number_of_options = 0, selected_index = -1, selected_items;
-    DIALOG_LISTITEM *dlg_items = NULL;
+    ui_properties_t properties;
     ui_return_t ret;
+
+    INIT_PROPERTIES(properties);
 
     /* Prepare dialog */
     dlgx_set_backtitle(xpp);
@@ -259,10 +259,7 @@ ui_return_t ui_dialog_checklist(struct xante_app *xpp, struct xante_item *item,
                                             : DEFAULT_NOT_EDIT_STATUSBAR_TEXT);
 
     /* Prepares dialog content */
-    calc_checklist_limits(item, &number_of_options, &height,
-                          &list_options_height);
-
-    dlg_items = prepare_dialog_content(item, list_options_height);
+    build_properties(item, &properties);
 
     /* Enables the help button */
     if (item->descriptive_help != NULL)
@@ -271,26 +268,30 @@ ui_return_t ui_dialog_checklist(struct xante_app *xpp, struct xante_item *item,
     do {
 #ifdef ALTERNATIVE_DIALOG
         ret_dialog = dlg_checklist(cl_string_valueof(item->name),
-                                   cl_tr("Choose an option"), height,
-                                   MINIMUM_WIDTH, list_options_height,
-                                   number_of_options, dlg_items, " X",
+                                   cl_tr("Choose an option"),
+                                   properties.height, properties.width,
+                                   properties.displayed_items,
+                                   properties.number_of_items,
+                                   properties.litems, " X",
                                    item->dialog_checklist_type,
                                    &selected_index,
                                    update_item_brief, item,
                                    edit_value);
 #else
         ret_dialog = dlg_checklist(cl_string_valueof(item->name),
-                                   cl_tr("Choose an option"), height,
-                                   MINIMUM_WIDTH, list_options_height,
-                                   number_of_options, dlg_items, " X",
-                                   item->dialog_checklist_type,
+                                   cl_tr("Choose an option"),
+                                   properties.height, properties.width,
+                                   properties.displayed_items,
+                                   properties.number_of_items,
+                                   properties.litems,
+                                   " X", item->dialog_checklist_type,
                                    &selected_index);
 #endif
 
         switch (ret_dialog) {
             case DLG_EXIT_OK:
-                selected_items = get_checklist_selected_value(dlg_items,
-                                                              number_of_options,
+                selected_items = get_checklist_selected_value(properties.litems,
+                                                              properties.number_of_items,
                                                               item->dialog_checklist_type);
 
                 if (selected_items < 0 ) {
@@ -306,8 +307,9 @@ ui_return_t ui_dialog_checklist(struct xante_app *xpp, struct xante_item *item,
                     break;
                 }
 
-                if (item_value_has_changed(xpp, item, dlg_items,
-                                           number_of_options, selected_items))
+                if (item_value_has_changed(xpp, item, properties.litems,
+                                           properties.number_of_items,
+                                           selected_items))
                 {
                     value_changed = true;
                 }
@@ -322,6 +324,10 @@ ui_return_t ui_dialog_checklist(struct xante_app *xpp, struct xante_item *item,
 #endif
 
             case DLG_EXIT_ESC:
+                /* Don't let the user close the dialog */
+                if (xante_runtime_esc_key(xpp))
+                    break;
+
             case DLG_EXIT_CANCEL:
                 loop = false;
                 break;
@@ -339,7 +345,7 @@ ui_return_t ui_dialog_checklist(struct xante_app *xpp, struct xante_item *item,
     if (item->descriptive_help != NULL)
         dialog_vars.help_button = 0;
 
-    release_dialog_content(dlg_items, list_options_height);
+    UNINIT_PROPERTIES(properties);
 
     ret.selected_button = ret_dialog;
     ret.updated_value = value_changed;
