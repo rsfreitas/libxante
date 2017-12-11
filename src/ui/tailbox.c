@@ -26,9 +26,6 @@
 
 #include "libxante.h"
 
-#define DEFAULT_STATUSBAR_TEXT              \
-    "[ESC] Cancel [Enter] Confirm selected button"
-
 /* The dialog size onto the screen */
 #define DIALOG_HEIGHT                       26
 #define DIALOG_WIDTH                        75
@@ -48,11 +45,6 @@ ui_return_t ui_tailbox(struct xante_app *xpp, struct xante_item *item)
     cl_object_t *value = NULL;
 
     INIT_PROPERTIES(properties);
-
-    /* Prepare dialog */
-    dlgx_set_backtitle(xpp);
-    dlgx_update_cancel_button_label();
-    dlgx_put_statusbar(DEFAULT_STATUSBAR_TEXT);
     properties.width = (item->geometry.width == 0) ? DIALOG_WIDTH
                                                    : item->geometry.width;
 
@@ -78,11 +70,6 @@ ui_return_t ui_tailbox(struct xante_app *xpp, struct xante_item *item)
 
         goto end_block;
     }
-
-    /* FIXME: Need to fix libdialog for this to work */
-    /* Enables the help button */
-//    if (item->descriptive_help != NULL)
-//        dialog_vars.help_button = 1;
 
     do {
         ret_dialog = dialog_tailbox(cl_string_valueof(item->name),
@@ -116,9 +103,6 @@ ui_return_t ui_tailbox(struct xante_app *xpp, struct xante_item *item)
                 break;
         }
     } while (loop);
-
-    if (item->descriptive_help != NULL)
-        dialog_vars.help_button = 0;
 
 end_block:
     UNINIT_PROPERTIES(properties);

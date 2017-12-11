@@ -26,12 +26,6 @@
 
 #include "libxante.h"
 
-#define DEFAULT_STATUSBAR_TEXT          \
-    "[ESC] Cancel [Enter] Confirm a selection [Up/Down] Move [TAB/Left/Right] Choose option [Spacebar] Select option"
-
-#define DEFAULT_NOT_EDIT_STATUSBAR_TEXT \
-    "[ESC] Cancel [Enter] Confirm a selection [Up/Down] Move [TAB/Left/Right] Choose option"
-
 #define DEFAULT_WIDTH                   DEFAULT_DIALOG_WIDTH
 
 /* XXX: The +1 is because of the window subtitle. */
@@ -147,18 +141,8 @@ ui_return_t ui_delete_dm(struct xante_app *xpp, struct xante_item *item,
         return ret;
     }
 
-    /* Prepare dialog */
-    dlgx_set_backtitle(xpp);
-    dlgx_update_cancel_button_label();
-    dlgx_put_statusbar((edit_value == true) ? DEFAULT_STATUSBAR_TEXT
-                                            : DEFAULT_NOT_EDIT_STATUSBAR_TEXT);
-
     /* Prepare dialog content */
     build_properties(dm_menu, &properties);
-
-    /* Enables the help button */
-    if (item->descriptive_help != NULL)
-        dialog_vars.help_button = 1;
 
     do {
 #ifdef ALTERNATIVE_DIALOG
@@ -217,9 +201,6 @@ ui_return_t ui_delete_dm(struct xante_app *xpp, struct xante_item *item,
                 break;
         }
     } while (loop);
-
-    if (item->descriptive_help != NULL)
-        dialog_vars.help_button = 0;
 
     UNINIT_PROPERTIES(properties);
 

@@ -26,9 +26,6 @@
 
 #include "libxante.h"
 
-#define DEFAULT_STATUSBAR_TEXT          \
-    "[ESC] Cancel [Enter] Confirm a selected option"
-
 #define DIALOG_WIDTH                    60
 #define DIALOG_HEIGHT                   12
 #define DIALOG_UPDATE_INTERVAL          500
@@ -86,9 +83,6 @@ ui_return_t ui_update_object(struct xante_app *xpp,
     };
 
     /* Prepare dialog */
-    dlgx_set_backtitle(xpp);
-    dlgx_update_cancel_button_label();
-    dlgx_put_statusbar(DEFAULT_STATUSBAR_TEXT);
     width = (item->geometry.width == 0) ? DIALOG_WIDTH
                                         : item->geometry.width;
 

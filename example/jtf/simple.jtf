@@ -339,10 +339,14 @@
                             }
                         },
                         "ui": {
+                            "btn_extra": true,
                             "labels": {
                                 "help": {
                                     "brief": "This is a help description calendar.",
                                     "description": "This is a help description."
+                                },
+                                "buttons": {
+                                    "extra": "EXTRA_BTN"
                                 }
                             }
                         }

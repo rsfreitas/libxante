@@ -26,9 +26,6 @@
 
 #include "libxante.h"
 
-#define DEFAULT_STATUSBAR_TEXT              \
-    "[ESC] Cancel [Enter] Confirm selected button [Tab/Arrows] Navigate through options [Spacebar] Select dir/file"
-
 /* The dialog size onto the screen */
 #define DIALOG_HEIGHT                       12
 #define DIALOG_WIDTH                        60
@@ -66,20 +63,11 @@ ui_return_t ui_fselect(struct xante_app *xpp, struct xante_item *item)
     ui_properties_t properties;
 
     INIT_PROPERTIES(properties);
-
-    /* Prepare dialog */
-    dlgx_set_backtitle(xpp);
-    dlgx_update_cancel_button_label();
-    dlgx_put_statusbar(DEFAULT_STATUSBAR_TEXT);
     properties.width = (item->geometry.width == 0) ? DIALOG_WIDTH
                                                    : item->geometry.width;
 
     properties.height = (item->geometry.height == 0) ? DIALOG_HEIGHT
                                                      : item->geometry.height;
-
-    /* Enables the help button */
-    if (item->descriptive_help != NULL)
-        dialog_vars.help_button = 1;
 
     do {
         dlgx_free_input();
@@ -140,9 +128,6 @@ ui_return_t ui_fselect(struct xante_app *xpp, struct xante_item *item)
                 break;
         }
     } while (loop);
-
-    if (item->descriptive_help != NULL)
-        dialog_vars.help_button = 0;
 
     UNINIT_PROPERTIES(properties);
 

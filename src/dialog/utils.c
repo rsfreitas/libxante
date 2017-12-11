@@ -662,6 +662,15 @@ void dlgx_update_ok_button_label(void)
     dialog_vars.ok_label = strdup(cl_tr("Ok"));
 }
 
+void dlgx_update_extra_button_label(cl_string_t *label)
+{
+    if (dialog_vars.extra_label != NULL)
+        free(dialog_vars.extra_label);
+
+    dialog_vars.extra_label = strdup((label != NULL) ? cl_string_valueof(label)
+                                                     : cl_tr("Extra"));
+}
+
 /**
  * @name dlgx_free_input
  * @brief Releases the dialog input buffer previously allocated.

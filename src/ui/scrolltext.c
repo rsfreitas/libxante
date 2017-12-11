@@ -26,9 +26,6 @@
 
 #include "libxante.h"
 
-#define DEFAULT_STATUSBAR_TEXT              \
-    "[ESC] Cancel [Enter] Confirm selected button [Up/Down/Pg Up/Pg Down] Navigate through the text"
-
 /* The dialog size onto the screen */
 #define DIALOG_HEIGHT                       14
 #define DIALOG_WIDTH                        60
@@ -48,11 +45,6 @@ ui_return_t ui_scrolltext(struct xante_app *xpp, struct xante_item *item)
     ui_properties_t properties;
 
     INIT_PROPERTIES(properties);
-
-    /* Prepare dialog */
-    dlgx_set_backtitle(xpp);
-    dlgx_update_cancel_button_label();
-    dlgx_put_statusbar(DEFAULT_STATUSBAR_TEXT);
     properties.width = (item->geometry.width == 0) ? DIALOG_WIDTH
                                                    : item->geometry.width;
 
@@ -62,10 +54,6 @@ ui_return_t ui_scrolltext(struct xante_app *xpp, struct xante_item *item)
     /* Gets the item voalue */
     value = item_value(item);
     properties.text = CL_OBJECT_AS_CSTRING(value);
-
-    /* Enables the help button */
-    if (item->descriptive_help != NULL)
-        dialog_vars.help_button = 1;
 
     do {
         ret_dialog = dlgx_scrolltext(properties.width, properties.height,
@@ -102,9 +90,6 @@ ui_return_t ui_scrolltext(struct xante_app *xpp, struct xante_item *item)
                 break;
         }
     } while (loop);
-
-    if (item->descriptive_help != NULL)
-        dialog_vars.help_button = 0;
 
     UNINIT_PROPERTIES(properties);
 

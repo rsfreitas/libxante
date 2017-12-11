@@ -26,9 +26,6 @@
 
 #include "libxante.h"
 
-#define DEFAULT_STATUSBAR_TEXT      \
-    "[ESC] Cancel [Enter] Confirm selected button [Tab] Navigate through cells"
-
 /*
  * A spreadsheet object must be configured inside a JTF with the following
  * content:
@@ -617,19 +614,9 @@ ui_return_t ui_spreadsheet(struct xante_app *xpp, struct xante_item *item)
     ui_properties_t properties;
     char *result = NULL;
 
-    INIT_PROPERTIES(properties);
-
-    /* Prepare dialog */
-    dlgx_set_backtitle(xpp);
-    dlgx_update_cancel_button_label();
-    dlgx_put_statusbar(DEFAULT_STATUSBAR_TEXT);
-
     /* Prepares dialog content */
+    INIT_PROPERTIES(properties);
     build_properties(item, &properties);
-
-    /* Enables the help button */
-    if (item->descriptive_help != NULL)
-        dialog_vars.help_button = 1;
 
     do {
         if (result != NULL) {
@@ -675,9 +662,6 @@ ui_return_t ui_spreadsheet(struct xante_app *xpp, struct xante_item *item)
 
     if (result != NULL)
         free(result);
-
-    if (item->descriptive_help != NULL)
-        dialog_vars.help_button = 0;
 
     UNINIT_PROPERTIES(properties);
 

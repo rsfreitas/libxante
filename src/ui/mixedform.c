@@ -26,9 +26,6 @@
 
 #include "libxante.h"
 
-#define DEFAULT_STATUSBAR_TEXT      \
-    "[ESC] Cancel [Enter] Confirm a selected option [Tab/Left/Right] Select an option [Up/Down] Select field"
-
 #define DIALOG_WIDTH                55
 
 /*
@@ -473,24 +470,11 @@ ui_return_t ui_mixedform(struct xante_app *xpp, struct xante_item *item)
     char *result = NULL;
     ui_return_t ret;
 
-    INIT_PROPERTIES(properties);
-
-    /* Prepare dialog */
-    dlgx_set_backtitle(xpp);
-    dlgx_update_cancel_button_label();
-    dlgx_put_statusbar(DEFAULT_STATUSBAR_TEXT);
-
-    /* Since we may have a password item, enable '*' on screen */
-    dialog_vars.insecure = 1;
-
     /* Prepares dialog content */
+    INIT_PROPERTIES(properties);
     fields = get_fields_node(item);
     form_title = get_title(item);
     build_properties(item, fields, &properties);
-
-    /* Enables the help button */
-    if (item->descriptive_help != NULL)
-        dialog_vars.help_button = 1;
 
     do {
         if (result != NULL) {
@@ -545,9 +529,6 @@ ui_return_t ui_mixedform(struct xante_app *xpp, struct xante_item *item)
                 break;
         }
     } while (loop);
-
-    if (item->descriptive_help != NULL)
-        dialog_vars.help_button = 0;
 
     if (result != NULL)
         free(result);

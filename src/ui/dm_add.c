@@ -26,9 +26,6 @@
 
 #include "libxante.h"
 
-#define DEFAULT_STATUSBAR_TEXT              \
-    "[ESC] Cancel [Enter] Confirm a selected option [Tab/Left/Right] Select an option"
-
 /*
  *
  * Internal functions
@@ -59,11 +56,6 @@ ui_return_t ui_add_dm(struct xante_app *xpp, struct xante_item *item)
 
     INIT_PROPERTIES(properties);
 
-    /* Prepare dialog */
-    dlgx_set_backtitle(xpp);
-    dlgx_update_cancel_button_label();
-    dlgx_put_statusbar(DEFAULT_STATUSBAR_TEXT);
-
     /* Adjusts window width and height */
     properties.text = cl_string_dup(item->options);
     cl_string_rplchr(properties.text, XANTE_STR_LINE_BREAK, '\n');
@@ -75,10 +67,6 @@ ui_return_t ui_add_dm(struct xante_app *xpp, struct xante_item *item)
                          ? dlgx_count_lines_by_delimiters(cl_string_valueof(properties.text)) +
                            FORM_HEIGHT_WITHOUT_TEXT
                          : item->geometry.height;
-
-    /* Enables the help button */
-    if (item->descriptive_help != NULL)
-        dialog_vars.help_button = 1;
 
     do {
         ret_dialog = dlgx_inputbox(properties.width, properties.height,
@@ -130,9 +118,6 @@ ui_return_t ui_add_dm(struct xante_app *xpp, struct xante_item *item)
                 break;
         }
     } while (loop);
-
-    if (item->descriptive_help != NULL)
-        dialog_vars.help_button = 0;
 
     UNINIT_PROPERTIES(properties);
 

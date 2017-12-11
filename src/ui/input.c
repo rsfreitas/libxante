@@ -29,12 +29,6 @@
 
 #include "libxante.h"
 
-#define DEFAULT_STATUSBAR_TEXT              \
-    "[ESC] Cancel [Enter] Confirm a selected option [Tab/Left/Right] Select an option"
-
-#define DEFAULT_RANGE_STATUSBAR_TEXT        \
-    "[ESC] Cancel [Enter] Confirm selected option [Tab/Left/Right] Select an option [Up/Down] Adjust range value"
-
 /*
  * Since the callbacks used by the dlgx_inputscroll function receives a
  * void *, this structure is built to hold some informations needed to
@@ -404,21 +398,9 @@ ui_return_t ui_input(struct xante_app *xpp, struct xante_item *item,
         .item = item,
     };
 
-    INIT_PROPERTIES(properties);
-
-    /* Prepare dialog */
-    dlgx_set_backtitle(xpp);
-    dlgx_update_cancel_button_label();
-    dlgx_put_statusbar((item->dialog_type == XANTE_UI_DIALOG_RANGE)
-                                ? DEFAULT_RANGE_STATUSBAR_TEXT
-                                : DEFAULT_STATUSBAR_TEXT);
-
     /* Prepares dialog content and properties */
+    INIT_PROPERTIES(properties);
     build_properties(xpp, item, &properties, input, sizeof(input));
-
-    /* Enables the help button */
-    if (item->descriptive_help != NULL)
-        dialog_vars.help_button = 1;
 
     do {
         if (item->dialog_type == XANTE_UI_DIALOG_INPUT_PASSWD) {
@@ -498,9 +480,6 @@ ui_return_t ui_input(struct xante_app *xpp, struct xante_item *item,
                 break;
         }
     } while (loop);
-
-    if (item->descriptive_help != NULL)
-        dialog_vars.help_button = 0;
 
     UNINIT_PROPERTIES(properties);
 

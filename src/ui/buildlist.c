@@ -26,9 +26,6 @@
 
 #include "libxante.h"
 
-#define DEFAULT_STATUSBAR_TEXT      \
-    "[ESC] Cancel [Enter] Confirm button [Spacebar] Move option between lists [^] Select origin [$] Select destination"
-
 /*
  * XXX: This DIALOG_WIDTH is important because we use half of its value
  *      to build the cprompt of the dialog.
@@ -161,20 +158,9 @@ ui_return_t ui_buildlist(struct xante_app *xpp, struct xante_item *item)
     ui_properties_t properties;
     cl_string_t *cprompt = NULL, *result = NULL;
 
-    INIT_PROPERTIES(properties);
-
-    /* Prepare dialog */
-    dlgx_set_backtitle(xpp);
-    dlgx_update_cancel_button_label();
-    dlgx_put_statusbar(DEFAULT_STATUSBAR_TEXT);
-
     /* Prepares dialog content */
+    INIT_PROPERTIES(properties);
     build_properties(item, &properties);
-
-    /* Enables the help button */
-    if (item->descriptive_help != NULL)
-        dialog_vars.help_button = 1;
-
     cprompt = cl_string_create(cl_tr("Select an option from origin to destination"
                                      "\n%-30s%-30s"),
                                cl_tr("Origin"),
@@ -231,9 +217,6 @@ ui_return_t ui_buildlist(struct xante_app *xpp, struct xante_item *item)
                 break;
         }
     } while (loop);
-
-    if (item->descriptive_help != NULL)
-        dialog_vars.help_button = 0;
 
     if (result != NULL)
         cl_string_unref(result);

@@ -26,12 +26,6 @@
 
 #include "libxante.h"
 
-#define DEFAULT_STATUSBAR_TEXT          \
-    "[ESC] Cancel [TAB] Select an option [Enter] Confirm [Arrows] Change selected time"
-
-#define DEFAULT_NOT_EDIT_STATUSBAR_TEXT \
-    "[ESC] Cancel [TAB/Arrows] Select an option [Enter] Confirm"
-
 #define DEFAULT_WIDTH                       DEFAULT_DIALOG_WIDTH
 #define DEFAULT_HEIGHT                      3
 
@@ -129,14 +123,6 @@ ui_return_t ui_timebox(struct xante_app *xpp, struct xante_item *item,
     ui_properties_t properties;
 
     INIT_PROPERTIES(properties);
-
-    /* Prepare dialog */
-    dlgx_set_backtitle(xpp);
-    dlgx_update_cancel_button_label();
-    dlgx_alloc_input(64);
-    dlgx_put_statusbar((edit_value == true) ? DEFAULT_STATUSBAR_TEXT
-                                            : DEFAULT_NOT_EDIT_STATUSBAR_TEXT);
-
     properties.width = (item->geometry.width == 0) ? DEFAULT_WIDTH
                                                    : item->geometry.width;
 
@@ -149,10 +135,6 @@ ui_return_t ui_timebox(struct xante_app *xpp, struct xante_item *item,
     /* Adjusts the window message */
     properties.text = cl_string_dup(item->options);
     cl_string_rplchr(properties.text, XANTE_STR_LINE_BREAK, '\n');
-
-    /* Enables the help button */
-    if (item->descriptive_help != NULL)
-        dialog_vars.help_button = 1;
 
     do {
 #ifdef ALTERNATIVE_DIALOG
@@ -222,10 +204,6 @@ ui_return_t ui_timebox(struct xante_app *xpp, struct xante_item *item,
         }
     } while (loop);
 
-    if (item->descriptive_help != NULL)
-        dialog_vars.help_button = 0;
-
-    dlgx_free_input();
     UNINIT_PROPERTIES(properties);
 
     ret.selected_button = ret_dialog;

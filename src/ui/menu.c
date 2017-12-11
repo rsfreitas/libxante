@@ -26,9 +26,6 @@
 
 #include "libxante.h"
 
-#define DEFAULT_STATUSBAR_TEXT          \
-    "[ESC] Exit [Enter] Select an option [Up/Down] Move [TAB/Left/Right] Choose option"
-
 #define DEFAULT_HEIGHT                  \
     (DIALOG_HEIGHT_WITHOUT_TEXT + MAX_DLG_ITEMS)
 
@@ -44,6 +41,8 @@ struct list_data {
     int name_size;
     int item_size;
 };
+
+static const char *ui_statusbar_text(enum xante_ui_dialog type, bool editable);
 
 static int check_item_availability(cl_list_node_t *node, void *a)
 {
@@ -224,7 +223,7 @@ static void prepare_dialog_look(struct xante_app *xpp,
     if (timeout > 0)
         dialog_vars.timeout_secs = timeout;
 
-    dlgx_put_statusbar(DEFAULT_STATUSBAR_TEXT);
+    dlgx_put_statusbar(ui_statusbar_text(XANTE_UI_DIALOG_MENU, true));
 }
 
 static void release_dialog_labels(void)
@@ -236,11 +235,12 @@ static void release_dialog_labels(void)
 }
 
 /* Rename menus to something better */
-static void call_menu_dialog(struct xante_app *xpp,
+static ui_return_t call_menu_dialog(struct xante_app *xpp,
     cl_list_t *menus, struct xante_item *selected_item)
 {
     struct xante_menu *referenced_menu = NULL;
     char *btn_cancel_label = NULL;
+    ui_return_t ret;
 
     referenced_menu =
         xante_menu_search_by_object_id(menus,
@@ -257,6 +257,11 @@ static void call_menu_dialog(struct xante_app *xpp,
     btn_cancel_label = strdup(cl_tr("Back"));
     ui_menu(xpp, menus, referenced_menu, btn_cancel_label);
     free(btn_cancel_label);
+
+    ret.selected_button = DLG_EXIT_OK;
+    ret.updated_value = false;
+
+    return ret;
 }
 
 static int item_at(unsigned int index, cl_list_node_t *node, void *a)
@@ -309,6 +314,210 @@ static void update_menu_item_brief(int current_item, void *a)
 }
 #endif
 
+static const char *ui_statusbar_text(enum xante_ui_dialog type, bool editable)
+{
+    char *text = NULL;
+
+    switch (type) {
+        case XANTE_UI_DIALOG_MENU:
+        case XANTE_UI_DIALOG_DYNAMIC_MENU:
+            text = cl_tr("[ESC] Exit [Enter] Select an option [Up/Down] Move "
+                         "[TAB/Left/Right] Choose button");
+
+            break;
+
+        case XANTE_UI_DIALOG_INPUT_INT:
+        case XANTE_UI_DIALOG_INPUT_FLOAT:
+        case XANTE_UI_DIALOG_INPUT_DATE:
+        case XANTE_UI_DIALOG_INPUT_STRING:
+        case XANTE_UI_DIALOG_INPUT_TIME:
+        case XANTE_UI_DIALOG_INPUT_PASSWD:
+        case XANTE_UI_DIALOG_INPUTSCROLL:
+            text = cl_tr("[ESC] Cancel [Enter] Confirm a selected option "
+                         "[Tab/Left/Right] Select an option");
+
+            break;
+
+        case XANTE_UI_DIALOG_RANGE:
+            text = cl_tr("[ESC] Cancel [Enter] Confirm selected option "
+                         "[Tab/Left/Right] Select an option "
+                         "[Up/Down] Adjust range value");
+
+            break;
+
+        case XANTE_UI_DIALOG_CALENDAR:
+            if (editable) {
+                text = cl_tr("[ESC] Cancel [TAB] Select an option "
+                             "[Enter] Confirm [Arrows] Change selected date");
+            } else
+                text = cl_tr("[ESC] Cancel [TAB] Select an option "
+                             "[Enter] Confirm");
+
+            break;
+
+        case XANTE_UI_DIALOG_TIMEBOX:
+            if (editable) {
+                text = cl_tr("[ESC] Cancel [TAB] Select an option "
+                             "[Enter] Confirm [Arrows] Change selected time");
+            } else
+                text = cl_tr("[ESC] Cancel [TAB/Arrows] Select an option "
+                             "[Enter] Confirm");
+
+            break;
+
+        case XANTE_UI_DIALOG_RADIO_CHECKLIST:
+        case XANTE_UI_DIALOG_CHECKLIST:
+            if (editable) {
+                text = cl_tr("[ESC] Cancel [Enter] Confirm a selection "
+                             "[Up/Down] Move [TAB/Left/Right] Choose option "
+                             "[Spacebar] Select option");
+            } else
+                text = cl_tr("[ESC] Cancel [Enter] Confirm a selection "
+                             "[Up/Down] Move [TAB/Left/Right] Choose option");
+
+            break;
+
+        case XANTE_UI_DIALOG_YES_NO:
+            text = cl_tr("[ESC] Cancel [Enter] Confirm a selected option "
+                         "[Tab/Left/Right] Select an option");
+
+            break;
+
+        case XANTE_UI_DIALOG_DELETE_DYNAMIC_MENU_ITEM:
+            if (editable) {
+                text = cl_tr("[ESC] Cancel [Enter] Confirm a selection "
+                             "[Up/Down] Move [TAB/Left/Right] Choose option "
+                             "[Spacebar] Select option");
+            } else
+                text = cl_tr("[ESC] Cancel [Enter] Confirm a selection "
+                             "[Up/Down] Move [TAB/Left/Right] Choose option");
+
+            break;
+
+        case XANTE_UI_DIALOG_ADD_DYNAMIC_MENU_ITEM:
+            text = cl_tr("[ESC] Cancel [Enter] Confirm a selected option "
+                         "[Tab/Left/Right] Select an option");
+
+            break;
+
+        case XANTE_UI_DIALOG_PROGRESS:
+            text = cl_tr("Wait the process to end.");
+            break;
+
+        case XANTE_UI_DIALOG_SPINNER_SYNC:
+        case XANTE_UI_DIALOG_DOTS_SYNC:
+            text = cl_tr("A task is running in background. Wait for it to end.");
+            break;
+
+        case XANTE_UI_DIALOG_FILE_SELECT:
+        case XANTE_UI_DIALOG_DIR_SELECT:
+            text = cl_tr("[ESC] Cancel [Enter] Confirm selected button "
+                         "[Tab/Arrows] Navigate through options "
+                         "[Spacebar] Select dir/file");
+
+            break;
+
+        case XANTE_UI_DIALOG_FILE_VIEW:
+            text = cl_tr("[ESC] Cancel [Enter] Confirm selected button "
+                         "[Up/Down/Pg Up/Pg Down] Navigate through the text");
+
+            break;
+
+        case XANTE_UI_DIALOG_TAILBOX:
+            text = cl_tr("[ESC] Cancel [Enter] Confirm selected button");
+            break;
+
+        case XANTE_UI_DIALOG_SCROLLTEXT:
+            text = cl_tr("[ESC] Cancel [Enter] Confirm selected button "
+                         "[Up/Down/Pg Up/Pg Down] Navigate through the text");
+
+            break;
+
+        case XANTE_UI_DIALOG_UPDATE_OBJECT:
+            text = cl_tr("[ESC] Cancel [Enter] Confirm a selected option");
+            break;
+
+        case XANTE_UI_DIALOG_MIXEDFORM:
+            text = cl_tr("[ESC] Cancel [Enter] Confirm a selected option "
+                         "[Tab/Left/Right] Select an option "
+                         "[Up/Down] Select field");
+
+            break;
+
+        case XANTE_UI_DIALOG_BUILDLIST:
+            text = cl_tr("[ESC] Cancel [Enter] Confirm button "
+                         "[Spacebar] Move option between lists "
+                         "[^] Select origin [$] Select destination");
+
+            break;
+
+        case XANTE_UI_DIALOG_SPREADSHEET:
+            text = cl_tr("[ESC] Cancel [Enter] Confirm selected button "
+                         "[Tab] Navigate through cells");
+
+            break;
+
+        default:
+            break;
+    }
+
+    return text;
+}
+
+static void start_dialog_internals(struct xante_app *xpp,
+    struct xante_item *item, bool edit_value)
+{
+    const char *text = NULL;
+
+    dlgx_set_backtitle(xpp);
+    dlgx_update_ok_button_label();
+    dlgx_update_cancel_button_label();
+    text = ui_statusbar_text(item->dialog_type, edit_value);
+
+    if (text != NULL)
+        dlgx_put_statusbar(text);
+
+    if ((item->dialog_type == XANTE_UI_DIALOG_CALENDAR) ||
+        (item->dialog_type == XANTE_UI_DIALOG_CALENDAR))
+    {
+        dlgx_alloc_input(64);
+    }
+
+    if (item->dialog_type == XANTE_UI_DIALOG_MIXEDFORM) {
+        /* Since we may have a password item, enable '*' on screen */
+        dialog_vars.insecure = 1;
+    }
+
+    /* Enables the help button */
+    if (item->descriptive_help != NULL)
+        dialog_vars.help_button = 1;
+
+    /* Enables the extra button */
+    if (item->button.extra) {
+        dlgx_update_extra_button_label(item->label.extra);
+        dialog_vars.extra_button = 1;
+    }
+}
+
+static void finish_dialog_internals(struct xante_item *item)
+{
+    /* Removes the Help button off the screen */
+    if (item->descriptive_help != NULL)
+        dialog_vars.help_button = 0;
+
+    /* Removes the Extra button off the screen */
+    if (item->button.extra)
+        dialog_vars.extra_button = 0;
+
+    if ((item->dialog_type == XANTE_UI_DIALOG_CALENDAR) ||
+        (item->dialog_type == XANTE_UI_DIALOG_CALENDAR))
+    {
+        dlgx_free_input();
+    }
+
+    dialog_vars.insecure = 0;
+}
+
 /*
  *
  * Internal API
@@ -328,8 +537,10 @@ static void update_menu_item_brief(int current_item, void *a)
 int ui_item(struct xante_app *xpp, cl_list_t *menus,
     struct xante_item *selected_item)
 {
+    bool edit_item_value = true, value_changed = false;
+    cl_string_t *result = NULL;
+    ui_properties_t properties;
     ui_return_t ret_dialog;
-    bool edit_item_value = true;
     int ret = -1;
 
     if (NULL == selected_item) {
@@ -350,11 +561,68 @@ int ui_item(struct xante_app *xpp, cl_list_t *menus,
     if (!(selected_item->mode & XANTE_ACCESS_EDIT))
         edit_item_value = false;
 
+    /* Prepare dialog common properties */
+    INIT_PROPERTIES(properties);
+    start_dialog_internals(xpp, selected_item, edit_item_value);
+
+    do {
+        if (result != NULL) {
+            cl_string_unref(result);
+            result = NULL;
+        }
+
+        ret_dialog = (dlgx_item.ui_dialog)(xpp, selected_item, edit_item_value,
+                                           menus, &properties);
+
+        switch (ret_dialog.selected_button) {
+            case DLG_EXIT_OK:
+                result = (dlgx_item.get_result)(&properties);
+
+                if (event_call(EV_ITEM_VALUE_CONFIRM, xpp, item,
+                               cl_string_valueof(result)) < 0)
+                {
+                    break;
+                }
+
+                value_changed = (dlgx_item.validate_result)(xpp, item, result);
+                loop = false;
+                break;
+
+#ifdef ALTERNATIVE_DIALOG
+            case DLG_EXIT_TIMEOUT:
+                loop = false;
+                break;
+#endif
+
+            case DLG_EXIT_EXTRA:
+                break;
+
+            case DLG_EXIT_ESC:
+                /* Don't let the user close the dialog */
+                if (xante_runtime_esc_key(xpp))
+                    break;
+
+            case DLG_EXIT_CANCEL:
+                loop = false;
+                break;
+
+            case DLG_EXIT_HELP:
+                dialog_vars.help_button = 0;
+                xante_dlg_messagebox(xpp, XANTE_MSGBOX_INFO, cl_tr("Help"), "%s",
+                                     cl_string_valueof(selected_item->descriptive_help));
+
+                dialog_vars.help_button = 1;
+                break;
+        }
+
+        if (result != NULL)
+            cl_string_unref(result);
+    } while (loop;)
+/*
     switch (selected_item->dialog_type) {
         case XANTE_UI_DIALOG_MENU:
         case XANTE_UI_DIALOG_DYNAMIC_MENU:
-            call_menu_dialog(xpp, menus, selected_item);
-            ret_dialog.selected_button = DLG_EXIT_OK;
+            ret_dialog = call_menu_dialog(xpp, menus, selected_item);
             break;
 
         case XANTE_UI_DIALOG_INPUT_INT:
@@ -458,13 +726,17 @@ int ui_item(struct xante_app *xpp, cl_list_t *menus,
 
         default:
             break;
-    }
+    }*/
+
+    UNINIT_PROPERTIES(properties);
+    finish_dialog_internals(selected_item);
 
     /*
      * We'll need to search if the item that has been updated is pointed by a
      * dynamic menu. If so, we're going to update its contents.
      */
-    if (ret_dialog.updated_value == true) {
+    //if (ret_dialog.updated_value == true) {
+    if (value_changed == true) {
         dm_update(xpp, selected_item);
         event_call(EV_ITEM_VALUE_UPDATED, xpp, selected_item);
     }
