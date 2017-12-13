@@ -242,6 +242,8 @@ static ui_return_t call_menu_dialog(struct xante_app *xpp,
     char *btn_cancel_label = NULL;
     ui_return_t ret;
 
+    ret.selected_button = DLG_EXIT_OK;
+    ret.updated_value = false;
     referenced_menu =
         xante_menu_search_by_object_id(menus,
                                        cl_string_valueof(selected_item->referenced_menu));
@@ -251,15 +253,12 @@ static ui_return_t call_menu_dialog(struct xante_app *xpp,
                              cl_tr("No menu '%s' was found!"),
                              cl_string_valueof(selected_item->name));
 
-        return;
+        return ret;
     }
 
     btn_cancel_label = strdup(cl_tr("Back"));
     ui_menu(xpp, menus, referenced_menu, btn_cancel_label);
     free(btn_cancel_label);
-
-    ret.selected_button = DLG_EXIT_OK;
-    ret.updated_value = false;
 
     return ret;
 }
@@ -537,8 +536,7 @@ static void finish_dialog_internals(struct xante_item *item)
 int ui_item(struct xante_app *xpp, cl_list_t *menus,
     struct xante_item *selected_item)
 {
-    bool edit_item_value = true, value_changed = false;
-    cl_string_t *result = NULL;
+    bool edit_item_value = true;
     ui_properties_t properties;
     ui_return_t ret_dialog;
     int ret = -1;
@@ -565,60 +563,6 @@ int ui_item(struct xante_app *xpp, cl_list_t *menus,
     INIT_PROPERTIES(properties);
     start_dialog_internals(xpp, selected_item, edit_item_value);
 
-    do {
-        if (result != NULL) {
-            cl_string_unref(result);
-            result = NULL;
-        }
-
-        ret_dialog = (dlgx_item.ui_dialog)(xpp, selected_item, edit_item_value,
-                                           menus, &properties);
-
-        switch (ret_dialog.selected_button) {
-            case DLG_EXIT_OK:
-                result = (dlgx_item.get_result)(&properties);
-
-                if (event_call(EV_ITEM_VALUE_CONFIRM, xpp, item,
-                               cl_string_valueof(result)) < 0)
-                {
-                    break;
-                }
-
-                value_changed = (dlgx_item.validate_result)(xpp, item, result);
-                loop = false;
-                break;
-
-#ifdef ALTERNATIVE_DIALOG
-            case DLG_EXIT_TIMEOUT:
-                loop = false;
-                break;
-#endif
-
-            case DLG_EXIT_EXTRA:
-                break;
-
-            case DLG_EXIT_ESC:
-                /* Don't let the user close the dialog */
-                if (xante_runtime_esc_key(xpp))
-                    break;
-
-            case DLG_EXIT_CANCEL:
-                loop = false;
-                break;
-
-            case DLG_EXIT_HELP:
-                dialog_vars.help_button = 0;
-                xante_dlg_messagebox(xpp, XANTE_MSGBOX_INFO, cl_tr("Help"), "%s",
-                                     cl_string_valueof(selected_item->descriptive_help));
-
-                dialog_vars.help_button = 1;
-                break;
-        }
-
-        if (result != NULL)
-            cl_string_unref(result);
-    } while (loop;)
-/*
     switch (selected_item->dialog_type) {
         case XANTE_UI_DIALOG_MENU:
         case XANTE_UI_DIALOG_DYNAMIC_MENU:
@@ -726,7 +670,7 @@ int ui_item(struct xante_app *xpp, cl_list_t *menus,
 
         default:
             break;
-    }*/
+    }
 
     UNINIT_PROPERTIES(properties);
     finish_dialog_internals(selected_item);
@@ -735,8 +679,7 @@ int ui_item(struct xante_app *xpp, cl_list_t *menus,
      * We'll need to search if the item that has been updated is pointed by a
      * dynamic menu. If so, we're going to update its contents.
      */
-    //if (ret_dialog.updated_value == true) {
-    if (value_changed == true) {
+    if (ret_dialog.updated_value == true) {
         dm_update(xpp, selected_item);
         event_call(EV_ITEM_VALUE_UPDATED, xpp, selected_item);
     }
