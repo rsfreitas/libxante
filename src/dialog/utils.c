@@ -641,34 +641,69 @@ int dlgx_count_lines(const char *text, int width)
 /**
  * @name dlgx_update_cancel_button_label
  * @brief Sets a default value to the cancel button label used inside dialogs.
+ *
+ * If \a label is NULL a default value is used.
+ *
+ * @param [in] label: The button label.
  */
-void dlgx_update_cancel_button_label(void)
+void dlgx_update_cancel_button_label(const cl_string_t *label)
 {
     if (dialog_vars.cancel_label != NULL)
         free(dialog_vars.cancel_label);
 
-    dialog_vars.cancel_label = strdup(cl_tr("Back"));
+    dialog_vars.cancel_label = strdup((label != NULL) ? cl_string_valueof(label)
+                                                      : cl_tr("Back"));
 }
 
 /**
  * @name dlgx_update_ok_button_label
  * @brief Sets a default value to the ok button label used inside dialogs.
+ *
+ * If \a label is NULL a default value is used.
+ *
+ * @param [in] label: The button label.
  */
-void dlgx_update_ok_button_label(void)
+void dlgx_update_ok_button_label(const cl_string_t *label)
 {
     if (dialog_vars.ok_label != NULL)
         free(dialog_vars.ok_label);
 
-    dialog_vars.ok_label = strdup(cl_tr("Ok"));
+    dialog_vars.ok_label = strdup((label != NULL) ? cl_string_valueof(label)
+                                                  : cl_tr("Ok"));
 }
 
-void dlgx_update_extra_button_label(cl_string_t *label)
+/**
+ * @name dlgx_update_extra_button_label
+ * @brief Sets the label of the Extra button.
+ *
+ * If \a label is NULL a default value is used.
+ *
+ * @param [in] label: The button label.
+ */
+void dlgx_update_extra_button_label(const cl_string_t *label)
 {
     if (dialog_vars.extra_label != NULL)
         free(dialog_vars.extra_label);
 
     dialog_vars.extra_label = strdup((label != NULL) ? cl_string_valueof(label)
                                                      : cl_tr("Extra"));
+}
+
+/**
+ * @name dlgx_update_help_button_label
+ * @brief Sets the label of the Help button.
+ *
+ * If \a label is NULL a default value is used.
+ *
+ * @param [in] label: The button label.
+ */
+void dlgx_update_help_button_label(const cl_string_t *label)
+{
+    if (dialog_vars.help_label != NULL)
+        free(dialog_vars.help_label);
+
+    dialog_vars.help_label = strdup((label != NULL) ? cl_string_valueof(label)
+                                                    : cl_tr("Help"));
 }
 
 /**

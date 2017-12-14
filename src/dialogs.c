@@ -183,7 +183,8 @@ __PUB_API__ int xante_dlg_messagebox(struct xante_app *xpp,
     enum xante_buttons key;
     int height = 0, ret_dialog;
     cl_string_t *real_msg = NULL;
-    bool dialog_needs_close = false, restore_help_button = false;
+    bool dialog_needs_close = false, restore_help_button = false,
+         restore_extra_button = false;
 
     va_start(ap, message);
     vasprintf(&msg, message, ap);
@@ -201,6 +202,11 @@ __PUB_API__ int xante_dlg_messagebox(struct xante_app *xpp,
         dialog_vars.help_button = 0;
     }
 
+    if (dialog_vars.extra_button) {
+        restore_extra_button = true;
+        dialog_vars.extra_button = 0;
+    }
+
     real_msg = cl_string_create("%s", msg);
     cl_string_rplchr(real_msg, XANTE_STR_LINE_BREAK, '\n');
     height = dlgx_count_lines(msg, DEFAULT_DIALOG_WIDTH);
@@ -213,6 +219,9 @@ __PUB_API__ int xante_dlg_messagebox(struct xante_app *xpp,
 
     if (restore_help_button == true)
         dialog_vars.help_button = 1;
+
+    if (restore_extra_button == true)
+        dialog_vars.extra_button = 1;
 
     if (dialog_needs_close == true)
         dlgx_uninit();

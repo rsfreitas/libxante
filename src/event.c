@@ -161,7 +161,7 @@ static int ev_item(struct xante_app *xpp, const char *event_name, va_list ap)
     cl_object_t *ret = NULL;
     struct xante_item *item = NULL;
     char *function_name = NULL;
-    int event_return = 0;
+    int event_return = -1;
     struct xante_event_argument arg = {
         .xpp = xpp,
         .menu = NULL,
@@ -176,8 +176,12 @@ static int ev_item(struct xante_app *xpp, const char *event_name, va_list ap)
     arg.item = item;
     function_name = get_function_name(item->events, event_name);
 
-    if (NULL == function_name)
+    if (NULL == function_name) {
+        xante_log_debug(cl_tr("Event function from event [%s] not found"),
+                        event_name);
+
         return 0; /* Should we return an error? */
+    }
 
     /*
      * We need to pass the custom data, otherwise this routine call (maybe)
@@ -195,11 +199,16 @@ static int ev_item(struct xante_app *xpp, const char *event_name, va_list ap)
                                  CL_PLUGIN_ARGS_POINTER, "xpp_arg", CL_POINTER,
                                  &arg, NULL);
 
-    if ((NULL == ret) &&
-        (strcmp(event_name, EV_CUSTOM) == 0))
-    {
-        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
-                             "Event call error: %s", cl_strerror(cl_get_last_error()));
+    if (NULL == ret) {
+        if ((strcmp(event_name, EV_CUSTOM) == 0) ||
+            (strcmp(event_name, EV_EXTRA_BUTTON_PRESSED) == 0))
+        {
+            xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
+                                 "Event call error: %s",
+                                 cl_strerror(cl_get_last_error()));
+        }
+
+        goto end_block;
     }
 
     /* These events have a return value */
@@ -212,8 +221,10 @@ static int ev_item(struct xante_app *xpp, const char *event_name, va_list ap)
         event_return = CL_OBJECT_AS_INT(ret);
     }
 
-    free(function_name);
     cl_object_unref(ret);
+
+end_block:
+    free(function_name);
 
     return event_return;
 }
@@ -387,7 +398,8 @@ static int call(const char *event_name, struct xante_app *xpp, va_list ap)
                (strcmp(event_name, EV_SYNC_ROUTINE) == 0) ||
                (strcmp(event_name, EV_CUSTOM) == 0) ||
                (strcmp(event_name, EV_VALUE_CHECK) == 0) ||
-               (strcmp(event_name, EV_VALUE_STRLEN) == 0))
+               (strcmp(event_name, EV_VALUE_STRLEN) == 0) ||
+               (strcmp(event_name, EV_EXTRA_BUTTON_PRESSED) == 0))
     {
         ret = ev_item(xpp, event_name, ap);
     } else if (strcmp(event_name, EV_MENU_EXIT) == 0)

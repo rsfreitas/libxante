@@ -250,28 +250,6 @@ static int get_form_number_of_rows(const struct xante_item *item)
     return cl_json_get_array_size(sheet);
 }
 
-static int get_configured_number_of_rows(struct xante_item *item,
-    cl_cfg_file_t *cfg)
-{
-    cl_cfg_entry_t *entry = NULL;
-    cl_object_t *value = NULL;
-    int rows = 0;
-
-    entry = cl_cfg_entry(cfg, cl_string_valueof(item->config_block),
-                         cl_string_valueof(item->config_item));
-
-    if (NULL == entry) {
-        /* Uses the number of rows inside the JSON form */
-        return get_form_number_of_rows(item);
-    }
-
-    value = cl_cfg_entry_value(entry);
-    rows = CL_OBJECT_AS_INT(value);
-    cl_object_unref(value);
-
-    return rows;
-}
-
 static cl_json_t *get_form_row(const struct xante_item *item, int row)
 {
     cl_json_t *sheet = NULL;
@@ -580,7 +558,7 @@ void ui_spreadsheet_load_and_set_value(struct xante_item *item,
     int cfg_rows, i;
 
     // First we get the number of rows
-    cfg_rows = get_configured_number_of_rows(item, cfg);
+    cfg_rows = get_form_number_of_rows(item);
 
     // For each row we get and set the column value
     for (i = 0; i < cfg_rows; i++)
@@ -639,6 +617,12 @@ ui_return_t ui_spreadsheet(struct xante_app *xpp, struct xante_item *item)
                 loop = false;
                 break;
 
+            case DLG_EXIT_EXTRA:
+                if (item->button.extra == true)
+                    event_call(EV_EXTRA_BUTTON_PRESSED, xpp, item);
+
+                break;
+
 #ifdef ALTERNATIVE_DIALOG
             case DLG_EXIT_TIMEOUT:
                 loop = false;
@@ -646,6 +630,10 @@ ui_return_t ui_spreadsheet(struct xante_app *xpp, struct xante_item *item)
 #endif
 
             case DLG_EXIT_ESC:
+                /* Don't let the user close the dialog */
+                if (xante_runtime_esc_key(xpp))
+                    break;
+
             case DLG_EXIT_CANCEL:
                 loop = false;
                 break;

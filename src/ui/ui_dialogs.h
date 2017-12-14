@@ -165,47 +165,6 @@ do {                                                \
         spreadsheet_st_destroy(p.sheet);            \
 } while (0)
 
-/* A structure to hold functions to execute a supported dialog */
-typedef struct {
-    ui_return_t     __ui_return;
-    ui_properties_t __properties;
-
-    void            (*run)(ui_return_t *, ui_properties_t *, struct xante_app *,
-                           struct xante_item *, bool, cl_list_t *);
-
-    /**
-     * get_result Must return the value the user just entered inside the
-     * dialog to be validated.
-     *
-     * @item: Is a pointer to the current xante_item structure of the item.
-     * @properties: Is a pointer to the current item's properties.
-     */
-    cl_string_t     *(*get_result)(struct xante_item *, ui_properties_t *);
-
-    /**
-     * validate_result
-     *
-     * @app: Is a pointer to the library main structure.
-     * @item: Is a pointer to the current xante_item structure of the item.
-     * @result: Is a pointer to 
-     */
-    bool            (*validate_result)(struct xante_app *, struct xante_item *,
-                                       const cl_string_t *);
-} ui_dialog_t;
-
-/** Macros to run and handle a dialog */
-#define ui_dlg_run(u, xpp, item, edit_value, menus) \
-    (u->run)(&u->__ui_return, &u->__properties, xpp, item, edit_value, menus)
-
-#define ui_dlg_get_result(u, item)                  \
-    (u->get_result)(&u->__ui_return, &u->__properties, item)
-
-#define ui_dlg_validate_result(u, xpp, item)        \
-    (u->validate_result)(&u->__ui_return, &u->__properties, xpp, item)
-
-#define ui_dlg_value_has_changed(u)                 \
-    (u->__ui_return.updated_value)
-
 /* menu */
 int ui_menu(struct xante_app *xpp, cl_list_t *menus,
             const struct xante_menu *menu, const char *cancel_label);

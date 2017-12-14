@@ -74,6 +74,7 @@
 #define EV_SYNC_ROUTINE                         "sync-routine"
 #define EV_VALUE_STRLEN                         "value-strlen"
 #define EV_VALUE_CHECK                          "value-check"
+#define EV_EXTRA_BUTTON_PRESSED                 "extra-button-pressed"
 
 /** Environment variables */
 #define ENV_XANTE_DB_PATH                       "XANTE_DB_PATH"

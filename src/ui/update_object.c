@@ -110,6 +110,12 @@ ui_return_t ui_update_object(struct xante_app *xpp,
                 loop = false;
                 break;
 
+            case DLG_EXIT_EXTRA:
+                if (item->button.extra == true)
+                    event_call(EV_EXTRA_BUTTON_PRESSED, xpp, item);
+
+                break;
+
 #ifdef ALTERNATIVE_DIALOG
             case DLG_EXIT_TIMEOUT:
                 loop = false;

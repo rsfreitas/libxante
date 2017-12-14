@@ -217,6 +217,7 @@ static void prepare_dialog_look(struct xante_app *xpp,
     int timeout = -1;
 
     dlgx_set_backtitle(xpp);
+    dlgx_update_ok_button_label(NULL);
     dialog_vars.cancel_label = strdup(cancel_label);
     timeout = xante_runtime_ui_dialog_timeout(xpp);
 
@@ -469,8 +470,6 @@ static void start_dialog_internals(struct xante_app *xpp,
     const char *text = NULL;
 
     dlgx_set_backtitle(xpp);
-    dlgx_update_ok_button_label();
-    dlgx_update_cancel_button_label();
     text = ui_statusbar_text(item->dialog_type, edit_value);
 
     if (text != NULL)
@@ -488,14 +487,19 @@ static void start_dialog_internals(struct xante_app *xpp,
     }
 
     /* Enables the help button */
-    if (item->descriptive_help != NULL)
+    if (item->descriptive_help != NULL) {
         dialog_vars.help_button = 1;
+        dlgx_update_help_button_label(item->label.help);
+    }
 
     /* Enables the extra button */
     if (item->button.extra) {
         dlgx_update_extra_button_label(item->label.extra);
         dialog_vars.extra_button = 1;
     }
+
+    dlgx_update_ok_button_label(item->label.ok);
+    dlgx_update_cancel_button_label(item->label.cancel);
 }
 
 static void finish_dialog_internals(struct xante_item *item)

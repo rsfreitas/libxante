@@ -127,13 +127,14 @@ bool dlgx_question(struct xante_app *xpp, const char *title, const char *msg,
                      const char *button1_label, const char *button2_label,
                      const char *statusbar_text);
 
-void dlgx_update_cancel_button_label(void);
-void dlgx_update_ok_button_label(void);
+void dlgx_update_cancel_button_label(const cl_string_t *label);
+void dlgx_update_ok_button_label(const cl_string_t *label);
+void dlgx_update_extra_button_label(const cl_string_t *label);
+void dlgx_update_help_button_label(const cl_string_t *label);
 void dlgx_free_input(void);
 void dlgx_alloc_input(unsigned int bytes);
 char *dlgx_get_input_result(void);
 int dlgx_get_input_window_width(const struct xante_item *item);
-void dlgx_update_extra_button_label(cl_string_t *label);
 
 /* simple progress */
 int dlgx_simple_progress(const char *title, const char *cprompt, int height,

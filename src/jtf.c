@@ -965,6 +965,45 @@ static int parse_item_labels(const cl_json_t *ui, struct xante_item *item)
 }
 
 /*
+ * Parse flags to enable/disable buttons in the dialog.
+ */
+static int parse_item_buttons(const cl_json_t *ui, struct xante_item *item)
+{
+    cl_json_t *buttons = NULL;
+
+    buttons = cl_json_get_object_item(ui, BUTTONS);
+
+    if (NULL == buttons)
+        return 0;
+
+    if (parse_object_value(buttons, BTN_OK_LABEL, CL_JSON_TRUE, false,
+                           (void **)&item->button.ok) < 0)
+    {
+        return -1;
+    }
+
+    if (parse_object_value(buttons, BTN_CANCEL_LABEL, CL_JSON_TRUE, false,
+                           (void **)&item->button.cancel) < 0)
+    {
+        return -1;
+    }
+
+    if (parse_object_value(buttons, BTN_EXTRA_LABEL, CL_JSON_TRUE, false,
+                           (void **)&item->button.extra) < 0)
+    {
+        return -1;
+    }
+
+    if (parse_object_value(buttons, BTN_HELP_LABEL, CL_JSON_TRUE, false,
+                           (void **)&item->button.help) < 0)
+    {
+        return -1;
+    }
+
+    return 0;
+}
+
+/*
  * Here all informations related the item's UI are parsed.
  */
 static int parse_item_ui(const cl_json_t *root, struct xante_item *item)
@@ -1009,6 +1048,9 @@ static int parse_item_ui(const cl_json_t *root, struct xante_item *item)
         return -1;
 
     if (parse_item_labels(ui, item) < 0)
+        return -1;
+
+    if (parse_item_buttons(ui, item) < 0)
         return -1;
 
     return 0;
