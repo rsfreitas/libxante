@@ -161,8 +161,8 @@ ui_return_t ui_buildlist(struct xante_app *xpp, struct xante_item *item)
     /* Prepares dialog content */
     INIT_PROPERTIES(properties);
     build_properties(item, &properties);
-    cprompt = cl_string_create(cl_tr("Select an option from origin to destination"
-                                     "\n%-30s%-30s"),
+    cprompt = cl_string_create(cl_tr("Select an option to move it from origin to "
+                                     "destination\n%-30s%-30s"),
                                cl_tr("Origin"),
                                cl_tr("Destination"));
 

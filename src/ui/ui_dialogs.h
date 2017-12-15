@@ -169,8 +169,8 @@ do {                                                \
 int manager_run(struct xante_app *xpp, cl_list_t *menus,
                 const struct xante_menu *menu, const char *cancel_label);
 
-int manager_run_single_item(struct xante_app *xpp, cl_list_t *menus,
-                            struct xante_item *selected_item);
+int manager_run_dialog(struct xante_app *xpp, cl_list_t *menus,
+                       struct xante_item *selected_item);
 
 /* yesno */
 ui_return_t ui_yesno(struct xante_app *xpp, struct xante_item *item);
@@ -228,7 +228,9 @@ void ui_mixedform_load_and_set_value(struct xante_item *item, cl_cfg_file_t *cfg
 ui_return_t ui_buildlist(struct xante_app *xpp, struct xante_item *item);
 
 /* spreadsheet */
-void ui_spreadsheet_load_and_set_value(struct xante_item *item, cl_cfg_file_t *cfg);
+void ui_spreadsheet_load_and_set_value(struct xante_item *item,
+                                       const cl_cfg_file_t *cfg);
+
 void ui_save_spreadsheet_item(struct xante_app *xpp, struct xante_item *item);
 ui_return_t ui_spreadsheet(struct xante_app *xpp, struct xante_item *item);
 

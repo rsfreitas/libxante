@@ -528,7 +528,7 @@ static void finish_dialog_internals(struct xante_item *item)
  */
 
 /**
- * @name manager_run_single_item
+ * @name manager_run_dialog
  * @brief Create and run a dialog according to the item passed as argument.
  *
  * @param [in,out] xpp: The library main object.
@@ -537,7 +537,7 @@ static void finish_dialog_internals(struct xante_item *item)
  *
  * @return Returns the button used by the user to end the dialog.
  */
-int manager_run_single_item(struct xante_app *xpp, cl_list_t *menus,
+int manager_run_dialog(struct xante_app *xpp, cl_list_t *menus,
     struct xante_item *selected_item)
 {
     bool edit_item_value = true;
@@ -739,9 +739,8 @@ int manager_run(struct xante_app *xpp, cl_list_t *menus,
 
         switch (ret_dialog) {
             case DLG_EXIT_OK:
-                manager_run_single_item(xpp, menus,
-                                        get_item_at(entry_menu->items,
-                                                    selected_index));
+                manager_run_dialog(xpp, menus, get_item_at(entry_menu->items,
+                                                           selected_index));
 
                 break;
 

@@ -63,7 +63,7 @@ static int ui_run_mjtf(struct xante_app *xpp, struct xante_mjtf *mjtf)
         xante_menu_unref(first);
         free(btn_cancel_label);
     } else /* Or a single item? */
-        ret_dialog = manager_run_single_item(xpp, NULL, mjtf->object);
+        ret_dialog = manager_run_dialog(xpp, NULL, mjtf->object);
 
     return ret_dialog;
 }

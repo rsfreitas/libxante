@@ -299,7 +299,7 @@ static cl_json_t *get_cell_from_row(const cl_json_t *row, int column)
 }
 
 static void load_configured_column(struct xante_item *item,
-    cl_cfg_file_t *cfg, const cl_json_t *jrow, int row, int column)
+    const cl_cfg_file_t *cfg, const cl_json_t *jrow, int row, int column)
 {
     cl_json_t *cell = NULL;
     cl_cfg_entry_t *entry = NULL;
@@ -357,7 +357,7 @@ static void load_configured_column(struct xante_item *item,
 }
 
 static void load_configured_row(struct xante_item *item,
-    cl_cfg_file_t *cfg, int row)
+    const cl_cfg_file_t *cfg, int row)
 {
     cl_json_t *jrow = NULL;
     int columns = 0, i;
@@ -552,8 +552,15 @@ end_block:
  *
  */
 
+/**
+ * @name ui_spreadsheet_load_and_set_value
+ * @brief Loads values to the spreadsheet celss from the configuration file.
+ *
+ * @param [in,out] item: The item which is being loaded.
+ * @param [in] cfg: A pointer to the configuration file data.
+ */
 void ui_spreadsheet_load_and_set_value(struct xante_item *item,
-    cl_cfg_file_t *cfg)
+    const cl_cfg_file_t *cfg)
 {
     int cfg_rows, i;
 
@@ -565,6 +572,33 @@ void ui_spreadsheet_load_and_set_value(struct xante_item *item,
         load_configured_row(item, cfg, i);
 }
 
+/**
+ * @name ui_save_spreadsheet
+ * @brief Saves the spreadsheet data into the configuration file.
+ *
+ * Besides saving the value of each spreadsheet cell this function needs to
+ * save the number of rows and columns inside the configuration file, so one
+ * may know these and be able to load all cell values.
+ *
+ * Assuming we have a spreadsheet with 2 rows with 3 columns each, the saved
+ * configuration will look like this:
+ *
+ * [item->config_block]
+ * item->config_item=2,3
+ *
+ * [item->config_item_0]
+ * column_0=a
+ * column_1=b
+ * column_2=c
+ *
+ * [item->config_item_1]
+ * column_0=1
+ * column_1=2
+ * column_2=3
+ *
+ * @param [in,out] xpp: The library main object.
+ * @param [in,out] item: The item which is being saved.
+ */
 void ui_save_spreadsheet_item(struct xante_app *xpp, struct xante_item *item)
 {
     int rows, i, columns;
@@ -576,7 +610,7 @@ void ui_save_spreadsheet_item(struct xante_app *xpp, struct xante_item *item)
     for (i = 0; i < rows; i++)
         save_row(xpp, item, i);
 
-    // Write the number of rows
+    // Write the number of rows and columns
     columns = get_form_number_of_columns(item);
     cl_cfg_set_value(xpp->config.cfg_file,
                      cl_string_valueof(item->config_block),
