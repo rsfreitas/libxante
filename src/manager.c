@@ -1,6 +1,6 @@
 
 /*
- * Description: Handles the menu dialog.
+ * Description: Handles the dialog (window) manager.
  *
  * Author: Rodrigo Freitas
  * Created at: Fri May  5 21:08:15 2017
@@ -258,7 +258,7 @@ static ui_return_t call_menu_dialog(struct xante_app *xpp,
     }
 
     btn_cancel_label = strdup(cl_tr("Back"));
-    ui_menu(xpp, menus, referenced_menu, btn_cancel_label);
+    manager_run(xpp, menus, referenced_menu, btn_cancel_label);
     free(btn_cancel_label);
 
     return ret;
@@ -528,7 +528,7 @@ static void finish_dialog_internals(struct xante_item *item)
  */
 
 /**
- * @name ui_item
+ * @name manager_run_single_item
  * @brief Create and run a dialog according to the item passed as argument.
  *
  * @param [in,out] xpp: The library main object.
@@ -537,7 +537,7 @@ static void finish_dialog_internals(struct xante_item *item)
  *
  * @return Returns the button used by the user to end the dialog.
  */
-int ui_item(struct xante_app *xpp, cl_list_t *menus,
+int manager_run_single_item(struct xante_app *xpp, cl_list_t *menus,
     struct xante_item *selected_item)
 {
     bool edit_item_value = true;
@@ -695,7 +695,7 @@ int ui_item(struct xante_app *xpp, cl_list_t *menus,
 }
 
 /**
- * @name ui_menu
+ * @name manager_run
  * @brief Creates a dialog of menu type.
  *
  * @param [in,out] xpp: The main library object.
@@ -705,7 +705,7 @@ int ui_item(struct xante_app *xpp, cl_list_t *menus,
  *
  * @return Returns the libdialog type of return value.
  */
-int ui_menu(struct xante_app *xpp, cl_list_t *menus,
+int manager_run(struct xante_app *xpp, cl_list_t *menus,
     const struct xante_menu *entry_menu, const char *cancel_label)
 {
     bool loop = true;
@@ -739,8 +739,9 @@ int ui_menu(struct xante_app *xpp, cl_list_t *menus,
 
         switch (ret_dialog) {
             case DLG_EXIT_OK:
-                ui_item(xpp, menus, get_item_at(entry_menu->items,
-                                                selected_index));
+                manager_run_single_item(xpp, menus,
+                                        get_item_at(entry_menu->items,
+                                                    selected_index));
 
                 break;
 

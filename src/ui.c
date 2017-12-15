@@ -59,11 +59,11 @@ static int ui_run_mjtf(struct xante_app *xpp, struct xante_mjtf *mjtf)
     if (mjtf->menus != NULL) {
         btn_cancel_label = strdup(cl_tr("Back"));
         first = xante_menu_head(mjtf->menus);
-        ret_dialog = ui_menu(xpp, mjtf->menus, first, btn_cancel_label);
+        ret_dialog = manager_run(xpp, mjtf->menus, first, btn_cancel_label);
         xante_menu_unref(first);
         free(btn_cancel_label);
     } else /* Or a single item? */
-        ret_dialog = ui_item(xpp, NULL, mjtf->object);
+        ret_dialog = manager_run_single_item(xpp, NULL, mjtf->object);
 
     return ret_dialog;
 }
@@ -171,7 +171,7 @@ __PUB_API__ enum xante_return_value xante_ui_run(xante_t *xpp)
         goto end_block;
     }
 
-    ret_dialog = ui_menu(xpp, x->ui.menus, root, btn_cancel_label);
+    ret_dialog = manager_run(xpp, x->ui.menus, root, btn_cancel_label);
 
 end_block:
     if (btn_cancel_label != NULL)

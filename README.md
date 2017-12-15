@@ -8,7 +8,38 @@ LGPLv2
 
 ## Overview
 
-This library is intended to build and run dialog based applications.
+This library is intended to build and run dialog based applications, where one
+dialog, as called, overlaps the older one.
+
+Heavily dependent on libdialog to control terminal settings and some standard
+dialogs. Such as:
+
+* Menu
+* Calendar input
+* Timebox input
+* File viewer
+* File viewer with update
+* File selector
+* Directory selector
+* Range selector
+* Yes/No selector
+* Checklist
+* Buildlist
+* Progressbar
+* Mixedforms
+
+With some internal created custom dialogs, such as:
+
+* Spreadsheet
+* Syncing tasks
+* Data input with scrollable descriptive text
+
+### Features
+
+* INI configuration files
+* Dynamic menus
+* Database authentication
+* Plugin support to build custom applications
 
 ## Dependencies
 

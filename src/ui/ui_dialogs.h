@@ -165,12 +165,12 @@ do {                                                \
         spreadsheet_st_destroy(p.sheet);            \
 } while (0)
 
-/* menu */
-int ui_menu(struct xante_app *xpp, cl_list_t *menus,
-            const struct xante_menu *menu, const char *cancel_label);
+/* manager */
+int manager_run(struct xante_app *xpp, cl_list_t *menus,
+                const struct xante_menu *menu, const char *cancel_label);
 
-int ui_item(struct xante_app *xpp, cl_list_t *menus,
-            struct xante_item *selected_item);
+int manager_run_single_item(struct xante_app *xpp, cl_list_t *menus,
+                            struct xante_item *selected_item);
 
 /* yesno */
 ui_return_t ui_yesno(struct xante_app *xpp, struct xante_item *item);
