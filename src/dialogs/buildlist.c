@@ -80,9 +80,10 @@ static int prepare_content(struct xante_item *item,
     return 0;
 }
 
-static void build_properties(struct xante_item *item,
-    ui_properties_t *properties)
+static void build_properties(ui_properties_t *properties)
 {
+    struct xante_item *item = properties->item;
+
     properties->width = (item->geometry.width == 0) ? DIALOG_WIDTH
                                                     : item->geometry.width;
 
@@ -117,25 +118,33 @@ static cl_string_t *get_current_result(const ui_properties_t *properties)
     return ret;
 }
 
-static bool item_value_has_changed(struct xante_app *xpp, struct xante_item *item,
-    const cl_string_t *new_value)
+/*
+ *
+ * Internal API
+ *
+ */
+
+bool buildlist_validate_result(ui_properties_t *properties)
 {
+    struct xante_item *item = properties->item;
     cl_string_t *old_value = NULL;
     bool changed = false;
 
     old_value = cl_stringlist_flat(item->selected_items, ',');
 
-    if (cl_string_cmp(old_value, new_value)) {
+    if (cl_string_cmp(old_value, properties->result)) {
         changed = true;
-        change_add(xpp, cl_string_valueof(item->name),
-                   cl_string_valueof(old_value),
-                   cl_string_valueof(new_value));
 
-        /* Updates the item value */
+         /* Set up details to save inside the internal changes list */
+        properties->change_item_name = cl_string_ref(item->name);
+        properties->change_old_value = cl_string_ref(old_value);
+        properties->change_new_value = cl_string_ref(properties->result);
+
+       /* Updates the item value */
         if (old_value != NULL)
             cl_stringlist_destroy(item->selected_items);
 
-        item->selected_items = cl_string_split(new_value, ",");
+        item->selected_items = cl_string_split(properties->result, ",");
     }
 
     if (old_value != NULL)
@@ -144,95 +153,31 @@ static bool item_value_has_changed(struct xante_app *xpp, struct xante_item *ite
     return changed;
 }
 
-/*
- *
- * Internal API
- *
- */
-
-ui_return_t ui_buildlist(struct xante_app *xpp, struct xante_item *item)
+int buildlist(ui_properties_t *properties)
 {
+    struct xante_item *item = properties->item;
     int ret_dialog = DLG_EXIT_OK, selected_item = 0;;
-    bool loop = true, value_changed = false;
-    ui_return_t ret;
-    ui_properties_t properties;
-    cl_string_t *cprompt = NULL, *result = NULL;
+    cl_string_t *cprompt = NULL;
 
     /* Prepares dialog content */
-    INIT_PROPERTIES(properties);
-    build_properties(item, &properties);
+    build_properties(properties);
     cprompt = cl_string_create(cl_tr("Select an option to move it from origin to "
                                      "destination\n%-30s%-30s"),
                                cl_tr("Origin"),
                                cl_tr("Destination"));
 
-    do {
-        if (result != NULL) {
-            cl_string_unref(result);
-            result = NULL;
-        }
+    ret_dialog = dlg_buildlist(cl_string_valueof(item->name),
+                               cl_string_valueof(cprompt),
+                               properties->height, properties->width,
+                               properties->displayed_items,
+                               properties->number_of_items,
+                               properties->litems, NULL, 0, &selected_item);
 
-        ret_dialog = dlg_buildlist(cl_string_valueof(item->name),
-                                   cl_string_valueof(cprompt),
-                                   properties.height, properties.width,
-                                   properties.displayed_items,
-                                   properties.number_of_items,
-                                   properties.litems, NULL, 0, &selected_item);
-
-        switch (ret_dialog) {
-            case DLG_EXIT_OK:
-                result = get_current_result(&properties);
-
-                if (event_call(EV_ITEM_VALUE_CONFIRM, xpp, item,
-                               cl_string_valueof(result)) < 0)
-                {
-                    break;
-                }
-
-                value_changed = item_value_has_changed(xpp, item, result);
-                loop = false;
-                break;
-
-            case DLG_EXIT_EXTRA:
-                if (item->button.extra == true)
-                    event_call(EV_EXTRA_BUTTON_PRESSED, xpp, item);
-
-                break;
-
-#ifdef ALTERNATIVE_DIALOG
-            case DLG_EXIT_TIMEOUT:
-                loop = false;
-                break;
-#endif
-
-            case DLG_EXIT_ESC:
-                /* Don't let the user close the dialog */
-                if (xante_runtime_esc_key(xpp))
-                    break;
-
-            case DLG_EXIT_CANCEL:
-                loop = false;
-                break;
-
-            case DLG_EXIT_HELP:
-                dialog_vars.help_button = 0;
-                xante_dlg_messagebox(xpp, XANTE_MSGBOX_INFO, cl_tr("Help"), "%s",
-                                     cl_string_valueof(item->descriptive_help));
-
-                dialog_vars.help_button = 1;
-                break;
-        }
-    } while (loop);
-
-    if (result != NULL)
-        cl_string_unref(result);
+    if (ret_dialog == DLG_EXIT_OK)
+        properties->result = get_current_result(properties);
 
     cl_string_unref(cprompt);
-    UNINIT_PROPERTIES(properties);
 
-    ret.selected_button = ret_dialog;
-    ret.updated_value = value_changed;
-
-    return ret;
+    return ret_dialog;
 }
 

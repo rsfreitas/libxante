@@ -8,8 +8,8 @@ option(SHARED "Enable/Disable the shared library version" ON)
 
 include_directories(include)
 include_directories("include/xante")
-include_directories("src/dialog")
-include_directories("src/ui")
+include_directories("src/dialogs")
+include_directories("src/extension")
 
 if(CMAKE_C_COMPILER_VERSION VERSION_GREATER 5)
     add_definitions(-fgnu89-inline)
@@ -30,8 +30,8 @@ if(ALTERNATIVE_DIALOG)
 endif(ALTERNATIVE_DIALOG)
 
 file(GLOB SOURCES "src/*.c")
-file(GLOB DIALOG_SOURCES "src/dialog/*.c")
-file(GLOB UI_SOURCES "src/ui/*.c")
+file(GLOB DIALOG_SOURCES "src/extension/*.c")
+file(GLOB UI_SOURCES "src/dialogs/*.c")
 
 set(SOURCE
     ${SOURCES}

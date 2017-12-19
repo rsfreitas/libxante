@@ -31,8 +31,7 @@
 #define DIALOG_WIDTH                60
 
 struct sync_thread {
-    struct xante_app    *xpp;
-    struct xante_item   *item;
+    ui_properties_t     *properties;
     void                *data;
     cl_timeout_t        *tm_task;
 };
@@ -98,8 +97,9 @@ static void update_synctext(cl_string_t *text, int step, enum xante_ui_dialog sy
 static void *call_task(cl_thread_t *thread)
 {
     struct sync_thread *sync = cl_thread_get_user_data(thread);
-    struct xante_app *xpp = sync->xpp;
-    struct xante_item *item = sync->item;
+    ui_properties_t *properties = sync->properties;
+    struct xante_app *xpp = properties->xpp;
+    struct xante_item *item = properties->item;
     bool loop = false;
 
     cl_thread_set_state(thread, CL_THREAD_ST_CREATED);
@@ -139,17 +139,16 @@ static void *call_task(cl_thread_t *thread)
 static void *make_sync(cl_thread_t *thread)
 {
     struct sync_thread *sync = cl_thread_get_user_data(thread);
-    struct xante_app *xpp = sync->xpp;
-    struct xante_item *item = sync->item;
+    ui_properties_t *properties = sync->properties;
+    struct xante_app *xpp = properties->xpp;
+    struct xante_item *item = properties->item;
     struct sync *sync_model;
     cl_thread_t *task = NULL;
     cl_string_t *text = NULL;
-    ui_properties_t properties;
     int stepbar = 0;
     char *tmp = NULL;
 
     cl_thread_set_state(thread, CL_THREAD_ST_CREATED);
-    INIT_PROPERTIES(properties);
     sync_model = get_sync(item->dialog_type);
 
     /* Creates a thread to run the user task (event) */
@@ -176,10 +175,10 @@ static void *make_sync(cl_thread_t *thread)
     sync->tm_task = cl_timeout_create(CL_OBJECT_AS_INT(item->max),
                                       CL_TM_SECONDS);
 
-    properties.width = (item->geometry.width == 0) ? DIALOG_WIDTH
+    properties->width = (item->geometry.width == 0) ? DIALOG_WIDTH
                                                    : item->geometry.width;
 
-    properties.height = (item->geometry.height == 0) ? DIALOG_HEIGHT
+    properties->height = (item->geometry.height == 0) ? DIALOG_HEIGHT
                                                      : item->geometry.height;
 
     cl_thread_set_state(thread, CL_THREAD_ST_INITIALIZED);
@@ -200,7 +199,7 @@ static void *make_sync(cl_thread_t *thread)
 
         update_synctext(text, stepbar, sync_model->type);
         dialog_msgbox(cl_string_valueof(item->name), cl_string_valueof(text),
-                      properties.height, properties.width, 0);
+                      properties->height, properties->width, 0);
 
         stepbar++;
 
@@ -224,7 +223,6 @@ static void *make_sync(cl_thread_t *thread)
     } while (item->cancel_update == false);
 
     cl_thread_destroy(task);
-    UNINIT_PROPERTIES(properties);
     xante_log_debug("%s: finish sync thread", __FUNCTION__);
 
     return NULL;
@@ -244,20 +242,18 @@ static void *make_sync(cl_thread_t *thread)
  * sync bar to ilustrate the evolution of it.
  *
  * The \a item must have two events filled
- * @param [in] xpp: The main library object.
- * @param [in] item: The item to be used inside the dialog.
  *
  * @return Returns a ui_return_t value indicating if the item's value has been
  *         changed (true) or not (false) with the dialog selected button.
  */
-ui_return_t ui_sync(struct xante_app *xpp, struct xante_item *item)
+int sync_dialog(ui_properties_t *properties)
 {
-    ui_return_t ret;
     void *data;
     cl_thread_t *thread;
+    struct xante_app *xpp = properties->xpp;
+    struct xante_item *item = properties->item;
     struct sync_thread sync = {
-        .xpp = xpp,
-        .item = item
+        .properties = properties,
     };
 
     /* Assures that we will be able to, at least, start the sync */
@@ -271,7 +267,7 @@ ui_return_t ui_sync(struct xante_app *xpp, struct xante_item *item)
                              cl_tr("Sync thread creation error: %s"),
                              cl_strerror(cl_get_last_error()));
 
-        goto end_block;
+        return DLG_EXIT_OK;
     }
 
     if (cl_thread_wait_startup(thread) != 0) {
@@ -279,16 +275,12 @@ ui_return_t ui_sync(struct xante_app *xpp, struct xante_item *item)
                              cl_tr("Error waiting for thread to initialize: %s"),
                              cl_strerror(cl_get_last_error()));
 
-        goto end_block;
+        return DLG_EXIT_OK;
     }
 
     /* Since there is a thread-join here it will wait for the thread to end. */
     cl_thread_destroy(thread);
 
-end_block:
-    ret.selected_button = DLG_EXIT_OK;
-    ret.updated_value = false;
-
-    return ret;
+    return DLG_EXIT_OK;
 }
 

@@ -127,6 +127,9 @@ int change_add(struct xante_app *xpp, const char *item_name,
 {
     struct xante_change_entry *c = NULL;
 
+    xante_log_info("%s: %d, %s, %s, %s", __FUNCTION__, (xpp == NULL),
+            item_name, old_value, new_value);
+
     if ((NULL == xpp) || (NULL == item_name) || (NULL == old_value) ||
         (NULL == new_value))
     {

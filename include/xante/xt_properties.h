@@ -3,7 +3,7 @@
  * Description:
  *
  * Author: Rodrigo Freitas
- * Created at: Tue May  2 20:25:58 2017
+ * Created at: Tue Dec 19 08:47:40 2017
  * Project: libxante
  *
  * Copyright (C) 2017 Rodrigo Freitas
@@ -24,37 +24,22 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_UTILS_H
-#define _LIBXANTE_XT_UTILS_H          1
+#ifndef _LIBXANTE_XT_PROPERTIES_H
+#define _LIBXANTE_XT_PROPERTIES_H          1
 
 #ifndef LIBXANTE_COMPILE
 # ifndef _LIBXANTE_H
-#  error "Never use <xt_utils.h> directly; include <libxante.h> instead."
+#  error "Never use <xt_properties.h> directly; include <libxante.h> instead."
 # endif
 #else
 
 /* Internal library declarations */
-bool is_valid_ui_dialog(enum xante_ui_dialog type);
-bool is_item_available(struct xante_item *item);
-enum xante_ui_menu translate_string_menu_type(const char *type);
-enum xante_ui_dialog translate_string_dialog_type(const char *type);
-bool item_has_ranges(enum xante_ui_dialog dlg_type);
-bool is_menu_item(const cl_string_t *type);
-int idigits(int n);
-bool file_exists(const char *pathname);
+void properties_init(struct xante_app *xpp, struct xante_item *item,
+                     ui_properties_t *properties);
+
+void properties_uninit(ui_properties_t *properties);
 
 #endif
-
-/**
- * @name xante_application_version
- * @brief Gets a string with the application version information.
- *
- * @param [in] xpp: The library main object.
- *
- * @return On success returns a buffer with the application version or NULL
- *         otherwise.
- */
-char *xante_application_version(xante_t *xpp);
 
 #endif
 

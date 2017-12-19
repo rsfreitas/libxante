@@ -139,12 +139,13 @@ static int get_checklist_selected_value(DIALOG_LISTITEM *dlg_items,
     return (selected_value != 0) ? selected_value : -1;
 }
 
-static void add_internal_change(struct xante_app *xpp, struct xante_item *item,
-    DIALOG_LISTITEM *dlg_items, int total_items, int current_value,
+static void add_internal_change(ui_properties_t *properties, int current_value,
     int selected_value)
 {
+    struct xante_item *item = properties->item;
+    DIALOG_LISTITEM *dlg_items = properties->litems;
+    int total_items = properties->number_of_items;
     cl_stringlist_t *current_entries = NULL, *selected_entries = NULL;
-    cl_string_t *current = NULL, *selected = NULL;
 
     current_entries = get_checklist_entries(dlg_items, total_items,
                                             item->dialog_checklist_type,
@@ -154,46 +155,16 @@ static void add_internal_change(struct xante_app *xpp, struct xante_item *item,
                                              item->dialog_checklist_type,
                                              selected_value);
 
-    current = cl_stringlist_flat(current_entries, ',');
-    selected = cl_stringlist_flat(selected_entries, ',');
-    change_add(xpp, cl_string_valueof(item->name), cl_string_valueof(current),
-               cl_string_valueof(selected));
-
-    if (current != NULL)
-        cl_string_unref(current);
-
-    if (selected != NULL)
-        cl_string_unref(selected);
+    /* Set up details to save inside the internal changes list */
+    properties->change_item_name = cl_string_ref(item->name);
+    properties->change_old_value = cl_stringlist_flat(current_entries, ',');
+    properties->change_new_value = cl_stringlist_flat(selected_entries, ',');
 
     if (current_entries != NULL)
         cl_stringlist_destroy(current_entries);
 
     if (selected_entries != NULL)
         cl_stringlist_destroy(selected_entries);
-}
-
-static bool item_value_has_changed(struct xante_app *xpp, struct xante_item *item,
-    DIALOG_LISTITEM *dlg_items, int total_items, int selected_items)
-{
-    int current_value;
-    bool changed = false;
-
-    current_value = CL_OBJECT_AS_INT(item_value(item));
-
-    if (current_value != selected_items) {
-        add_internal_change(xpp, item, dlg_items, total_items, current_value,
-                            selected_items);
-
-        changed = true;
-
-        /* Updates item value */
-        if (NULL == item->value)
-            item->value = cl_object_create(CL_INT, selected_items);
-        else
-            cl_object_set(item->value, selected_items);
-    }
-
-    return changed;
 }
 
 #ifdef ALTERNATIVE_DIALOG
@@ -221,6 +192,29 @@ static void update_item_brief(int current_index, void *a)
  *
  */
 
+bool checklist_validate_result(ui_properties_t *properties)
+{
+    struct xante_item *item = properties->item;
+    int current_value, selected_items;
+    bool changed = false;
+
+    selected_items = cl_string_to_int(properties->result);
+    current_value = CL_OBJECT_AS_INT(item_value(item));
+
+    if (current_value != selected_items) {
+        add_internal_change(properties, current_value, selected_items);
+        changed = true;
+
+        /* Updates item value */
+        if (NULL == item->value)
+            item->value = cl_object_create(CL_INT, selected_items);
+        else
+            cl_object_set(item->value, selected_items);
+    }
+
+    return changed;
+}
+
 /**
  * @name ui_checklist
  * @brief Creates a dialog to choose an option inside a list of options.
@@ -228,114 +222,52 @@ static void update_item_brief(int current_index, void *a)
  * Since we (and libdialog) use an int variable to store the selected options,
  * we only have 32 available options.
  *
- * @param [in] xpp: The main library object.
- * @param [in] item: The item to be used inside the dialog.
- * @param [in] edit_value: A flag to indicate if the value will be editable
- *                         or not.
- *
  * @return Returns a ui_return_t value indicating if the item's value has been
  *         changed (true) or not (false) with the dialog selected button.
  */
-ui_return_t ui_checklist(struct xante_app *xpp, struct xante_item *item,
-    bool edit_value)
+int checklist(ui_properties_t *properties)
 {
+    struct xante_app *xpp = properties->xpp;
+    struct xante_item *item = properties->item;
     int ret_dialog = DLG_EXIT_OK, selected_index = -1, selected_items;
-    bool loop = true, value_changed = false;
-    ui_properties_t properties;
-    ui_return_t ret;
 
     /* Prepares dialog content */
-    INIT_PROPERTIES(properties);
-    build_properties(item, &properties);
+    build_properties(item, properties);
 
-    do {
 #ifdef ALTERNATIVE_DIALOG
-        ret_dialog = dlg_checklist(cl_string_valueof(item->name),
-                                   cl_tr("Choose an option"),
-                                   properties.height, properties.width,
-                                   properties.displayed_items,
-                                   properties.number_of_items,
-                                   properties.litems, " X",
-                                   item->dialog_checklist_type,
-                                   &selected_index,
-                                   update_item_brief, item,
-                                   edit_value);
+    ret_dialog = dlg_checklist(cl_string_valueof(item->name),
+                               cl_tr("Choose an option"),
+                               properties->height, properties->width,
+                               properties->displayed_items,
+                               properties->number_of_items,
+                               properties->litems, " X",
+                               item->dialog_checklist_type,
+                               &selected_index,
+                               update_item_brief, item,
+                               properties->editable_value);
 #else
-        ret_dialog = dlg_checklist(cl_string_valueof(item->name),
-                                   cl_tr("Choose an option"),
-                                   properties.height, properties.width,
-                                   properties.displayed_items,
-                                   properties.number_of_items,
-                                   properties.litems,
-                                   " X", item->dialog_checklist_type,
-                                   &selected_index);
+    ret_dialog = dlg_checklist(cl_string_valueof(item->name),
+                               cl_tr("Choose an option"),
+                               properties->height, properties->width,
+                               properties->displayed_items,
+                               properties->number_of_items,
+                               properties->litems,
+                               " X", item->dialog_checklist_type,
+                               &selected_index);
 #endif
 
-        switch (ret_dialog) {
-            case DLG_EXIT_OK:
-                selected_items = get_checklist_selected_value(properties.litems,
-                                                              properties.number_of_items,
-                                                              item->dialog_checklist_type);
+    if ((ret_dialog == DLG_EXIT_OK) && properties->editable_value) {
+        selected_items = get_checklist_selected_value(properties->litems,
+                                                      properties->number_of_items,
+                                                      item->dialog_checklist_type);
 
-                if (selected_items < 0 ) {
-                    xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
-                                         "%s", cl_tr("No option was selected."));
+        if (selected_items < 0 ) {
+            xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
+                                 "%s", cl_tr("No option was selected."));
+        } else
+            properties->result = cl_string_create("%d", selected_items);
+    }
 
-                    break;
-                }
-
-                if (event_call(EV_ITEM_VALUE_CONFIRM, xpp, item,
-                               selected_items) < 0)
-                {
-                    break;
-                }
-
-                if (item_value_has_changed(xpp, item, properties.litems,
-                                           properties.number_of_items,
-                                           selected_items))
-                {
-                    value_changed = true;
-                }
-
-                loop = false;
-                break;
-
-            case DLG_EXIT_EXTRA:
-                if (item->button.extra == true)
-                    event_call(EV_EXTRA_BUTTON_PRESSED, xpp, item);
-
-                break;
-
-#ifdef ALTERNATIVE_DIALOG
-            case DLG_EXIT_TIMEOUT:
-                loop = false;
-                break;
-#endif
-
-            case DLG_EXIT_ESC:
-                /* Don't let the user close the dialog */
-                if (xante_runtime_esc_key(xpp))
-                    break;
-
-            case DLG_EXIT_CANCEL:
-                loop = false;
-                break;
-
-            case DLG_EXIT_HELP:
-                dialog_vars.help_button = 0;
-                xante_dlg_messagebox(xpp, XANTE_MSGBOX_INFO, cl_tr("Help"), "%s",
-                                     cl_string_valueof(item->descriptive_help));
-
-                dialog_vars.help_button = 1;
-                break;
-        }
-    } while (loop);
-
-    UNINIT_PROPERTIES(properties);
-
-    ret.selected_button = ret_dialog;
-    ret.updated_value = value_changed;
-
-    return ret;
+    return ret_dialog;
 }
 

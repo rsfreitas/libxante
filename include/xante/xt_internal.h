@@ -344,11 +344,19 @@ struct xante_mjtf {
 
 #define max(a,b)                            ((a) > (b) ? (a) : (b))
 #define min(a,b)                            ((a) < (b) ? (a) : (b))
-#define bit_test(data, bit)                 (((data) & (bit)) == (bit)) ? true : false
+#define bit_test(data, bit)                 ((((data) & (bit)) == (bit)) ? (true) : (false))
 
 /* Exclusive internal library headers */
 #include "ui_dialogs.h"
 #include "addon_dialogs.h"
+
+#include "xante/xt_changes.h"
+#include "xante/xt_dm.h"
+#include "xante/xt_instance.h"
+#include "xante/xt_jtf.h"
+#include "xante/xt_manager.h"
+#include "xante/xt_mjtf.h"
+#include "xante/xt_properties.h"
 
 #endif
 

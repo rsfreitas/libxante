@@ -29,12 +29,6 @@
 #define DEFAULT_HEIGHT                  \
     (DIALOG_HEIGHT_WITHOUT_TEXT + MAX_DLG_ITEMS)
 
-/*
- *
- * Internal functions
- *
- */
-
 /* A structure to be used while mapping lists */
 struct list_data {
     int total;
@@ -43,6 +37,13 @@ struct list_data {
 };
 
 static const char *ui_statusbar_text(enum xante_ui_dialog type, bool editable);
+
+/*
+ *
+ * Internal functions
+ *
+ */
+
 
 static int check_item_availability(cl_list_node_t *node, void *a)
 {
@@ -476,9 +477,11 @@ static void start_dialog_internals(struct xante_app *xpp,
         dlgx_put_statusbar(text);
 
     if ((item->dialog_type == XANTE_UI_DIALOG_CALENDAR) ||
-        (item->dialog_type == XANTE_UI_DIALOG_CALENDAR))
+        (item->dialog_type == XANTE_UI_DIALOG_TIMEBOX) ||
+        (item->dialog_type == XANTE_UI_DIALOG_FILE_SELECT) ||
+        (item->dialog_type == XANTE_UI_DIALOG_DIR_SELECT))
     {
-        dlgx_alloc_input(64);
+        dlgx_alloc_input(1024);
     }
 
     if (item->dialog_type == XANTE_UI_DIALOG_MIXEDFORM) {
@@ -513,12 +516,183 @@ static void finish_dialog_internals(struct xante_item *item)
         dialog_vars.extra_button = 0;
 
     if ((item->dialog_type == XANTE_UI_DIALOG_CALENDAR) ||
-        (item->dialog_type == XANTE_UI_DIALOG_CALENDAR))
+        (item->dialog_type == XANTE_UI_DIALOG_TIMEBOX) ||
+        (item->dialog_type == XANTE_UI_DIALOG_FILE_SELECT) ||
+        (item->dialog_type == XANTE_UI_DIALOG_DIR_SELECT))
     {
         dlgx_free_input();
     }
 
     dialog_vars.insecure = 0;
+}
+
+static bool should_call_manager(struct xante_item *item)
+{
+    if ((item->dialog_type == XANTE_UI_DIALOG_MENU) ||
+        (item->dialog_type == XANTE_UI_DIALOG_DYNAMIC_MENU))
+    {
+        return true;
+    }
+
+    return false;
+}
+
+/*
+ * This function is where a internal dialog is called according a selected item
+ * type.
+ *
+ * The selected button validation is made here, so the dialog functions don't
+ * need to do it.
+ *
+ * There are at least two functions that a implemented dialog must provide to
+ * be correctly executed and validated here:
+ *
+ * 1 - The function which calls the dialog. It must have the following
+ *     prototype:
+ *
+ *     int foo_dialog(ui_properties_t *properties);
+ *
+ *     Where the returned value must indicate which button was selected to
+ *     close it.
+ *
+ *     And, in case o returning DLG_EXIT_OK (which is when the user selects
+ *     the Ok button), the function must fill the dialog result inside the
+ *     properties->result variable.
+ *
+ *     Also, if one wants that the event EV_ITEM_VALUE_CONFIRM to be called
+ *     when a new value is entered, the properties->call_item_value_confirm
+ *     must be changed to true.
+ *
+ * 2 - A function to validate the properties->result value and case it is
+ *     valid, update the item's internal value. The function must have the
+ *     following prototype:
+ *
+ *     bool foo_validate(ui_properties_t *properties);
+ *
+ *     Where the returned value must tell if the new value, that is contained
+ *     in properties->result, can replace the current item's value or not.
+ *
+ *     In case of properties->result can successfully replace the item's value,
+ *     the function must also update three properties, so this change may be
+ *     inserted into the internal changes lists. The properties are:
+ *
+ *     - properties->change_item_name: the name which will identify the item
+ *                                     inside the changes list.
+ *
+ *     - properties->change_old_value: the item's old value.
+ *
+ *     - properties->change_new_value: the item's new value.
+ *
+ */
+static ui_return_t run_selected_dialog(ui_properties_t *properties)
+{
+    struct xante_app *xpp = properties->xpp;
+    struct xante_item *item = properties->item;
+    ui_return_t ret_dialog;
+    bool loop = true, value_changed = false;
+
+    /* Default return value */
+    ret_dialog.selected_button = DLG_EXIT_OK;
+    ret_dialog.updated_value = false;
+
+    /*
+     * The only kind of dialog which we don't need to handle its return
+     * value is XANTE_UI_DIALOG_CUSTOM, since the function can do preety
+     * much anything in it and it is its responsibility to handle it.
+     */
+    if (item->dialog_type == XANTE_UI_DIALOG_CUSTOM) {
+        if (event_call(EV_CUSTOM, xpp, item, NULL) < 0) {
+            xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
+                                 cl_tr("Error calling custom object '%s'"),
+                                 cl_string_valueof(item->name));
+        }
+
+        return ret_dialog;
+    }
+
+    if (NULL == properties->run) {
+        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
+                             cl_tr("The selected item doesn't have a function "
+                                   "to run its dialog!"));
+
+        return ret_dialog;
+    }
+
+    do {
+        ret_dialog.selected_button = (properties->run)(properties);
+
+        switch (ret_dialog.selected_button) {
+            case DLG_EXIT_OK:
+                /*
+                 * We do nothing if we can't edit the item's value.
+                 */
+                if (properties->editable_value == false) {
+                    loop = false;
+                    break;
+                }
+
+                /*
+                 * If an item requires a call to this event it must turn this
+                 * flag on.
+                 */
+                if (properties->call_item_value_confirm) {
+                    if (event_call(EV_ITEM_VALUE_CONFIRM, xpp, item,
+                                   cl_string_valueof(properties->result)) < 0)
+                    {
+                        break;
+                    }
+                }
+
+                if ((properties->validate_result != NULL) &&
+                    properties->editable_value)
+                {
+                    value_changed = (properties->validate_result)(properties);
+
+                    if (value_changed)
+                        loop = false;
+                } else
+                    loop = false;
+
+                break;
+
+            case DLG_EXIT_EXTRA:
+                if (item->button.extra == true)
+                    event_call(EV_EXTRA_BUTTON_PRESSED, xpp, item);
+
+                break;
+
+#ifdef ALTERNATIVE_DIALOG
+            case DLG_EXIT_TIMEOUT:
+                loop = false;
+                break;
+#endif
+
+            case DLG_EXIT_ESC:
+                /* Don't let the user close the dialog */
+                if (xante_runtime_esc_key(xpp))
+                    break;
+
+            case DLG_EXIT_CANCEL:
+                loop = false;
+                break;
+
+            case DLG_EXIT_HELP:
+                dialog_vars.help_button = 0;
+                xante_dlg_messagebox(xpp, XANTE_MSGBOX_INFO, cl_tr("Help"), "%s",
+                                     cl_string_valueof(item->descriptive_help));
+
+                dialog_vars.help_button = 1;
+                break;
+        }
+    } while (loop);
+
+    ret_dialog.updated_value = value_changed;
+
+    xante_log_info("%s: %d, %d", __FUNCTION__,
+            ret_dialog.selected_button,
+            ret_dialog.updated_value);
+
+    return ret_dialog;
 }
 
 /*
@@ -540,16 +714,14 @@ static void finish_dialog_internals(struct xante_item *item)
 int manager_run_dialog(struct xante_app *xpp, cl_list_t *menus,
     struct xante_item *selected_item)
 {
-    bool edit_item_value = true;
     ui_properties_t properties;
     ui_return_t ret_dialog;
-    int ret = -1;
 
     if (NULL == selected_item) {
         xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
                              cl_tr("No item was selected!"));
 
-        return ret;
+        return DLG_EXIT_CANCEL;
     }
 
     /* Are we leaving? */
@@ -557,139 +729,51 @@ int manager_run_dialog(struct xante_app *xpp, cl_list_t *menus,
         return DLG_EXIT_OK;
 
     if (event_call(EV_ITEM_SELECTED, xpp, selected_item) < 0)
-        return ret;
-
-    /* Verify input edit */
-    if (!(selected_item->mode & XANTE_ACCESS_EDIT))
-        edit_item_value = false;
+        return DLG_EXIT_CANCEL;
 
     /* Prepare dialog common properties */
-    INIT_PROPERTIES(properties);
-    start_dialog_internals(xpp, selected_item, edit_item_value);
+    properties_init(xpp, selected_item, &properties);
+    start_dialog_internals(xpp, selected_item, properties.editable_value);
 
-    switch (selected_item->dialog_type) {
-        case XANTE_UI_DIALOG_MENU:
-        case XANTE_UI_DIALOG_DYNAMIC_MENU:
-            ret_dialog = call_menu_dialog(xpp, menus, selected_item);
-            break;
+    if (should_call_manager(selected_item))
+        ret_dialog = call_menu_dialog(xpp, menus, selected_item);
+    else
+        ret_dialog = run_selected_dialog(&properties);
 
-        case XANTE_UI_DIALOG_INPUT_INT:
-        case XANTE_UI_DIALOG_INPUT_FLOAT:
-        case XANTE_UI_DIALOG_INPUT_DATE:
-        case XANTE_UI_DIALOG_INPUT_STRING:
-        case XANTE_UI_DIALOG_INPUT_TIME:
-        case XANTE_UI_DIALOG_INPUT_PASSWD:
-        case XANTE_UI_DIALOG_RANGE:
-        case XANTE_UI_DIALOG_INPUTSCROLL:
-            ret_dialog = ui_input(xpp, selected_item, edit_item_value);
-            break;
-
-        case XANTE_UI_DIALOG_CALENDAR:
-            ret_dialog = ui_calendar(xpp, selected_item, edit_item_value);
-            break;
-
-        case XANTE_UI_DIALOG_TIMEBOX:
-            ret_dialog = ui_timebox(xpp, selected_item, edit_item_value);
-            break;
-
-        case XANTE_UI_DIALOG_RADIO_CHECKLIST:
-        case XANTE_UI_DIALOG_CHECKLIST:
-            ret_dialog = ui_checklist(xpp, selected_item, edit_item_value);
-            break;
-
-        case XANTE_UI_DIALOG_YES_NO:
-            if (edit_item_value == true)
-                ret_dialog = ui_yesno(xpp, selected_item);
-            else {
-                xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
-                                     cl_tr("Cannot change the value of this item!"));
-            }
-
-            break;
-
-        case XANTE_UI_DIALOG_DELETE_DYNAMIC_MENU_ITEM:
-            ui_delete_dm(xpp, selected_item, edit_item_value);
-            break;
-
-        case XANTE_UI_DIALOG_ADD_DYNAMIC_MENU_ITEM:
-            if (edit_item_value == true)
-                ui_add_dm(xpp, selected_item);
-            else {
-                xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
-                                     cl_tr("Cannot add item!"));
-            }
-
-            break;
-
-        case XANTE_UI_DIALOG_CUSTOM:
-            if (event_call(EV_CUSTOM, xpp, selected_item, NULL) < 0) {
-                xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
-                                     cl_tr("Error calling custom object '%s'"),
-                                     cl_string_valueof(selected_item->name));
-            }
-
-            break;
-
-        case XANTE_UI_DIALOG_PROGRESS:
-            ret_dialog = ui_progress(xpp, selected_item);
-            break;
-
-        case XANTE_UI_DIALOG_SPINNER_SYNC:
-        case XANTE_UI_DIALOG_DOTS_SYNC:
-            ret_dialog = ui_sync(xpp, selected_item);
-            break;
-
-        case XANTE_UI_DIALOG_FILE_SELECT:
-        case XANTE_UI_DIALOG_DIR_SELECT:
-            ret_dialog = ui_fselect(xpp, selected_item);
-            break;
-
-        case XANTE_UI_DIALOG_FILE_VIEW:
-            ret_dialog = ui_file_view(xpp, selected_item);
-            break;
-
-        case XANTE_UI_DIALOG_TAILBOX:
-            ret_dialog = ui_tailbox(xpp, selected_item);
-            break;
-
-        case XANTE_UI_DIALOG_SCROLLTEXT:
-            ret_dialog = ui_scrolltext(xpp, selected_item);
-            break;
-
-        case XANTE_UI_DIALOG_UPDATE_OBJECT:
-            ret_dialog = ui_update_object(xpp, selected_item);
-            break;
-
-        case XANTE_UI_DIALOG_MIXEDFORM:
-            ret_dialog = ui_mixedform(xpp, selected_item);
-            break;
-
-        case XANTE_UI_DIALOG_BUILDLIST:
-            ret_dialog = ui_buildlist(xpp, selected_item);
-            break;
-
-        case XANTE_UI_DIALOG_SPREADSHEET:
-            ret_dialog = ui_spreadsheet(xpp, selected_item);
-            break;
-
-        default:
-            break;
-    }
-
-    UNINIT_PROPERTIES(properties);
-    finish_dialog_internals(selected_item);
+    xante_log_info("%s: %d, %d", __FUNCTION__,
+            ret_dialog.selected_button,
+            ret_dialog.updated_value);
 
     /*
      * We'll need to search if the item that has been updated is pointed by a
      * dynamic menu. If so, we're going to update its contents.
+     *
+     * Also here we insert the occourred modification into the internal changes
+     * list.
      */
     if (ret_dialog.updated_value == true) {
+        /*
+         * If the selected item is one of these types we already saved their
+         * changes and don't need to do it again or they type don't hold an
+         * internal change.
+         */
+        if ((selected_item->dialog_type != XANTE_UI_DIALOG_MIXEDFORM) ||
+            (selected_item->dialog_type != XANTE_UI_DIALOG_SPREADSHEET))
+        {
+            change_add(xpp, cl_string_valueof(properties.change_item_name),
+                       cl_string_valueof(properties.change_old_value),
+                       cl_string_valueof(properties.change_new_value));
+        }
+
         dm_update(xpp, selected_item);
         event_call(EV_ITEM_VALUE_UPDATED, xpp, selected_item);
     }
 
     /* Run return event */
     event_call(EV_ITEM_EXIT, xpp, selected_item);
+
+    properties_uninit(&properties);
+    finish_dialog_internals(selected_item);
 
     return ret_dialog.selected_button;
 }
@@ -718,7 +802,7 @@ int manager_run(struct xante_app *xpp, cl_list_t *menus,
         if (xante_runtime_close_ui(xpp) == true)
             break;
 
-        INIT_PROPERTIES(properties);
+        properties_init(xpp, NULL, &properties);
         build_properties(entry_menu, &properties);
         prepare_dialog_look(xpp, cancel_label);
 
@@ -781,7 +865,7 @@ int manager_run(struct xante_app *xpp, cl_list_t *menus,
         }
 
         release_dialog_labels();
-        UNINIT_PROPERTIES(properties);
+        properties_uninit(&properties);
     } while (loop);
 
     return ret_dialog;

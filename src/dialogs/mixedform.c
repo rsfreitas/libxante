@@ -301,6 +301,12 @@ static bool compare_elements(struct xante_app *xpp, struct xante_item *item,
         o = cl_object_to_cstring(old_value);
         n = cl_object_to_cstring(new_value);
         set_element_value(old_element, cl_string_valueof(n));
+
+        /*
+         * Since a mixedform may have several internal fields, and consequently,
+         * several values to load and save from/into the configuration file, we
+         * add here a notification about a change which was just discovered.
+         */
         change_add(xpp, cl_string_valueof(item->name), cl_string_valueof(o),
                    cl_string_valueof(n));
 
@@ -310,43 +316,6 @@ static bool compare_elements(struct xante_app *xpp, struct xante_item *item,
 
     cl_object_unref(new_value);
     cl_object_unref(old_value);
-
-    return changed;
-}
-
-static bool item_values_have_changed(struct xante_app *xpp,
-    struct xante_item *item, cl_json_t *fields, int total_fields,
-    const char *result)
-{
-    bool changed = false;
-    int i;
-    cl_json_t *field = NULL, *jresult = NULL, *result_fields = NULL,
-              *rfield = NULL;
-
-    /* Gets the result in JSON format to ease our job below */
-    jresult = cl_json_parse_string(result);
-
-    if (NULL == jresult)
-        goto end_block;
-
-    result_fields = cl_json_get_object_item(jresult, "fields");
-
-    if (NULL == result_fields)
-        goto end_block;
-
-    /* We compare each element to look for changes */
-    for (i = 0; i < total_fields; i++) {
-        rfield = cl_json_get_array_item(result_fields, i);
-        field = get_field_by_name(fields, total_fields,
-                                  get_element_name(rfield));
-
-        if (compare_elements(xpp, item, field, rfield))
-            changed = true;
-    }
-
-end_block:
-    if (jresult != NULL)
-        cl_json_delete(jresult);
 
     return changed;
 }
@@ -391,6 +360,44 @@ static void save_mixedform_field(struct xante_app *xpp, cl_json_t *field)
  * Internal API
  *
  */
+
+bool mixedform_validate_result(ui_properties_t *properties)
+{
+    struct xante_item *item = properties->item;
+    bool changed = false;
+    int i;
+    cl_json_t *field = NULL, *jresult = NULL, *result_fields = NULL,
+              *rfield = NULL, *fields = NULL;
+
+    /* Gets the result in JSON format to ease our job below */
+    jresult = cl_json_parse(properties->result);
+
+    if (NULL == jresult)
+        goto end_block;
+
+    result_fields = cl_json_get_object_item(jresult, "fields");
+
+    if (NULL == result_fields)
+        goto end_block;
+
+    /* We compare each element to look for changes */
+    fields = get_fields_node(item);
+
+    for (i = 0; i < properties->number_of_items; i++) {
+        rfield = cl_json_get_array_item(result_fields, i);
+        field = get_field_by_name(fields, properties->number_of_items,
+                                  get_element_name(rfield));
+
+        if (compare_elements(properties->xpp, item, field, rfield))
+            changed = true;
+    }
+
+end_block:
+    if (jresult != NULL)
+        cl_json_delete(jresult);
+
+    return changed;
+}
 
 /**
  * @name ui_mixedform_load_and_set_value
@@ -460,91 +467,35 @@ void ui_save_mixedform_item(struct xante_app *xpp, struct xante_item *item)
         save_mixedform_field(xpp, cl_json_get_array_item(fields, i));
 }
 
-ui_return_t ui_mixedform(struct xante_app *xpp, struct xante_item *item)
+int mixedform(ui_properties_t *properties)
 {
-    bool value_changed = false, loop = true;
-    ui_properties_t properties;
+    struct xante_item *item = properties->item;
     int ret_dialog = DLG_EXIT_OK, selected_item = 0;
     cl_string_t *form_title = NULL;
     cl_json_t *fields = NULL;
     char *result = NULL;
-    ui_return_t ret;
 
     /* Prepares dialog content */
-    INIT_PROPERTIES(properties);
     fields = get_fields_node(item);
     form_title = get_title(item);
-    build_properties(item, fields, &properties);
+    build_properties(item, fields, properties);
 
-    do {
-        if (result != NULL) {
-            free(result);
-            result = NULL;
-        }
+    ret_dialog = dlg_form(cl_string_valueof(item->name),
+                          cl_string_valueof(form_title),
+                          properties->height, properties->width,
+                          properties->displayed_items,
+                          properties->number_of_items,
+                          properties->fitems,
+                          &selected_item);
 
-        ret_dialog = dlg_form(cl_string_valueof(item->name),
-                              cl_string_valueof(form_title),
-                              properties.height, properties.width,
-                              properties.displayed_items,
-                              properties.number_of_items,
-                              properties.fitems,
-                              &selected_item);
+    if ((ret_dialog == DLG_EXIT_OK) && properties->editable_value) {
+        result = get_current_result(properties->fitems,
+                                    properties->number_of_items);
 
-        switch (ret_dialog) {
-            case DLG_EXIT_OK:
-                result = get_current_result(properties.fitems,
-                                            properties.number_of_items);
-
-                if (event_call(EV_ITEM_VALUE_CONFIRM, xpp, item, result) < 0)
-                    break;
-
-                value_changed = item_values_have_changed(xpp, item, fields,
-                                                         properties.number_of_items,
-                                                         result);
-
-                loop = false;
-                break;
-
-            case DLG_EXIT_EXTRA:
-                if (item->button.extra == true)
-                    event_call(EV_EXTRA_BUTTON_PRESSED, xpp, item);
-
-                break;
-
-#ifdef ALTERNATIVE_DIALOG
-            case DLG_EXIT_TIMEOUT:
-                loop = false;
-                break;
-#endif
-
-            case DLG_EXIT_ESC:
-                /* Don't let the user close the dialog */
-                if (xante_runtime_esc_key(xpp))
-                    break;
-
-            case DLG_EXIT_CANCEL:
-                loop = false;
-                break;
-
-            case DLG_EXIT_HELP:
-                dialog_vars.help_button = 0;
-                xante_dlg_messagebox(xpp, XANTE_MSGBOX_INFO, cl_tr("Help"), "%s",
-                                     cl_string_valueof(item->descriptive_help));
-
-                dialog_vars.help_button = 1;
-                break;
-        }
-    } while (loop);
-
-    if (result != NULL)
+        properties->result = cl_string_create("%s", result);
         free(result);
+    }
 
-    dialog_vars.insecure = 0;
-    UNINIT_PROPERTIES(properties);
-
-    ret.selected_button = ret_dialog;
-    ret.updated_value = value_changed;
-
-    return ret;
+    return ret_dialog;
 }
 

@@ -79,9 +79,9 @@ static int get_input_length(const struct xante_item *item)
     return l;
 }
 
-static bool item_value_has_changed(struct xante_app *xpp,
-    struct xante_item *item, const char *new_value)
+static bool item_value_has_changed(ui_properties_t *properties)
 {
+    struct xante_item *item = properties->item;
     bool changed = false;
     cl_object_t *value = NULL;
     cl_string_t *result = NULL, *str_value = NULL;
@@ -89,16 +89,19 @@ static bool item_value_has_changed(struct xante_app *xpp,
     value = item_value(item);
     str_value = cl_object_to_cstring(value);
 
-    if (equals(cl_string_valueof(str_value), new_value) == false) {
+    if (cl_string_cmp(str_value, properties->result) != 0) {
         changed = true;
-        change_add(xpp, cl_string_valueof(item->name),
-                   cl_string_valueof(str_value), new_value);
+
+        /* Set up details to save inside the internal changes list */
+        properties->change_item_name = cl_string_ref(item->name);
+        properties->change_old_value = cl_string_ref(str_value);
+        properties->change_new_value = cl_string_ref(properties->result);
 
         /* Updates item value */
         if (item->value != NULL)
             cl_object_unref(item->value);
 
-        result = cl_string_create("%s", new_value);
+        result = cl_string_dup(properties->result);
 
         if ((item->dialog_type == XANTE_UI_DIALOG_INPUT_INT) ||
             (item->dialog_type == XANTE_UI_DIALOG_RANGE))
@@ -113,7 +116,7 @@ static bool item_value_has_changed(struct xante_app *xpp,
     }
 
     if (str_value != NULL)
-        free(str_value);
+        cl_string_unref(str_value);
 
     return changed;
 }
@@ -303,7 +306,7 @@ static int inputscroll_check(const char *value, void *data)
     return event_call(EV_VALUE_CHECK, input->xpp, input->item, value);
 }
 
-static int dlgx_passwd(struct xante_item *item, bool edit_value, char *input,
+static int dlgx_passwd(struct xante_item *item, char *input,
     unsigned int input_length, const ui_properties_t *properties)
 {
     DIALOG_FORMITEM fitem;
@@ -318,7 +321,7 @@ static int dlgx_passwd(struct xante_item *item, bool edit_value, char *input,
     fitem.text_y = 0;
     fitem.text_x = 0;
 
-    if (edit_value == true)
+    if (properties->editable_value == true)
         fitem.text_flen = 53;
     else
         fitem.text_flen = 0;
@@ -337,16 +340,10 @@ static int dlgx_passwd(struct xante_item *item, bool edit_value, char *input,
     return ret_dialog;
 }
 
-/*
- *
- * Internal API
- *
- */
-
-static void build_properties(struct xante_app *xpp,
-    struct xante_item *item, ui_properties_t *properties, char *input,
+static void build_properties(ui_properties_t *properties, char *input,
     int max_input)
 {
+    struct xante_item *item = properties->item;
     cl_string_t *value = NULL;
 
     /* Adjusts current content */
@@ -369,129 +366,101 @@ static void build_properties(struct xante_app *xpp,
 
     if (item->dialog_type == XANTE_UI_DIALOG_INPUTSCROLL) {
         /* Gets the scrollable text to be displayed from a module function */
-        properties->scroll_content = event_item_custom_data(xpp, item);
+        properties->scroll_content = event_item_custom_data(properties->xpp,
+                                                            properties->item);
     }
+}
+
+/*
+ *
+ * Internal API
+ *
+ */
+
+bool input_validate_result(ui_properties_t *properties)
+{
+    struct xante_app *xpp = properties->xpp;
+    struct xante_item *item = properties->item;
+    bool value_changed = false;
+
+    if (validate_input_value(xpp, item,
+                             cl_string_valueof(properties->result)) == false)
+    {
+        return false;
+    }
+
+    if (item_value_has_changed(properties) == true)
+        value_changed = true;
+
+    return value_changed;
 }
 
 /**
  * @name ui_input
  * @brief Creates a dialog to do some data input.
  *
- * @param [in] xpp: The main library object.
- * @param [in] item: The item to be used inside the dialog.
- * @param [in] edit_value: A flag to indicate if the value will be editable
- *                         or not.
- *
  * @return Returns a ui_return_t value indicating if the item's value has been
  *         changed (true) or not (false) with the dialog selected button.
  */
-ui_return_t ui_input(struct xante_app *xpp, struct xante_item *item,
-    bool edit_value)
+//ui_return_t ui_input(ui_properties_t *properties)
+int input(ui_properties_t *properties)
 {
-    bool loop = true, value_changed = false;
-    int ret_dialog = DLG_EXIT_OK;
-    ui_return_t ret;
-    ui_properties_t properties;
-    char input[MAX_INPUT_VALUE] = {0}, *range_value = NULL;
+    int ret_dialog = DLG_EXIT_CANCEL;
+    char input_result[MAX_INPUT_VALUE] = {0}, *range_value = NULL;
+    struct xante_app *xpp = properties->xpp;
+    struct xante_item *item = properties->item;
     struct inputscroll_data input_data = {
         .xpp = xpp,
         .item = item,
     };
 
     /* Prepares dialog content and properties */
-    INIT_PROPERTIES(properties);
-    build_properties(xpp, item, &properties, input, sizeof(input));
+    build_properties(properties, input_result, sizeof(input_result));
 
-    do {
-        if (item->dialog_type == XANTE_UI_DIALOG_INPUT_PASSWD) {
-            ret_dialog = dlgx_passwd(item, edit_value, input, sizeof(input),
-                                     &properties);
-        } else if (item->dialog_type == XANTE_UI_DIALOG_RANGE) {
-            dlgx_free_input();
-            ret_dialog = dialog_rangebox(cl_string_valueof(item->name),
-                                         cl_string_valueof(properties.text),
-                                         properties.height,
-                                         properties.width,
-                                         CL_OBJECT_AS_INT(item->min),
-                                         CL_OBJECT_AS_INT(item->max),
-                                         strtol(input, NULL, 10));
+    if (item->dialog_type == XANTE_UI_DIALOG_INPUT_PASSWD) {
+        ret_dialog = dlgx_passwd(item, input_result, sizeof(input_result),
+                                properties);
+    } else if (item->dialog_type == XANTE_UI_DIALOG_RANGE) {
+        dlgx_free_input();
+        ret_dialog = dialog_rangebox(cl_string_valueof(item->name),
+                                     cl_string_valueof(properties->text),
+                                     properties->height,
+                                     properties->width,
+                                     CL_OBJECT_AS_INT(item->min),
+                                     CL_OBJECT_AS_INT(item->max),
+                                     strtol(input_result, NULL, 10));
 
-            /*
-             * Since this is a libdialog's dialog, we need to copy its internal
-             * result to our.
-             */
-            range_value = dlgx_get_input_result();
-            strncpy(input, range_value, max(strlen(range_value),
-                                            MAX_INPUT_VALUE));
+        /*
+         * Since this is a libdialog's dialog, we need to copy its internal
+         * result to our.
+         */
+        range_value = dlgx_get_input_result();
+        strncpy(input_result, range_value, max(strlen(range_value),
+                                               MAX_INPUT_VALUE));
 
-            free(range_value);
-        } else if (item->dialog_type == XANTE_UI_DIALOG_INPUTSCROLL) {
-            ret_dialog = dlgx_inputbox(properties.width, 20,// height,
-                                       cl_string_valueof(item->name),
-                                       cl_string_valueof(properties.text),
-                                       cl_tr("Enter value:"),
-                                       properties.scroll_content,
-                                       get_input_length(item), input,
-                                       edit_value, inputscroll_len,
-                                       inputscroll_check, &input_data);
-        } else {
-            ret_dialog = dlgx_inputbox(properties.width, properties.height,
-                                       cl_string_valueof(item->name),
-                                       cl_string_valueof(properties.text), NULL,
-                                       NULL, get_input_length(item), input,
-                                       edit_value, NULL, NULL, NULL);
-        }
+        free(range_value);
+    } else if (item->dialog_type == XANTE_UI_DIALOG_INPUTSCROLL) {
+        ret_dialog = dlgx_inputbox(properties->width, 20,// height,
+                                   cl_string_valueof(item->name),
+                                   cl_string_valueof(properties->text),
+                                   cl_tr("Enter value:"),
+                                   properties->scroll_content,
+                                   get_input_length(item), input_result,
+                                   properties->editable_value,
+                                   inputscroll_len, inputscroll_check,
+                                   &input_data);
+    } else {
+        ret_dialog = dlgx_inputbox(properties->width, properties->height,
+                                   cl_string_valueof(item->name),
+                                   cl_string_valueof(properties->text), NULL,
+                                   NULL, get_input_length(item), input_result,
+                                   properties->editable_value, NULL, NULL,
+                                   NULL);
+    }
 
-        switch (ret_dialog) {
-            case DLG_EXIT_OK:
-                if (event_call(EV_ITEM_VALUE_CONFIRM, xpp, item, input) < 0)
-                    break;
+    if ((ret_dialog == DLG_EXIT_OK) && properties->editable_value)
+        properties->result = cl_string_create("%s", input_result);
 
-                if (validate_input_value(xpp, item, input) == false)
-                    break;
-
-                if (item_value_has_changed(xpp, item, input) == true)
-                    value_changed = true;
-
-                loop = false;
-                break;
-
-            case DLG_EXIT_EXTRA:
-                if (item->button.extra == true)
-                    event_call(EV_EXTRA_BUTTON_PRESSED, xpp, item);
-
-                break;
-
-#ifdef ALTERNATIVE_DIALOG
-            case DLG_EXIT_TIMEOUT:
-                loop = false;
-                break;
-#endif
-
-            case DLG_EXIT_ESC:
-                /* Don't let the user close the dialog */
-                if (xante_runtime_esc_key(xpp))
-                    break;
-
-            case DLG_EXIT_CANCEL:
-                loop = false;
-                break;
-
-            case DLG_EXIT_HELP:
-                dialog_vars.help_button = 0;
-                xante_dlg_messagebox(xpp, XANTE_MSGBOX_INFO, cl_tr("Help"), "%s",
-                                     cl_string_valueof(item->descriptive_help));
-
-                dialog_vars.help_button = 1;
-                break;
-        }
-    } while (loop);
-
-    UNINIT_PROPERTIES(properties);
-
-    ret.selected_button = ret_dialog;
-    ret.updated_value = value_changed;
-
-    return ret;
+    return ret_dialog;
 }
 

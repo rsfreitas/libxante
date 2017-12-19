@@ -220,9 +220,9 @@ static int build_sheet(const struct xante_item *item,
     return 0;
 }
 
-static void build_properties(const struct xante_item *item,
-    ui_properties_t *properties)
+static void build_properties(ui_properties_t *properties)
 {
+    struct xante_item *item = properties->item;
     cl_json_t *node;
 
     /* Window title */
@@ -422,12 +422,12 @@ static void save_row(struct xante_app *xpp, struct xante_item *item, int row)
  * It should be used to compare with current stored values to know if any change
  * has been made. It also should be passed to the confirm event.
  */
-static char *get_current_result(const struct xante_item *item,
+static cl_string_t *get_current_result(const struct xante_item *item,
     ui_properties_t *properties)
 {
     int rows = 0, columns = 0, i = 0, j = 0;
     cl_string_t *result = NULL;
-    char *cell_data = NULL, *tmp = NULL;
+    char *cell_data = NULL;
 
     rows = get_form_number_of_rows(item);
     columns = get_form_number_of_columns(item);
@@ -449,10 +449,8 @@ static char *get_current_result(const struct xante_item *item,
 
     cl_string_truncate(result, -1);
     cl_string_cat(result, "]}");
-    tmp = strdup(cl_string_valueof(result));
-    cl_string_unref(result);
 
-    return tmp;
+    return result;
 }
 
 static bool compare_cells(struct xante_app *xpp, struct xante_item *item,
@@ -471,6 +469,11 @@ static bool compare_cells(struct xante_app *xpp, struct xante_item *item,
     if (cl_string_cmp(old_value, new_value) != 0) {
         changed = true;
         set_cell_value(old_cell, cl_string_valueof(new_value));
+
+        /*
+         * Since a spreadsheet may have several values we add a notification
+         * about a change here, for each different cell.
+         */
         change_add(xpp, cl_string_valueof(item_name),
                    cl_string_valueof(old_value),
                    cl_string_valueof(new_value));
@@ -507,16 +510,22 @@ static bool compare_rows(struct xante_app *xpp, struct xante_item *item,
     return changed;
 }
 
-static bool item_values_have_changed(struct xante_app *xpp,
-    struct xante_item *item, const char *result)
+/*
+ *
+ * Internal API
+ *
+ */
+
+bool spreadsheet_validate_result(ui_properties_t *properties)
 {
+    struct xante_item *item = properties->item;
     bool changed = false;
     cl_json_t *jresult = NULL, *sheet = NULL, *result_sheet = NULL,
               *sheet_row = NULL, *result_row = NULL;
     int rows, i;
 
     rows = get_form_number_of_rows(item);
-    jresult = cl_json_parse_string(result);
+    jresult = cl_json_parse(properties->result);
 
     if (NULL == jresult)
         goto end_block;
@@ -535,7 +544,7 @@ static bool item_values_have_changed(struct xante_app *xpp,
         sheet_row = cl_json_get_array_item(sheet, i);
         result_row = cl_json_get_array_item(result_sheet, i);
 
-        if (compare_rows(xpp, item, sheet_row, result_row, i))
+        if (compare_rows(properties->xpp, item, sheet_row, result_row, i))
             changed = true;
     }
 
@@ -545,12 +554,6 @@ end_block:
 
     return changed;
 }
-
-/*
- *
- * Internal API
- *
- */
 
 /**
  * @name ui_spreadsheet_load_and_set_value
@@ -618,78 +621,21 @@ void ui_save_spreadsheet_item(struct xante_app *xpp, struct xante_item *item)
                      "%d,%d", rows, columns);
 }
 
-ui_return_t ui_spreadsheet(struct xante_app *xpp, struct xante_item *item)
+int spreadsheet(ui_properties_t *properties)
 {
-    ui_return_t ret;
-    bool value_changed = false, loop = true;
+    struct xante_item *item = properties->item;
     int ret_dialog = DLG_EXIT_OK;
-    ui_properties_t properties;
-    char *result = NULL;
 
     /* Prepares dialog content */
-    INIT_PROPERTIES(properties);
-    build_properties(item, &properties);
+    build_properties(properties);
 
-    do {
-        if (result != NULL) {
-            free(result);
-            result = NULL;
-        }
+    ret_dialog = dlgx_spreadsheet(cl_string_valueof(item->name),
+                                  cl_string_valueof(properties->title),
+                                  properties->sheet);
 
-        ret_dialog = dlgx_spreadsheet(cl_string_valueof(item->name),
-                                      cl_string_valueof(properties.title),
-                                      properties.sheet);
+    if (ret_dialog == DLG_EXIT_OK)
+        properties->result = get_current_result(item, properties);
 
-        switch (ret_dialog) {
-            case DLG_EXIT_OK:
-                result = get_current_result(item, &properties);
-
-                if (event_call(EV_ITEM_VALUE_CONFIRM, xpp, item, result) < 0)
-                    break;
-
-                value_changed = item_values_have_changed(xpp, item, result);
-                loop = false;
-                break;
-
-            case DLG_EXIT_EXTRA:
-                if (item->button.extra == true)
-                    event_call(EV_EXTRA_BUTTON_PRESSED, xpp, item);
-
-                break;
-
-#ifdef ALTERNATIVE_DIALOG
-            case DLG_EXIT_TIMEOUT:
-                loop = false;
-                break;
-#endif
-
-            case DLG_EXIT_ESC:
-                /* Don't let the user close the dialog */
-                if (xante_runtime_esc_key(xpp))
-                    break;
-
-            case DLG_EXIT_CANCEL:
-                loop = false;
-                break;
-
-            case DLG_EXIT_HELP:
-                dialog_vars.help_button = 0;
-                xante_dlg_messagebox(xpp, XANTE_MSGBOX_INFO, cl_tr("Help"), "%s",
-                                     cl_string_valueof(item->descriptive_help));
-
-                dialog_vars.help_button = 1;
-                break;
-        }
-    } while (loop);
-
-    if (result != NULL)
-        free(result);
-
-    UNINIT_PROPERTIES(properties);
-
-    ret.selected_button = ret_dialog;
-    ret.updated_value = value_changed;
-
-    return ret;
+    return ret_dialog;
 }
 

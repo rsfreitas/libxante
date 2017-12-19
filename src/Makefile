@@ -34,8 +34,8 @@ TARGET_SHARED := $(OUTPUTDIR)/$(SHARED_LIBNAME)
 TARGET_STATIC := $(OUTPUTDIR)/$(STATIC_LIBNAME)
 
 INCLUDEDIR = -I../include
-INCLUDEDIR += -Iui
-INCLUDEDIR += -Idialog
+INCLUDEDIR += -Idialogs
+INCLUDEDIR += -Iextension
 
 CFLAGS = -Wall -Wextra -fPIC -ggdb -O0 -g3 \
         -DLIBXANTE_COMPILE -D_GNU_SOURCE $(INCLUDEDIR)
@@ -59,8 +59,8 @@ endif
 VPATH = ../include:.
 
 C_FILES := $(wildcard *.c)
-UI_FILES := $(wildcard ui/*.c)
-DIALOG_FILES := $(wildcard dialog/*.c)
+UI_FILES := $(wildcard dialogs/*.c)
+DIALOG_FILES := $(wildcard extension/*.c)
 OBJS = 		\
 	$(DIALOG_FILES:.c=.o)	\
 	$(UI_FILES:.c=.o)	\

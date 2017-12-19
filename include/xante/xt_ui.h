@@ -76,5 +76,41 @@ enum xante_return_value xante_ui_run(xante_t *xpp);
  */
 enum xante_return_value xante_ui_run_mjtf(xante_t *xpp, const char *raw_mjtf);
 
+/**
+ * @name xante_dlg_set_backtitle
+ * @brief Sets the application backtitle to its default value.
+ *
+ * @param [in,out] xpp: The library main object.
+ *
+ * @return On success returns 0 or -1 otherwise.
+ */
+int xante_dlg_set_backtitle(xante_t *xpp);
+
+/**
+ * @name xante_dlg_clear_backtitle
+ * @brief Clears the application backtitle content.
+ *
+ * @param [in,out] xpp: The library main object.
+ *
+ * @return On success returns 0 or -1 otherwise.
+ */
+int xante_dlg_clear_backtitle(xante_t *xpp);
+
+/**
+ * @name xante_dlg_messagebox
+ * @brief Creates a message box dialog.
+ *
+ * @param [in] xpp: The library main object.
+ * @param [in] type: The message box type (info, error, warning).
+ * @param [in] title: The dialog title.
+ * @param [in] message: The dialog message format.
+ * @param [in] ...: The dialog message content.
+ *
+ * @return On success returns the button selected or -1 otherwise.
+ */
+int xante_dlg_messagebox(struct xante_app *xpp, enum xante_msgbox_type type,
+                         const char *title, const char *message, ...)
+                         __attribute__((format(printf, 4, 5)));
+
 #endif
 

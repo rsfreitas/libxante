@@ -94,29 +94,34 @@ static void build_properties(const struct xante_menu *dm_menu,
  *
  */
 
+bool delete_dm_validate_result(ui_properties_t *properties)
+{
+    if (NULL == properties->result)
+        return false;
+
+    /* Set up details to save inside the internal changes list */
+    properties->change_item_name = cl_string_create("Removed dynamic menu entry");
+    properties->change_old_value = cl_string_create("EMPTY");
+    properties->change_new_value = cl_string_create("EMPTY");
+
+    return true;
+}
+
 /**
  * @name ui_delete_dm
  * @brief Creates a dialog to delete entries from a dynamic menu.
  *
  * The dialog will be a radio-checklist with the current dynamic menu options.
  *
- * @param [in,out] xpp: The library main object.
- * @param [in] item: The previously selected item.
- * @param [in] edit_value: A boolean flag indicating if is possible to edit
- *                         the option or not (removing an item).
- *
  * @return Returns a ui_return_t value indicating if an item was deleted or not.
  */
-ui_return_t ui_delete_dm(struct xante_app *xpp, struct xante_item *item,
-    bool edit_value)
+int delete_dm(ui_properties_t *properties)
 {
-    bool deleted = false, loop = true;
+    struct xante_app *xpp = properties->xpp;
+    struct xante_item *item = properties->item;
     struct xante_menu *dm_menu = NULL;
     int ret_dialog = DLG_EXIT_OK, selected_index = -1;
-    ui_properties_t properties;
-    ui_return_t ret;
 
-    INIT_PROPERTIES(properties);
     dm_menu = xante_menu_search_by_object_id(xpp->ui.menus,
                                              cl_string_valueof(item->referenced_menu));
 
@@ -124,10 +129,7 @@ ui_return_t ui_delete_dm(struct xante_app *xpp, struct xante_item *item,
         xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
                              cl_tr("No dynamic menu was found!"));
 
-        ret.selected_button = ret_dialog;
-        ret.updated_value = deleted;
-
-        return ret;
+        return DLG_EXIT_OK;
     }
 
     if (cl_list_size(dm_menu->items) == 0) {
@@ -135,84 +137,40 @@ ui_return_t ui_delete_dm(struct xante_app *xpp, struct xante_item *item,
                              cl_tr("The dynamic menu does not have any item "
                                    "to remove!"));
 
-        ret.selected_button = ret_dialog;
-        ret.updated_value = deleted;
-
-        return ret;
+        return DLG_EXIT_OK;
     }
 
     /* Prepare dialog content */
-    build_properties(dm_menu, &properties);
+    build_properties(dm_menu, properties);
 
-    do {
 #ifdef ALTERNATIVE_DIALOG
-        ret_dialog = dlg_checklist(cl_string_valueof(item->name),
-                                   cl_string_valueof(item->options),
-                                   properties.height, properties.width,
-                                   properties.displayed_items,
-                                   properties.number_of_items,
-                                   properties.litems, " X",
-                                   item->dialog_checklist_type,
-                                   &selected_index, NULL, NULL,
-                                   edit_value);
+    ret_dialog = dlg_checklist(cl_string_valueof(item->name),
+                               cl_string_valueof(item->options),
+                               properties->height, properties->width,
+                               properties->displayed_items,
+                               properties->number_of_items,
+                               properties->litems, " X",
+                               item->dialog_checklist_type,
+                               &selected_index, NULL, NULL,
+                               properties->editable_value);
 #else
-        ret_dialog = dlg_checklist(cl_string_valueof(item->name),
-                                   cl_string_valueof(item->options),
-                                   properties.height, properties.width,
-                                   properties.displayed_items,
-                                   properties.number_of_items,
-                                   properties.litems, " X",
-                                   item->dialog_checklist_type,
-                                   &selected_index);
+    ret_dialog = dlg_checklist(cl_string_valueof(item->name),
+                               cl_string_valueof(item->options),
+                               properties->height, properties->width,
+                               properties->displayed_items,
+                               properties->number_of_items,
+                               properties->litems, " X",
+                               item->dialog_checklist_type,
+                               &selected_index);
 #endif
 
-        switch (ret_dialog) {
-            case DLG_EXIT_OK:
-                /*
-                 * An item was selected. Now we're going to remove it from the
-                 * dynamic menu.
-                 */
-                dm_delete(dm_menu, selected_index);
-                loop = false;
-                deleted = true;
-                break;
+    if (ret_dialog == DLG_EXIT_OK) {
+        dm_delete(dm_menu, selected_index);
 
-            case DLG_EXIT_EXTRA:
-                if (item->button.extra == true)
-                    event_call(EV_EXTRA_BUTTON_PRESSED, xpp, item);
+        /* We hold a simple string just to know that we have a change */
+        properties->result = cl_string_create("changed");
+    }
 
-                break;
-
-#ifdef ALTERNATIVE_DIALOG
-            case DLG_EXIT_TIMEOUT:
-                loop = false;
-                break;
-#endif
-
-            case DLG_EXIT_ESC:
-                /* Don't let the user close the dialog */
-                if (xante_runtime_esc_key(xpp))
-                    break;
-
-            case DLG_EXIT_CANCEL:
-                loop = false;
-                break;
-
-            case DLG_EXIT_HELP:
-                dialog_vars.help_button = 0;
-                xante_dlg_messagebox(xpp, XANTE_MSGBOX_INFO, cl_tr("Help"), "%s",
-                                     cl_string_valueof(item->descriptive_help));
-
-                dialog_vars.help_button = 1;
-                break;
-        }
-    } while (loop);
-
-    UNINIT_PROPERTIES(properties);
-
-    ret.selected_button = ret_dialog;
-    ret.updated_value = deleted;
-
-    return ret;
+    return ret_dialog;
 }
 

@@ -269,23 +269,6 @@ int idigits(int n)
 }
 
 /**
- * @name equals
- * @brief Compares two strings.
- *
- * @param [in] a: The first string.
- * @param [in] b: The second string.
- *
- * @return Returns true if \a a and \a b are equals or false otherwise.
- */
-bool equals(const char *a, const char *b)
-{
-    if (!strcmp(a, b))
-        return true;
-
-    return false;
-}
-
-/**
  * @name file_exists
  * @brief Checks if a specific file exists.
  *
