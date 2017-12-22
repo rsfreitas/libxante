@@ -30,193 +30,257 @@ struct dialog_function_events {
     enum xante_ui_dialog    type;
     int                     (*run)(struct ui_properties *);
     bool                    (*validate_result)(struct ui_properties *);
+    bool                    (*value_changed)(struct ui_properties *);
+    void                    (*update_value)(struct ui_properties *);
 };
 
 static struct dialog_function_events __dialog_function_events[] = {
     {
         .type = XANTE_UI_DIALOG_UNKNOWN,
         .run = NULL,
+        .value_changed = NULL,
+        .update_value = NULL,
         .validate_result = NULL
     },
 
     {
         .type = XANTE_UI_DIALOG_MENU,
         .run = NULL,
+        .value_changed = NULL,
+        .update_value = NULL,
         .validate_result = NULL
     },
 
     {
         .type = XANTE_UI_DIALOG_INPUT_INT,
         .run = input,
-        .validate_result = input_validate_result
+        .validate_result = input_validate_result,
+        .value_changed = input_value_changed,
+        .update_value = input_update_value,
     },
 
     {
         .type = XANTE_UI_DIALOG_INPUT_FLOAT,
         .run = input,
+        .value_changed = input_value_changed,
+        .update_value = input_update_value,
         .validate_result = input_validate_result
     },
 
     {
         .type = XANTE_UI_DIALOG_INPUT_DATE,
         .run = input,
+        .value_changed = input_value_changed,
+        .update_value = input_update_value,
         .validate_result = input_validate_result
     },
 
     {
         .type = XANTE_UI_DIALOG_INPUT_STRING,
         .run = input,
+        .value_changed = input_value_changed,
+        .update_value = input_update_value,
         .validate_result = input_validate_result
     },
 
     {
         .type = XANTE_UI_DIALOG_INPUT_PASSWD,
         .run = input,
+        .value_changed = input_value_changed,
+        .update_value = input_update_value,
         .validate_result = input_validate_result
     },
 
     {
         .type = XANTE_UI_DIALOG_INPUT_TIME,
         .run = input,
+        .value_changed = input_value_changed,
+        .update_value = input_update_value,
         .validate_result = input_validate_result
     },
 
     {
         .type = XANTE_UI_DIALOG_CALENDAR,
         .run = calendar,
-        .validate_result = calendar_validate_result
+        .value_changed = calendar_value_changed,
+        .update_value = calendar_update_value,
+        .validate_result = NULL
     },
 
     {
         .type = XANTE_UI_DIALOG_TIMEBOX,
         .run = timebox,
-        .validate_result = timebox_validate_result
+        .value_changed = timebox_value_changed,
+        .update_value = timebox_update_value,
+        .validate_result = NULL
     },
 
     {
         .type = XANTE_UI_DIALOG_RADIO_CHECKLIST,
         .run = checklist,
+        .value_changed = checklist_value_changed,
+        .update_value = checklist_update_value,
         .validate_result = checklist_validate_result
     },
 
     {
         .type = XANTE_UI_DIALOG_CHECKLIST,
         .run = checklist,
+        .value_changed = checklist_value_changed,
+        .update_value = checklist_update_value,
         .validate_result = checklist_validate_result
     },
 
     {
         .type = XANTE_UI_DIALOG_YES_NO,
         .run = yesno,
+        .value_changed = yesno_value_changed,
+        .update_value = yesno_update_value,
         .validate_result = yesno_validate_result
     },
 
     {
         .type = XANTE_UI_DIALOG_DYNAMIC_MENU,
         .run = NULL,
+        .value_changed = NULL,
+        .update_value = NULL,
         .validate_result = NULL
     },
 
     {
         .type = XANTE_UI_DIALOG_DELETE_DYNAMIC_MENU_ITEM,
         .run = delete_dm,
-        .validate_result = delete_dm_validate_result
+        .value_changed = delete_dm_value_changed,
+        .update_value = NULL,
+        .validate_result = NULL
     },
 
     {
         .type = XANTE_UI_DIALOG_ADD_DYNAMIC_MENU_ITEM,
         .run = add_dm,
-        .validate_result = add_dm_validate_result
+        .value_changed = add_dm_value_changed,
+        .update_value = NULL,
+        .validate_result = NULL
     },
 
     {
         .type = XANTE_UI_DIALOG_CUSTOM,
         .run = NULL,
+        .value_changed = NULL,
+        .update_value = NULL,
         .validate_result = NULL
     },
 
     {
         .type = XANTE_UI_DIALOG_PROGRESS,
         .run = progress,
+        .value_changed = NULL,
+        .update_value = NULL,
         .validate_result = NULL
     },
 
     {
         .type = XANTE_UI_DIALOG_SPINNER_SYNC,
         .run = sync_dialog,
+        .value_changed = NULL,
+        .update_value = NULL,
         .validate_result = NULL
     },
 
     {
         .type = XANTE_UI_DIALOG_DOTS_SYNC,
         .run = sync_dialog,
+        .value_changed = NULL,
+        .update_value = NULL,
         .validate_result = NULL
     },
 
     {
         .type = XANTE_UI_DIALOG_RANGE,
         .run = input,
+        .value_changed = input_value_changed,
+        .update_value = input_update_value,
         .validate_result = input_validate_result
     },
 
     {
         .type = XANTE_UI_DIALOG_FILE_SELECT,
         .run = fselect,
-        .validate_result = NULL
+        .value_changed = fselect_value_changed,
+        .update_value = fselect_update_value,
+        .validate_result = fselect_validate_result
     },
 
     {
         .type = XANTE_UI_DIALOG_DIR_SELECT,
         .run = fselect,
+        .value_changed = fselect_value_changed,
+        .update_value = fselect_update_value,
         .validate_result = fselect_validate_result
     },
 
     {
         .type = XANTE_UI_DIALOG_FILE_VIEW,
         .run = file_view,
+        .value_changed = NULL,
+        .update_value = NULL,
         .validate_result = NULL
     },
 
     {
         .type = XANTE_UI_DIALOG_TAILBOX,
         .run = tailbox,
+        .value_changed = NULL,
+        .update_value = NULL,
         .validate_result = NULL
     },
 
     {
         .type = XANTE_UI_DIALOG_SCROLLTEXT,
         .run = scrolltext,
+        .value_changed = NULL,
+        .update_value = NULL,
         .validate_result = NULL
     },
 
     {
         .type = XANTE_UI_DIALOG_UPDATE_OBJECT,
         .run = update_object,
+        .value_changed = NULL,
+        .update_value = NULL,
         .validate_result = NULL
     },
 
     {
         .type = XANTE_UI_DIALOG_INPUTSCROLL,
         .run = input,
+        .value_changed = input_value_changed,
+        .update_value = input_update_value,
         .validate_result = input_validate_result
     },
 
     {
         .type = XANTE_UI_DIALOG_MIXEDFORM,
         .run = mixedform,
-        .validate_result = mixedform_validate_result
+        .value_changed = mixedform_value_changed,
+        .update_value = NULL,
+        .validate_result = NULL
     },
 
     {
         .type = XANTE_UI_DIALOG_BUILDLIST,
         .run = buildlist,
-        .validate_result = buildlist_validate_result
+        .value_changed = buildlist_value_changed,
+        .update_value = NULL,
+        .validate_result = NULL
     },
 
     {
         .type = XANTE_UI_DIALOG_SPREADSHEET,
         .run = spreadsheet,
-        .validate_result = spreadsheet_validate_result
+        .value_changed = spreadsheet_value_changed,
+        .update_value = NULL,
+        .validate_result = NULL
     }
 };
 
@@ -355,13 +419,13 @@ void properties_uninit(ui_properties_t *properties)
         cl_string_unref(properties->column_title);
 
     if (properties->change_item_name != NULL)
-        cl_string_valueof(properties->change_item_name);
+        cl_string_unref(properties->change_item_name);
 
     if (properties->change_old_value != NULL)
-        cl_string_valueof(properties->change_old_value);
+        cl_string_unref(properties->change_old_value);
 
     if (properties->change_new_value != NULL)
-        cl_string_valueof(properties->change_new_value);
+        cl_string_unref(properties->change_new_value);
 
     if (properties->sheet != NULL)
         spreadsheet_st_destroy(properties->sheet);

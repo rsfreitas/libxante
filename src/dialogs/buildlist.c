@@ -124,7 +124,7 @@ static cl_string_t *get_current_result(const ui_properties_t *properties)
  *
  */
 
-bool buildlist_validate_result(ui_properties_t *properties)
+bool buildlist_value_changed(ui_properties_t *properties)
 {
     struct xante_item *item = properties->item;
     cl_string_t *old_value = NULL;

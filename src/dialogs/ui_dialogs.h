@@ -115,38 +115,48 @@ typedef struct ui_properties {
     DIALOG_LISTITEM     *litems;    /** buildlist, checklist, dm_delete, menu */
     DIALOG_FORMITEM     *fitems;    /** mixedform */
 
-    /* Required events */
+    /* Dialog functions to run it */
     int                 (*run)(struct ui_properties *);
     bool                (*validate_result)(struct ui_properties *);
+    bool                (*value_changed)(struct ui_properties *);
+    void                (*update_value)(struct ui_properties *);
 } ui_properties_t;
 
 /* yesno */
 int yesno(ui_properties_t *properties);
 bool yesno_validate_result(ui_properties_t *properties);
+bool yesno_value_changed(ui_properties_t *properties);
+void yesno_update_value(ui_properties_t *properties);
 
 /* calendar */
 int calendar(ui_properties_t *properties);
-bool calendar_validate_result(ui_properties_t *properties);
+bool calendar_value_changed(ui_properties_t *properties);
+void calendar_update_value(ui_properties_t *properties);
 
 /* timebox */
 int timebox(ui_properties_t *properties);
-bool timebox_validate_result(ui_properties_t *properties);
+bool timebox_value_changed(ui_properties_t *properties);
+void timebox_update_value(ui_properties_t *properties);
 
 /* checklist */
 int checklist(ui_properties_t *properties);
 bool checklist_validate_result(ui_properties_t *properties);
+bool checklist_value_changed(ui_properties_t *properties);
+void checklist_update_value(ui_properties_t *properties);
 
 /* input */
 int input(ui_properties_t *properties);
 bool input_validate_result(ui_properties_t *properties);
+bool input_value_changed(ui_properties_t *properties);
+void input_update_value(ui_properties_t *properties);
 
 /* dm_delete */
 int delete_dm(ui_properties_t *properties);
-bool delete_dm_validate_result(ui_properties_t *properties);
+bool delete_dm_value_changed(ui_properties_t *properties);
 
 /* dm_add */
 int add_dm(ui_properties_t *properties);
-bool add_dm_validate_result(ui_properties_t *properties);
+bool add_dm_value_changed(ui_properties_t *properties);
 
 /* progress */
 int progress(ui_properties_t *properties);
@@ -157,6 +167,8 @@ int sync_dialog(ui_properties_t *properties);
 /* file-select */
 int fselect(ui_properties_t *properties);
 bool fselect_validate_result(ui_properties_t *properties);
+bool fselect_value_changed(ui_properties_t *properties);
+void fselect_update_value(ui_properties_t *properties);
 
 /* file-view */
 int file_view(ui_properties_t *properties);
@@ -172,13 +184,13 @@ int update_object(ui_properties_t *properties);
 
 /* mixedform */
 int mixedform(ui_properties_t *properties);
-bool mixedform_validate_result(ui_properties_t *properties);
+bool mixedform_value_changed(ui_properties_t *properties);
 void ui_save_mixedform_item(struct xante_app *xpp, struct xante_item *item);
 void ui_mixedform_load_and_set_value(struct xante_item *item, cl_cfg_file_t *cfg);
 
 /* buildlist */
 int buildlist(ui_properties_t *properties);
-bool buildlist_validate_result(ui_properties_t *properties);
+bool buildlist_value_changed(ui_properties_t *properties);
 
 /* spreadsheet */
 void ui_spreadsheet_load_and_set_value(struct xante_item *item,
@@ -186,7 +198,7 @@ void ui_spreadsheet_load_and_set_value(struct xante_item *item,
 
 void ui_save_spreadsheet_item(struct xante_app *xpp, struct xante_item *item);
 int spreadsheet(ui_properties_t *properties);
-bool spreadsheet_validate_result(ui_properties_t *properties);
+bool spreadsheet_value_changed(ui_properties_t *properties);
 
 #endif
 

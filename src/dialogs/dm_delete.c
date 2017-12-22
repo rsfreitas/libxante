@@ -75,14 +75,21 @@ static int prepare_content(const struct xante_menu *dm_menu,
 static void build_properties(const struct xante_menu *dm_menu,
     ui_properties_t *properties)
 {
+    struct xante_item *item = properties->item;
+    int prompt = 0;
+
+    if (item->options != NULL)
+        prompt = 1;
+
     properties->number_of_items = cl_stringlist_size(dm_menu->items);
     properties->width = (dm_menu->geometry.width == 0) ? DEFAULT_WIDTH
                                                        : dm_menu->geometry.width;
 
-    properties->height = (dm_menu->geometry.height == 0) ? DEFAULT_HEIGHT
-                                                         : dm_menu->geometry.height;
+    properties->displayed_items = dlgx_get_dlg_items(properties->number_of_items);
+    properties->height = (dm_menu->geometry.height == 0)
+                ? (properties->displayed_items + DIALOG_HEIGHT_WITHOUT_TEXT + prompt)
+                : dm_menu->geometry.height;
 
-    properties->displayed_items = properties->height - DIALOG_HEIGHT_WITHOUT_TEXT;
 
     /* Creates the UI content */
     prepare_content(dm_menu, properties);
@@ -94,7 +101,7 @@ static void build_properties(const struct xante_menu *dm_menu,
  *
  */
 
-bool delete_dm_validate_result(ui_properties_t *properties)
+bool delete_dm_value_changed(ui_properties_t *properties)
 {
     if (NULL == properties->result)
         return false;

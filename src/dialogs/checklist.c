@@ -85,10 +85,11 @@ static void build_properties(const struct xante_item *item,
     properties->width = (item->geometry.width == 0) ? DEFAULT_WIDTH
                                                     : item->geometry.width;
 
-    properties->height = (item->geometry.height == 0) ? DEFAULT_HEIGHT
-                                                      : item->geometry.height;
-
-    properties->displayed_items = properties->height - DIALOG_HEIGHT_WITHOUT_TEXT;
+    /* The +1 on height is because we have a prompt inside the dialog */
+    properties->displayed_items = dlgx_get_dlg_items(properties->number_of_items);
+    properties->height = (item->geometry.height == 0)
+                ? (properties->displayed_items + DIALOG_HEIGHT_WITHOUT_TEXT + 1)
+                : item->geometry.height;
 
     /* Creates the UI content */
     prepare_content(item, properties);
@@ -194,6 +195,14 @@ static void update_item_brief(int current_index, void *a)
 
 bool checklist_validate_result(ui_properties_t *properties)
 {
+    if (NULL == properties->result)
+        return false;
+
+    return true;
+}
+
+bool checklist_value_changed(ui_properties_t *properties)
+{
     struct xante_item *item = properties->item;
     int current_value, selected_items;
     bool changed = false;
@@ -204,15 +213,23 @@ bool checklist_validate_result(ui_properties_t *properties)
     if (current_value != selected_items) {
         add_internal_change(properties, current_value, selected_items);
         changed = true;
-
-        /* Updates item value */
-        if (NULL == item->value)
-            item->value = cl_object_create(CL_INT, selected_items);
-        else
-            cl_object_set(item->value, selected_items);
     }
 
     return changed;
+}
+
+void checklist_update_value(ui_properties_t *properties)
+{
+    struct xante_item *item = properties->item;
+    int selected_items;
+
+    selected_items = cl_string_to_int(properties->result);
+
+    /* Updates item value */
+    if (NULL == item->value)
+        item->value = cl_object_create(CL_INT, selected_items);
+    else
+        cl_object_set(item->value, selected_items);
 }
 
 /**

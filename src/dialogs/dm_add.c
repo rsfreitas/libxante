@@ -46,7 +46,7 @@ static bool is_input_valid(const char *input)
  *
  */
 
-bool add_dm_validate_result(ui_properties_t *properties)
+bool add_dm_value_changed(ui_properties_t *properties)
 {
     if (NULL == properties->result)
         return false;

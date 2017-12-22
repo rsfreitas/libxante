@@ -66,6 +66,9 @@ static void load_buildlist_item(struct xante_item *item,
     key = cl_cfg_entry(cfg, cl_string_valueof(item->config_block),
                        cl_string_valueof(item->config_item));
 
+    if (NULL == key)
+        return;
+
     value = cl_cfg_entry_value(key);
     s = CL_OBJECT_AS_CSTRING(value);
     item->selected_items = cl_string_split(s, ",");

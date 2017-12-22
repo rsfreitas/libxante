@@ -79,48 +79,6 @@ static int get_input_length(const struct xante_item *item)
     return l;
 }
 
-static bool item_value_has_changed(ui_properties_t *properties)
-{
-    struct xante_item *item = properties->item;
-    bool changed = false;
-    cl_object_t *value = NULL;
-    cl_string_t *result = NULL, *str_value = NULL;
-
-    value = item_value(item);
-    str_value = cl_object_to_cstring(value);
-
-    if (cl_string_cmp(str_value, properties->result) != 0) {
-        changed = true;
-
-        /* Set up details to save inside the internal changes list */
-        properties->change_item_name = cl_string_ref(item->name);
-        properties->change_old_value = cl_string_ref(str_value);
-        properties->change_new_value = cl_string_ref(properties->result);
-
-        /* Updates item value */
-        if (item->value != NULL)
-            cl_object_unref(item->value);
-
-        result = cl_string_dup(properties->result);
-
-        if ((item->dialog_type == XANTE_UI_DIALOG_INPUT_INT) ||
-            (item->dialog_type == XANTE_UI_DIALOG_RANGE))
-        {
-            item->value = cl_object_create(CL_INT, cl_string_to_int(result));
-        } else if (item->dialog_type == XANTE_UI_DIALOG_INPUT_FLOAT)
-            item->value = cl_object_create(CL_FLOAT, cl_string_to_float(result));
-        else
-            item->value = cl_object_from_cstring(result);
-
-        cl_string_unref(result);
-    }
-
-    if (str_value != NULL)
-        cl_string_unref(str_value);
-
-    return changed;
-}
-
 static bool validate_date(struct xante_app *xpp, cl_string_t *value)
 {
     cl_stringlist_t *date = NULL;
@@ -233,59 +191,6 @@ static bool validate_time(struct xante_app *xpp, cl_string_t *value)
     return true;
 }
 
-static bool validate_input_value(struct xante_app *xpp, struct xante_item *item,
-    const char *new_value)
-{
-    bool valid = false;
-    cl_object_t *value = NULL;
-    cl_string_t *str_value = NULL;
-
-    str_value = cl_string_create("%s", new_value);
-    value = cl_object_from_cstring(str_value);
-
-    if (item->dialog_type == XANTE_UI_DIALOG_INPUT_INT) {
-        valid = cl_spec_validate(item->value_spec, item_value(item), false,
-                                 CL_VALIDATE_RANGE, CL_OBJECT_AS_INT(value));
-
-        if (valid == false) {
-            xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
-                                 cl_tr("The entered value must be between "
-                                       "'%d' and '%d'!"),
-                                 CL_OBJECT_AS_INT(item->min),
-                                 CL_OBJECT_AS_INT(item->max));
-        }
-    } else if (item->dialog_type == XANTE_UI_DIALOG_INPUT_FLOAT) {
-        valid = cl_spec_validate(item->value_spec, item_value(item), false,
-                                 CL_VALIDATE_RANGE,
-                                 cl_string_to_float(str_value));
-
-        if (valid == false) {
-            xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
-                                 cl_tr("The entered value must be between "
-                                       "'%.2f' and '%.2f'!"),
-                                 CL_OBJECT_AS_FLOAT(item->min),
-                                 CL_OBJECT_AS_FLOAT(item->max));
-        }
-    } else if (item->dialog_type == XANTE_UI_DIALOG_INPUT_DATE) {
-        valid = validate_date(xpp, str_value);
-    } else if (item->dialog_type == XANTE_UI_DIALOG_INPUT_TIME) {
-        valid = validate_time(xpp, str_value);
-    } else {
-        /*
-         * XXX: A XANTE_UI_DIALOG_INPUT_PASSWD and XANTE_UI_DIALOG_RANGE must
-         *      be validated inside the module, in a EV_ITEM_VALUE_CONFIRM
-         *      event, which is called before this function.
-         *
-         *      We don't hold any information inside the JTF to compare them and
-         *      just return true to keep running.
-         */
-
-        valid = true;
-    }
-
-    return valid;
-}
-
 static int inputscroll_len(const char *value, void *data)
 {
     struct inputscroll_data *input = (struct inputscroll_data *)data;
@@ -311,18 +216,21 @@ static int dlgx_passwd(struct xante_item *item, char *input,
 {
     DIALOG_FORMITEM fitem;
     int ret_dialog = DLG_EXIT_OK, form_height = 1, selected = -1;
+    char password[MAX_INPUT_VALUE] = {0};
 
     dialog_vars.insecure = 1;
+    strcpy(password, input);
 
+    memset(&fitem, 0, sizeof(DIALOG_FORMITEM));
     fitem.type = 1;
     fitem.text_free = 0;
-    fitem.text = input;
-    fitem.text_len = strlen(input);
+    fitem.text = password;
+    fitem.text_len = strlen(password);
     fitem.text_y = 0;
     fitem.text_x = 0;
 
     if (properties->editable_value == true)
-        fitem.text_flen = 53;
+        fitem.text_flen = properties->width - 6;
     else
         fitem.text_flen = 0;
 
@@ -379,20 +287,106 @@ static void build_properties(ui_properties_t *properties, char *input,
 
 bool input_validate_result(ui_properties_t *properties)
 {
-    struct xante_app *xpp = properties->xpp;
     struct xante_item *item = properties->item;
-    bool value_changed = false;
+    struct xante_app *xpp = properties->xpp;
+    bool valid = false;
+    cl_object_t *value = NULL;
+    cl_string_t *str_value = NULL;
 
-    if (validate_input_value(xpp, item,
-                             cl_string_valueof(properties->result)) == false)
-    {
-        return false;
+    str_value = cl_string_ref(properties->result);
+    value = cl_object_from_cstring(properties->result);
+
+    if (item->dialog_type == XANTE_UI_DIALOG_INPUT_INT) {
+        valid = cl_spec_validate(item->value_spec, item_value(item), false,
+                                 CL_VALIDATE_RANGE, CL_OBJECT_AS_INT(value));
+
+        if (valid == false) {
+            xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
+                                 cl_tr("The entered value must be between "
+                                       "'%d' and '%d'!"),
+                                 CL_OBJECT_AS_INT(item->min),
+                                 CL_OBJECT_AS_INT(item->max));
+        }
+    } else if (item->dialog_type == XANTE_UI_DIALOG_INPUT_FLOAT) {
+        valid = cl_spec_validate(item->value_spec, item_value(item), false,
+                                 CL_VALIDATE_RANGE,
+                                 cl_string_to_float(str_value));
+
+        if (valid == false) {
+            xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
+                                 cl_tr("The entered value must be between "
+                                       "'%.2f' and '%.2f'!"),
+                                 CL_OBJECT_AS_FLOAT(item->min),
+                                 CL_OBJECT_AS_FLOAT(item->max));
+        }
+    } else if (item->dialog_type == XANTE_UI_DIALOG_INPUT_DATE) {
+        valid = validate_date(xpp, str_value);
+    } else if (item->dialog_type == XANTE_UI_DIALOG_INPUT_TIME) {
+        valid = validate_time(xpp, str_value);
+    } else {
+        /*
+         * XXX: A XANTE_UI_DIALOG_INPUT_PASSWD and XANTE_UI_DIALOG_RANGE must
+         *      be validated inside the module, in a EV_ITEM_VALUE_CONFIRM
+         *      event, which is called before this function.
+         *
+         *      We don't hold any information inside the JTF to compare them and
+         *      just return true to keep running.
+         */
+
+        valid = true;
     }
 
-    if (item_value_has_changed(properties) == true)
-        value_changed = true;
+    cl_string_unref(str_value);
 
-    return value_changed;
+    return valid;
+}
+
+bool input_value_changed(ui_properties_t *properties)
+{
+    struct xante_item *item = properties->item;
+    bool changed = false;
+    cl_object_t *value = NULL;
+    cl_string_t *str_value = NULL;
+
+    value = item_value(item);
+    str_value = cl_object_to_cstring(value);
+
+    if (cl_string_cmp(str_value, properties->result) != 0) {
+        changed = true;
+
+        /* Set up details to save inside the internal changes list */
+        properties->change_item_name = cl_string_ref(item->name);
+        properties->change_old_value = cl_string_ref(str_value);
+        properties->change_new_value = cl_string_ref(properties->result);
+    }
+
+    if (str_value != NULL)
+        cl_string_unref(str_value);
+
+    return changed;
+}
+
+void input_update_value(ui_properties_t *properties)
+{
+    struct xante_item *item = properties->item;
+    cl_string_t *result = NULL;
+
+    /* Updates item value */
+    if (item->value != NULL)
+        cl_object_unref(item->value);
+
+    result = cl_string_dup(properties->result);
+
+    if ((item->dialog_type == XANTE_UI_DIALOG_INPUT_INT) ||
+        (item->dialog_type == XANTE_UI_DIALOG_RANGE))
+    {
+        item->value = cl_object_create(CL_INT, cl_string_to_int(result));
+    } else if (item->dialog_type == XANTE_UI_DIALOG_INPUT_FLOAT)
+        item->value = cl_object_create(CL_FLOAT, cl_string_to_float(result));
+    else
+        item->value = cl_object_from_cstring(result);
+
+    cl_string_unref(result);
 }
 
 /**
@@ -402,7 +396,6 @@ bool input_validate_result(ui_properties_t *properties)
  * @return Returns a ui_return_t value indicating if the item's value has been
  *         changed (true) or not (false) with the dialog selected button.
  */
-//ui_return_t ui_input(ui_properties_t *properties)
 int input(ui_properties_t *properties)
 {
     int ret_dialog = DLG_EXIT_CANCEL;
@@ -419,7 +412,7 @@ int input(ui_properties_t *properties)
 
     if (item->dialog_type == XANTE_UI_DIALOG_INPUT_PASSWD) {
         ret_dialog = dlgx_passwd(item, input_result, sizeof(input_result),
-                                properties);
+                                 properties);
     } else if (item->dialog_type == XANTE_UI_DIALOG_RANGE) {
         dlgx_free_input();
         ret_dialog = dialog_rangebox(cl_string_valueof(item->name),

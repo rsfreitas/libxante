@@ -350,7 +350,7 @@ static void load_configured_column(struct xante_item *item,
     }
 
     set_cell_value(cell, cl_string_valueof(tmp));
-    cl_string_valueof(tmp);
+    cl_string_unref(tmp);
     cl_object_unref(value);
     cl_string_unref(config_item);
     cl_string_unref(config_block);
@@ -516,7 +516,7 @@ static bool compare_rows(struct xante_app *xpp, struct xante_item *item,
  *
  */
 
-bool spreadsheet_validate_result(ui_properties_t *properties)
+bool spreadsheet_value_changed(ui_properties_t *properties)
 {
     struct xante_item *item = properties->item;
     bool changed = false;

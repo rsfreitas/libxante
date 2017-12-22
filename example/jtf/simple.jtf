@@ -321,7 +321,7 @@
                                 }
                             },
                             "buttons": {
-                                "extra": false
+                                "extra": true
                             }
                         },
                         "events": {

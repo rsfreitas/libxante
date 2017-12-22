@@ -47,7 +47,7 @@ static int count_lines_by_maximum_column(const char *text, int width)
             ((l % (width - DIALOG_COLUMNS)) ? 1 : 0);
 }
 
-static int get_longest_line_length(cl_string_t *text)
+static int get_longest_line_length(const cl_string_t *text)
 {
     cl_string_t *s = cl_string_dup(text), *tmp;
     cl_stringlist_t *list = NULL;
@@ -424,6 +424,9 @@ void dlgx_uninit(void)
     int dialog_return_value = DLG_EXIT_OK;
 
     dlg_killall_bg(&dialog_return_value);
+
+    if (dialog_vars.ok_label != NULL)
+        free(dialog_vars.ok_label);
 
     if (dialog_state.screen_initialized) {
         (void)refresh();

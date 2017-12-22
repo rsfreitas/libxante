@@ -54,6 +54,6 @@ int scrolltext(ui_properties_t *properties)
     return dlgx_scrolltext(properties->width, properties->height,
                            cl_string_valueof(item->name),
                            cl_string_valueof(item->options),
-                           properties->text);
+                           cl_string_valueof(properties->text));
 }
 

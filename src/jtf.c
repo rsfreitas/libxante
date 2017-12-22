@@ -77,7 +77,7 @@
 #define BRIEF               "brief"
 #define REFERENCED_MENU     "referenced_menu"
 #define BLOCKED_KEYS        "blocked_keys"
-#define ESC_KEY             "esc_key"
+#define ESC_KEY             "esc"
 #define SUSPEND_KEY         "suspend_key"
 #define STOP_KEY            "stop_key"
 #define GEOMETRY            "geometry"
@@ -662,9 +662,13 @@ static int adjusts_item_info(struct xante_item *item)
         (item->dialog_type != XANTE_UI_DIALOG_MIXEDFORM) &&
         (item->dialog_type != XANTE_UI_DIALOG_SPREADSHEET))
     {
+        if (item->__helper.options != NULL) {
+            item->options = cl_string_ref(item->__helper.options);
+            cl_string_unref(item->__helper.options);
+        }
+    } else
         if (item->__helper.options != NULL)
-            item->options = item->__helper.options;
-    }
+            cl_string_unref(item->__helper.options);
 
     if (item_has_ranges(item->dialog_type) == true)
         item->value_spec = cl_spec_create(CL_READABLE | CL_WRITABLE, item->min,

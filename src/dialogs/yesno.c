@@ -36,16 +36,24 @@
 
 bool yesno_validate_result(ui_properties_t *properties)
 {
-    struct xante_item *item = properties->item;
-    int choice;
-
     if (NULL == properties->result)
         return false;
 
-    /* Set up details to save inside the internal changes list */
-    properties->change_item_name = cl_string_ref(item->name);
-    properties->change_old_value = cl_string_create("%s", dialog_vars.no_label);
-    properties->change_new_value = cl_string_create("%s", dialog_vars.yes_label);
+    return true;
+}
+
+bool yesno_value_changed(ui_properties_t *properties)
+{
+    if (NULL == properties->result)
+        return false;
+
+    return true;
+}
+
+void yesno_update_value(ui_properties_t *properties)
+{
+    struct xante_item *item = properties->item;
+    int choice;
 
     /* Updates the item value */
     choice = cl_string_to_int(properties->result);
@@ -54,8 +62,6 @@ bool yesno_validate_result(ui_properties_t *properties)
         item->value = cl_object_create(CL_INT, choice);
     else
         cl_object_set(item->value, choice);
-
-    return true;
 }
 
 /**
@@ -101,8 +107,17 @@ int yesno(ui_properties_t *properties)
                               cl_string_valueof(properties->text),
                               properties->height, properties->width);
 
-    if (ret_dialog == DLG_EXIT_OK)
+    if (ret_dialog == DLG_EXIT_OK) {
         properties->result = cl_string_create("%d", !choice);
+
+        /* Set up details to save inside the internal changes list */
+        properties->change_item_name = cl_string_ref(item->name);
+        properties->change_old_value = cl_string_create("%s",
+                                                        dialog_vars.no_label);
+
+        properties->change_new_value = cl_string_create("%s",
+                                                        dialog_vars.yes_label);
+    }
 
     return ret_dialog;
 }

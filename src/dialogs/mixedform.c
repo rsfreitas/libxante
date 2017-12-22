@@ -361,7 +361,7 @@ static void save_mixedform_field(struct xante_app *xpp, cl_json_t *field)
  *
  */
 
-bool mixedform_validate_result(ui_properties_t *properties)
+bool mixedform_value_changed(ui_properties_t *properties)
 {
     struct xante_item *item = properties->item;
     bool changed = false;

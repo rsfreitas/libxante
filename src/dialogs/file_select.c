@@ -38,6 +38,14 @@
 
 bool fselect_validate_result(ui_properties_t *properties)
 {
+    if (NULL == properties->result)
+        return false;
+
+    return true;
+}
+
+bool fselect_value_changed(ui_properties_t *properties)
+{
     struct xante_item *item = properties->item;
     bool changed = false;
     cl_string_t *current_path = NULL;
@@ -54,17 +62,22 @@ bool fselect_validate_result(ui_properties_t *properties)
         properties->change_item_name = cl_string_ref(item->name);
         properties->change_old_value = cl_string_ref(current_path);
         properties->change_new_value = cl_string_ref(properties->result);
-
-        if (item->value != NULL)
-            cl_object_unref(item->value);
-
-        item->value = cl_object_from_cstring(properties->result);
     }
 
     if (current_path != NULL)
         cl_string_unref(current_path);
 
     return changed;
+}
+
+void fselect_update_value(ui_properties_t *properties)
+{
+    struct xante_item *item = properties->item;
+
+    if (item->value != NULL)
+        cl_object_unref(item->value);
+
+    item->value = cl_object_from_cstring(properties->result);
 }
 
 int fselect(ui_properties_t *properties)

@@ -36,7 +36,8 @@ struct list_data {
     int item_size;
 };
 
-static const char *ui_statusbar_text(enum xante_ui_dialog type, bool editable);
+static char *ui_statusbar_text(enum xante_ui_dialog type, bool editable,
+                               bool block_esc_key);
 
 /*
  *
@@ -203,10 +204,10 @@ static void build_properties(const struct xante_menu *menu,
     properties->width = (menu->geometry.width == 0) ? calc_menu_width(menu)
                                                     : menu->geometry.width;
 
-    properties->height = (menu->geometry.height == 0) ? DEFAULT_HEIGHT
-                                                      : menu->geometry.height;
-
-    properties->displayed_items = properties->height - DIALOG_HEIGHT_WITHOUT_TEXT;
+    properties->displayed_items = dlgx_get_dlg_items(properties->number_of_items);
+    properties->height = (menu->geometry.height == 0)
+                ? (properties->displayed_items + DIALOG_HEIGHT_WITHOUT_TEXT)
+                : menu->geometry.height;
 
     /* Creates the UI content */
     prepare_content(menu, properties);
@@ -216,6 +217,7 @@ static void prepare_dialog_look(struct xante_app *xpp,
     const char *cancel_label)
 {
     int timeout = -1;
+    char *text = NULL;
 
     dlgx_set_backtitle(xpp);
     dlgx_update_ok_button_label(NULL);
@@ -225,7 +227,11 @@ static void prepare_dialog_look(struct xante_app *xpp,
     if (timeout > 0)
         dialog_vars.timeout_secs = timeout;
 
-    dlgx_put_statusbar(ui_statusbar_text(XANTE_UI_DIALOG_MENU, true));
+    text = ui_statusbar_text(XANTE_UI_DIALOG_MENU, true,
+                             xante_runtime_esc_key(xpp));
+
+    dlgx_put_statusbar(text);
+    free(text);
 }
 
 static void release_dialog_labels(void)
@@ -315,15 +321,39 @@ static void update_menu_item_brief(int current_item, void *a)
 }
 #endif
 
-static const char *ui_statusbar_text(enum xante_ui_dialog type, bool editable)
+static char *ui_statusbar_text(enum xante_ui_dialog type, bool editable,
+    bool block_esc_key)
 {
+    cl_string_t *t = NULL;
     char *text = NULL;
+
+    if (block_esc_key)
+        t = cl_string_create_empty(0);
+    else {
+        switch (type) {
+            case XANTE_UI_DIALOG_MENU:
+            case XANTE_UI_DIALOG_DYNAMIC_MENU:
+                t = cl_string_create("%s", cl_tr("[ESC] Exit "));
+                break;
+
+            case XANTE_UI_DIALOG_PROGRESS:
+            case XANTE_UI_DIALOG_SPINNER_SYNC:
+            case XANTE_UI_DIALOG_DOTS_SYNC:
+                t = cl_string_create_empty(0);
+                break;
+
+            default:
+                t = cl_string_create("%s", cl_tr("[ESC] Cancel "));
+                break;
+        }
+    }
 
     switch (type) {
         case XANTE_UI_DIALOG_MENU:
         case XANTE_UI_DIALOG_DYNAMIC_MENU:
-            text = cl_tr("[ESC] Exit [Enter] Select an option [Up/Down] Move "
-                         "[TAB/Left/Right] Choose button");
+            cl_string_cat(t, "%s",
+                          cl_tr("[Enter] Select an option "
+                                "[Up/Down] Move [TAB/Left/Right] Choose button"));
 
             break;
 
@@ -334,127 +364,151 @@ static const char *ui_statusbar_text(enum xante_ui_dialog type, bool editable)
         case XANTE_UI_DIALOG_INPUT_TIME:
         case XANTE_UI_DIALOG_INPUT_PASSWD:
         case XANTE_UI_DIALOG_INPUTSCROLL:
-            text = cl_tr("[ESC] Cancel [Enter] Confirm a selected option "
-                         "[Tab/Left/Right] Select an option");
+            cl_string_cat(t, "%s",
+                          cl_tr("[Enter] Confirm a selected option "
+                                "[Tab/Left/Right] Select an option"));
 
             break;
 
         case XANTE_UI_DIALOG_RANGE:
-            text = cl_tr("[ESC] Cancel [Enter] Confirm selected option "
-                         "[Tab/Left/Right] Select an option "
-                         "[Up/Down] Adjust range value");
+            cl_string_cat(t, "%s",
+                          cl_tr("[Enter] Confirm selected option "
+                                "[Tab/Left/Right] Select an option "
+                                "[Up/Down] Adjust range value"));
 
             break;
 
         case XANTE_UI_DIALOG_CALENDAR:
             if (editable) {
-                text = cl_tr("[ESC] Cancel [TAB] Select an option "
-                             "[Enter] Confirm [Arrows] Change selected date");
+                cl_string_cat(t, "%s",
+                              cl_tr("[TAB] Select an option "
+                                    "[Enter] Confirm [Arrows] Change selected date"));
             } else
-                text = cl_tr("[ESC] Cancel [TAB] Select an option "
-                             "[Enter] Confirm");
+                cl_string_cat(t, "%s",
+                              cl_tr("[TAB] Select an option "
+                                    "[Enter] Confirm"));
 
             break;
 
         case XANTE_UI_DIALOG_TIMEBOX:
             if (editable) {
-                text = cl_tr("[ESC] Cancel [TAB] Select an option "
-                             "[Enter] Confirm [Arrows] Change selected time");
+                cl_string_cat(t, "%s",
+                              cl_tr("[TAB] Select an option "
+                                    "[Enter] Confirm [Arrows] Change selected time"));
             } else
-                text = cl_tr("[ESC] Cancel [TAB/Arrows] Select an option "
-                             "[Enter] Confirm");
+                cl_string_cat(t, "%s",
+                              cl_tr("[TAB/Arrows] Select an option "
+                                    "[Enter] Confirm"));
 
             break;
 
         case XANTE_UI_DIALOG_RADIO_CHECKLIST:
         case XANTE_UI_DIALOG_CHECKLIST:
             if (editable) {
-                text = cl_tr("[ESC] Cancel [Enter] Confirm a selection "
-                             "[Up/Down] Move [TAB/Left/Right] Choose option "
-                             "[Spacebar] Select option");
+                cl_string_cat(t, "%s",
+                              cl_tr("[Enter] Confirm a selection "
+                                    "[Up/Down] Move [TAB/Left/Right] Choose option "
+                                    "[Spacebar] Select option"));
             } else
-                text = cl_tr("[ESC] Cancel [Enter] Confirm a selection "
-                             "[Up/Down] Move [TAB/Left/Right] Choose option");
+                cl_string_cat(t, "%s",
+                              cl_tr("[Enter] Confirm a selection "
+                                    "[Up/Down] Move [TAB/Left/Right] Choose option"));
 
             break;
 
         case XANTE_UI_DIALOG_YES_NO:
-            text = cl_tr("[ESC] Cancel [Enter] Confirm a selected option "
-                         "[Tab/Left/Right] Select an option");
+            cl_string_cat(t, "%s",
+                          cl_tr("[Enter] Confirm a selected option "
+                                "[Tab/Left/Right] Select an option"));
 
             break;
 
         case XANTE_UI_DIALOG_DELETE_DYNAMIC_MENU_ITEM:
             if (editable) {
-                text = cl_tr("[ESC] Cancel [Enter] Confirm a selection "
-                             "[Up/Down] Move [TAB/Left/Right] Choose option "
-                             "[Spacebar] Select option");
+                cl_string_cat(t, "%s",
+                              cl_tr("[Enter] Confirm a selection "
+                                    "[Up/Down] Move [TAB/Left/Right] Choose option "
+                                    "[Spacebar] Select option"));
             } else
-                text = cl_tr("[ESC] Cancel [Enter] Confirm a selection "
-                             "[Up/Down] Move [TAB/Left/Right] Choose option");
+                cl_string_cat(t, "%s",
+                              cl_tr("[Enter] Confirm a selection "
+                                    "[Up/Down] Move [TAB/Left/Right] Choose option"));
 
             break;
 
         case XANTE_UI_DIALOG_ADD_DYNAMIC_MENU_ITEM:
-            text = cl_tr("[ESC] Cancel [Enter] Confirm a selected option "
-                         "[Tab/Left/Right] Select an option");
+            cl_string_cat(t, "%s",
+                          cl_tr("[Enter] Confirm a selected option "
+                                "[Tab/Left/Right] Select an option"));
 
             break;
 
         case XANTE_UI_DIALOG_PROGRESS:
-            text = cl_tr("Wait the process to end.");
+            cl_string_cat(t, "%s", cl_tr("Wait the process to end."));
             break;
 
         case XANTE_UI_DIALOG_SPINNER_SYNC:
         case XANTE_UI_DIALOG_DOTS_SYNC:
-            text = cl_tr("A task is running in background. Wait for it to end.");
+            cl_string_cat(t, "%s",
+                          cl_tr("A task is running in background. Wait for it to end."));
+
             break;
 
         case XANTE_UI_DIALOG_FILE_SELECT:
         case XANTE_UI_DIALOG_DIR_SELECT:
-            text = cl_tr("[ESC] Cancel [Enter] Confirm selected button "
-                         "[Tab/Arrows] Navigate through options "
-                         "[Spacebar] Select dir/file");
+            cl_string_cat(t, "%s",
+                          cl_tr("[Enter] Confirm selected button "
+                                "[Tab/Arrows] Navigate through options "
+                                "[Spacebar] Select dir/file"));
 
             break;
 
         case XANTE_UI_DIALOG_FILE_VIEW:
-            text = cl_tr("[ESC] Cancel [Enter] Confirm selected button "
-                         "[Up/Down/Pg Up/Pg Down] Navigate through the text");
+            cl_string_cat(t, "%s",
+                          cl_tr("[Enter] Confirm selected button "
+                                "[Up/Down/Pg Up/Pg Down] Navigate through the text"));
 
             break;
 
         case XANTE_UI_DIALOG_TAILBOX:
-            text = cl_tr("[ESC] Cancel [Enter] Confirm selected button");
+            cl_string_cat(t, "%s",
+                          cl_tr("[Enter] Confirm selected button"));
+
             break;
 
         case XANTE_UI_DIALOG_SCROLLTEXT:
-            text = cl_tr("[ESC] Cancel [Enter] Confirm selected button "
-                         "[Up/Down/Pg Up/Pg Down] Navigate through the text");
+            cl_string_cat(t, "%s",
+                          cl_tr("[Enter] Confirm selected button "
+                                "[Up/Down/Pg Up/Pg Down] Navigate through the text"));
 
             break;
 
         case XANTE_UI_DIALOG_UPDATE_OBJECT:
-            text = cl_tr("[ESC] Cancel [Enter] Confirm a selected option");
+            cl_string_cat(t, "%s",
+                          cl_tr("[Enter] Confirm a selected option"));
+
             break;
 
         case XANTE_UI_DIALOG_MIXEDFORM:
-            text = cl_tr("[ESC] Cancel [Enter] Confirm a selected option "
-                         "[Tab/Left/Right] Select an option "
-                         "[Up/Down] Select field");
+            cl_string_cat(t, "%s",
+                          cl_tr("[Enter] Confirm a selected option "
+                                "[Tab/Left/Right] Select an option "
+                                "[Up/Down] Select field"));
 
             break;
 
         case XANTE_UI_DIALOG_BUILDLIST:
-            text = cl_tr("[ESC] Cancel [Enter] Confirm button "
-                         "[Spacebar] Move option between lists "
-                         "[^] Select origin [$] Select destination");
+            cl_string_cat(t, "%s",
+                          cl_tr("[Enter] Confirm button "
+                                "[Spacebar] Move option between lists "
+                                "[^] Select origin [$] Select destination"));
 
             break;
 
         case XANTE_UI_DIALOG_SPREADSHEET:
-            text = cl_tr("[ESC] Cancel [Enter] Confirm selected button "
-                         "[Tab] Navigate through cells");
+            cl_string_cat(t, "%s",
+                          cl_tr("[Enter] Confirm selected button "
+                                "[Tab] Navigate through cells"));
 
             break;
 
@@ -462,19 +516,25 @@ static const char *ui_statusbar_text(enum xante_ui_dialog type, bool editable)
             break;
     }
 
+    text = strdup(cl_string_valueof(t));
+    cl_string_unref(t);
+
     return text;
 }
 
 static void start_dialog_internals(struct xante_app *xpp,
     struct xante_item *item, bool edit_value)
 {
-    const char *text = NULL;
+    char *text = NULL;
 
     dlgx_set_backtitle(xpp);
-    text = ui_statusbar_text(item->dialog_type, edit_value);
+    text = ui_statusbar_text(item->dialog_type, edit_value,
+                             xante_runtime_esc_key(xpp));
 
-    if (text != NULL)
+    if (text != NULL) {
         dlgx_put_statusbar(text);
+        free(text);
+    }
 
     if ((item->dialog_type == XANTE_UI_DIALOG_CALENDAR) ||
         (item->dialog_type == XANTE_UI_DIALOG_TIMEBOX) ||
@@ -495,8 +555,13 @@ static void start_dialog_internals(struct xante_app *xpp,
         dlgx_update_help_button_label(item->label.help);
     }
 
-    /* Enables the extra button */
-    if (item->button.extra) {
+    /*
+     * Enables the extra button and does not allow this button on
+     * yesno dialogs.
+     */
+    if (item->button.extra &&
+        (item->dialog_type != XANTE_UI_DIALOG_YES_NO))
+    {
         dlgx_update_extra_button_label(item->label.extra);
         dialog_vars.extra_button = 1;
     }
@@ -544,10 +609,12 @@ static bool should_call_manager(struct xante_item *item)
  * The selected button validation is made here, so the dialog functions don't
  * need to do it.
  *
- * There are at least two functions that a implemented dialog must provide to
- * be correctly executed and validated here:
+ * There are a couple of functions that a dialog must provide to be correctly
+ * executed and validated here:
  *
- * 1 - The function which calls the dialog. It must have the following
+ * * run:
+ *
+ *     The function which calls the dialog. It must have the following
  *     prototype:
  *
  *     int foo_dialog(ui_properties_t *properties);
@@ -563,7 +630,9 @@ static bool should_call_manager(struct xante_item *item)
  *     when a new value is entered, the properties->call_item_value_confirm
  *     must be changed to true.
  *
- * 2 - A function to validate the properties->result value and case it is
+ * * validate_result:
+ *
+ *     A function to validate the properties->result value and case it is
  *     valid, update the item's internal value. The function must have the
  *     following prototype:
  *
@@ -583,6 +652,9 @@ static bool should_call_manager(struct xante_item *item)
  *
  *     - properties->change_new_value: the item's new value.
  *
+ * * value_changed:
+ *
+ * * update_value:
  */
 static ui_return_t run_selected_dialog(ui_properties_t *properties)
 {
@@ -631,6 +703,10 @@ static ui_return_t run_selected_dialog(ui_properties_t *properties)
                     break;
                 }
 
+                if (properties->validate_result != NULL)
+                    if ((properties->validate_result)(properties) == false)
+                        break;
+
                 /*
                  * If an item requires a call to this event it must turn this
                  * flag on.
@@ -643,16 +719,10 @@ static ui_return_t run_selected_dialog(ui_properties_t *properties)
                     }
                 }
 
-                if ((properties->validate_result != NULL) &&
-                    properties->editable_value)
-                {
-                    value_changed = (properties->validate_result)(properties);
+                if (properties->value_changed != NULL)
+                    value_changed = (properties->value_changed)(properties);
 
-                    if (value_changed)
-                        loop = false;
-                } else
-                    loop = false;
-
+                loop = false;
                 break;
 
             case DLG_EXIT_EXTRA:
@@ -752,6 +822,9 @@ int manager_run_dialog(struct xante_app *xpp, cl_list_t *menus,
      * list.
      */
     if (ret_dialog.updated_value == true) {
+        if (properties.update_value != NULL)
+            (properties.update_value)(&properties);
+
         /*
          * If the selected item is one of these types we already saved their
          * changes and don't need to do it again or they type don't hold an

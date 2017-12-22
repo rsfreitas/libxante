@@ -75,7 +75,7 @@ static void split_item_value(struct xante_item *item, int *day, int *month,
  *
  */
 
-bool calendar_validate_result(ui_properties_t *properties)
+bool calendar_value_changed(ui_properties_t *properties)
 {
     struct xante_item *item = properties->item;
     cl_object_t *value = NULL;
@@ -92,18 +92,23 @@ bool calendar_validate_result(ui_properties_t *properties)
         properties->change_item_name = cl_string_ref(item->name);
         properties->change_old_value = cl_string_ref(str_value);
         properties->change_new_value = cl_string_ref(properties->result);
-
-        /* Updates item value */
-        if (NULL == item->value)
-            item->value = cl_object_from_cstring(properties->result);
-        else
-            cl_object_set(item->value, cl_string_valueof(properties->result));
     }
 
     if (str_value != NULL)
         cl_string_unref(str_value);
 
     return changed;
+}
+
+void calendar_update_value(ui_properties_t *properties)
+{
+    struct xante_item *item = properties->item;
+
+    /* Updates item value */
+    if (NULL == item->value)
+        item->value = cl_object_from_cstring(properties->result);
+    else
+        cl_object_set(item->value, cl_string_valueof(properties->result));
 }
 
 /**
