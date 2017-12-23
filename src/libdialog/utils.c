@@ -28,7 +28,7 @@
 #include "libxante.h"
 
 #define DEFAULT_STATUSBAR_TEXT              \
-    "[ESC] Cancel [Enter] Confirm a selected option [Tab/Left/Right] Select an option"
+    cl_tr("[Enter] Confirm a selected option [Tab/Left/Right] Select an option")
 
 /*
  *
@@ -616,7 +616,7 @@ bool dlgx_question(struct xante_app *xpp, const char *title, const char *msg,
     const char *button1_label, const char *button2_label,
     const char *statusbar_text)
 {
-    cl_string_t *form_msg = NULL;
+    cl_string_t *form_msg = NULL, *default_text = NULL;
     int width = 45, lines = 0;
     bool ret_value = false, dialog_needs_closing = false;
 
@@ -632,8 +632,18 @@ bool dlgx_question(struct xante_app *xpp, const char *title, const char *msg,
     lines = dlgx_count_lines(msg, width);
     form_msg = cl_string_create("%s", msg);
     cl_string_rplchr(form_msg, XANTE_STR_LINE_BREAK, '\n');
-    dlgx_put_statusbar((statusbar_text != NULL) ? statusbar_text
-                                                : DEFAULT_STATUSBAR_TEXT);
+
+    if (statusbar_text != NULL)
+        dlgx_put_statusbar(statusbar_text);
+    else {
+        if (xante_runtime_esc_key(xpp))
+            default_text = cl_string_create("%s", cl_tr("[ESC] Cancel"));
+        else
+            default_text = cl_string_create_empty(0);
+
+        cl_string_cat(default_text, "%s", DEFAULT_STATUSBAR_TEXT);
+        dlgx_put_statusbar(cl_string_valueof(default_text));
+    }
 
     if (dialog_yesno(title, cl_string_valueof(form_msg), lines,
                                               width) == DLG_EXIT_OK)
@@ -648,6 +658,9 @@ bool dlgx_question(struct xante_app *xpp, const char *title, const char *msg,
     }
 
     cl_string_unref(form_msg);
+
+    if (default_text != NULL)
+        cl_string_unref(default_text);
 
     return ret_value;
 }
