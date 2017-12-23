@@ -127,7 +127,7 @@ int xante_runtime_set_force_config_file_saving(xante_t *xpp, bool force_saving);
 bool xante_runtime_force_config_file_saving(const xante_t *xpp);
 
 /**
- * @name xante_runtime_set_ui_dialog_timeout
+ * @name xante_runtime_set_inactivity_timeout
  * @brief Sets the timeout to close an UI dialog.
  *
  * @param [in] xpp: The library main object.
@@ -135,17 +135,17 @@ bool xante_runtime_force_config_file_saving(const xante_t *xpp);
  *
  * @return On success returns 0 or -1 otherwise.
  */
-int xante_runtime_set_ui_dialog_timeout(xante_t *xpp, unsigned int timeout);
+int xante_runtime_set_inactivity_timeout(xante_t *xpp, unsigned int timeout);
 
 /**
- * @name xante_runtime_ui_dialog_timeout
+ * @name xante_runtime_inactivity_timeout
  * @brief Retrives the current timeout to close a dialog.
  *
  * @param [in] xpp: The library main object.
  *
  * @return On success returns the timeout or -1 otherwise.
  */
-int xante_runtime_ui_dialog_timeout(const xante_t *xpp);
+int xante_runtime_inactivity_timeout(const xante_t *xpp);
 
 /**
  * @name xante_runtime_set_show_config_saving_question.

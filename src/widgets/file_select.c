@@ -36,32 +36,32 @@
  *
  */
 
-bool fselect_validate_result(ui_properties_t *properties)
+bool fselect_validate_result(session_t *session)
 {
-    if (NULL == properties->result)
+    if (NULL == session->result)
         return false;
 
     return true;
 }
 
-bool fselect_value_changed(ui_properties_t *properties)
+bool fselect_value_changed(session_t *session)
 {
-    struct xante_item *item = properties->item;
+    struct xante_item *item = session->item;
     bool changed = false;
     cl_string_t *current_path = NULL;
 
-    if (NULL == properties->result)
+    if (NULL == session->result)
         return false;
 
     current_path = cl_object_to_cstring(item_value(item));
 
-    if (cl_string_cmp(properties->result, current_path) != 0) {
+    if (cl_string_cmp(session->result, current_path) != 0) {
         changed = true;
 
         /* Set up details to save inside the internal changes list */
-        properties->change_item_name = cl_string_ref(item->name);
-        properties->change_old_value = cl_string_ref(current_path);
-        properties->change_new_value = cl_string_ref(properties->result);
+        session->change_item_name = cl_string_ref(item->name);
+        session->change_old_value = cl_string_ref(current_path);
+        session->change_new_value = cl_string_ref(session->result);
     }
 
     if (current_path != NULL)
@@ -70,41 +70,41 @@ bool fselect_value_changed(ui_properties_t *properties)
     return changed;
 }
 
-void fselect_update_value(ui_properties_t *properties)
+void fselect_update_value(session_t *session)
 {
-    struct xante_item *item = properties->item;
+    struct xante_item *item = session->item;
 
     if (item->value != NULL)
         cl_object_unref(item->value);
 
-    item->value = cl_object_from_cstring(properties->result);
+    item->value = cl_object_from_cstring(session->result);
 }
 
-int fselect(ui_properties_t *properties)
+int fselect(session_t *session)
 {
-    struct xante_item *item = properties->item;
+    struct xante_item *item = session->item;
     int ret_dialog = DLG_EXIT_OK;
     char *chosen_path = NULL;
 
-    properties->width = (item->geometry.width == 0) ? DIALOG_WIDTH
+    session->width = (item->geometry.width == 0) ? DIALOG_WIDTH
                                                    : item->geometry.width;
 
-    properties->height = (item->geometry.height == 0) ? DIALOG_HEIGHT
+    session->height = (item->geometry.height == 0) ? DIALOG_HEIGHT
                                                      : item->geometry.height;
 
-    if (item->dialog_type == XANTE_UI_DIALOG_FILE_SELECT) {
+    if (item->widget_type == XANTE_WIDGET_FILE_SELECT) {
         ret_dialog = dialog_fselect(cl_string_valueof(item->name),
                                     cl_string_valueof(item->options),
-                                    properties->height, properties->width);
+                                    session->height, session->width);
     } else {
         ret_dialog = dialog_dselect(cl_string_valueof(item->name),
                                     cl_string_valueof(item->options),
-                                    properties->height, properties->width);
+                                    session->height, session->width);
     }
 
     if (ret_dialog == DLG_EXIT_OK) {
         chosen_path = dlgx_get_input_result();
-        properties->result = cl_string_create("%s", chosen_path);
+        session->result = cl_string_create("%s", chosen_path);
         free(chosen_path);
     }
 

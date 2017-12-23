@@ -112,12 +112,13 @@ int dlgx_text_init(WINDOW *window, struct dlgx_text *dlg_text, int height,
 void dlgx_text_destroy(struct dlgx_text *dlg_text);
 int dlgx_text_print(WINDOW *window, struct dlgx_text *dlg_text, int point);
 void dlgx_text_clear(WINDOW *window, struct dlgx_text *dlg_text);
+
 int dlgx_get_subtitle_lines(const char *s);
 int dlgx_cleanup_result(int code, WINDOW *dialog);
 void dlgx_put_statusbar(const char *text);
 void dlgx_put_item_brief(const char *brief);
 
-void dlgx_uninit(void);
+void dlgx_uninit(struct xante_app *xpp);
 void dlgx_init(bool temporarily);
 void dlgx_set_backtitle(struct xante_app *xpp);
 char *dlgx_get_item_value_as_text(const struct xante_item *item);
@@ -135,6 +136,10 @@ void dlgx_free_input(void);
 void dlgx_alloc_input(unsigned int bytes);
 char *dlgx_get_input_result(void);
 int dlgx_get_input_window_width(const struct xante_item *item);
+void dlgx_session_init(struct xante_app *xpp, const struct xante_item *item,
+                       bool edit_value);
+
+void dlgx_session_uninit(const struct xante_item *item);
 
 /* simple progress */
 int dlgx_simple_progress(const char *title, const char *cprompt, int height,

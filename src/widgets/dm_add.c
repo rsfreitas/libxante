@@ -46,27 +46,27 @@ static bool is_input_valid(const char *input)
  *
  */
 
-bool add_dm_value_changed(ui_properties_t *properties)
+bool add_dm_value_changed(session_t *session)
 {
-    if (NULL == properties->result)
+    if (NULL == session->result)
         return false;
 
     /* Set up details to save inside the internal changes list */
-    properties->change_item_name = cl_string_create("New dynamic menu entry");
-    properties->change_old_value = cl_string_create("EMPTY");
-    properties->change_new_value = cl_string_create("EMPTY");
+    session->change_item_name = cl_string_create("New dynamic menu entry");
+    session->change_old_value = cl_string_create("EMPTY");
+    session->change_new_value = cl_string_create("EMPTY");
 
     return true;
 }
 
-int add_dm(ui_properties_t *properties)
+int add_dm(session_t *session)
 {
-    struct xante_app *xpp = properties->xpp;
-    struct xante_item *item = properties->item;
+    struct xante_app *xpp = session->xpp;
+    struct xante_item *item = session->item;
     int ret_dialog = DLG_EXIT_OK;
     char input[MAX_INPUT_VALUE] = {0};
 
-    if (properties->editable_value == false) {
+    if (session->editable_value == false) {
         xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
                              cl_tr("Cannot add item!"));
 
@@ -74,20 +74,20 @@ int add_dm(ui_properties_t *properties)
     }
 
     /* Adjusts window width and height */
-    properties->text = cl_string_dup(item->options);
-    cl_string_rplchr(properties->text, XANTE_STR_LINE_BREAK, '\n');
-    properties->width = (item->geometry.width == 0)
+    session->text = cl_string_dup(item->options);
+    cl_string_rplchr(session->text, XANTE_STR_LINE_BREAK, '\n');
+    session->width = (item->geometry.width == 0)
                             ? dlgx_get_input_window_width(item)
                             : item->geometry.width;
 
-    properties->height = (item->geometry.height == 0)
-                         ? dlgx_count_lines_by_delimiters(cl_string_valueof(properties->text)) +
+    session->height = (item->geometry.height == 0)
+                         ? dlgx_count_lines_by_delimiters(cl_string_valueof(session->text)) +
                            FORM_HEIGHT_WITHOUT_TEXT
                          : item->geometry.height;
 
-    ret_dialog = dlgx_inputbox(properties->width, properties->height,
+    ret_dialog = dlgx_inputbox(session->width, session->height,
                                cl_string_valueof(item->name),
-                               cl_string_valueof(properties->text), NULL,
+                               cl_string_valueof(session->text), NULL,
                                NULL, sizeof(input) - 1, input,
                                true, NULL, NULL, NULL);
 
@@ -100,7 +100,7 @@ int add_dm(ui_properties_t *properties)
              */
             if (dm_insert(xpp, item, input)) {
                 /* We hold a simple string just to know that we have a change */
-                properties->result = cl_string_create("changed");
+                session->result = cl_string_create("changed");
             }
         } else
             xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),

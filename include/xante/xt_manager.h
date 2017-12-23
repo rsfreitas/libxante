@@ -34,13 +34,41 @@
 #else
 
 /* Internal library declarations */
-int manager_run(struct xante_app *xpp, cl_list_t *menus,
-                const struct xante_menu *menu, const char *cancel_label);
-
-int manager_run_dialog(struct xante_app *xpp, cl_list_t *menus,
-                       struct xante_item *selected_item);
+void ui_data_init(struct xante_app *xpp);
+void ui_data_uninit(struct xante_app *xpp);
 
 #endif
+
+/**
+ * @name xante_manager_run
+ * @brief Puts a libxante application to run.
+ *
+ * It is important to remember that once we call this function we only leave it
+ * when closing the application from the UI.
+ *
+ * @param [in,out] xpp: The library main object.
+ *
+ * @return Return an exit value indicating what happened inside (see enum
+ *         xante_return_value declaration).
+ */
+enum xante_return_value xante_manager_run(xante_t *xpp);
+
+/**
+ * @name xante_manager_single_run
+ * @brief Puts a MJTF dialog to run.
+ *
+ * This function may be called inside a module event function and also, this
+ * event may run with an already running application or not. This way this
+ * function is in charge to know this situation and does all required
+ * initialization to run the dialog.
+ *
+ * @param [in,out] xpp: The library main object.
+ * @param [in] raw_mjtf: The MJTF dialog in a string format.
+ *
+ * @return Return an exit value indicating what happened inside (see enum
+ *         xante_return_value declaration).
+ */
+enum xante_return_value xante_manager_single_run(xante_t *xpp, const char *raw_mjtf);
 
 #endif
 

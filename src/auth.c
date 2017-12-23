@@ -961,7 +961,7 @@ int auth_init(struct xante_app *xpp, bool use_auth, enum xante_session session,
     }
 
     if ((NULL == username) || (NULL == password)) {
-        /* TODO: Makes the user enter user/pass inside a dialog form */
+        /* TODO: Makes the user enter user/pass inside a gadget */
     }
 
     xpp->auth.db = NULL;
@@ -1114,7 +1114,7 @@ bool auth_check_item_access(const struct xante_app *xpp,
 
 /*
  *
- * External API
+ * API
  *
  */
 

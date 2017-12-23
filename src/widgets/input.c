@@ -49,26 +49,26 @@ static int get_input_length(const struct xante_item *item)
 {
     int l = 0;
 
-    switch (item->dialog_type) {
-        case XANTE_UI_DIALOG_INPUT_INT:
+    switch (item->widget_type) {
+        case XANTE_WIDGET_INPUT_INT:
             l = idigits(INT_MAX - 1);
             break;
 
-        case XANTE_UI_DIALOG_INPUT_FLOAT:
+        case XANTE_WIDGET_INPUT_FLOAT:
             l = idigits((int)FLT_MAX - 1);
             break;
 
-        case XANTE_UI_DIALOG_INPUT_DATE:
+        case XANTE_WIDGET_INPUT_DATE:
             l = DATE_MAX_INPUT_LENGTH;
             break;
 
-        case XANTE_UI_DIALOG_INPUT_TIME:
+        case XANTE_WIDGET_INPUT_TIME:
             l = TIME_MAX_INPUT_LENGTH;
             break;
 
-        case XANTE_UI_DIALOG_INPUT_STRING:
-        case XANTE_UI_DIALOG_INPUT_PASSWD:
-        case XANTE_UI_DIALOG_INPUTSCROLL:
+        case XANTE_WIDGET_INPUT_STRING:
+        case XANTE_WIDGET_INPUT_PASSWD:
+        case XANTE_WIDGET_INPUTSCROLL:
             l = item->string_length;
             break;
 
@@ -212,7 +212,7 @@ static int inputscroll_check(const char *value, void *data)
 }
 
 static int dlgx_passwd(struct xante_item *item, char *input,
-    unsigned int input_length, const ui_properties_t *properties)
+    unsigned int input_length, const session_t *session)
 {
     DIALOG_FORMITEM fitem;
     int ret_dialog = DLG_EXIT_OK, form_height = 1, selected = -1;
@@ -229,15 +229,15 @@ static int dlgx_passwd(struct xante_item *item, char *input,
     fitem.text_y = 0;
     fitem.text_x = 0;
 
-    if (properties->editable_value == true)
-        fitem.text_flen = properties->width - 6;
+    if (session->editable_value == true)
+        fitem.text_flen = session->width - 6;
     else
         fitem.text_flen = 0;
 
     fitem.text_ilen = MAX_INPUT_VALUE;
     ret_dialog = dlg_form(cl_string_valueof(item->name),
-                          cl_string_valueof(properties->text),
-                          properties->height, properties->width,
+                          cl_string_valueof(session->text),
+                          session->height, session->width,
                           form_height, 1, &fitem, &selected);
 
     if (ret_dialog == DLG_EXIT_OK)
@@ -248,10 +248,10 @@ static int dlgx_passwd(struct xante_item *item, char *input,
     return ret_dialog;
 }
 
-static void build_properties(ui_properties_t *properties, char *input,
+static void build_session(session_t *session, char *input,
     int max_input)
 {
-    struct xante_item *item = properties->item;
+    struct xante_item *item = session->item;
     cl_string_t *value = NULL;
 
     /* Adjusts current content */
@@ -261,21 +261,21 @@ static void build_properties(ui_properties_t *properties, char *input,
 
     cl_string_unref(value);
 
-    /* UI properties */
-    properties->text = cl_string_dup(item->options);
-    cl_string_rplchr(properties->text, XANTE_STR_LINE_BREAK, '\n');
-    properties->width = (item->geometry.width == 0) ? dlgx_get_input_window_width(item)
+    /* UI session */
+    session->text = cl_string_dup(item->options);
+    cl_string_rplchr(session->text, XANTE_STR_LINE_BREAK, '\n');
+    session->width = (item->geometry.width == 0) ? dlgx_get_input_window_width(item)
                                                     : item->geometry.width;
 
-    properties->height = (item->geometry.height == 0)
-                        ? dlgx_count_lines_by_delimiters(cl_string_valueof(properties->text)) +
-                            ((item->dialog_type == XANTE_UI_DIALOG_RANGE) ? 2 : FORM_HEIGHT_WITHOUT_TEXT)
+    session->height = (item->geometry.height == 0)
+                        ? dlgx_count_lines_by_delimiters(cl_string_valueof(session->text)) +
+                            ((item->widget_type == XANTE_WIDGET_RANGE) ? 2 : FORM_HEIGHT_WITHOUT_TEXT)
                         : item->geometry.height;
 
-    if (item->dialog_type == XANTE_UI_DIALOG_INPUTSCROLL) {
+    if (item->widget_type == XANTE_WIDGET_INPUTSCROLL) {
         /* Gets the scrollable text to be displayed from a module function */
-        properties->scroll_content = event_item_custom_data(properties->xpp,
-                                                            properties->item);
+        session->scroll_content = event_item_custom_data(session->xpp,
+                                                            session->item);
     }
 }
 
@@ -285,18 +285,18 @@ static void build_properties(ui_properties_t *properties, char *input,
  *
  */
 
-bool input_validate_result(ui_properties_t *properties)
+bool input_validate_result(session_t *session)
 {
-    struct xante_item *item = properties->item;
-    struct xante_app *xpp = properties->xpp;
+    struct xante_item *item = session->item;
+    struct xante_app *xpp = session->xpp;
     bool valid = false;
     cl_object_t *value = NULL;
     cl_string_t *str_value = NULL;
 
-    str_value = cl_string_ref(properties->result);
-    value = cl_object_from_cstring(properties->result);
+    str_value = cl_string_ref(session->result);
+    value = cl_object_from_cstring(session->result);
 
-    if (item->dialog_type == XANTE_UI_DIALOG_INPUT_INT) {
+    if (item->widget_type == XANTE_WIDGET_INPUT_INT) {
         valid = cl_spec_validate(item->value_spec, item_value(item), false,
                                  CL_VALIDATE_RANGE, CL_OBJECT_AS_INT(value));
 
@@ -307,7 +307,7 @@ bool input_validate_result(ui_properties_t *properties)
                                  CL_OBJECT_AS_INT(item->min),
                                  CL_OBJECT_AS_INT(item->max));
         }
-    } else if (item->dialog_type == XANTE_UI_DIALOG_INPUT_FLOAT) {
+    } else if (item->widget_type == XANTE_WIDGET_INPUT_FLOAT) {
         valid = cl_spec_validate(item->value_spec, item_value(item), false,
                                  CL_VALIDATE_RANGE,
                                  cl_string_to_float(str_value));
@@ -319,13 +319,13 @@ bool input_validate_result(ui_properties_t *properties)
                                  CL_OBJECT_AS_FLOAT(item->min),
                                  CL_OBJECT_AS_FLOAT(item->max));
         }
-    } else if (item->dialog_type == XANTE_UI_DIALOG_INPUT_DATE) {
+    } else if (item->widget_type == XANTE_WIDGET_INPUT_DATE) {
         valid = validate_date(xpp, str_value);
-    } else if (item->dialog_type == XANTE_UI_DIALOG_INPUT_TIME) {
+    } else if (item->widget_type == XANTE_WIDGET_INPUT_TIME) {
         valid = validate_time(xpp, str_value);
     } else {
         /*
-         * XXX: A XANTE_UI_DIALOG_INPUT_PASSWD and XANTE_UI_DIALOG_RANGE must
+         * XXX: A XANTE_WIDGET_INPUT_PASSWD and XANTE_WIDGET_RANGE must
          *      be validated inside the module, in a EV_ITEM_VALUE_CONFIRM
          *      event, which is called before this function.
          *
@@ -341,9 +341,9 @@ bool input_validate_result(ui_properties_t *properties)
     return valid;
 }
 
-bool input_value_changed(ui_properties_t *properties)
+bool input_value_changed(session_t *session)
 {
-    struct xante_item *item = properties->item;
+    struct xante_item *item = session->item;
     bool changed = false;
     cl_object_t *value = NULL;
     cl_string_t *str_value = NULL;
@@ -351,13 +351,13 @@ bool input_value_changed(ui_properties_t *properties)
     value = item_value(item);
     str_value = cl_object_to_cstring(value);
 
-    if (cl_string_cmp(str_value, properties->result) != 0) {
+    if (cl_string_cmp(str_value, session->result) != 0) {
         changed = true;
 
         /* Set up details to save inside the internal changes list */
-        properties->change_item_name = cl_string_ref(item->name);
-        properties->change_old_value = cl_string_ref(str_value);
-        properties->change_new_value = cl_string_ref(properties->result);
+        session->change_item_name = cl_string_ref(item->name);
+        session->change_old_value = cl_string_ref(str_value);
+        session->change_new_value = cl_string_ref(session->result);
     }
 
     if (str_value != NULL)
@@ -366,22 +366,22 @@ bool input_value_changed(ui_properties_t *properties)
     return changed;
 }
 
-void input_update_value(ui_properties_t *properties)
+void input_update_value(session_t *session)
 {
-    struct xante_item *item = properties->item;
+    struct xante_item *item = session->item;
     cl_string_t *result = NULL;
 
     /* Updates item value */
     if (item->value != NULL)
         cl_object_unref(item->value);
 
-    result = cl_string_dup(properties->result);
+    result = cl_string_dup(session->result);
 
-    if ((item->dialog_type == XANTE_UI_DIALOG_INPUT_INT) ||
-        (item->dialog_type == XANTE_UI_DIALOG_RANGE))
+    if ((item->widget_type == XANTE_WIDGET_INPUT_INT) ||
+        (item->widget_type == XANTE_WIDGET_RANGE))
     {
         item->value = cl_object_create(CL_INT, cl_string_to_int(result));
-    } else if (item->dialog_type == XANTE_UI_DIALOG_INPUT_FLOAT)
+    } else if (item->widget_type == XANTE_WIDGET_INPUT_FLOAT)
         item->value = cl_object_create(CL_FLOAT, cl_string_to_float(result));
     else
         item->value = cl_object_from_cstring(result);
@@ -396,29 +396,29 @@ void input_update_value(ui_properties_t *properties)
  * @return Returns a ui_return_t value indicating if the item's value has been
  *         changed (true) or not (false) with the dialog selected button.
  */
-int input(ui_properties_t *properties)
+int input(session_t *session)
 {
     int ret_dialog = DLG_EXIT_CANCEL;
     char input_result[MAX_INPUT_VALUE] = {0}, *range_value = NULL;
-    struct xante_app *xpp = properties->xpp;
-    struct xante_item *item = properties->item;
+    struct xante_app *xpp = session->xpp;
+    struct xante_item *item = session->item;
     struct inputscroll_data input_data = {
         .xpp = xpp,
         .item = item,
     };
 
-    /* Prepares dialog content and properties */
-    build_properties(properties, input_result, sizeof(input_result));
+    /* Prepares dialog content and session */
+    build_session(session, input_result, sizeof(input_result));
 
-    if (item->dialog_type == XANTE_UI_DIALOG_INPUT_PASSWD) {
+    if (item->widget_type == XANTE_WIDGET_INPUT_PASSWD) {
         ret_dialog = dlgx_passwd(item, input_result, sizeof(input_result),
-                                 properties);
-    } else if (item->dialog_type == XANTE_UI_DIALOG_RANGE) {
+                                 session);
+    } else if (item->widget_type == XANTE_WIDGET_RANGE) {
         dlgx_free_input();
         ret_dialog = dialog_rangebox(cl_string_valueof(item->name),
-                                     cl_string_valueof(properties->text),
-                                     properties->height,
-                                     properties->width,
+                                     cl_string_valueof(session->text),
+                                     session->height,
+                                     session->width,
                                      CL_OBJECT_AS_INT(item->min),
                                      CL_OBJECT_AS_INT(item->max),
                                      strtol(input_result, NULL, 10));
@@ -432,27 +432,27 @@ int input(ui_properties_t *properties)
                                                MAX_INPUT_VALUE));
 
         free(range_value);
-    } else if (item->dialog_type == XANTE_UI_DIALOG_INPUTSCROLL) {
-        ret_dialog = dlgx_inputbox(properties->width, 20,// height,
+    } else if (item->widget_type == XANTE_WIDGET_INPUTSCROLL) {
+        ret_dialog = dlgx_inputbox(session->width, 20,// height,
                                    cl_string_valueof(item->name),
-                                   cl_string_valueof(properties->text),
+                                   cl_string_valueof(session->text),
                                    cl_tr("Enter value:"),
-                                   properties->scroll_content,
+                                   session->scroll_content,
                                    get_input_length(item), input_result,
-                                   properties->editable_value,
+                                   session->editable_value,
                                    inputscroll_len, inputscroll_check,
                                    &input_data);
     } else {
-        ret_dialog = dlgx_inputbox(properties->width, properties->height,
+        ret_dialog = dlgx_inputbox(session->width, session->height,
                                    cl_string_valueof(item->name),
-                                   cl_string_valueof(properties->text), NULL,
+                                   cl_string_valueof(session->text), NULL,
                                    NULL, get_input_length(item), input_result,
-                                   properties->editable_value, NULL, NULL,
+                                   session->editable_value, NULL, NULL,
                                    NULL);
     }
 
-    if ((ret_dialog == DLG_EXIT_OK) && properties->editable_value)
-        properties->result = cl_string_create("%s", input_result);
+    if ((ret_dialog == DLG_EXIT_OK) && session->editable_value)
+        session->result = cl_string_create("%s", input_result);
 
     return ret_dialog;
 }

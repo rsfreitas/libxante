@@ -75,9 +75,9 @@ static void split_item_value(struct xante_item *item, int *hour, int *minutes,
  *
  */
 
-bool timebox_value_changed(ui_properties_t *properties)
+bool timebox_value_changed(session_t *session)
 {
-    struct xante_item *item = properties->item;
+    struct xante_item *item = session->item;
     cl_object_t *value = NULL;
     cl_string_t *str_value = NULL;
     bool changed = false;
@@ -85,13 +85,13 @@ bool timebox_value_changed(ui_properties_t *properties)
     value = item_value(item);
     str_value = cl_object_to_cstring(value);
 
-    if (cl_string_cmp(properties->result, str_value) != 0) {
+    if (cl_string_cmp(session->result, str_value) != 0) {
         changed = true;
 
         /* Set up details to save inside the internal changes list */
-        properties->change_item_name = cl_string_ref(item->name);
-        properties->change_old_value = cl_string_ref(str_value);
-        properties->change_new_value = cl_string_ref(properties->result);
+        session->change_item_name = cl_string_ref(item->name);
+        session->change_old_value = cl_string_ref(str_value);
+        session->change_new_value = cl_string_ref(session->result);
     }
 
     if (str_value != NULL)
@@ -100,15 +100,15 @@ bool timebox_value_changed(ui_properties_t *properties)
     return changed;
 }
 
-void timebox_update_value(ui_properties_t *properties)
+void timebox_update_value(session_t *session)
 {
-    struct xante_item *item = properties->item;
+    struct xante_item *item = session->item;
 
     /* Updates item value */
     if (NULL == item->value)
-        item->value = cl_object_from_cstring(properties->result);
+        item->value = cl_object_from_cstring(session->result);
     else
-        cl_object_set(item->value, cl_string_valueof(properties->result));
+        cl_object_set(item->value, cl_string_valueof(session->result));
 }
 
 /**
@@ -118,41 +118,41 @@ void timebox_update_value(ui_properties_t *properties)
  * @return Returns a ui_return_t value indicating if the item's value has been
  *         changed (true) or not (false) with the dialog selected button.
  */
-int timebox(ui_properties_t *properties)
+int timebox(session_t *session)
 {
-    struct xante_item *item = properties->item;
+    struct xante_item *item = session->item;
     int ret_dialog = DLG_EXIT_OK, hour = 0, minutes = 0, seconds = 0;
     char *result = NULL;
 
-    properties->width = (item->geometry.width == 0) ? DEFAULT_WIDTH
+    session->width = (item->geometry.width == 0) ? DEFAULT_WIDTH
                                                    : item->geometry.width;
 
-    properties->height = (item->geometry.height == 0) ? DEFAULT_HEIGHT
+    session->height = (item->geometry.height == 0) ? DEFAULT_HEIGHT
                                                      : item->geometry.height;
 
     /* Adjusts the dialog content using the item content */
     split_item_value(item, &hour, &minutes, &seconds);
 
     /* Adjusts the window message */
-    properties->text = cl_string_dup(item->options);
-    cl_string_rplchr(properties->text, XANTE_STR_LINE_BREAK, '\n');
+    session->text = cl_string_dup(item->options);
+    cl_string_rplchr(session->text, XANTE_STR_LINE_BREAK, '\n');
 
 #ifdef ALTERNATIVE_DIALOG
     ret_dialog = dialog_timebox(cl_string_valueof(item->name),
-                                cl_string_valueof(properties->text),
-                                properties->height, properties->width,
+                                cl_string_valueof(session->text),
+                                session->height, session->width,
                                 hour, minutes, seconds,
-                                properties->editable_value);
+                                session->editable_value);
 #else
     ret_dialog = dialog_timebox(cl_string_valueof(item->name),
-                                cl_string_valueof(properties->text),
-                                properties->height, properties->width,
+                                cl_string_valueof(session->text),
+                                session->height, session->width,
                                 hour, minutes, seconds);
 #endif
 
-    if ((ret_dialog == DLG_EXIT_OK) && properties->editable_value) {
+    if ((ret_dialog == DLG_EXIT_OK) && session->editable_value) {
         result = dlgx_get_input_result();
-        properties->result = cl_string_create("%s", result);
+        session->result = cl_string_create("%s", result);
         free(result);
     }
 

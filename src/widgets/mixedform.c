@@ -168,24 +168,24 @@ static int get_longest_element_name(const cl_json_t *fields, int total_fields)
     return max;
 }
 
-static int prepare_content(const cl_json_t *fields, ui_properties_t *properties)
+static int prepare_content(const cl_json_t *fields, session_t *session)
 {
     DIALOG_FORMITEM *item = NULL;
     int i;
     char fmt[8] = {0};
     cl_json_t *field;
 
-    properties->fitems = calloc(properties->number_of_items, sizeof(DIALOG_FORMITEM));
+    session->fitems = calloc(session->number_of_items, sizeof(DIALOG_FORMITEM));
 
-    if (NULL == properties->fitems) {
+    if (NULL == session->fitems) {
         errno_set(XANTE_ERROR_NO_MEMORY);
         return -1;
     }
 
-    sprintf(fmt, "%%-%ds:", properties->longest_field_name);
+    sprintf(fmt, "%%-%ds:", session->longest_field_name);
 
-        for (i = 0; i < properties->number_of_items; i++) {
-        item = &properties->fitems[i];
+        for (i = 0; i < session->number_of_items; i++) {
+        item = &session->fitems[i];
         field = cl_json_get_array_item(fields, i);
 
         asprintf(&item->name, fmt,
@@ -199,7 +199,7 @@ static int prepare_content(const cl_json_t *fields, ui_properties_t *properties)
 
         item->name_x = 0;
         item->name_y = i;
-        item->text_x = properties->longest_field_name + 2;
+        item->text_x = session->longest_field_name + 2;
         item->text_y = i;
 
         if (get_element_read_only(field))
@@ -218,24 +218,24 @@ static int prepare_content(const cl_json_t *fields, ui_properties_t *properties)
     return 0;
 }
 
-static void build_properties(const struct xante_item *item,
-    const cl_json_t *fields, ui_properties_t *properties)
+static void build_session(const struct xante_item *item,
+    const cl_json_t *fields, session_t *session)
 {
-    properties->width = (item->geometry.width == 0) ? DIALOG_WIDTH
+    session->width = (item->geometry.width == 0) ? DIALOG_WIDTH
                                                     : item->geometry.width;
 
-    properties->number_of_items = cl_json_get_array_size(fields);
-    properties->longest_field_name =
-        get_longest_element_name(fields, properties->number_of_items);
+    session->number_of_items = cl_json_get_array_size(fields);
+    session->longest_field_name =
+        get_longest_element_name(fields, session->number_of_items);
 
-    properties->displayed_items = dlgx_get_dlg_items(properties->number_of_items);
+    session->displayed_items = dlgx_get_dlg_items(session->number_of_items);
 
     /* XXX: This 1 is from the dialog text message. */
-    properties->height = (item->geometry.height == 0)
-                            ? (properties->number_of_items + DIALOG_HEIGHT_WITHOUT_TEXT + 1)
+    session->height = (item->geometry.height == 0)
+                            ? (session->number_of_items + DIALOG_HEIGHT_WITHOUT_TEXT + 1)
                             : item->geometry.height;
 
-    prepare_content(fields, properties);
+    prepare_content(fields, session);
 }
 
 static char *get_current_result(DIALOG_FORMITEM *items, int number_of_items)
@@ -361,16 +361,16 @@ static void save_mixedform_field(struct xante_app *xpp, cl_json_t *field)
  *
  */
 
-bool mixedform_value_changed(ui_properties_t *properties)
+bool mixedform_value_changed(session_t *session)
 {
-    struct xante_item *item = properties->item;
+    struct xante_item *item = session->item;
     bool changed = false;
     int i;
     cl_json_t *field = NULL, *jresult = NULL, *result_fields = NULL,
               *rfield = NULL, *fields = NULL;
 
     /* Gets the result in JSON format to ease our job below */
-    jresult = cl_json_parse(properties->result);
+    jresult = cl_json_parse(session->result);
 
     if (NULL == jresult)
         goto end_block;
@@ -383,12 +383,12 @@ bool mixedform_value_changed(ui_properties_t *properties)
     /* We compare each element to look for changes */
     fields = get_fields_node(item);
 
-    for (i = 0; i < properties->number_of_items; i++) {
+    for (i = 0; i < session->number_of_items; i++) {
         rfield = cl_json_get_array_item(result_fields, i);
-        field = get_field_by_name(fields, properties->number_of_items,
+        field = get_field_by_name(fields, session->number_of_items,
                                   get_element_name(rfield));
 
-        if (compare_elements(properties->xpp, item, field, rfield))
+        if (compare_elements(session->xpp, item, field, rfield))
             changed = true;
     }
 
@@ -467,9 +467,9 @@ void ui_save_mixedform_item(struct xante_app *xpp, struct xante_item *item)
         save_mixedform_field(xpp, cl_json_get_array_item(fields, i));
 }
 
-int mixedform(ui_properties_t *properties)
+int mixedform(session_t *session)
 {
-    struct xante_item *item = properties->item;
+    struct xante_item *item = session->item;
     int ret_dialog = DLG_EXIT_OK, selected_item = 0;
     cl_string_t *form_title = NULL;
     cl_json_t *fields = NULL;
@@ -478,21 +478,21 @@ int mixedform(ui_properties_t *properties)
     /* Prepares dialog content */
     fields = get_fields_node(item);
     form_title = get_title(item);
-    build_properties(item, fields, properties);
+    build_session(item, fields, session);
 
     ret_dialog = dlg_form(cl_string_valueof(item->name),
                           cl_string_valueof(form_title),
-                          properties->height, properties->width,
-                          properties->displayed_items,
-                          properties->number_of_items,
-                          properties->fitems,
+                          session->height, session->width,
+                          session->displayed_items,
+                          session->number_of_items,
+                          session->fitems,
                           &selected_item);
 
-    if ((ret_dialog == DLG_EXIT_OK) && properties->editable_value) {
-        result = get_current_result(properties->fitems,
-                                    properties->number_of_items);
+    if ((ret_dialog == DLG_EXIT_OK) && session->editable_value) {
+        result = get_current_result(session->fitems,
+                                    session->number_of_items);
 
-        properties->result = cl_string_create("%s", result);
+        session->result = cl_string_create("%s", result);
         free(result);
     }
 

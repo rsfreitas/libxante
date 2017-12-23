@@ -82,11 +82,11 @@ static int load_item_config(cl_list_node_t *node, void *a)
     cl_cfg_file_t *cfg_file = (cl_cfg_file_t *)a;
     cl_cfg_entry_t *key = NULL;
 
-    if (item->dialog_type == XANTE_UI_DIALOG_MIXEDFORM)
+    if (item->widget_type == XANTE_WIDGET_MIXEDFORM)
         ui_mixedform_load_and_set_value(item, cfg_file);
-    else if (item->dialog_type == XANTE_UI_DIALOG_BUILDLIST)
+    else if (item->widget_type == XANTE_WIDGET_BUILDLIST)
         load_buildlist_item(item, cfg_file);
-    else if (item->dialog_type == XANTE_UI_DIALOG_SPREADSHEET)
+    else if (item->widget_type == XANTE_WIDGET_SPREADSHEET)
         ui_spreadsheet_load_and_set_value(item, cfg_file);
     else {
         key = cl_cfg_entry(cfg_file, cl_string_valueof(item->config_block),
@@ -206,11 +206,11 @@ static int save_item_config(cl_list_node_t *node, void *a)
     struct xante_app *xpp = (struct xante_app *)a;
     cl_string_t *value = NULL;
 
-    if (item->dialog_type == XANTE_UI_DIALOG_MIXEDFORM)
+    if (item->widget_type == XANTE_WIDGET_MIXEDFORM)
         ui_save_mixedform_item(xpp, item);
-    else if (item->dialog_type == XANTE_UI_DIALOG_BUILDLIST)
+    else if (item->widget_type == XANTE_WIDGET_BUILDLIST)
         save_buildlist_item(xpp, item);
-    else if (item->dialog_type == XANTE_UI_DIALOG_SPREADSHEET)
+    else if (item->widget_type == XANTE_WIDGET_SPREADSHEET)
         ui_save_spreadsheet_item(xpp, item);
     else {
         /* Checks if we can save the item */
@@ -284,7 +284,7 @@ end_block:
 
 /*
  *
- * External API
+ * API
  *
  */
 

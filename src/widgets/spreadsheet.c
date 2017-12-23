@@ -158,7 +158,7 @@ static void set_cell_value(cl_json_t *cell, const char *new_value)
 }
 
 static int build_sheet(const struct xante_item *item,
-    ui_properties_t *properties)
+    session_t *session)
 {
     cl_json_t *sheet, *row, *column, *cell;
     cl_string_t *value;
@@ -170,8 +170,8 @@ static int build_sheet(const struct xante_item *item,
         return -1;
 
     rows = cl_json_get_array_size(sheet);
-    properties->row_title = cl_string_create_empty(0);
-    properties->column_title = cl_string_create_empty(0);
+    session->row_title = cl_string_create_empty(0);
+    session->column_title = cl_string_create_empty(0);
 
     /* First we build the sheet row and column titles */
     for (i = 0; i < rows; i++) {
@@ -185,22 +185,22 @@ static int build_sheet(const struct xante_item *item,
             /* Column title */
             for (j = 0; j < columns; j++) {
                 cell = cl_json_get_array_item(column, j);
-                cl_string_cat(properties->column_title, "%s,",
+                cl_string_cat(session->column_title, "%s,",
                               cl_string_valueof(get_title(cell)));
             }
         }
 
         /* Row column */
-        cl_string_cat(properties->row_title, "%s,",
+        cl_string_cat(session->row_title, "%s,",
                       cl_string_valueof(get_title(row)));
     }
 
-    cl_string_truncate(properties->row_title, -1);
-    cl_string_truncate(properties->column_title, -1);
-    properties->sheet = spreadsheet_st_init(cl_string_valueof(properties->row_title),
-                                            cl_string_valueof(properties->column_title));
+    cl_string_truncate(session->row_title, -1);
+    cl_string_truncate(session->column_title, -1);
+    session->sheet = spreadsheet_st_init(cl_string_valueof(session->row_title),
+                                            cl_string_valueof(session->column_title));
 
-    if (NULL == properties->sheet)
+    if (NULL == session->sheet)
         return -1;
 
     /* Now we can store the value of each cell */
@@ -212,7 +212,7 @@ static int build_sheet(const struct xante_item *item,
         for (j = 0; j < columns; j++) {
             cell = cl_json_get_array_item(column, j);
             value = get_cell_value(cell);
-            spreadsheet_st_add_data(properties->sheet, (i * columns) + j,
+            spreadsheet_st_add_data(session->sheet, (i * columns) + j,
                                     "%s", cl_string_valueof(value));
         }
     }
@@ -220,9 +220,9 @@ static int build_sheet(const struct xante_item *item,
     return 0;
 }
 
-static void build_properties(ui_properties_t *properties)
+static void build_session(session_t *session)
 {
-    struct xante_item *item = properties->item;
+    struct xante_item *item = session->item;
     cl_json_t *node;
 
     /* Window title */
@@ -231,10 +231,10 @@ static void build_properties(ui_properties_t *properties)
     if (NULL == node)
         return;
 
-    properties->title = cl_string_ref(cl_json_get_object_value(node));
+    session->title = cl_string_ref(cl_json_get_object_value(node));
 
     /* Sheet */
-    if (build_sheet(item, properties) < 0)
+    if (build_sheet(item, session) < 0)
         return;
 }
 
@@ -423,7 +423,7 @@ static void save_row(struct xante_app *xpp, struct xante_item *item, int row)
  * has been made. It also should be passed to the confirm event.
  */
 static cl_string_t *get_current_result(const struct xante_item *item,
-    ui_properties_t *properties)
+    session_t *session)
 {
     int rows = 0, columns = 0, i = 0, j = 0;
     cl_string_t *result = NULL;
@@ -437,7 +437,7 @@ static cl_string_t *get_current_result(const struct xante_item *item,
         cl_string_cat(result, "[");
 
         for (j = 0; j < columns; j++) {
-            cell_data = (char *)spreadsheet_st_get_data(properties->sheet,
+            cell_data = (char *)spreadsheet_st_get_data(session->sheet,
                                                         (i * columns) + j);
 
             cl_string_cat(result, "\"%s\",", cell_data);
@@ -516,16 +516,16 @@ static bool compare_rows(struct xante_app *xpp, struct xante_item *item,
  *
  */
 
-bool spreadsheet_value_changed(ui_properties_t *properties)
+bool spreadsheet_value_changed(session_t *session)
 {
-    struct xante_item *item = properties->item;
+    struct xante_item *item = session->item;
     bool changed = false;
     cl_json_t *jresult = NULL, *sheet = NULL, *result_sheet = NULL,
               *sheet_row = NULL, *result_row = NULL;
     int rows, i;
 
     rows = get_form_number_of_rows(item);
-    jresult = cl_json_parse(properties->result);
+    jresult = cl_json_parse(session->result);
 
     if (NULL == jresult)
         goto end_block;
@@ -544,7 +544,7 @@ bool spreadsheet_value_changed(ui_properties_t *properties)
         sheet_row = cl_json_get_array_item(sheet, i);
         result_row = cl_json_get_array_item(result_sheet, i);
 
-        if (compare_rows(properties->xpp, item, sheet_row, result_row, i))
+        if (compare_rows(session->xpp, item, sheet_row, result_row, i))
             changed = true;
     }
 
@@ -621,20 +621,20 @@ void ui_save_spreadsheet_item(struct xante_app *xpp, struct xante_item *item)
                      "%d,%d", rows, columns);
 }
 
-int spreadsheet(ui_properties_t *properties)
+int spreadsheet(session_t *session)
 {
-    struct xante_item *item = properties->item;
+    struct xante_item *item = session->item;
     int ret_dialog = DLG_EXIT_OK;
 
     /* Prepares dialog content */
-    build_properties(properties);
+    build_session(session);
 
     ret_dialog = dlgx_spreadsheet(cl_string_valueof(item->name),
-                                  cl_string_valueof(properties->title),
-                                  properties->sheet);
+                                  cl_string_valueof(session->title),
+                                  session->sheet);
 
     if (ret_dialog == DLG_EXIT_OK)
-        properties->result = get_current_result(item, properties);
+        session->result = get_current_result(item, session);
 
     return ret_dialog;
 }

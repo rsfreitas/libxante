@@ -3,7 +3,7 @@
  * Description:
  *
  * Author: Rodrigo Freitas
- * Created at: Tue Dec 19 08:47:40 2017
+ * Created at: Fri Dec 22 22:59:52 2017
  * Project: libxante
  *
  * Copyright (C) 2017 Rodrigo Freitas
@@ -23,23 +23,4 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  * USA
  */
-
-#ifndef _LIBXANTE_XT_PROPERTIES_H
-#define _LIBXANTE_XT_PROPERTIES_H          1
-
-#ifndef LIBXANTE_COMPILE
-# ifndef _LIBXANTE_H
-#  error "Never use <xt_properties.h> directly; include <libxante.h> instead."
-# endif
-#else
-
-/* Internal library declarations */
-void properties_init(struct xante_app *xpp, struct xante_item *item,
-                     ui_properties_t *properties);
-
-void properties_uninit(ui_properties_t *properties);
-
-#endif
-
-#endif
 

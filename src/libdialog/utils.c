@@ -168,6 +168,77 @@ static void split_text(struct dlgx_text *t, const char *text)
     }
 }
 
+static int prepare_dlgx_backtitle(xante_t *xpp)
+{
+    struct xante_app *x = (struct xante_app *)xpp;
+    cl_string_t *title = NULL, *left = NULL, *format = NULL, *right = NULL;
+    unsigned int screen_width = dlg_box_x_ordinate(0) * 2;
+
+    if (xante_runtime_ui_active(xpp) == false)
+        return -1;
+
+    if (change_has_occourred(xpp)) {
+        right = cl_string_create("[%s*] %s",
+                                 (x->auth.name != NULL)
+                                    ? cl_string_valueof(x->auth.login_and_source)
+                                    : "",
+                                 x->info.company);
+    } else
+        right = cl_string_create("[%s] %s",
+                                 (x->auth.name != NULL)
+                                    ? cl_string_valueof(x->auth.login_and_source)
+                                    : "",
+                                 x->info.company);
+
+    left = cl_string_create(cl_tr("%s - Version %s.%d Build %d %s"),
+                            x->info.application_name,
+                            x->info.version,
+                            x->info.revision, x->info.build,
+                            (x->info.beta == true) ? "BETA" : "");
+
+    if (screen_width  > (unsigned int)(cl_string_length(left) +
+                                       cl_string_length(right)))
+    {
+        format = cl_string_create("%%s%%%ds",
+                                  (screen_width - cl_string_length(left)));
+    } else
+        format = cl_string_create("%%s - %%s");
+
+    title = cl_string_create(cl_string_valueof(format),
+                             cl_string_valueof(left),
+                             cl_string_valueof(right));
+
+    if (dialog_vars.backtitle != NULL)
+        free(dialog_vars.backtitle);
+
+    dialog_vars.backtitle = strdup(cl_string_valueof(title));
+
+    if (title != NULL)
+        cl_string_unref(title);
+
+    if (left != NULL)
+        cl_string_unref(left);
+
+    if (right != NULL)
+        cl_string_unref(right);
+
+    if (format != NULL)
+        cl_string_unref(format);
+
+    return 0;
+}
+
+static int clear_backtitle(xante_t *xpp)
+{
+    if (xante_runtime_ui_active(xpp) == false)
+        return -1;
+
+    free(dialog_vars.backtitle);
+    dialog_vars.backtitle = NULL;
+
+    return 0;
+}
+
 /*
  *
  * Internal API
@@ -419,10 +490,11 @@ void dlgx_put_item_brief(const char *brief)
  * @name dlgx_uninit
  * @brief Closes libdialog's environment.
  */
-void dlgx_uninit(void)
+void dlgx_uninit(struct xante_app *xpp)
 {
     int dialog_return_value = DLG_EXIT_OK;
 
+    clear_backtitle(xpp);
     dlg_killall_bg(&dialog_return_value);
 
     if (dialog_vars.ok_label != NULL)
@@ -460,7 +532,7 @@ void dlgx_init(bool temporarily)
 void dlgx_set_backtitle(struct xante_app *xpp)
 {
     dlg_clear();
-    xante_dlg_set_backtitle(xpp);
+    prepare_dlgx_backtitle(xpp);
     dlg_put_backtitle();
 }
 
@@ -482,16 +554,16 @@ char *dlgx_get_item_value_as_text(const struct xante_item *item)
     cl_string_t *value = NULL;
     int index = -1;
 
-    switch (item->dialog_type) {
-        case XANTE_UI_DIALOG_INPUT_INT:
-        case XANTE_UI_DIALOG_INPUT_FLOAT:
-        case XANTE_UI_DIALOG_INPUT_DATE:
-        case XANTE_UI_DIALOG_INPUT_TIME:
-        case XANTE_UI_DIALOG_CALENDAR:
-        case XANTE_UI_DIALOG_TIMEBOX:
-        case XANTE_UI_DIALOG_INPUT_STRING:
-        case XANTE_UI_DIALOG_RANGE:
-        case XANTE_UI_DIALOG_INPUTSCROLL:
+    switch (item->widget_type) {
+        case XANTE_WIDGET_INPUT_INT:
+        case XANTE_WIDGET_INPUT_FLOAT:
+        case XANTE_WIDGET_INPUT_DATE:
+        case XANTE_WIDGET_INPUT_TIME:
+        case XANTE_WIDGET_CALENDAR:
+        case XANTE_WIDGET_TIMEBOX:
+        case XANTE_WIDGET_INPUT_STRING:
+        case XANTE_WIDGET_RANGE:
+        case XANTE_WIDGET_INPUTSCROLL:
             value = cl_object_to_cstring(item_value(item));
 
             if ((value != NULL) && (cl_string_length(value) > 0))
@@ -499,7 +571,7 @@ char *dlgx_get_item_value_as_text(const struct xante_item *item)
 
             break;
 
-        case XANTE_UI_DIALOG_RADIO_CHECKLIST:
+        case XANTE_WIDGET_RADIO_CHECKLIST:
             index = CL_OBJECT_AS_INT(item_value(item));
             value = cl_stringlist_get(item->list_items, index);
 
@@ -508,7 +580,7 @@ char *dlgx_get_item_value_as_text(const struct xante_item *item)
 
             break;
 
-        case XANTE_UI_DIALOG_YES_NO:
+        case XANTE_WIDGET_YES_NO:
             index = CL_OBJECT_AS_INT(item_value(item));
 
             if (index == 1)
@@ -572,7 +644,7 @@ bool dlgx_question(struct xante_app *xpp, const char *title, const char *msg,
         ret_value = false;
 
     if (dialog_needs_closing == true) {
-        dlgx_uninit();
+        dlgx_uninit(xpp);
         runtime_set_ui_active(xpp, false);
     }
 
@@ -791,5 +863,86 @@ int dlgx_get_input_window_width(const struct xante_item *item)
         w += WINDOW_COLUMNS;
 
     return w;
+}
+
+/**
+ * @name dlgx_session_init
+ * @brief Initializes the libdialog's environment to run a widget or in its
+ *        own naming convention, a dialog.
+ */
+void dlgx_session_init(struct xante_app *xpp, const struct xante_item *item,
+    bool edit_value)
+{
+    char *text = NULL;
+
+    dlgx_set_backtitle(xpp);
+    text = widget_statusbar_text(item->widget_type, edit_value,
+                                 xante_runtime_esc_key(xpp));
+
+    if (text != NULL) {
+        dlgx_put_statusbar(text);
+        free(text);
+    }
+
+    if ((item->widget_type == XANTE_WIDGET_CALENDAR) ||
+        (item->widget_type == XANTE_WIDGET_TIMEBOX) ||
+        (item->widget_type == XANTE_WIDGET_FILE_SELECT) ||
+        (item->widget_type == XANTE_WIDGET_DIR_SELECT))
+    {
+        dlgx_alloc_input(1024);
+    }
+
+    if (item->widget_type == XANTE_WIDGET_MIXEDFORM) {
+        /* Since we may have a password item, enable '*' on screen */
+        dialog_vars.insecure = 1;
+    }
+
+    if (item->widget_type != XANTE_WIDGET_TAILBOX) {
+        /* Enables the help button */
+        if (item->descriptive_help != NULL) {
+            dialog_vars.help_button = 1;
+            dlgx_update_help_button_label(item->label.help);
+        }
+
+        /*
+         * Enables the extra button and does not allow this button on
+         * yesno dialogs.
+         */
+        if (item->button.extra &&
+            (item->widget_type != XANTE_WIDGET_YES_NO))
+        {
+            dlgx_update_extra_button_label(item->label.extra);
+            dialog_vars.extra_button = 1;
+        }
+    }
+
+    dlgx_update_ok_button_label(item->label.ok);
+    dlgx_update_cancel_button_label(item->label.cancel);
+}
+
+/**
+ * @name dlgx_session_uninit
+ * @brief Clears all relevant libdialog's environment information used to run
+ *        a widget.
+ */
+void dlgx_session_uninit(const struct xante_item *item)
+{
+    /* Removes the Help button off the screen */
+    if (item->descriptive_help != NULL)
+        dialog_vars.help_button = 0;
+
+    /* Removes the Extra button off the screen */
+    if (item->button.extra)
+        dialog_vars.extra_button = 0;
+
+    if ((item->widget_type == XANTE_WIDGET_CALENDAR) ||
+        (item->widget_type == XANTE_WIDGET_TIMEBOX) ||
+        (item->widget_type == XANTE_WIDGET_FILE_SELECT) ||
+        (item->widget_type == XANTE_WIDGET_DIR_SELECT))
+    {
+        dlgx_free_input();
+    }
+
+    dialog_vars.insecure = 0;
 }
 

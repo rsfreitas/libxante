@@ -71,26 +71,26 @@ static char *update_routine(void *arg)
  *
  */
 
-int update_object(ui_properties_t *properties)
+int update_object(session_t *session)
 {
-    struct xante_app *xpp = properties->xpp;
-    struct xante_item *item = properties->item;
+    struct xante_app *xpp = session->xpp;
+    struct xante_item *item = session->item;
     struct update_routine_arg user_arg = {
         .xpp = xpp,
         .item = item
     };
 
     /* Prepare dialog */
-    properties->width = (item->geometry.width == 0) ? DIALOG_WIDTH
+    session->width = (item->geometry.width == 0) ? DIALOG_WIDTH
                                                     : item->geometry.width;
 
-    properties->height = (item->geometry.height == 0) ? DIALOG_HEIGHT
+    session->height = (item->geometry.height == 0) ? DIALOG_HEIGHT
                                                       : item->geometry.height;
 
     /* Gets the user custom data */
     user_arg.data = event_item_custom_data(xpp, item);
 
-    return dlgx_update_object(properties->width, properties->height,
+    return dlgx_update_object(session->width, session->height,
                               cl_string_valueof(item->name),
                               cl_string_valueof(item->options),
                               DIALOG_UPDATE_INTERVAL,

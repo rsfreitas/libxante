@@ -75,7 +75,7 @@ const char *xante_menu_object_id(const xante_menu_t *menu);
  *
  * @return On success return the menu type or -1 otherwise.
  */
-enum xante_ui_menu xante_menu_type(const xante_menu_t *menu);
+enum xante_menu_type xante_menu_type(const xante_menu_t *menu);
 
 #endif
 

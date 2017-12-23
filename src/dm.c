@@ -200,8 +200,8 @@ static struct xante_item *dup_item(struct xante_menu *menu, int item_index,
     cl_string_cat(d_item->referenced_menu, "_%d", menu_index);
 
     d_item->mode = item->mode;
-    d_item->dialog_type = item->dialog_type;
-    d_item->dialog_checklist_type = item->dialog_checklist_type;
+    d_item->widget_type = item->widget_type;
+    d_item->widget_checklist_type = item->widget_checklist_type;
     d_item->string_length = item->string_length;
 
     d_item->list_items = cl_stringlist_dup(item->list_items);
@@ -214,7 +214,7 @@ static struct xante_item *dup_item(struct xante_menu *menu, int item_index,
         d_item->config_block = create_item_config_block(menu, menu_index, item);
     }
 
-    if (item_has_ranges(d_item->dialog_type) == true)
+    if (item_has_ranges(d_item->widget_type) == true)
         d_item->value_spec = cl_spec_create(CL_READABLE | CL_WRITABLE,
                                             d_item->min, d_item->max,
                                             d_item->string_length);
@@ -274,11 +274,11 @@ static int find_submenu_to_replicate(cl_list_node_t *a, void *b)
     struct xante_menu *menu = NULL;
 
     /* We don't handle dynamic menus inside dynamic menus */
-    if (item->dialog_type == XANTE_UI_DIALOG_DYNAMIC_MENU)
+    if (item->widget_type == XANTE_WIDGET_DYNAMIC_MENU_REFERENCE)
         return -1;
 
     /* Is this a submenu? */
-    if (item->dialog_type == XANTE_UI_DIALOG_MENU) {
+    if (item->widget_type == XANTE_WIDGET_MENU_REFERENCE) {
         menu = xante_menu_search_by_object_id(ld->xpp->ui.menus,
                                               cl_string_valueof(item->referenced_menu));
 
@@ -344,9 +344,9 @@ static struct xante_item *create_rme_item(struct xante_menu *menu,
                                        item_index);
 
     item->referenced_menu = cl_string_dup(item->object_id);
-    item->type = cl_string_create(XANTE_UI_STR_DIALOG_MENU);
+    item->type = cl_string_create(XANTE_STR_WIDGET_MENU);
     item->mode = XANTE_ACCESS_VIEW;
-    item->dialog_type = XANTE_UI_DIALOG_MENU;
+    item->widget_type = XANTE_WIDGET_MENU_REFERENCE;
 
     return item;
 }
@@ -363,7 +363,7 @@ static void rme_create(struct xante_app *xpp, struct xante_menu *menu,
     /* Create some required menu's information */
     rme->name = cl_string_dup(menu->name);
     rme->object_id = cl_string_dup(menu->object_id);
-    rme->menu_type = XANTE_UI_MENU_DEFAULT;
+    rme->menu_type = XANTE_MENU_DEFAULT;
 
     /* Create items to point at every previously created (sub)menu */
     for (i = 0; i < copies; i++) {
@@ -389,7 +389,7 @@ static int dm_push_menu(cl_list_node_t *a, void *b)
     if (menu->creator == XANTE_MENU_CREATED_INTERNALLY)
         return 0;
 
-    if (menu->menu_type == XANTE_UI_MENU_DEFAULT)
+    if (menu->menu_type == XANTE_MENU_DEFAULT)
         return 0;
 
     /* Discover how many copies we'll have from this menu */
@@ -427,7 +427,7 @@ static int find_dm(cl_list_node_t *node, void *a)
     struct xante_menu *menu = cl_list_node_content(node);
     struct xante_item *item = (struct xante_item *)a;
 
-    if (menu->menu_type == XANTE_UI_MENU_DEFAULT)
+    if (menu->menu_type == XANTE_MENU_DEFAULT)
         return 0;
 
     if (menu->dynamic_names != NULL)
@@ -560,7 +560,7 @@ void dm_update(struct xante_app *xpp, struct xante_item *selected_item)
     struct xante_menu *unref_menu = NULL, *rme_menu = NULL;
     int expected_copies = -1, current_copies = -1;
 
-    if (selected_item->dialog_type != XANTE_UI_DIALOG_INPUT_INT)
+    if (selected_item->widget_type != XANTE_WIDGET_INPUT_INT)
         return;
 
     expected_copies = CL_OBJECT_AS_INT(item_value(selected_item));

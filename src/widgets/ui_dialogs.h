@@ -76,10 +76,10 @@ typedef struct {
     cl_string_t *item_name;
     cl_string_t *old_value;
     cl_string_t *new_value;
-} ui_return_t;
+} widget_result_t;
 
-/* A structure to hold properties and information of a running dialog */
-typedef struct ui_properties {
+/* A structure to hold session and information of a running dialog */
+typedef struct session {
     bool                editable_value;
     bool                call_item_value_confirm;
     struct xante_app    *xpp;
@@ -105,7 +105,7 @@ typedef struct ui_properties {
     cl_string_t         *change_old_value;
     cl_string_t         *change_new_value;
 
-    /* spreadsheet properties */
+    /* spreadsheet session */
     cl_string_t                 *title;
     cl_string_t                 *row_title;
     cl_string_t                 *column_title;
@@ -116,89 +116,99 @@ typedef struct ui_properties {
     DIALOG_FORMITEM     *fitems;    /** mixedform */
 
     /* Dialog functions to run it */
-    int                 (*run)(struct ui_properties *);
-    bool                (*validate_result)(struct ui_properties *);
-    bool                (*value_changed)(struct ui_properties *);
-    void                (*update_value)(struct ui_properties *);
-} ui_properties_t;
+    int                 (*run)(struct session *);
+    bool                (*validate_result)(struct session *);
+    bool                (*value_changed)(struct session *);
+    void                (*update_value)(struct session *);
+} session_t;
+
+/* widgets */
+char *widget_statusbar_text(enum xante_widget type, bool editable,
+                            bool block_esc_key);
+
+/*
+ *
+ * Supported basic widgets
+ *
+ */
 
 /* yesno */
-int yesno(ui_properties_t *properties);
-bool yesno_validate_result(ui_properties_t *properties);
-bool yesno_value_changed(ui_properties_t *properties);
-void yesno_update_value(ui_properties_t *properties);
+int yesno(session_t *session);
+bool yesno_validate_result(session_t *session);
+bool yesno_value_changed(session_t *session);
+void yesno_update_value(session_t *session);
 
 /* calendar */
-int calendar(ui_properties_t *properties);
-bool calendar_value_changed(ui_properties_t *properties);
-void calendar_update_value(ui_properties_t *properties);
+int calendar(session_t *session);
+bool calendar_value_changed(session_t *session);
+void calendar_update_value(session_t *session);
 
 /* timebox */
-int timebox(ui_properties_t *properties);
-bool timebox_value_changed(ui_properties_t *properties);
-void timebox_update_value(ui_properties_t *properties);
+int timebox(session_t *session);
+bool timebox_value_changed(session_t *session);
+void timebox_update_value(session_t *session);
 
 /* checklist */
-int checklist(ui_properties_t *properties);
-bool checklist_validate_result(ui_properties_t *properties);
-bool checklist_value_changed(ui_properties_t *properties);
-void checklist_update_value(ui_properties_t *properties);
+int checklist(session_t *session);
+bool checklist_validate_result(session_t *session);
+bool checklist_value_changed(session_t *session);
+void checklist_update_value(session_t *session);
 
 /* input */
-int input(ui_properties_t *properties);
-bool input_validate_result(ui_properties_t *properties);
-bool input_value_changed(ui_properties_t *properties);
-void input_update_value(ui_properties_t *properties);
+int input(session_t *session);
+bool input_validate_result(session_t *session);
+bool input_value_changed(session_t *session);
+void input_update_value(session_t *session);
 
 /* dm_delete */
-int delete_dm(ui_properties_t *properties);
-bool delete_dm_value_changed(ui_properties_t *properties);
+int delete_dm(session_t *session);
+bool delete_dm_value_changed(session_t *session);
 
 /* dm_add */
-int add_dm(ui_properties_t *properties);
-bool add_dm_value_changed(ui_properties_t *properties);
+int add_dm(session_t *session);
+bool add_dm_value_changed(session_t *session);
 
 /* progress */
-int progress(ui_properties_t *properties);
+int progress(session_t *session);
 
 /* sync */
-int sync_dialog(ui_properties_t *properties);
+int sync_dialog(session_t *session);
 
 /* file-select */
-int fselect(ui_properties_t *properties);
-bool fselect_validate_result(ui_properties_t *properties);
-bool fselect_value_changed(ui_properties_t *properties);
-void fselect_update_value(ui_properties_t *properties);
+int fselect(session_t *session);
+bool fselect_validate_result(session_t *session);
+bool fselect_value_changed(session_t *session);
+void fselect_update_value(session_t *session);
 
 /* file-view */
-int file_view(ui_properties_t *properties);
+int file_view(session_t *session);
 
 /* tailbox */
-int tailbox(ui_properties_t *properties);
+int tailbox(session_t *session);
 
 /* scrolltext */
-int scrolltext(ui_properties_t *properties);
+int scrolltext(session_t *session);
 
 /* update-object */
-int update_object(ui_properties_t *properties);
+int update_object(session_t *session);
 
 /* mixedform */
-int mixedform(ui_properties_t *properties);
-bool mixedform_value_changed(ui_properties_t *properties);
+int mixedform(session_t *session);
+bool mixedform_value_changed(session_t *session);
 void ui_save_mixedform_item(struct xante_app *xpp, struct xante_item *item);
 void ui_mixedform_load_and_set_value(struct xante_item *item, cl_cfg_file_t *cfg);
 
 /* buildlist */
-int buildlist(ui_properties_t *properties);
-bool buildlist_value_changed(ui_properties_t *properties);
+int buildlist(session_t *session);
+bool buildlist_value_changed(session_t *session);
 
 /* spreadsheet */
 void ui_spreadsheet_load_and_set_value(struct xante_item *item,
                                        const cl_cfg_file_t *cfg);
 
 void ui_save_spreadsheet_item(struct xante_app *xpp, struct xante_item *item);
-int spreadsheet(ui_properties_t *properties);
-bool spreadsheet_value_changed(ui_properties_t *properties);
+int spreadsheet(session_t *session);
+bool spreadsheet_value_changed(session_t *session);
 
 #endif
 

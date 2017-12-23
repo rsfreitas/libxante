@@ -31,19 +31,19 @@
 #define DIALOG_WIDTH                60
 
 struct sync_thread {
-    ui_properties_t     *properties;
+    session_t     *session;
     void                *data;
     cl_timeout_t        *tm_task;
 };
 
 struct sync {
-    enum xante_ui_dialog    type;
-    int                     step_limit;
+    enum xante_widget   type;
+    int                 step_limit;
 };
 
 static struct sync __sync[] = {
-    { XANTE_UI_DIALOG_SPINNER_SYNC, 4 },
-    { XANTE_UI_DIALOG_DOTS_SYNC,    6 }
+    { XANTE_WIDGET_SPINNER_SYNC, 4 },
+    { XANTE_WIDGET_DOTS_SYNC,    6 }
 };
 
 #define MAX_SYNC        (sizeof(__sync) / sizeof(__sync[0]))
@@ -61,7 +61,7 @@ static void task_signal(int signum)
     }
 }
 
-static struct sync *get_sync(enum xante_ui_dialog sync)
+static struct sync *get_sync(enum xante_widget sync)
 {
     unsigned int i;
 
@@ -72,12 +72,12 @@ static struct sync *get_sync(enum xante_ui_dialog sync)
     return NULL;
 }
 
-static void update_synctext(cl_string_t *text, int step, enum xante_ui_dialog sync)
+static void update_synctext(cl_string_t *text, int step, enum xante_widget sync)
 {
     char c;
     int i;
 
-    if (sync == XANTE_UI_DIALOG_SPINNER_SYNC) {
+    if (sync == XANTE_WIDGET_SPINNER_SYNC) {
         if (step == 0)
             c = '-';
         else if (step == 1)
@@ -88,7 +88,7 @@ static void update_synctext(cl_string_t *text, int step, enum xante_ui_dialog sy
             c = '/';
 
         cl_string_cat(text, " %c", c);
-    } else if (sync == XANTE_UI_DIALOG_DOTS_SYNC) {
+    } else if (sync == XANTE_WIDGET_DOTS_SYNC) {
         for (i = 0; i < step; i++)
             cl_string_cat(text, ".");
     }
@@ -97,9 +97,9 @@ static void update_synctext(cl_string_t *text, int step, enum xante_ui_dialog sy
 static void *call_task(cl_thread_t *thread)
 {
     struct sync_thread *sync = cl_thread_get_user_data(thread);
-    ui_properties_t *properties = sync->properties;
-    struct xante_app *xpp = properties->xpp;
-    struct xante_item *item = properties->item;
+    session_t *session = sync->session;
+    struct xante_app *xpp = session->xpp;
+    struct xante_item *item = session->item;
     bool loop = false;
 
     cl_thread_set_state(thread, CL_THREAD_ST_CREATED);
@@ -139,9 +139,9 @@ static void *call_task(cl_thread_t *thread)
 static void *make_sync(cl_thread_t *thread)
 {
     struct sync_thread *sync = cl_thread_get_user_data(thread);
-    ui_properties_t *properties = sync->properties;
-    struct xante_app *xpp = properties->xpp;
-    struct xante_item *item = properties->item;
+    session_t *session = sync->session;
+    struct xante_app *xpp = session->xpp;
+    struct xante_item *item = session->item;
     struct sync *sync_model;
     cl_thread_t *task = NULL;
     cl_string_t *text = NULL;
@@ -149,7 +149,7 @@ static void *make_sync(cl_thread_t *thread)
     char *tmp = NULL;
 
     cl_thread_set_state(thread, CL_THREAD_ST_CREATED);
-    sync_model = get_sync(item->dialog_type);
+    sync_model = get_sync(item->widget_type);
 
     /* Creates a thread to run the user task (event) */
     task = cl_thread_spawn(CL_THREAD_JOINABLE, call_task, sync);
@@ -175,10 +175,10 @@ static void *make_sync(cl_thread_t *thread)
     sync->tm_task = cl_timeout_create(CL_OBJECT_AS_INT(item->max),
                                       CL_TM_SECONDS);
 
-    properties->width = (item->geometry.width == 0) ? DIALOG_WIDTH
+    session->width = (item->geometry.width == 0) ? DIALOG_WIDTH
                                                    : item->geometry.width;
 
-    properties->height = (item->geometry.height == 0) ? DIALOG_HEIGHT
+    session->height = (item->geometry.height == 0) ? DIALOG_HEIGHT
                                                      : item->geometry.height;
 
     cl_thread_set_state(thread, CL_THREAD_ST_INITIALIZED);
@@ -199,7 +199,7 @@ static void *make_sync(cl_thread_t *thread)
 
         update_synctext(text, stepbar, sync_model->type);
         dialog_msgbox(cl_string_valueof(item->name), cl_string_valueof(text),
-                      properties->height, properties->width, 0);
+                      session->height, session->width, 0);
 
         stepbar++;
 
@@ -246,14 +246,14 @@ static void *make_sync(cl_thread_t *thread)
  * @return Returns a ui_return_t value indicating if the item's value has been
  *         changed (true) or not (false) with the dialog selected button.
  */
-int sync_dialog(ui_properties_t *properties)
+int sync_dialog(session_t *session)
 {
     void *data;
     cl_thread_t *thread;
-    struct xante_app *xpp = properties->xpp;
-    struct xante_item *item = properties->item;
+    struct xante_app *xpp = session->xpp;
+    struct xante_item *item = session->item;
     struct sync_thread sync = {
-        .properties = properties,
+        .session = session,
     };
 
     /* Assures that we will be able to, at least, start the sync */

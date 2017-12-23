@@ -31,7 +31,7 @@
 #define DIALOG_WIDTH                    60
 
 struct progress_thread {
-    ui_properties_t     *properties;
+    session_t     *session;
     void                *data;
 };
 
@@ -47,16 +47,16 @@ struct progress_thread {
 static void *make_progress(cl_thread_t *thread)
 {
     struct progress_thread *progress = cl_thread_get_user_data(thread);
-    ui_properties_t *properties = progress->properties;
-    struct xante_app *xpp = properties->xpp;
-    struct xante_item *item = properties->item;
+    session_t *session = progress->session;
+    struct xante_app *xpp = session->xpp;
+    struct xante_item *item = session->item;
     int percent;
 
     cl_thread_set_state(thread, CL_THREAD_ST_CREATED);
-    properties->width = (item->geometry.width == 0) ? DIALOG_WIDTH
+    session->width = (item->geometry.width == 0) ? DIALOG_WIDTH
                                                    : item->geometry.width;
 
-    properties->height = (item->geometry.height == 0) ? DIALOG_HEIGHT
+    session->height = (item->geometry.height == 0) ? DIALOG_HEIGHT
                                                      : item->geometry.height;
 
     cl_thread_set_state(thread, CL_THREAD_ST_INITIALIZED);
@@ -65,7 +65,7 @@ static void *make_progress(cl_thread_t *thread)
         percent = event_call(EV_UPDATE_ROUTINE, xpp, item, progress->data);
         dlgx_simple_progress(cl_string_valueof(item->name),
                              cl_string_valueof(item->options),
-                             properties->height, properties->width,
+                             session->height, session->width,
                              percent);
 
         /* Abort if we caught a invalid value */
@@ -109,13 +109,13 @@ static void *make_progress(cl_thread_t *thread)
  * @return Returns a ui_return_t value indicating if the item's value has been
  *         changed (true) or not (false) with the dialog selected button.
  */
-int progress(ui_properties_t *properties)
+int progress(session_t *session)
 {
-    struct xante_app *xpp = properties->xpp;
-    struct xante_item *item = properties->item;
+    struct xante_app *xpp = session->xpp;
+    struct xante_item *item = session->item;
     cl_thread_t *thread;
     struct progress_thread progress = {
-        .properties = properties,
+        .session = session,
     };
 
     /* Assures that we will be able to, at least, start the progress */

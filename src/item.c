@@ -484,7 +484,7 @@ __PUB_API__ cl_object_t *xante_item_value(const xante_item_t *item)
     return cl_object_ref(i->value);
 }
 
-__PUB_API__ enum xante_ui_dialog xante_item_dialog_type(const xante_item_t *item)
+__PUB_API__ enum xante_widget xante_item_widget_type(const xante_item_t *item)
 {
     struct xante_item *i = (struct xante_item *)item;
 
@@ -495,7 +495,7 @@ __PUB_API__ enum xante_ui_dialog xante_item_dialog_type(const xante_item_t *item
         return -1;
     }
 
-    return i->dialog_type;
+    return i->widget_type;
 }
 
 __PUB_API__ int xante_item_checklist_type(const xante_item_t *item)
@@ -509,7 +509,7 @@ __PUB_API__ int xante_item_checklist_type(const xante_item_t *item)
         return -1;
     }
 
-    return i->dialog_checklist_type;
+    return i->widget_checklist_type;
 }
 
 __PUB_API__ int xante_item_update_value(xante_item_t *item, const char *fmt, ...)

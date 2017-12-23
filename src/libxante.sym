@@ -26,16 +26,13 @@ LIBXANTE_0.1 {
         xante_runtime_ui_active;
         xante_runtime_user_authentication;
         xante_runtime_caller_name;
-        xante_ui_run;
-        xante_ui_run_mjtf;
-        xante_ui_suspend;
-        xante_ui_continue;
+        xante_manager_run;
+        xante_manager_single_run;
         xante_load_config;
         xante_write_config;
         xante_event_argument;
         xante_dlg_messagebox;
         xante_dlg_clear_backtitle;
-        xante_dlg_set_backtitle;
         xante_application_version;
         xante_object_id_calc;
         xante_auth_set_path;

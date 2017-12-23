@@ -27,8 +27,8 @@
 #include "libxante.h"
 
 /* The dialog size onto the screen */
-#define DIALOG_HEIGHT                       26
-#define DIALOG_WIDTH                        75
+#define DIALOG_HEIGHT                       14
+#define DIALOG_WIDTH                        60
 
 /*
  *
@@ -36,40 +36,24 @@
  *
  */
 
-int file_view(ui_properties_t *properties)
+int scrolltext(session_t *session)
 {
-    struct xante_app *xpp = properties->xpp;
-    struct xante_item *item = properties->item;
+    struct xante_item *item = session->item;
     cl_object_t *value = NULL;
 
-    properties->width = (item->geometry.width == 0) ? DIALOG_WIDTH
+    session->width = (item->geometry.width == 0) ? DIALOG_WIDTH
                                                    : item->geometry.width;
 
-    properties->height = (item->geometry.height == 0) ? DIALOG_HEIGHT
+    session->height = (item->geometry.height == 0) ? DIALOG_HEIGHT
                                                      : item->geometry.height;
 
     /* Gets the item voalue */
     value = item_value(item);
+    session->text = CL_OBJECT_AS_CSTRING(value);
 
-    if (NULL == value) {
-        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
-                             cl_tr("No file was selected to view."));
-
-        return DLG_EXIT_OK;
-    }
-
-    properties->text = CL_OBJECT_AS_CSTRING(value);
-
-    if (file_exists(cl_string_valueof(properties->text)) == false) {
-        xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
-                             cl_tr("File '%s' not found."),
-                             cl_string_valueof(properties->text));
-
-        return DLG_EXIT_OK;
-    }
-
-    return dialog_textbox(cl_string_valueof(item->name),
-                          cl_string_valueof(properties->text),
-                          properties->height, properties->width);
+    return dlgx_scrolltext(session->width, session->height,
+                           cl_string_valueof(item->name),
+                           cl_string_valueof(item->options),
+                           cl_string_valueof(session->text));
 }
 

@@ -34,46 +34,46 @@
 
 /**
  * @name is_valid_ui_dialog
- * @brief Checks if a given dialog type is valid inside the library
+ * @brief Checks if a given widget type is valid inside the library
  *        environment.
  *
- * @param [in] type: The dialog type to be checked.
+ * @param [in] type: The widget type to be checked.
  *
- * @return Returns true if is a valid dialog type or false otherwise.
+ * @return Returns true if is a valid widget type or false otherwise.
  */
-bool is_valid_ui_dialog(enum xante_ui_dialog type)
+bool is_valid_ui_dialog(enum xante_widget type)
 {
     switch (type) {
-        case XANTE_UI_DIALOG_MENU:
-        case XANTE_UI_DIALOG_INPUT_INT:
-        case XANTE_UI_DIALOG_INPUT_FLOAT:
-        case XANTE_UI_DIALOG_INPUT_DATE:
-        case XANTE_UI_DIALOG_INPUT_STRING:
-        case XANTE_UI_DIALOG_INPUT_PASSWD:
-        case XANTE_UI_DIALOG_INPUT_TIME:
-        case XANTE_UI_DIALOG_CALENDAR:
-        case XANTE_UI_DIALOG_TIMEBOX:
-        case XANTE_UI_DIALOG_CHECKLIST:
-        case XANTE_UI_DIALOG_RADIO_CHECKLIST:
-        case XANTE_UI_DIALOG_YES_NO:
-        case XANTE_UI_DIALOG_DYNAMIC_MENU:
-        case XANTE_UI_DIALOG_DELETE_DYNAMIC_MENU_ITEM:
-        case XANTE_UI_DIALOG_ADD_DYNAMIC_MENU_ITEM:
-        case XANTE_UI_DIALOG_CUSTOM:
-        case XANTE_UI_DIALOG_PROGRESS:
-        case XANTE_UI_DIALOG_SPINNER_SYNC:
-        case XANTE_UI_DIALOG_DOTS_SYNC:
-        case XANTE_UI_DIALOG_RANGE:
-        case XANTE_UI_DIALOG_FILE_SELECT:
-        case XANTE_UI_DIALOG_DIR_SELECT:
-        case XANTE_UI_DIALOG_FILE_VIEW:
-        case XANTE_UI_DIALOG_TAILBOX:
-        case XANTE_UI_DIALOG_SCROLLTEXT:
-        case XANTE_UI_DIALOG_UPDATE_OBJECT:
-        case XANTE_UI_DIALOG_INPUTSCROLL:
-        case XANTE_UI_DIALOG_MIXEDFORM:
-        case XANTE_UI_DIALOG_BUILDLIST:
-        case XANTE_UI_DIALOG_SPREADSHEET:
+        case XANTE_WIDGET_MENU_REFERENCE:
+        case XANTE_WIDGET_INPUT_INT:
+        case XANTE_WIDGET_INPUT_FLOAT:
+        case XANTE_WIDGET_INPUT_DATE:
+        case XANTE_WIDGET_INPUT_STRING:
+        case XANTE_WIDGET_INPUT_PASSWD:
+        case XANTE_WIDGET_INPUT_TIME:
+        case XANTE_WIDGET_CALENDAR:
+        case XANTE_WIDGET_TIMEBOX:
+        case XANTE_WIDGET_CHECKLIST:
+        case XANTE_WIDGET_RADIO_CHECKLIST:
+        case XANTE_WIDGET_YES_NO:
+        case XANTE_WIDGET_DYNAMIC_MENU_REFERENCE:
+        case XANTE_WIDGET_DELETE_DYNAMIC_MENU_ITEM:
+        case XANTE_WIDGET_ADD_DYNAMIC_MENU_ITEM:
+        case XANTE_WIDGET_CUSTOM:
+        case XANTE_WIDGET_PROGRESS:
+        case XANTE_WIDGET_SPINNER_SYNC:
+        case XANTE_WIDGET_DOTS_SYNC:
+        case XANTE_WIDGET_RANGE:
+        case XANTE_WIDGET_FILE_SELECT:
+        case XANTE_WIDGET_DIR_SELECT:
+        case XANTE_WIDGET_FILE_VIEW:
+        case XANTE_WIDGET_TAILBOX:
+        case XANTE_WIDGET_SCROLLTEXT:
+        case XANTE_WIDGET_UPDATE_OBJECT:
+        case XANTE_WIDGET_INPUTSCROLL:
+        case XANTE_WIDGET_MIXEDFORM:
+        case XANTE_WIDGET_BUILDLIST:
+        case XANTE_WIDGET_SPREADSHEET:
             return true;
 
         default:
@@ -110,93 +110,93 @@ bool is_item_available(struct xante_item *item)
  *
  * @return Returns the numeric value of the menu type.
  */
-enum xante_ui_menu translate_string_menu_type(const char *type)
+enum xante_menu_type translate_string_menu_type(const char *type)
 {
-    enum xante_ui_menu menu = XANTE_UI_MENU_DEFAULT;
+    enum xante_menu_type menu = XANTE_MENU_DEFAULT;
 
     if (NULL == type)
         return menu;
 
-    if (strcmp(type, XANTE_UI_STR_DYNAMIC_MENU) == 0)
-        menu = XANTE_UI_MENU_DYNAMIC;
+    if (strcmp(type, XANTE_STR_DYNAMIC_MENU) == 0)
+        menu = XANTE_MENU_DYNAMIC;
 
     return menu;
 }
 
 /**
- * @name translate_string_dialog_type
- * @brief Translates a string representing a dialog type to its numeric value.
+ * @name translate_string_widget_type
+ * @brief Translates a string representing a widget type to its numeric value.
  *
- * @param [in] type: The dialog type as a string.
+ * @param [in] type: The widget type as a string.
  *
- * @return Returns the numeric value of the dialog type.
+ * @return Returns the numeric value of the widget type.
  */
-enum xante_ui_dialog translate_string_dialog_type(const char *type)
+enum xante_widget translate_string_widget_type(const char *type)
 {
-    enum xante_ui_dialog dialog = XANTE_UI_DIALOG_UNKNOWN;
+    enum xante_widget widget = XANTE_WIDGET_UNKNOWN;
 
-    if (strcmp(type, XANTE_UI_STR_DIALOG_MENU) == 0)
-        dialog = XANTE_UI_DIALOG_MENU;
-    else if (strcmp(type, XANTE_UI_STR_DIALOG_INPUT_INT) == 0)
-        dialog = XANTE_UI_DIALOG_INPUT_INT;
-    else if (strcmp(type, XANTE_UI_STR_DIALOG_INPUT_FLOAT) == 0)
-        dialog = XANTE_UI_DIALOG_INPUT_FLOAT;
-    else if (strcmp(type, XANTE_UI_STR_DIALOG_INPUT_DATE) == 0)
-        dialog = XANTE_UI_DIALOG_INPUT_DATE;
-    else if (strcmp(type, XANTE_UI_STR_DIALOG_INPUT_STRING) == 0)
-        dialog = XANTE_UI_DIALOG_INPUT_STRING;
-    else if (strcmp(type, XANTE_UI_STR_DIALOG_INPUT_PASSWD) == 0)
-        dialog = XANTE_UI_DIALOG_INPUT_PASSWD;
-    else if (strcmp(type, XANTE_UI_STR_DIALOG_INPUT_TIME) == 0)
-        dialog = XANTE_UI_DIALOG_INPUT_TIME;
-    else if (strcmp(type, XANTE_UI_STR_DIALOG_CALENDAR) == 0)
-        dialog = XANTE_UI_DIALOG_CALENDAR;
-    else if (strcmp(type, XANTE_UI_STR_DIALOG_TIMEBOX) == 0)
-        dialog = XANTE_UI_DIALOG_TIMEBOX;
-    else if (strcmp(type, XANTE_UI_STR_DIALOG_RADIO_CHECKLIST) == 0)
-        dialog = XANTE_UI_DIALOG_RADIO_CHECKLIST;
-    else if (strcmp(type, XANTE_UI_STR_DIALOG_CHECKLIST) == 0)
-        dialog = XANTE_UI_DIALOG_CHECKLIST;
-    else if (strcmp(type, XANTE_UI_STR_DIALOG_YESNO) == 0)
-        dialog = XANTE_UI_DIALOG_YES_NO;
-    else if (strcmp(type, XANTE_UI_STR_DIALOG_DYNAMIC_MENU) == 0)
-        dialog = XANTE_UI_DIALOG_DYNAMIC_MENU;
-    else if (strcmp(type, XANTE_UI_STR_DIALOG_DELETE_DYNAMIC_MENU) == 0)
-        dialog = XANTE_UI_DIALOG_DELETE_DYNAMIC_MENU_ITEM;
-    else if (strcmp(type, XANTE_UI_STR_DIALOG_ADD_DYNAMIC_MENU) == 0)
-        dialog = XANTE_UI_DIALOG_ADD_DYNAMIC_MENU_ITEM;
-    else if (strcmp(type, XANTE_UI_STR_DIALOG_CUSTOM) == 0)
-        dialog = XANTE_UI_DIALOG_CUSTOM;
-    else if (strcmp(type, XANTE_UI_STR_DIALOG_PROGRESS) == 0)
-        dialog = XANTE_UI_DIALOG_PROGRESS;
-    else if (strcmp(type, XANTE_UI_STR_DIALOG_SPINNER_SYNC) == 0)
-        dialog = XANTE_UI_DIALOG_SPINNER_SYNC;
-    else if (strcmp(type, XANTE_UI_STR_DIALOG_DOTS_SYNC) == 0)
-        dialog = XANTE_UI_DIALOG_DOTS_SYNC;
-    else if (strcmp(type, XANTE_UI_STR_DIALOG_RANGE) == 0)
-        dialog = XANTE_UI_DIALOG_RANGE;
-    else if (strcmp(type, XANTE_UI_STR_DIALOG_FILE_SELECT) == 0)
-        dialog = XANTE_UI_DIALOG_FILE_SELECT;
-    else if (strcmp(type, XANTE_UI_STR_DIALOG_DIR_SELECT) == 0)
-        dialog = XANTE_UI_DIALOG_DIR_SELECT;
-    else if (strcmp(type, XANTE_UI_STR_DIALOG_FILE_VIEW) == 0)
-        dialog = XANTE_UI_DIALOG_FILE_VIEW;
-    else if (strcmp(type, XANTE_UI_STR_DIALOG_TAILBOX) == 0)
-        dialog = XANTE_UI_DIALOG_TAILBOX;
-    else if (strcmp(type, XANTE_UI_STR_DIALOG_SCROLLTEXT) == 0)
-        dialog = XANTE_UI_DIALOG_SCROLLTEXT;
-    else if (strcmp(type, XANTE_UI_STR_DIALOG_UPDATE_OBJECT) == 0)
-        dialog = XANTE_UI_DIALOG_UPDATE_OBJECT;
-    else if (strcmp(type, XANTE_UI_STR_DIALOG_INPUTSCROLL) == 0)
-        dialog = XANTE_UI_DIALOG_INPUTSCROLL;
-    else if (strcmp(type, XANTE_UI_STR_DIALOG_MIXEDFORM) == 0)
-        dialog = XANTE_UI_DIALOG_MIXEDFORM;
-    else if (strcmp(type, XANTE_UI_STR_DIALOG_BUILDLIST) == 0)
-        dialog = XANTE_UI_DIALOG_BUILDLIST;
-    else if (strcmp(type, XANTE_UI_STR_DIALOG_SPREADSHEET) == 0)
-        dialog = XANTE_UI_DIALOG_SPREADSHEET;
+    if (strcmp(type, XANTE_STR_WIDGET_MENU) == 0)
+        widget = XANTE_WIDGET_MENU_REFERENCE;
+    else if (strcmp(type, XANTE_STR_WIDGET_INPUT_INT) == 0)
+        widget = XANTE_WIDGET_INPUT_INT;
+    else if (strcmp(type, XANTE_STR_WIDGET_INPUT_FLOAT) == 0)
+        widget = XANTE_WIDGET_INPUT_FLOAT;
+    else if (strcmp(type, XANTE_STR_WIDGET_INPUT_DATE) == 0)
+        widget = XANTE_WIDGET_INPUT_DATE;
+    else if (strcmp(type, XANTE_STR_WIDGET_INPUT_STRING) == 0)
+        widget = XANTE_WIDGET_INPUT_STRING;
+    else if (strcmp(type, XANTE_STR_WIDGET_INPUT_PASSWD) == 0)
+        widget = XANTE_WIDGET_INPUT_PASSWD;
+    else if (strcmp(type, XANTE_STR_WIDGET_INPUT_TIME) == 0)
+        widget = XANTE_WIDGET_INPUT_TIME;
+    else if (strcmp(type, XANTE_STR_WIDGET_CALENDAR) == 0)
+        widget = XANTE_WIDGET_CALENDAR;
+    else if (strcmp(type, XANTE_STR_WIDGET_TIMEBOX) == 0)
+        widget = XANTE_WIDGET_TIMEBOX;
+    else if (strcmp(type, XANTE_STR_WIDGET_RADIO_CHECKLIST) == 0)
+        widget = XANTE_WIDGET_RADIO_CHECKLIST;
+    else if (strcmp(type, XANTE_STR_WIDGET_CHECKLIST) == 0)
+        widget = XANTE_WIDGET_CHECKLIST;
+    else if (strcmp(type, XANTE_STR_WIDGET_YESNO) == 0)
+        widget = XANTE_WIDGET_YES_NO;
+    else if (strcmp(type, XANTE_STR_WIDGET_DYNAMIC_MENU) == 0)
+        widget = XANTE_WIDGET_DYNAMIC_MENU_REFERENCE;
+    else if (strcmp(type, XANTE_STR_WIDGET_DELETE_DYNAMIC_MENU) == 0)
+        widget = XANTE_WIDGET_DELETE_DYNAMIC_MENU_ITEM;
+    else if (strcmp(type, XANTE_STR_WIDGET_ADD_DYNAMIC_MENU) == 0)
+        widget = XANTE_WIDGET_ADD_DYNAMIC_MENU_ITEM;
+    else if (strcmp(type, XANTE_STR_WIDGET_CUSTOM) == 0)
+        widget = XANTE_WIDGET_CUSTOM;
+    else if (strcmp(type, XANTE_STR_WIDGET_PROGRESS) == 0)
+        widget = XANTE_WIDGET_PROGRESS;
+    else if (strcmp(type, XANTE_STR_WIDGET_SPINNER_SYNC) == 0)
+        widget = XANTE_WIDGET_SPINNER_SYNC;
+    else if (strcmp(type, XANTE_STR_WIDGET_DOTS_SYNC) == 0)
+        widget = XANTE_WIDGET_DOTS_SYNC;
+    else if (strcmp(type, XANTE_STR_WIDGET_RANGE) == 0)
+        widget = XANTE_WIDGET_RANGE;
+    else if (strcmp(type, XANTE_STR_WIDGET_FILE_SELECT) == 0)
+        widget = XANTE_WIDGET_FILE_SELECT;
+    else if (strcmp(type, XANTE_STR_WIDGET_DIR_SELECT) == 0)
+        widget = XANTE_WIDGET_DIR_SELECT;
+    else if (strcmp(type, XANTE_STR_WIDGET_FILE_VIEW) == 0)
+        widget = XANTE_WIDGET_FILE_VIEW;
+    else if (strcmp(type, XANTE_STR_WIDGET_TAILBOX) == 0)
+        widget = XANTE_WIDGET_TAILBOX;
+    else if (strcmp(type, XANTE_STR_WIDGET_SCROLLTEXT) == 0)
+        widget = XANTE_WIDGET_SCROLLTEXT;
+    else if (strcmp(type, XANTE_STR_WIDGET_UPDATE_OBJECT) == 0)
+        widget = XANTE_WIDGET_UPDATE_OBJECT;
+    else if (strcmp(type, XANTE_STR_WIDGET_INPUTSCROLL) == 0)
+        widget = XANTE_WIDGET_INPUTSCROLL;
+    else if (strcmp(type, XANTE_STR_WIDGET_MIXEDFORM) == 0)
+        widget = XANTE_WIDGET_MIXEDFORM;
+    else if (strcmp(type, XANTE_STR_WIDGET_BUILDLIST) == 0)
+        widget = XANTE_WIDGET_BUILDLIST;
+    else if (strcmp(type, XANTE_STR_WIDGET_SPREADSHEET) == 0)
+        widget = XANTE_WIDGET_SPREADSHEET;
 
-    return dialog;
+    return widget;
 }
 
 /**
@@ -209,14 +209,14 @@ enum xante_ui_dialog translate_string_dialog_type(const char *type)
  */
 bool is_menu_item(const cl_string_t *type)
 {
-    enum xante_ui_dialog dlg_type;
+    enum xante_widget dlg_type;
 
-    dlg_type = translate_string_dialog_type(cl_string_valueof(type));
+    dlg_type = translate_string_widget_type(cl_string_valueof(type));
 
     switch (dlg_type) {
-        case XANTE_UI_DIALOG_MENU:
-        case XANTE_UI_DIALOG_DYNAMIC_MENU:
-        case XANTE_UI_DIALOG_DELETE_DYNAMIC_MENU_ITEM:
+        case XANTE_WIDGET_MENU_REFERENCE:
+        case XANTE_WIDGET_DYNAMIC_MENU_REFERENCE:
+        case XANTE_WIDGET_DELETE_DYNAMIC_MENU_ITEM:
             return true;
 
         default:
@@ -234,18 +234,18 @@ bool is_menu_item(const cl_string_t *type)
  *
  * @return Returns true is is an input kind or false if not.
  */
-bool item_has_ranges(enum xante_ui_dialog dlg_type)
+bool item_has_ranges(enum xante_widget dlg_type)
 {
     switch (dlg_type) {
-        case XANTE_UI_DIALOG_INPUT_INT:
-        case XANTE_UI_DIALOG_INPUT_FLOAT:
-        case XANTE_UI_DIALOG_INPUT_STRING:
-        case XANTE_UI_DIALOG_INPUT_PASSWD:
-        case XANTE_UI_DIALOG_PROGRESS:
-        case XANTE_UI_DIALOG_SPINNER_SYNC:
-        case XANTE_UI_DIALOG_DOTS_SYNC:
-        case XANTE_UI_DIALOG_RANGE:
-        case XANTE_UI_DIALOG_INPUTSCROLL:
+        case XANTE_WIDGET_INPUT_INT:
+        case XANTE_WIDGET_INPUT_FLOAT:
+        case XANTE_WIDGET_INPUT_STRING:
+        case XANTE_WIDGET_INPUT_PASSWD:
+        case XANTE_WIDGET_PROGRESS:
+        case XANTE_WIDGET_SPINNER_SYNC:
+        case XANTE_WIDGET_DOTS_SYNC:
+        case XANTE_WIDGET_RANGE:
+        case XANTE_WIDGET_INPUTSCROLL:
             return true;
 
         default:

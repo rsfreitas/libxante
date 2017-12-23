@@ -288,24 +288,24 @@ static int ev_item_value(struct xante_app *xpp, const char *event_name, va_list 
         return 0; /* Should we return an error? */
 
     /* Parse the item value */
-    switch (item->dialog_type) {
-        case XANTE_UI_DIALOG_INPUT_INT:
-        case XANTE_UI_DIALOG_CHECKLIST:
-        case XANTE_UI_DIALOG_RADIO_CHECKLIST:
-        case XANTE_UI_DIALOG_YES_NO:
+    switch (item->widget_type) {
+        case XANTE_WIDGET_INPUT_INT:
+        case XANTE_WIDGET_CHECKLIST:
+        case XANTE_WIDGET_RADIO_CHECKLIST:
+        case XANTE_WIDGET_YES_NO:
             arg.value = cl_object_create(CL_INT, va_arg(ap, int));
             break;
 
-        case XANTE_UI_DIALOG_INPUT_FLOAT:
+        case XANTE_WIDGET_INPUT_FLOAT:
             arg.value = cl_object_create(CL_FLOAT, (float)va_arg(ap, double));
             break;
 
-        case XANTE_UI_DIALOG_INPUT_DATE:
-        case XANTE_UI_DIALOG_INPUT_STRING:
-        case XANTE_UI_DIALOG_INPUT_PASSWD:
-        case XANTE_UI_DIALOG_INPUT_TIME:
-        case XANTE_UI_DIALOG_CALENDAR:
-        case XANTE_UI_DIALOG_TIMEBOX:
+        case XANTE_WIDGET_INPUT_DATE:
+        case XANTE_WIDGET_INPUT_STRING:
+        case XANTE_WIDGET_INPUT_PASSWD:
+        case XANTE_WIDGET_INPUT_TIME:
+        case XANTE_WIDGET_CALENDAR:
+        case XANTE_WIDGET_TIMEBOX:
             arg.value = cl_object_create(CL_STRING, va_arg(ap, char *));
             break;
 

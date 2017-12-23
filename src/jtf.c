@@ -387,7 +387,7 @@ static int parse_item_ranges(const cl_json_t *item, struct xante_item *i)
      * XXX: We just need to remember that the 'type' object must be previously
      *      loaded.
      */
-    if (item_has_ranges(i->dialog_type) == false)
+    if (item_has_ranges(i->widget_type) == false)
         return 0;
 
     ranges = cl_json_get_object_item(item, RANGES);
@@ -398,23 +398,23 @@ static int parse_item_ranges(const cl_json_t *item, struct xante_item *i)
     }
 
     /* Decide what ranges we're goind to parse */
-    switch (i->dialog_type) {
-        case XANTE_UI_DIALOG_INPUT_STRING:
-        case XANTE_UI_DIALOG_INPUT_PASSWD:
-        case XANTE_UI_DIALOG_INPUTSCROLL:
+    switch (i->widget_type) {
+        case XANTE_WIDGET_INPUT_STRING:
+        case XANTE_WIDGET_INPUT_PASSWD:
+        case XANTE_WIDGET_INPUTSCROLL:
             input_string = true;
             break;
 
-        case XANTE_UI_DIALOG_INPUT_INT:
-        case XANTE_UI_DIALOG_INPUT_FLOAT:
-        case XANTE_UI_DIALOG_RANGE:
+        case XANTE_WIDGET_INPUT_INT:
+        case XANTE_WIDGET_INPUT_FLOAT:
+        case XANTE_WIDGET_RANGE:
             max_range = true;
             min_range = true;
             break;
 
-        case XANTE_UI_DIALOG_PROGRESS:
-        case XANTE_UI_DIALOG_SPINNER_SYNC:
-        case XANTE_UI_DIALOG_DOTS_SYNC:
+        case XANTE_WIDGET_PROGRESS:
+        case XANTE_WIDGET_SPINNER_SYNC:
+        case XANTE_WIDGET_DOTS_SYNC:
             max_range = true;
             break;
 
@@ -429,7 +429,7 @@ static int parse_item_ranges(const cl_json_t *item, struct xante_item *i)
         return -1;
     }
 
-    expected_type = (i->dialog_type == XANTE_UI_DIALOG_INPUT_FLOAT) ? CL_JSON_NUMBER_FLOAT
+    expected_type = (i->widget_type == XANTE_WIDGET_INPUT_FLOAT) ? CL_JSON_NUMBER_FLOAT
                                                                     : CL_JSON_NUMBER;
 
     if ((parse_object_value(ranges, MIN_RANGE, expected_type, false,
@@ -514,39 +514,39 @@ static int parse_item_help(const cl_json_t *item, struct xante_item *it,
  */
 static void pre_adjust_item_info(struct xante_item *item)
 {
-    item->dialog_type =
-        translate_string_dialog_type(cl_string_valueof(item->type));
+    item->widget_type =
+        translate_string_widget_type(cl_string_valueof(item->type));
 
     /* Which properties are mandatory to an item? */
-    if ((item->dialog_type == XANTE_UI_DIALOG_MENU) ||
-        (item->dialog_type == XANTE_UI_DIALOG_DYNAMIC_MENU))
+    if ((item->widget_type == XANTE_WIDGET_MENU_REFERENCE) ||
+        (item->widget_type == XANTE_WIDGET_DYNAMIC_MENU_REFERENCE))
     {
         item->flags.referenced_menu = true;
     } else {
-        if ((item->dialog_type == XANTE_UI_DIALOG_INPUT_INT) ||
-            (item->dialog_type == XANTE_UI_DIALOG_INPUT_FLOAT) ||
-            (item->dialog_type == XANTE_UI_DIALOG_INPUT_DATE) ||
-            (item->dialog_type == XANTE_UI_DIALOG_INPUT_TIME) ||
-            (item->dialog_type == XANTE_UI_DIALOG_INPUT_STRING) ||
-            (item->dialog_type == XANTE_UI_DIALOG_CALENDAR) ||
-            (item->dialog_type == XANTE_UI_DIALOG_TIMEBOX) ||
-            (item->dialog_type == XANTE_UI_DIALOG_CHECKLIST) ||
-            (item->dialog_type == XANTE_UI_DIALOG_RADIO_CHECKLIST) ||
-            (item->dialog_type == XANTE_UI_DIALOG_YES_NO) ||
-            (item->dialog_type == XANTE_UI_DIALOG_RANGE) ||
-            (item->dialog_type == XANTE_UI_DIALOG_INPUTSCROLL) ||
-            (item->dialog_type == XANTE_UI_DIALOG_BUILDLIST) ||
-            (item->dialog_type == XANTE_UI_DIALOG_SPREADSHEET))
+        if ((item->widget_type == XANTE_WIDGET_INPUT_INT) ||
+            (item->widget_type == XANTE_WIDGET_INPUT_FLOAT) ||
+            (item->widget_type == XANTE_WIDGET_INPUT_DATE) ||
+            (item->widget_type == XANTE_WIDGET_INPUT_TIME) ||
+            (item->widget_type == XANTE_WIDGET_INPUT_STRING) ||
+            (item->widget_type == XANTE_WIDGET_CALENDAR) ||
+            (item->widget_type == XANTE_WIDGET_TIMEBOX) ||
+            (item->widget_type == XANTE_WIDGET_CHECKLIST) ||
+            (item->widget_type == XANTE_WIDGET_RADIO_CHECKLIST) ||
+            (item->widget_type == XANTE_WIDGET_YES_NO) ||
+            (item->widget_type == XANTE_WIDGET_RANGE) ||
+            (item->widget_type == XANTE_WIDGET_INPUTSCROLL) ||
+            (item->widget_type == XANTE_WIDGET_BUILDLIST) ||
+            (item->widget_type == XANTE_WIDGET_SPREADSHEET))
         {
             item->flags.config = true;
         }
 
         /* Almost every item needs to have the "options" object */
-        if (item->dialog_type != XANTE_UI_DIALOG_CUSTOM)
+        if (item->widget_type != XANTE_WIDGET_CUSTOM)
             item->flags.options = true;
     }
 
-    item->flags.ranges = item_has_ranges(item->dialog_type);
+    item->flags.ranges = item_has_ranges(item->widget_type);
 }
 
 /**
@@ -574,10 +574,10 @@ static int adjusts_item_info(struct xante_item *item)
         cl_string_unref(item->__helper.default_value);
     }
 
-    switch (item->dialog_type) {
-        case XANTE_UI_DIALOG_RADIO_CHECKLIST:
-        case XANTE_UI_DIALOG_CHECKLIST:
-        case XANTE_UI_DIALOG_BUILDLIST:
+    switch (item->widget_type) {
+        case XANTE_WIDGET_RADIO_CHECKLIST:
+        case XANTE_WIDGET_CHECKLIST:
+        case XANTE_WIDGET_BUILDLIST:
             if (item->__helper.options != NULL) {
                 t = cl_json_get_array_size(item->__helper.options);
                 item->list_items = cl_stringlist_create();
@@ -590,12 +590,12 @@ static int adjusts_item_info(struct xante_item *item)
             }
 
             /* There's nothing more to do if we're a buildlist object. */
-            if (item->dialog_type == XANTE_UI_DIALOG_BUILDLIST) {
+            if (item->widget_type == XANTE_WIDGET_BUILDLIST) {
                 break;
             }
 
-            item->dialog_checklist_type =
-                (item->dialog_type == XANTE_UI_DIALOG_CHECKLIST) ? FLAG_CHECK
+            item->widget_checklist_type =
+                (item->widget_type == XANTE_WIDGET_CHECKLIST) ? FLAG_CHECK
                                                                  : FLAG_RADIO;
 
             if (item->__helper.brief_options_help != NULL) {
@@ -611,38 +611,38 @@ static int adjusts_item_info(struct xante_item *item)
 
             break;
 
-        case XANTE_UI_DIALOG_INPUT_DATE:
+        case XANTE_WIDGET_INPUT_DATE:
             item->string_length = DATE_MAX_INPUT_LENGTH;
             break;
 
-        case XANTE_UI_DIALOG_INPUT_TIME:
+        case XANTE_WIDGET_INPUT_TIME:
             item->string_length = TIME_MAX_INPUT_LENGTH;
             break;
 
-        case XANTE_UI_DIALOG_INPUT_INT:
-        case XANTE_UI_DIALOG_RANGE:
+        case XANTE_WIDGET_INPUT_INT:
+        case XANTE_WIDGET_RANGE:
             i_min = *(int *)&item->__helper.min;
             i_max = *(int *)&item->__helper.max;
             item->min = cl_object_create(CL_INT, i_min);
             item->max = cl_object_create(CL_INT, i_max);
             break;
 
-        case XANTE_UI_DIALOG_PROGRESS:
-        case XANTE_UI_DIALOG_SPINNER_SYNC:
-        case XANTE_UI_DIALOG_DOTS_SYNC:
+        case XANTE_WIDGET_PROGRESS:
+        case XANTE_WIDGET_SPINNER_SYNC:
+        case XANTE_WIDGET_DOTS_SYNC:
             i_max = *(int *)&item->__helper.max;
             item->max = cl_object_create(CL_INT, i_max);
             break;
 
-        case XANTE_UI_DIALOG_INPUT_FLOAT:
+        case XANTE_WIDGET_INPUT_FLOAT:
             f_min = *(float *)&item->__helper.min;
             f_max = *(float *)&item->__helper.max;
             item->min = cl_object_create(CL_FLOAT, f_min);
             item->max = cl_object_create(CL_FLOAT, f_max);
             break;
 
-        case XANTE_UI_DIALOG_MIXEDFORM:
-        case XANTE_UI_DIALOG_SPREADSHEET:
+        case XANTE_WIDGET_MIXEDFORM:
+        case XANTE_WIDGET_SPREADSHEET:
             item->form_options = cl_json_parse(item->__helper.options);
 
             if (NULL == item->form_options) {
@@ -657,10 +657,10 @@ static int adjusts_item_info(struct xante_item *item)
             break;
     }
 
-    if ((item->dialog_type != XANTE_UI_DIALOG_CHECKLIST) &&
-        (item->dialog_type != XANTE_UI_DIALOG_RADIO_CHECKLIST) &&
-        (item->dialog_type != XANTE_UI_DIALOG_MIXEDFORM) &&
-        (item->dialog_type != XANTE_UI_DIALOG_SPREADSHEET))
+    if ((item->widget_type != XANTE_WIDGET_CHECKLIST) &&
+        (item->widget_type != XANTE_WIDGET_RADIO_CHECKLIST) &&
+        (item->widget_type != XANTE_WIDGET_MIXEDFORM) &&
+        (item->widget_type != XANTE_WIDGET_SPREADSHEET))
     {
         if (item->__helper.options != NULL) {
             item->options = cl_string_ref(item->__helper.options);
@@ -670,7 +670,7 @@ static int adjusts_item_info(struct xante_item *item)
         if (item->__helper.options != NULL)
             cl_string_unref(item->__helper.options);
 
-    if (item_has_ranges(item->dialog_type) == true)
+    if (item_has_ranges(item->widget_type) == true)
         item->value_spec = cl_spec_create(CL_READABLE | CL_WRITABLE, item->min,
                                           item->max, item->string_length);
 
@@ -684,7 +684,7 @@ static int parse_dynamic_menu_properties(const cl_json_t *menu,
     enum cl_json_type expected_type;
 
     /* We don't need to continue if we're not a dynamic menu */
-    if (m->menu_type != XANTE_UI_MENU_DYNAMIC)
+    if (m->menu_type != XANTE_MENU_DYNAMIC)
         return 0;
 
     dynamic = cl_json_get_object_item(menu, DYNAMIC);
@@ -754,7 +754,7 @@ static void adjusts_menu_info(struct xante_menu *menu, const void *copies)
     cl_json_t *node = NULL;
     cl_string_t *value = NULL;
 
-    if ((menu->menu_type == XANTE_UI_MENU_DYNAMIC) && (copies != NULL)) {
+    if ((menu->menu_type == XANTE_MENU_DYNAMIC) && (copies != NULL)) {
         /* If we don't have a block_prefix, we handle @copies as an array */
         if (NULL == menu->dynamic_block_prefix) {
             t = cl_json_get_array_size(copies);
@@ -876,10 +876,10 @@ static int parse_item_data(const cl_json_t *root, struct xante_item *item)
         return -1;
     }
 
-    /* Some dialogs require that the options object to be an array. */
-    if ((item->dialog_type == XANTE_UI_DIALOG_CHECKLIST) ||
-        (item->dialog_type == XANTE_UI_DIALOG_RADIO_CHECKLIST) ||
-        (item->dialog_type == XANTE_UI_DIALOG_BUILDLIST))
+    /* Some widgets require that the options object to be an array. */
+    if ((item->widget_type == XANTE_WIDGET_CHECKLIST) ||
+        (item->widget_type == XANTE_WIDGET_RADIO_CHECKLIST) ||
+        (item->widget_type == XANTE_WIDGET_BUILDLIST))
     {
         expected_option = CL_JSON_ARRAY;
     }
@@ -969,7 +969,7 @@ static int parse_item_labels(const cl_json_t *ui, struct xante_item *item)
 }
 
 /*
- * Parse flags to enable/disable buttons in the dialog.
+ * Parse flags to enable/disable buttons in the widget.
  */
 static int parse_item_buttons(const cl_json_t *ui, struct xante_item *item)
 {

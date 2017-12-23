@@ -40,16 +40,16 @@
  */
 
 static int prepare_content(struct xante_item *item,
-    ui_properties_t *properties)
+    session_t *session)
 {
     DIALOG_LISTITEM *listitem = NULL;
     cl_string_t *p = NULL;
     int index;
 
-    properties->litems = calloc(properties->number_of_items,
+    session->litems = calloc(session->number_of_items,
                                 sizeof(DIALOG_LISTITEM));
 
-    if (NULL == properties->litems) {
+    if (NULL == session->litems) {
         errno_set(XANTE_ERROR_NO_MEMORY);
         return -1;
     }
@@ -61,8 +61,8 @@ static int prepare_content(struct xante_item *item,
         cl_string_unref(p);
     }
 
-    for (index = 0; index < properties->number_of_items; index++) {
-        listitem = &properties->litems[index];
+    for (index = 0; index < session->number_of_items; index++) {
+        listitem = &session->litems[index];
         p = cl_stringlist_get(item->list_items, index);
 
         listitem->text = strdup(cl_string_valueof(p));
@@ -80,24 +80,24 @@ static int prepare_content(struct xante_item *item,
     return 0;
 }
 
-static void build_properties(ui_properties_t *properties)
+static void build_session(session_t *session)
 {
-    struct xante_item *item = properties->item;
+    struct xante_item *item = session->item;
 
-    properties->width = (item->geometry.width == 0) ? DIALOG_WIDTH
+    session->width = (item->geometry.width == 0) ? DIALOG_WIDTH
                                                     : item->geometry.width;
 
-    properties->height = (item->geometry.height == 0) ? DIALOG_HEIGHT
+    session->height = (item->geometry.height == 0) ? DIALOG_HEIGHT
                                                       : item->geometry.height;
 
-    properties->number_of_items = cl_stringlist_size(item->list_items);
-    properties->displayed_items = dlgx_get_dlg_items(properties->number_of_items);
+    session->number_of_items = cl_stringlist_size(item->list_items);
+    session->displayed_items = dlgx_get_dlg_items(session->number_of_items);
 
     /* Creates the UI content */
-    prepare_content(item, properties);
+    prepare_content(item, session);
 }
 
-static cl_string_t *get_current_result(const ui_properties_t *properties)
+static cl_string_t *get_current_result(const session_t *session)
 {
     int i;
     cl_string_t *ret = NULL;
@@ -105,8 +105,8 @@ static cl_string_t *get_current_result(const ui_properties_t *properties)
 
     ret = cl_string_create_empty(0);
 
-    for (i = 0; i < properties->number_of_items; i++) {
-        item = &properties->litems[i];
+    for (i = 0; i < session->number_of_items; i++) {
+        item = &session->litems[i];
 
         if (item->state == 1)
             cl_string_cat(ret, "%s,", item->text);
@@ -124,27 +124,27 @@ static cl_string_t *get_current_result(const ui_properties_t *properties)
  *
  */
 
-bool buildlist_value_changed(ui_properties_t *properties)
+bool buildlist_value_changed(session_t *session)
 {
-    struct xante_item *item = properties->item;
+    struct xante_item *item = session->item;
     cl_string_t *old_value = NULL;
     bool changed = false;
 
     old_value = cl_stringlist_flat(item->selected_items, ',');
 
-    if (cl_string_cmp(old_value, properties->result)) {
+    if (cl_string_cmp(old_value, session->result)) {
         changed = true;
 
          /* Set up details to save inside the internal changes list */
-        properties->change_item_name = cl_string_ref(item->name);
-        properties->change_old_value = cl_string_ref(old_value);
-        properties->change_new_value = cl_string_ref(properties->result);
+        session->change_item_name = cl_string_ref(item->name);
+        session->change_old_value = cl_string_ref(old_value);
+        session->change_new_value = cl_string_ref(session->result);
 
        /* Updates the item value */
         if (old_value != NULL)
             cl_stringlist_destroy(item->selected_items);
 
-        item->selected_items = cl_string_split(properties->result, ",");
+        item->selected_items = cl_string_split(session->result, ",");
     }
 
     if (old_value != NULL)
@@ -153,14 +153,14 @@ bool buildlist_value_changed(ui_properties_t *properties)
     return changed;
 }
 
-int buildlist(ui_properties_t *properties)
+int buildlist(session_t *session)
 {
-    struct xante_item *item = properties->item;
+    struct xante_item *item = session->item;
     int ret_dialog = DLG_EXIT_OK, selected_item = 0;;
     cl_string_t *cprompt = NULL;
 
     /* Prepares dialog content */
-    build_properties(properties);
+    build_session(session);
     cprompt = cl_string_create(cl_tr("Select an option to move it from origin to "
                                      "destination\n%-30s%-30s"),
                                cl_tr("Origin"),
@@ -168,13 +168,13 @@ int buildlist(ui_properties_t *properties)
 
     ret_dialog = dlg_buildlist(cl_string_valueof(item->name),
                                cl_string_valueof(cprompt),
-                               properties->height, properties->width,
-                               properties->displayed_items,
-                               properties->number_of_items,
-                               properties->litems, NULL, 0, &selected_item);
+                               session->height, session->width,
+                               session->displayed_items,
+                               session->number_of_items,
+                               session->litems, NULL, 0, &selected_item);
 
     if (ret_dialog == DLG_EXIT_OK)
-        properties->result = get_current_result(properties);
+        session->result = get_current_result(session);
 
     cl_string_unref(cprompt);
 

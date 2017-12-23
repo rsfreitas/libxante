@@ -39,22 +39,22 @@
  */
 
 static int prepare_content(const struct xante_menu *dm_menu,
-    ui_properties_t *properties)
+    session_t *session)
 {
     DIALOG_LISTITEM *litems = NULL, *listitem = NULL;
     int index;
     cl_list_node_t *node = NULL;
     struct xante_item *item = NULL;
 
-    properties->litems = calloc(properties->number_of_items,
+    session->litems = calloc(session->number_of_items,
                                 sizeof(DIALOG_LISTITEM));
 
-    if (NULL == properties->litems) {
+    if (NULL == session->litems) {
         errno_set(XANTE_ERROR_NO_MEMORY);
         return -1;
     }
 
-    for (index = 0; index < properties->number_of_items; index++) {
+    for (index = 0; index < session->number_of_items; index++) {
         node = cl_list_at(dm_menu->items, index);
         item = cl_list_node_content(node);
 
@@ -72,27 +72,27 @@ static int prepare_content(const struct xante_menu *dm_menu,
     return 0;
 }
 
-static void build_properties(const struct xante_menu *dm_menu,
-    ui_properties_t *properties)
+static void build_session(const struct xante_menu *dm_menu,
+    session_t *session)
 {
-    struct xante_item *item = properties->item;
+    struct xante_item *item = session->item;
     int prompt = 0;
 
     if (item->options != NULL)
         prompt = 1;
 
-    properties->number_of_items = cl_stringlist_size(dm_menu->items);
-    properties->width = (dm_menu->geometry.width == 0) ? DEFAULT_WIDTH
+    session->number_of_items = cl_stringlist_size(dm_menu->items);
+    session->width = (dm_menu->geometry.width == 0) ? DEFAULT_WIDTH
                                                        : dm_menu->geometry.width;
 
-    properties->displayed_items = dlgx_get_dlg_items(properties->number_of_items);
-    properties->height = (dm_menu->geometry.height == 0)
-                ? (properties->displayed_items + DIALOG_HEIGHT_WITHOUT_TEXT + prompt)
+    session->displayed_items = dlgx_get_dlg_items(session->number_of_items);
+    session->height = (dm_menu->geometry.height == 0)
+                ? (session->displayed_items + DIALOG_HEIGHT_WITHOUT_TEXT + prompt)
                 : dm_menu->geometry.height;
 
 
     /* Creates the UI content */
-    prepare_content(dm_menu, properties);
+    prepare_content(dm_menu, session);
 }
 
 /*
@@ -101,15 +101,15 @@ static void build_properties(const struct xante_menu *dm_menu,
  *
  */
 
-bool delete_dm_value_changed(ui_properties_t *properties)
+bool delete_dm_value_changed(session_t *session)
 {
-    if (NULL == properties->result)
+    if (NULL == session->result)
         return false;
 
     /* Set up details to save inside the internal changes list */
-    properties->change_item_name = cl_string_create("Removed dynamic menu entry");
-    properties->change_old_value = cl_string_create("EMPTY");
-    properties->change_new_value = cl_string_create("EMPTY");
+    session->change_item_name = cl_string_create("Removed dynamic menu entry");
+    session->change_old_value = cl_string_create("EMPTY");
+    session->change_new_value = cl_string_create("EMPTY");
 
     return true;
 }
@@ -122,10 +122,10 @@ bool delete_dm_value_changed(ui_properties_t *properties)
  *
  * @return Returns a ui_return_t value indicating if an item was deleted or not.
  */
-int delete_dm(ui_properties_t *properties)
+int delete_dm(session_t *session)
 {
-    struct xante_app *xpp = properties->xpp;
-    struct xante_item *item = properties->item;
+    struct xante_app *xpp = session->xpp;
+    struct xante_item *item = session->item;
     struct xante_menu *dm_menu = NULL;
     int ret_dialog = DLG_EXIT_OK, selected_index = -1;
 
@@ -148,26 +148,26 @@ int delete_dm(ui_properties_t *properties)
     }
 
     /* Prepare dialog content */
-    build_properties(dm_menu, properties);
+    build_session(dm_menu, session);
 
 #ifdef ALTERNATIVE_DIALOG
     ret_dialog = dlg_checklist(cl_string_valueof(item->name),
                                cl_string_valueof(item->options),
-                               properties->height, properties->width,
-                               properties->displayed_items,
-                               properties->number_of_items,
-                               properties->litems, " X",
-                               item->dialog_checklist_type,
+                               session->height, session->width,
+                               session->displayed_items,
+                               session->number_of_items,
+                               session->litems, " X",
+                               item->widget_checklist_type,
                                &selected_index, NULL, NULL,
-                               properties->editable_value);
+                               session->editable_value);
 #else
     ret_dialog = dlg_checklist(cl_string_valueof(item->name),
                                cl_string_valueof(item->options),
-                               properties->height, properties->width,
-                               properties->displayed_items,
-                               properties->number_of_items,
-                               properties->litems, " X",
-                               item->dialog_checklist_type,
+                               session->height, session->width,
+                               session->displayed_items,
+                               session->number_of_items,
+                               session->litems, " X",
+                               item->widget_checklist_type,
                                &selected_index);
 #endif
 
@@ -175,7 +175,7 @@ int delete_dm(ui_properties_t *properties)
         dm_delete(dm_menu, selected_index);
 
         /* We hold a simple string just to know that we have a change */
-        properties->result = cl_string_create("changed");
+        session->result = cl_string_create("changed");
     }
 
     return ret_dialog;

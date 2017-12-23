@@ -3,7 +3,7 @@
  * Description:
  *
  * Author: Rodrigo Freitas
- * Created at: Tue May  2 20:25:58 2017
+ * Created at: Sat Dec 23 10:34:31 2017
  * Project: libxante
  *
  * Copyright (C) 2017 Rodrigo Freitas
@@ -24,37 +24,33 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_UTILS_H
-#define _LIBXANTE_XT_UTILS_H          1
+#ifndef _LIBXANTE_XT_GADGET_H
+#define _LIBXANTE_XT_GADGET_H          1
 
 #ifndef LIBXANTE_COMPILE
 # ifndef _LIBXANTE_H
-#  error "Never use <xt_utils.h> directly; include <libxante.h> instead."
+#  error "Never use <xt_gadget.h> directly; include <libxante.h> instead."
 # endif
 #else
 
 /* Internal library declarations */
-bool is_valid_ui_dialog(enum xante_widget type);
-bool is_item_available(struct xante_item *item);
-enum xante_menu_type translate_string_menu_type(const char *type);
-enum xante_widget translate_string_widget_type(const char *type);
-bool item_has_ranges(enum xante_widget dlg_type);
-bool is_menu_item(const cl_string_t *type);
-int idigits(int n);
-bool file_exists(const char *pathname);
-
 #endif
 
 /**
- * @name xante_application_version
- * @brief Gets a string with the application version information.
+ * @name xante_dlg_messagebox
+ * @brief Creates a message box dialog.
  *
  * @param [in] xpp: The library main object.
+ * @param [in] type: The message box type (info, error, warning).
+ * @param [in] title: The dialog title.
+ * @param [in] message: The dialog message format.
+ * @param [in] ...: The dialog message content.
  *
- * @return On success returns a buffer with the application version or NULL
- *         otherwise.
+ * @return On success returns the button selected or -1 otherwise.
  */
-char *xante_application_version(xante_t *xpp);
+int xante_dlg_messagebox(struct xante_app *xpp, enum xante_msgbox_type type,
+                         const char *title, const char *message, ...)
+                         __attribute__((format(printf, 4, 5)));
 
 #endif
 

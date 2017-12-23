@@ -34,29 +34,29 @@
  *
  */
 
-bool yesno_validate_result(ui_properties_t *properties)
+bool yesno_validate_result(session_t *session)
 {
-    if (NULL == properties->result)
+    if (NULL == session->result)
         return false;
 
     return true;
 }
 
-bool yesno_value_changed(ui_properties_t *properties)
+bool yesno_value_changed(session_t *session)
 {
-    if (NULL == properties->result)
+    if (NULL == session->result)
         return false;
 
     return true;
 }
 
-void yesno_update_value(ui_properties_t *properties)
+void yesno_update_value(session_t *session)
 {
-    struct xante_item *item = properties->item;
+    struct xante_item *item = session->item;
     int choice;
 
     /* Updates the item value */
-    choice = cl_string_to_int(properties->result);
+    choice = cl_string_to_int(session->result);
 
     if (NULL == item->value)
         item->value = cl_object_create(CL_INT, choice);
@@ -71,15 +71,15 @@ void yesno_update_value(ui_properties_t *properties)
  * @return Returns a ui_return_t value indicating if the item's value has been
  *         changed (true) or not (false) with the dialog selected button.
  */
-int yesno(ui_properties_t *properties)
+int yesno(session_t *session)
 {
-    struct xante_app *xpp = properties->xpp;
-    struct xante_item *item = properties->item;
+    struct xante_app *xpp = session->xpp;
+    struct xante_item *item = session->item;
     const char *yes = cl_tr("Yes"), *no = cl_tr("No");
     cl_object_t *value = NULL;
     int choice = -1, ret_dialog = DLG_EXIT_OK;
 
-    if (properties->editable_value == false) {
+    if (session->editable_value == false) {
         xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
                              cl_tr("Cannot change the value of this item!"));
 
@@ -93,29 +93,29 @@ int yesno(ui_properties_t *properties)
     dialog_vars.no_label = (choice == 0 ? (char *)no : (char *)yes);
 
     /* Adjusts the window message */
-    properties->text = cl_string_dup(item->options);
-    properties->width = (item->geometry.width == 0) ? DEFAULT_WIDTH
+    session->text = cl_string_dup(item->options);
+    session->width = (item->geometry.width == 0) ? DEFAULT_WIDTH
                                                    : item->geometry.width;
 
-    properties->height = (item->geometry.height == 0)
-                             ? dlgx_count_lines(cl_string_valueof(properties->text),
-                                                properties->width)
+    session->height = (item->geometry.height == 0)
+                             ? dlgx_count_lines(cl_string_valueof(session->text),
+                                                session->width)
                              : item->geometry.height;
 
-    cl_string_rplchr(properties->text, XANTE_STR_LINE_BREAK, '\n');
+    cl_string_rplchr(session->text, XANTE_STR_LINE_BREAK, '\n');
     ret_dialog = dialog_yesno(cl_string_valueof(item->name),
-                              cl_string_valueof(properties->text),
-                              properties->height, properties->width);
+                              cl_string_valueof(session->text),
+                              session->height, session->width);
 
     if (ret_dialog == DLG_EXIT_OK) {
-        properties->result = cl_string_create("%d", !choice);
+        session->result = cl_string_create("%d", !choice);
 
         /* Set up details to save inside the internal changes list */
-        properties->change_item_name = cl_string_ref(item->name);
-        properties->change_old_value = cl_string_create("%s",
+        session->change_item_name = cl_string_ref(item->name);
+        session->change_old_value = cl_string_create("%s",
                                                         dialog_vars.no_label);
 
-        properties->change_new_value = cl_string_create("%s",
+        session->change_new_value = cl_string_create("%s",
                                                         dialog_vars.yes_label);
     }
 
