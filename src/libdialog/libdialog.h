@@ -124,10 +124,6 @@ void dlgx_set_backtitle(struct xante_app *xpp);
 char *dlgx_get_item_value_as_text(const struct xante_item *item);
 int dlgx_count_lines_by_delimiters(const char *text);
 int dlgx_count_lines(const char *text, int width);
-bool dlgx_question(struct xante_app *xpp, const char *title, const char *msg,
-                     const char *button1_label, const char *button2_label,
-                     const char *statusbar_text);
-
 void dlgx_update_cancel_button_label(const cl_string_t *label);
 void dlgx_update_ok_button_label(const cl_string_t *label);
 void dlgx_update_extra_button_label(const cl_string_t *label);

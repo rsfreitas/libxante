@@ -33,5 +33,18 @@
 # endif
 #endif
 
+/*
+ * Important: Internal library gadgets only must have the 'gadget_' prefix in
+ *            the function name.
+ *
+ *            Exported gadgets, the ones accessible inside modules, must have
+ *            the 'xante_dlg_' prefix.
+ */
+
+/* question */
+bool gadget_question(struct xante_app *xpp, const char *title, const char *msg,
+                     const char *button1_label, const char *button2_label,
+                     const char *statusbar_text);
+
 #endif
 

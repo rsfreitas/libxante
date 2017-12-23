@@ -675,9 +675,9 @@ static int manager_run(struct xante_app *xpp, cl_list_t *menus,
             case DLG_EXIT_CANCEL:
                 /* Are we leaving the application? */
                 if (strcmp(cancel_label, MAIN_MENU_CANCEL_LABEL) == 0) {
-                    if (dlgx_question(xpp, cl_tr("Closing"),
-                                      cl_tr("Do you really want to quit?"),
-                                      cl_tr("Yes"), cl_tr("No"), NULL) == true)
+                    if (gadget_question(xpp, cl_tr("Closing"),
+                                        cl_tr("Do you really want to quit?"),
+                                        cl_tr("Yes"), cl_tr("No"), NULL) == true)
                     {
                         loop = false;
                     }

@@ -248,9 +248,9 @@ static int write_config(struct xante_app *xpp)
 
     /* Do we need to ask the user for saving the changes? */
     if (xante_runtime_show_config_saving_question(xpp) == true) {
-        if (dlgx_question(xpp, cl_tr("Closing"),
-                          cl_tr("Do you want to save all modifications?"),
-                          cl_tr("Yes"), cl_tr("No"), NULL) == false)
+        if (gadget_question(xpp, cl_tr("Closing"),
+                            cl_tr("Do you want to save all modifications?"),
+                            cl_tr("Yes"), cl_tr("No"), NULL) == false)
         {
             runtime_set_exit_value(xpp, XANTE_RETURN_CONFIG_UNSAVED);
             xante_log_info(cl_tr("User chose not to save internal modifications"));
