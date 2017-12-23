@@ -62,21 +62,21 @@ static void ui_uninit(struct xante_app *xpp)
     runtime_set_ui_active(xpp, false);
 }
 
-static int ui_single_run(struct xante_app *xpp, struct xante_mjtf *mjtf)
+static int ui_single_run(struct xante_app *xpp, struct xante_single_instance_jtf *si)
 {
     char *btn_cancel_label = NULL;
     struct xante_menu *first = NULL;
     int ret_dialog = DLG_EXIT_CANCEL;
 
     /* Are we dealing with a complete menu? */
-    if (mjtf->menus != NULL) {
+    if (si->menus != NULL) {
         btn_cancel_label = strdup(cl_tr("Back"));
-        first = xante_menu_head(mjtf->menus);
-        ret_dialog = manager_run(xpp, mjtf->menus, first, btn_cancel_label);
+        first = xante_menu_head(si->menus);
+        ret_dialog = manager_run(xpp, si->menus, first, btn_cancel_label);
         xante_menu_unref(first);
         free(btn_cancel_label);
     } else /* Or a single item? */
-        ret_dialog = manager_run_widget(xpp, NULL, mjtf->object);
+        ret_dialog = manager_run_widget(xpp, NULL, si->object);
 
     return ret_dialog;
 }
@@ -830,23 +830,23 @@ end_block:
 }
 
 __PUB_API__ enum xante_return_value xante_manager_single_run(xante_t *xpp,
-    const char *raw_mjtf)
+    const char *raw_si)
 {
     enum xante_return_value exit_status = XANTE_RETURN_OK;
     int ret_dialog = DLG_EXIT_CANCEL;
     bool close_libdialog = false;
-    struct xante_mjtf *mjtf = NULL;
+    struct xante_single_instance_jtf *si = NULL;
 
     errno_clear();
 
-    if ((NULL == xpp) || (NULL == raw_mjtf)) {
+    if ((NULL == xpp) || (NULL == raw_si)) {
         errno_set(XANTE_ERROR_NULL_ARG);
         return XANTE_RETURN_ERROR;
     }
 
-    mjtf = mjtf_load(raw_mjtf);
+    si = si_jtf_load(raw_si);
 
-    if (NULL == mjtf)
+    if (NULL == si)
         return XANTE_RETURN_ERROR;
 
     if (xante_runtime_ui_active(xpp) == false) {
@@ -854,10 +854,10 @@ __PUB_API__ enum xante_return_value xante_manager_single_run(xante_t *xpp,
         close_libdialog = true;
     }
 
-    ret_dialog = ui_single_run(xpp, mjtf);
+    ret_dialog = ui_single_run(xpp, si);
 
-    if (mjtf != NULL)
-        mjtf_unload(mjtf);
+    if (si != NULL)
+        si_jtf_unload(si);
 
 #ifdef ALTERNATIVE_DIALOG
     exit_status = (ret_dialog == DLG_EXIT_TIMEOUT) ? XANTE_RETURN_TIMEOUT

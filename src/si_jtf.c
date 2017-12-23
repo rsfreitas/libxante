@@ -33,11 +33,11 @@
  *
  */
 
-static struct xante_mjtf *new_xante_mjtf(void)
+static struct xante_single_instance_jtf *new_xante_single_instance_jtf(void)
 {
-    struct xante_mjtf *m = NULL;
+    struct xante_single_instance_jtf *m = NULL;
 
-    m = calloc(1, sizeof(struct xante_mjtf));
+    m = calloc(1, sizeof(struct xante_single_instance_jtf));
 
     if (NULL == m) {
         errno_set(XANTE_ERROR_NO_MEMORY);
@@ -50,7 +50,7 @@ static struct xante_mjtf *new_xante_mjtf(void)
     return m;
 }
 
-static int mjtf_parse(struct xante_mjtf *mjtf, cl_json_t *jdata)
+static int si_jtf_parse(struct xante_single_instance_jtf *si, cl_json_t *jdata)
 {
     cl_json_t *object = NULL;
     struct xante_menu *menu = NULL;
@@ -60,7 +60,7 @@ static int mjtf_parse(struct xante_mjtf *mjtf, cl_json_t *jdata)
     object = cl_json_get_object_item(jdata, "menu");
 
     if (object != NULL) {
-        mjtf->menus = cl_list_create(xante_menu_destroy, NULL, NULL, NULL);
+        si->menus = cl_list_create(xante_menu_destroy, NULL, NULL, NULL);
         t = cl_json_get_array_size(object);
 
         for (i = 0; i < t; i++) {
@@ -69,7 +69,7 @@ static int mjtf_parse(struct xante_mjtf *mjtf, cl_json_t *jdata)
             if (NULL == menu)
                 return -1;
 
-            cl_list_unshift(mjtf->menus, menu, -1);
+            cl_list_unshift(si->menus, menu, -1);
         }
 
         return 0;
@@ -79,9 +79,9 @@ static int mjtf_parse(struct xante_mjtf *mjtf, cl_json_t *jdata)
     object = cl_json_get_object_item(jdata, "item");
 
     if (object != NULL) {
-        mjtf->object = jtf_parse_item(object, true);
+        si->object = jtf_parse_item(object, true);
 
-        if (NULL == mjtf->object)
+        if (NULL == si->object)
             return -1;
 
         return 0;
@@ -97,26 +97,26 @@ static int mjtf_parse(struct xante_mjtf *mjtf, cl_json_t *jdata)
  *
  */
 
-struct xante_mjtf *mjtf_load(const char *mjtf)
+struct xante_single_instance_jtf *si_jtf_load(const char *si)
 {
     cl_json_t *jdata = NULL;
-    struct xante_mjtf *m = NULL;
+    struct xante_single_instance_jtf *m = NULL;
 
-    jdata = cl_json_parse_string(mjtf);
+    jdata = cl_json_parse_string(si);
 
     if (NULL == jdata) {
         errno_set(XANTE_ERROR_WRONG_JTF_FORMAT);
         return NULL;
     }
 
-    m = new_xante_mjtf();
+    m = new_xante_single_instance_jtf();
 
     if (NULL == m)
         return NULL;
 
     /* Parse the MJTF */
-    if (mjtf_parse(m, jdata) < 0) {
-        mjtf_unload(m);
+    if (si_jtf_parse(m, jdata) < 0) {
+        si_jtf_unload(m);
         m = NULL;
     }
 
@@ -126,17 +126,17 @@ struct xante_mjtf *mjtf_load(const char *mjtf)
     return m;
 }
 
-void mjtf_unload(struct xante_mjtf *mjtf)
+void si_jtf_unload(struct xante_single_instance_jtf *si)
 {
-    if (NULL == mjtf)
+    if (NULL == si)
         return;
 
-    if (mjtf->menus != NULL)
-        cl_list_destroy(mjtf->menus);
+    if (si->menus != NULL)
+        cl_list_destroy(si->menus);
 
-    if (mjtf->object != NULL)
-        xante_item_unref(mjtf->object);
+    if (si->object != NULL)
+        xante_item_unref(si->object);
 
-    free(mjtf);
+    free(si);
 }
 

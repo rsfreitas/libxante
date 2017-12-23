@@ -447,7 +447,8 @@ static int parse_item_ranges(const cl_json_t *item, struct xante_item *i)
     return 0;
 }
 
-static int parse_item_config(const cl_json_t *item, struct xante_item *it)
+static int parse_item_config(const cl_json_t *item, struct xante_item *it,
+    bool single_instance)
 {
     cl_json_t *config = NULL;
 
@@ -458,8 +459,15 @@ static int parse_item_config(const cl_json_t *item, struct xante_item *it)
     config = cl_json_get_object_item(item, CONFIG);
 
     if (NULL == config) {
-        errno_set(XANTE_ERROR_JTF_NO_CONFIG_OBJECT);
-        return -1;
+        if (single_instance == false) {
+            errno_set(XANTE_ERROR_JTF_NO_CONFIG_OBJECT);
+            return -1;
+        } else {
+            /*
+             * If we're a single instance JTF we don't need to return an error
+             */
+            return 0;
+        }
     }
 
     if (parse_object_value(config, BLOCK, CL_JSON_STRING, true,
@@ -857,7 +865,8 @@ static bool data_object_must_exist(const struct xante_item *item)
 /*
  * Here we parse the "data" object inside an item.
  */
-static int parse_item_data(const cl_json_t *root, struct xante_item *item)
+static int parse_item_data(const cl_json_t *root, struct xante_item *item,
+    bool single_instance)
 {
     cl_json_t *data = NULL;
     enum cl_json_type expected_option = CL_JSON_STRING;
@@ -898,7 +907,7 @@ static int parse_item_data(const cl_json_t *root, struct xante_item *item)
         return -1;
     }
 
-    if (parse_item_config(data, item) < 0)
+    if (parse_item_config(data, item, single_instance) < 0)
         return -1;
 
     if (parse_item_ranges(data, item) < 0)
@@ -1070,17 +1079,17 @@ static int parse_item_ui(const cl_json_t *root, struct xante_item *item)
  * @name jtf_parse_item
  * @brief Parses a JTF item from a JSON node.
  *
- * With the \a ignores_object_id argument we provide a mechanism to manually
- * created JTF won't need the object_id to its items.
+ * With the \a single_instance as true we make the item parse flexible, ignoring
+ * its needed for the object_id and configurations objects to exist.
  *
  * @param [in] item: The item as a JSON node.
- * @param [in] ignores_object_id: A boolean flag to ignore the existence or not
- *                                of the object_id information.
+ * @param [in] single_instance: A boolean flag to tell if we're parsing the main
+ *                              application JTF file or a Single Instance JTF.
  *
  * @return On success returns a struct xante_item with the parsed info or
  *         NULL otherwise.
  */
-struct xante_item *jtf_parse_item(const cl_json_t *item, bool ignores_object_id)
+struct xante_item *jtf_parse_item(const cl_json_t *item, bool single_instance)
 {
     struct xante_item *i;
 
@@ -1108,7 +1117,7 @@ struct xante_item *jtf_parse_item(const cl_json_t *item, bool ignores_object_id)
         return NULL;
     }
 
-    if (parse_object_value(item, OBJECT_ID, CL_JSON_STRING, !ignores_object_id,
+    if (parse_object_value(item, OBJECT_ID, CL_JSON_STRING, !single_instance,
                            (void **)&i->object_id) < 0)
     {
         return NULL;
@@ -1120,7 +1129,7 @@ struct xante_item *jtf_parse_item(const cl_json_t *item, bool ignores_object_id)
      */
     pre_adjust_item_info(i);
 
-    if (parse_item_data(item, i) < 0)
+    if (parse_item_data(item, i, single_instance) < 0)
         return NULL;
 
     i->events = cl_json_dup(cl_json_get_object_item(item, EVENTS));

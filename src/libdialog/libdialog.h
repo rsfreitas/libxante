@@ -24,12 +24,12 @@
  * USA
  */
 
-#ifndef _LIBXANTE_ADDON_DIALOGS_H
-#define _LIBXANTE_ADDON_DIALOGS_H           1
+#ifndef _LIBXANTE_LIBDIALOG_H
+#define _LIBXANTE_LIBDIALOG_H           1
 
 #ifndef LIBXANTE_COMPILE
 # ifndef _LIBXANTE_H
-#  error "Never use <addon_dialogs.h> directly; include <libxante.h> instead."
+#  error "Never use <libdialog.h> directly; include <libxante.h> instead."
 # endif
 #endif
 

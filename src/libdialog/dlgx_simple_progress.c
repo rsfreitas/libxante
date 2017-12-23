@@ -25,7 +25,6 @@
  */
 
 #include "libxante.h"
-#include "addon_dialogs.h"
 
 #define MY_LEN                  (MAX_LEN) / 2
 #define MIN_HIGH                (4)

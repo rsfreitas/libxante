@@ -25,7 +25,6 @@
  */
 
 #include "libxante.h"
-#include "addon_dialogs.h"
 
 #define STEXT                               -1
 

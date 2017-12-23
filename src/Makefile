@@ -35,6 +35,7 @@ TARGET_STATIC := $(OUTPUTDIR)/$(STATIC_LIBNAME)
 
 INCLUDEDIR = -I../include
 INCLUDEDIR += -Iwidgets
+INCLUDEDIR += -Igadgets
 INCLUDEDIR += -Ilibdialog
 
 CFLAGS = -Wall -Wextra -fPIC -ggdb -O0 -g3 \

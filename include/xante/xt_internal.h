@@ -208,6 +208,11 @@ struct parser_helper {
     cl_string_t *default_value;
 };
 
+/* This structure holds an item's behaviour while running. */
+struct widget_behaviour {
+    bool        skip_config;
+};
+
 /** UI Menu Item informations */
 struct xante_item {
     /* JTF objects */
@@ -245,6 +250,7 @@ struct xante_item {
     struct window_labels    label;
     struct window_buttons   button;
     struct parser_helper    __helper;
+    struct widget_behaviour behaviour;
 };
 
 /** UI Menu informations */
@@ -329,7 +335,7 @@ struct xante_app {
 };
 
 /** The structure to hold a single widget to run */
-struct xante_mjtf {
+struct xante_single_instance_jtf {
     cl_list_t           *menus;
     struct xante_item   *object;
 };
@@ -347,14 +353,15 @@ struct xante_mjtf {
 #define bit_test(data, bit)                 ((((data) & (bit)) == (bit)) ? (true) : (false))
 
 /* Exclusive internal library headers */
-#include "ui_dialogs.h"
-#include "addon_dialogs.h"
+#include "libdialog.h"
+#include "widgets.h"
+#include "gadgets.h"
 
 #include "xante/xt_changes.h"
 #include "xante/xt_dm.h"
 #include "xante/xt_instance.h"
 #include "xante/xt_jtf.h"
-#include "xante/xt_mjtf.h"
+#include "xante/xt_si_jtf.h"
 #include "xante/xt_session.h"
 
 #endif

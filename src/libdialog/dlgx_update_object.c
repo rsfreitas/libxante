@@ -25,7 +25,6 @@
  */
 
 #include "libxante.h"
-#include "addon_dialogs.h"
 
 #define VIEW_BINDINGS   \
     DLG_KEYS_DATA(DLGK_GRID_UP, KEY_UP), \

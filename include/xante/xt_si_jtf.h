@@ -3,7 +3,7 @@
  * Description:
  *
  * Author: Rodrigo Freitas
- * Created at: Tue May  2 21:07:38 2017
+ * Created at: Tue Nov 21 19:26:16 2017
  * Project: libxante
  *
  * Copyright (C) 2017 Rodrigo Freitas
@@ -24,21 +24,18 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_JTF_H
-#define _LIBXANTE_XT_JTF_H          1
+#ifndef _LIBXANTE_XT_SI_JTF_H
+#define _LIBXANTE_XT_SI_JTF_H          1
 
 #ifndef LIBXANTE_COMPILE
 # ifndef _LIBXANTE_H
-#  error "Never use <xt_jtf.h> directly; include <libxante.h> instead."
+#  error "Never use <xt_si_jtf.h> directly; include <libxante.h> instead."
 # endif
 #else
 
 /* Internal library declarations */
-struct xante_item *jtf_parse_item(const cl_json_t *item, bool single_instance);
-struct xante_menu *jtf_parse_menu(const cl_json_t *menu);
-int jtf_parse_application_info(const char *pathname, struct xante_app *xpp);
-int jtf_parse_application(const char *pathname, struct xante_app *xpp);
-void jtf_release_info(struct xante_app *xpp);
+struct xante_single_instance_jtf *si_jtf_load(const char *si);
+void si_jtf_unload(struct xante_single_instance_jtf *si);
 
 #endif
 

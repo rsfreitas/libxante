@@ -24,12 +24,12 @@
  * USA
  */
 
-#ifndef _LIBXANTE_UI_DIALOGS_H
-#define _LIBXANTE_UI_DIALOGS_H      1
+#ifndef _LIBXANTE_WIDGETS_H
+#define _LIBXANTE_WIDGETS_H      1
 
 #ifndef LIBXANTE_COMPILE
 # ifndef _LIBXANTE_H
-#  error "Never use <ui_dialogs.h> directly; include <libxante.h> instead."
+#  error "Never use <widgets.h> directly; include <libxante.h> instead."
 # endif
 #endif
 

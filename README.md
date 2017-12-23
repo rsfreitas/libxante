@@ -1,4 +1,4 @@
-# libxante
+# libxante (eXtendable ApplicatioN TEmplate)
 
 A library to build (dialog based) applications using a specification file.
 
