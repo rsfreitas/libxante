@@ -78,6 +78,9 @@ int gadget_dispatch_call(const char *function, struct xante_app *xpp,
     df = cl_hashtable_get(__dispatch_table, function);
 
     if ((NULL == df) || (NULL == df->symbol)) {
+        xante_log_error(cl_tr("[dispatcher]: Function '%s' not found"),
+                        function);
+
         return 0;
     }
 

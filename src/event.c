@@ -186,14 +186,15 @@ static struct module_function get_function_name(cl_json_t *events,
 
     cl_string_unref(tmp);
 
-    if ((strcmp(cl_string_valueof(function.module), "xante") == 0) ||
-        (cl_string_length(function.module) == 0))
+    if ((strcmp(function.module, "xante") == 0) ||
+        (strlen(function.module) == 0))
     {
         function.need_internal_dispatch = true;
     } else
         function.external_module = true;
 
     tmp = cl_stringlist_get(l, 1);
+    memset(function.name, 0, sizeof(function.name));
     strncpy(function.name, cl_string_valueof(tmp),
             min((int)sizeof(function.name), cl_string_length(tmp)));
 
@@ -252,6 +253,16 @@ static int ev_item(struct xante_app *xpp, const char *event_name, va_list ap)
             pl = xpp->module.module;
         else {
             pl = cl_plugin_load(function.module);
+
+            if (NULL == pl) {
+                xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
+                                     cl_tr("Trying to load external module '%s': %s!"),
+                                     function.module,
+                                     cl_strerror(cl_get_last_error()));
+
+                return -1;
+            }
+
             unload = true;
         }
 
@@ -275,6 +286,7 @@ static int ev_item(struct xante_app *xpp, const char *event_name, va_list ap)
         if ((strcmp(event_name, EV_ITEM_SELECTED) == 0) ||
             (strcmp(event_name, EV_SYNC_ROUTINE) == 0) ||
             (strcmp(event_name, EV_UPDATE_ROUTINE) == 0) ||
+            (strcmp(event_name, EV_CUSTOM) == 0) ||
             (strcmp(event_name, EV_VALUE_CHECK) == 0) ||
             (strcmp(event_name, EV_VALUE_STRLEN) == 0))
         {

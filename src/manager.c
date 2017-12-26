@@ -438,12 +438,7 @@ static widget_result_t run_selected_dialog(session_t *session)
      * much anything in it and it is its responsibility to handle it.
      */
     if (item->widget_type == XANTE_WIDGET_CUSTOM) {
-        if (event_call(EV_CUSTOM, xpp, item, NULL) < 0) {
-            xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
-                                 cl_tr("Error calling custom object '%s'"),
-                                 cl_string_valueof(item->name));
-        }
-
+        event_call(EV_CUSTOM, xpp, item, NULL);
         return ret_dialog;
     }
 
