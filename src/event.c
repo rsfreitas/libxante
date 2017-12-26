@@ -28,6 +28,14 @@
 
 #include "libxante.h"
 
+struct module_function {
+    bool    found;
+    bool    need_internal_dispatch;
+    bool    external_module;
+    char    module[256];
+    char    name[512];
+};
+
 struct xante_event_argument {
     struct xante_app        *xpp;
     struct xante_menu       *menu;
@@ -136,32 +144,73 @@ static void ev_config(struct xante_app *xpp, const char *event_name, va_list ap)
     cl_object_unref(ret);
 }
 
-static char *get_function_name(cl_json_t *events, const char *event_name)
+/*
+ * Extracts the event function name from the "events" JTF object previously
+ * loaded.
+ *
+ * If the function name contains a colon character, it means that the function
+ * will be searched in the internal dispatch table or inside another module.
+ */
+static struct module_function get_function_name(cl_json_t *events,
+    const char *event_name)
 {
     cl_json_t *event = NULL;
-    cl_string_t *value = NULL;
-    char *name = NULL;
+    cl_string_t *value = NULL, *tmp;
+    cl_stringlist_t *l = NULL;
+    struct module_function function = {
+        .found = false,
+    };
 
     if (NULL == events)
-        return NULL;
+        return function;
 
     event = cl_json_get_object_item(events, event_name);
 
     if (NULL == event)
-        return NULL;
+        return function;
 
     value = cl_json_get_object_value(event);
-    name = strdup(cl_string_valueof(value));
+    function.need_internal_dispatch = false;
+    function.external_module = false;
+    function.found = true;
+    strncpy(function.name, cl_string_valueof(value),
+            min((int)sizeof(function.name), cl_string_length(value)));
 
-    return name;
+    if (cl_string_find(value, ':') < 0)
+        return function;
+
+    l = cl_string_split(value, ":");
+    tmp = cl_stringlist_get(l, 0);
+    strncpy(function.module, cl_string_valueof(tmp),
+            min((int)sizeof(function.module), cl_string_length(tmp)));
+
+    cl_string_unref(tmp);
+
+    if ((strcmp(cl_string_valueof(function.module), "xante") == 0) ||
+        (cl_string_length(function.module) == 0))
+    {
+        function.need_internal_dispatch = true;
+    } else
+        function.external_module = true;
+
+    tmp = cl_stringlist_get(l, 1);
+    strncpy(function.name, cl_string_valueof(tmp),
+            min((int)sizeof(function.name), cl_string_length(tmp)));
+
+    cl_string_unref(tmp);
+    cl_stringlist_destroy(l);
+
+    return function;
 }
 
 static int ev_item(struct xante_app *xpp, const char *event_name, va_list ap)
 {
     cl_object_t *ret = NULL;
+    cl_plugin_t *pl = NULL;
     struct xante_item *item = NULL;
-    char *function_name = NULL;
+    struct module_function function;
     int event_return = -1;
+    bool unload = false;
     struct xante_event_argument arg = {
         .xpp = xpp,
         .menu = NULL,
@@ -174,9 +223,9 @@ static int ev_item(struct xante_app *xpp, const char *event_name, va_list ap)
 
     item = va_arg(ap, void *);
     arg.item = item;
-    function_name = get_function_name(item->events, event_name);
+    function = get_function_name(item->events, event_name);
 
-    if (NULL == function_name) {
+    if (function.found == false) {
         xante_log_debug(cl_tr("Event function from event [%s] not found"),
                         event_name);
 
@@ -195,36 +244,48 @@ static int ev_item(struct xante_app *xpp, const char *event_name, va_list ap)
         arg.data = va_arg(ap, void *);
     }
 
-    ret = cl_plugin_foreign_call(xpp->module.module, function_name, CL_INT,
-                                 CL_PLUGIN_ARGS_POINTER, "xpp_arg", CL_POINTER,
-                                 &arg, NULL);
-
-    if (NULL == ret) {
-        if ((strcmp(event_name, EV_CUSTOM) == 0) ||
-            (strcmp(event_name, EV_EXTRA_BUTTON_PRESSED) == 0))
-        {
-            xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
-                                 "Event call error: %s",
-                                 cl_strerror(cl_get_last_error()));
+    if (function.need_internal_dispatch) {
+        event_return = gadget_dispatch_call(function.name, xpp, item,
+                                            arg.data);
+    } else {
+        if (function.external_module == false)
+            pl = xpp->module.module;
+        else {
+            pl = cl_plugin_load(function.module);
+            unload = true;
         }
 
-        goto end_block;
+        ret = cl_plugin_foreign_call(pl, function.name, CL_INT,
+                                     CL_PLUGIN_ARGS_POINTER, "xpp_arg", CL_POINTER,
+                                     &arg, NULL);
+
+        if (NULL == ret) {
+            if ((strcmp(event_name, EV_CUSTOM) == 0) ||
+                (strcmp(event_name, EV_EXTRA_BUTTON_PRESSED) == 0))
+            {
+                xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
+                                     "Event call error: %s",
+                                     cl_strerror(cl_get_last_error()));
+            }
+
+            return -1;
+        }
+
+        /* These events have a return value */
+        if ((strcmp(event_name, EV_ITEM_SELECTED) == 0) ||
+            (strcmp(event_name, EV_SYNC_ROUTINE) == 0) ||
+            (strcmp(event_name, EV_UPDATE_ROUTINE) == 0) ||
+            (strcmp(event_name, EV_VALUE_CHECK) == 0) ||
+            (strcmp(event_name, EV_VALUE_STRLEN) == 0))
+        {
+            event_return = CL_OBJECT_AS_INT(ret);
+        }
+
+        cl_object_unref(ret);
+
+        if (unload)
+            cl_plugin_unload(pl);
     }
-
-    /* These events have a return value */
-    if ((strcmp(event_name, EV_ITEM_SELECTED) == 0) ||
-        (strcmp(event_name, EV_SYNC_ROUTINE) == 0) ||
-        (strcmp(event_name, EV_UPDATE_ROUTINE) == 0) ||
-        (strcmp(event_name, EV_VALUE_CHECK) == 0) ||
-        (strcmp(event_name, EV_VALUE_STRLEN) == 0))
-    {
-        event_return = CL_OBJECT_AS_INT(ret);
-    }
-
-    cl_object_unref(ret);
-
-end_block:
-    free(function_name);
 
     return event_return;
 }
@@ -233,8 +294,8 @@ static int ev_menu(struct xante_app *xpp, const char *event_name, va_list ap)
 {
     cl_object_t *ret = NULL;
     struct xante_menu *menu = NULL;
-    char *function_name = NULL;
     int event_return = 0;
+    struct module_function function;
     struct xante_event_argument arg = {
         .xpp = xpp,
         .menu = NULL,
@@ -247,12 +308,12 @@ static int ev_menu(struct xante_app *xpp, const char *event_name, va_list ap)
 
     menu = va_arg(ap, void *);
     arg.menu = menu;
-    function_name = get_function_name(menu->events, event_name);
+    function = get_function_name(menu->events, event_name);
 
-    if (NULL == function_name)
+    if (function.found == false)
         return 0; /* Should we return an error? */
 
-    ret = cl_plugin_foreign_call(xpp->module.module, event_name, CL_INT,
+    ret = cl_plugin_foreign_call(xpp->module.module, function.name, CL_INT,
                                  CL_PLUGIN_ARGS_POINTER, "xpp_arg", CL_POINTER,
                                  &arg, NULL);
 
@@ -266,10 +327,12 @@ static int ev_menu(struct xante_app *xpp, const char *event_name, va_list ap)
 
 static int ev_item_value(struct xante_app *xpp, const char *event_name, va_list ap)
 {
-    cl_object_t *ret = NULL;
     struct xante_item *item = NULL;
-    char *function_name = NULL;
+    cl_object_t *ret = NULL;
+    cl_plugin_t *pl = NULL;
     int event_return = 0;
+    bool unload = false;
+    struct module_function function;
     struct xante_event_argument arg = {
         .xpp = xpp,
         .menu = NULL,
@@ -282,9 +345,9 @@ static int ev_item_value(struct xante_app *xpp, const char *event_name, va_list 
 
     item = va_arg(ap, void *);
     arg.item = item;
-    function_name = get_function_name(item->events, event_name);
+    function = get_function_name(item->events, event_name);
 
-    if (NULL == function_name)
+    if (function.found == false)
         return 0; /* Should we return an error? */
 
     /* Parse the item value */
@@ -313,15 +376,29 @@ static int ev_item_value(struct xante_app *xpp, const char *event_name, va_list 
             break;
     }
 
-    ret = cl_plugin_foreign_call(xpp->module.module, event_name, CL_INT,
-                                 CL_PLUGIN_ARGS_POINTER, "xpp_arg", CL_POINTER,
-                                 &arg, NULL);
+    if (function.need_internal_dispatch) {
+        event_return = gadget_dispatch_call(function.name, xpp, item,
+                                            arg.value);
+    } else {
+        if (function.external_module == false)
+            pl = xpp->module.module;
+        else {
+            pl = cl_plugin_load(function.module);
+            unload = true;
+        }
 
-    if (strcmp(event_name, EV_ITEM_VALUE_CONFIRM) == 0)
-        event_return = CL_OBJECT_AS_INT(ret);
+        ret = cl_plugin_foreign_call(pl, function.name, CL_INT,
+                                     CL_PLUGIN_ARGS_POINTER, "xpp_arg", CL_POINTER,
+                                     &arg, NULL);
 
-    free(function_name);
-    cl_object_unref(ret);
+        if (strcmp(event_name, EV_ITEM_VALUE_CONFIRM) == 0)
+            event_return = CL_OBJECT_AS_INT(ret);
+
+        cl_object_unref(ret);
+
+        if (unload)
+            cl_plugin_unload(pl);
+    }
 
     if (arg.value != NULL)
         cl_object_unref(arg.value);
@@ -337,16 +414,16 @@ static int ev_item_value(struct xante_app *xpp, const char *event_name, va_list 
 static void *ev_item_custom_data(struct xante_app *xpp,
     struct xante_item *item)
 {
-    char *function_name = NULL;
+    struct module_function function;
     cl_object_t *ret = NULL;
     void *data = NULL;
 
-    function_name = get_function_name(item->events, EV_ITEM_CUSTOM_DATA);
+    function = get_function_name(item->events, EV_ITEM_CUSTOM_DATA);
 
-    if (NULL == function_name)
+    if (function.found == false)
         return NULL; /* Should we return an error? */
 
-    ret = cl_plugin_foreign_call(xpp->module.module, function_name, CL_POINTER,
+    ret = cl_plugin_foreign_call(xpp->module.module, function.name, CL_POINTER,
                                  CL_PLUGIN_ARGS_VOID, NULL);
 
     if (NULL == ret)
@@ -459,6 +536,8 @@ int event_call(const char *event_name, struct xante_app *xpp, ...)
  */
 int event_init(struct xante_app *xpp, bool use_module)
 {
+    gadget_dispatch_init();
+
     if (use_module == false) {
         runtime_set_execute_module(xpp, false);
         return 0;
@@ -520,6 +599,8 @@ void event_uninit(struct xante_app *xpp)
         cl_stringlist_destroy(xpp->module.functions);
         cl_plugin_unload(xpp->module.module);
     }
+
+    gadget_dispatch_uninit();
 }
 
 /**

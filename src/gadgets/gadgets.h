@@ -41,6 +41,16 @@
  *            the 'xante_dlg_' prefix.
  */
 
+/* dtable */
+void gadget_dispatch_init(void);
+void gadget_dispatch_uninit(void);
+int gadget_dispatch_call(const char *function, struct xante_app *xpp,
+                         struct xante_item *item, void *data);
+
+void gadget_dispatch_add(const char *function,
+                         int (*symbol)(struct xante_app *, struct xante_item *,
+                                       void *));
+
 /* question */
 bool gadget_question(struct xante_app *xpp, const char *title, const char *msg,
                      const char *button1_label, const char *button2_label,
