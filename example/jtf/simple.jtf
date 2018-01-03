@@ -315,14 +315,21 @@
                                 "help": {
                                     "brief": "This is a help description yesno.",
                                     "description": "This is a help description."
+                                },
+                                "buttons": {
+                                    "extra": "EXTRA"
                                 }
+                            },
+                            "buttons": {
+                                "extra": true
                             }
                         },
                         "events": {
                             "item-selected": "yesno_selected",
                             "item-value-confirm": "yesno_confirm",
                             "item-value-updated": "yesno_updated",
-                            "item-exit": "yesno_exit"
+                            "item-exit": "yesno_exit",
+                            "extra-button-pressed": "foo_extra_btn"
                         }
                     },
                     {
@@ -339,10 +346,14 @@
                             }
                         },
                         "ui": {
+                            "btn_extra": true,
                             "labels": {
                                 "help": {
                                     "brief": "This is a help description calendar.",
                                     "description": "This is a help description."
+                                },
+                                "buttons": {
+                                    "extra": "EXTRA_BTN"
                                 }
                             }
                         }

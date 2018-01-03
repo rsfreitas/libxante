@@ -34,7 +34,7 @@
 #else
 
 /* Internal library declarations */
-struct xante_item *jtf_parse_item(const cl_json_t *item, bool ignores_object_id);
+struct xante_item *jtf_parse_item(const cl_json_t *item, bool single_instance);
 struct xante_menu *jtf_parse_menu(const cl_json_t *menu);
 int jtf_parse_application_info(const char *pathname, struct xante_app *xpp);
 int jtf_parse_application(const char *pathname, struct xante_app *xpp);

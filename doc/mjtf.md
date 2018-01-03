@@ -1,24 +1,25 @@
-# MJTF Dialog
+# SIJTF - Single Instance JTF
 
 This document describes a JTF format specifically used to build and run
-dialogs inside an already running application, called here as a
-Minimum JTF (MJTF).
+widgets inside an already running application, called here as a
+Single Instance JTF (SIJTF).
 
 With this mechanism one may build custom dialogs to be called on an
 active application.
 
 Its format is very similar to the JTF file, but instead having all
-specific application informations it only has the dialog part, with a
+specific application informations it only has the widgets part, with a
 few modifications.
 
 While in the JTF you must have all information about any accessible
 option described in details and inside an array of menus, in this kind
-of MJTF you can put only one specific kind of dialog to be built or
-even a sequence of dialogs to be accessible through the first one.
+of SIJTF you can put only one specific kind of widget to be built or
+even a sequence of widgets to be accessible through the first one
+(pretty much like a menu).
 
 ## Details
 
-### Specific dialog
+### Specific widget
 ```
 {
     "item": {

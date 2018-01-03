@@ -34,39 +34,39 @@
 /** Supported line break character to be used inside JTF strings */
 #define XANTE_STR_LINE_BREAK    '^'
 
-/** Supported UI dialogs */
-enum xante_ui_dialog {
-    XANTE_UI_DIALOG_UNKNOWN,
-    XANTE_UI_DIALOG_MENU,
-    XANTE_UI_DIALOG_INPUT_INT,
-    XANTE_UI_DIALOG_INPUT_FLOAT,
-    XANTE_UI_DIALOG_INPUT_DATE,
-    XANTE_UI_DIALOG_INPUT_STRING,
-    XANTE_UI_DIALOG_INPUT_PASSWD,
-    XANTE_UI_DIALOG_INPUT_TIME,
-    XANTE_UI_DIALOG_CALENDAR,
-    XANTE_UI_DIALOG_TIMEBOX,
-    XANTE_UI_DIALOG_RADIO_CHECKLIST,
-    XANTE_UI_DIALOG_CHECKLIST,
-    XANTE_UI_DIALOG_YES_NO,
-    XANTE_UI_DIALOG_DYNAMIC_MENU,
-    XANTE_UI_DIALOG_DELETE_DYNAMIC_MENU_ITEM,
-    XANTE_UI_DIALOG_ADD_DYNAMIC_MENU_ITEM,
-    XANTE_UI_DIALOG_CUSTOM,
-    XANTE_UI_DIALOG_PROGRESS,
-    XANTE_UI_DIALOG_SPINNER_SYNC,
-    XANTE_UI_DIALOG_DOTS_SYNC,
-    XANTE_UI_DIALOG_RANGE,
-    XANTE_UI_DIALOG_FILE_SELECT,
-    XANTE_UI_DIALOG_DIR_SELECT,
-    XANTE_UI_DIALOG_FILE_VIEW,
-    XANTE_UI_DIALOG_TAILBOX,
-    XANTE_UI_DIALOG_SCROLLTEXT,
-    XANTE_UI_DIALOG_UPDATE_OBJECT,
-    XANTE_UI_DIALOG_INPUTSCROLL,
-    XANTE_UI_DIALOG_MIXEDFORM,
-    XANTE_UI_DIALOG_BUILDLIST,
-    XANTE_UI_DIALOG_SPREADSHEET
+/** Supported UI widgets */
+enum xante_widget {
+    XANTE_WIDGET_UNKNOWN,
+    XANTE_WIDGET_MENU_REFERENCE,
+    XANTE_WIDGET_INPUT_INT,
+    XANTE_WIDGET_INPUT_FLOAT,
+    XANTE_WIDGET_INPUT_DATE,
+    XANTE_WIDGET_INPUT_STRING,
+    XANTE_WIDGET_INPUT_PASSWD,
+    XANTE_WIDGET_INPUT_TIME,
+    XANTE_WIDGET_CALENDAR,
+    XANTE_WIDGET_TIMEBOX,
+    XANTE_WIDGET_RADIO_CHECKLIST,
+    XANTE_WIDGET_CHECKLIST,
+    XANTE_WIDGET_YES_NO,
+    XANTE_WIDGET_DYNAMIC_MENU_REFERENCE,
+    XANTE_WIDGET_DELETE_DYNAMIC_MENU_ITEM,
+    XANTE_WIDGET_ADD_DYNAMIC_MENU_ITEM,
+    XANTE_WIDGET_CUSTOM,
+    XANTE_WIDGET_PROGRESS,
+    XANTE_WIDGET_SPINNER_SYNC,
+    XANTE_WIDGET_DOTS_SYNC,
+    XANTE_WIDGET_RANGE,
+    XANTE_WIDGET_FILE_SELECT,
+    XANTE_WIDGET_DIR_SELECT,
+    XANTE_WIDGET_FILE_VIEW,
+    XANTE_WIDGET_TAILBOX,
+    XANTE_WIDGET_SCROLLTEXT,
+    XANTE_WIDGET_UPDATE_OBJECT,
+    XANTE_WIDGET_INPUTSCROLL,
+    XANTE_WIDGET_MIXEDFORM,
+    XANTE_WIDGET_BUILDLIST,
+    XANTE_WIDGET_SPREADSHEET
 };
 
 /** An access mode from a menu or a menu item */
@@ -76,7 +76,7 @@ enum xante_access_mode {
     XANTE_ACCESS_EDIT       = (1 << 1)
 };
 
-/** Buttons from a dialog */
+/** Buttons from a widget */
 enum xante_buttons {
     XANTE_BTN_OK        = (1 << 0),
     XANTE_BTN_CANCEL    = (1 << 1),
@@ -92,9 +92,9 @@ enum xante_msgbox_type {
 };
 
 /** Types of menu */
-enum xante_ui_menu {
-    XANTE_UI_MENU_DEFAULT,
-    XANTE_UI_MENU_DYNAMIC
+enum xante_menu_type {
+    XANTE_MENU_DEFAULT,
+    XANTE_MENU_DYNAMIC
 };
 
 /** Session formats */
@@ -166,29 +166,24 @@ struct xante_change_entry {
 #ifdef LIBXANTE_COMPILE
 # define MAJOR_VERSION  0
 # define MINOR_VERSION  0
-# define RELEASE        8
+# define RELEASE        13
 
 # include "xante/xt_internal.h"
 #endif
 
 #include "xante/xt_auth.h"
-#include "xante/xt_changes.h"
 #include "xante/xt_config.h"
-#include "xante/xt_dialogs.h"
-#include "xante/xt_dm.h"
 #include "xante/xt_env.h"
 #include "xante/xt_error.h"
 #include "xante/xt_event.h"
+#include "xante/xt_gadget.h"
 #include "xante/xt_info.h"
 #include "xante/xt_init.h"
-#include "xante/xt_instance.h"
 #include "xante/xt_item.h"
-#include "xante/xt_jtf.h"
 #include "xante/xt_log.h"
+#include "xante/xt_manager.h"
 #include "xante/xt_menu.h"
-#include "xante/xt_mjtf.h"
 #include "xante/xt_runtime.h"
-#include "xante/xt_ui.h"
 #include "xante/xt_utils.h"
 
 #endif

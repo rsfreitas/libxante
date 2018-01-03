@@ -71,7 +71,7 @@ void runtime_start(struct xante_app *xpp, const char *caller_name)
     xante_runtime_set_discard_changes(xpp, false);
     xante_runtime_set_discard_changes_on_timeout(xpp, true);
     xante_runtime_set_force_config_file_saving(xpp, false);
-    xante_runtime_set_ui_dialog_timeout(xpp, UI_DIALOG_TIMEOUT);
+    xante_runtime_set_inactivity_timeout(xpp, DEFAULT_INACTIVITY_TIMEOUT);
     xante_runtime_set_show_config_saving_question(xpp, true);
     xante_runtime_set_accent_characters(xpp, false);
     xante_runtime_set_close_ui(xpp, false);
@@ -292,7 +292,7 @@ __PUB_API__ bool xante_runtime_force_config_file_saving(const xante_t *xpp)
     return x->runtime.force_config_file_saving;
 }
 
-__PUB_API__ int xante_runtime_set_ui_dialog_timeout(xante_t *xpp,
+__PUB_API__ int xante_runtime_set_inactivity_timeout(xante_t *xpp,
     unsigned int timeout)
 {
     struct xante_app *x = (struct xante_app *)xpp;
@@ -304,12 +304,12 @@ __PUB_API__ int xante_runtime_set_ui_dialog_timeout(xante_t *xpp,
         return -1;
     }
 
-    x->runtime.ui_dialog_timeout = timeout;
+    x->runtime.inactivity_timeout = timeout;
 
     return 0;
 }
 
-__PUB_API__ int xante_runtime_ui_dialog_timeout(const xante_t *xpp)
+__PUB_API__ int xante_runtime_inactivity_timeout(const xante_t *xpp)
 {
     struct xante_app *x = (struct xante_app *)xpp;
 
@@ -320,7 +320,7 @@ __PUB_API__ int xante_runtime_ui_dialog_timeout(const xante_t *xpp)
         return -1;
     }
 
-    return x->runtime.ui_dialog_timeout;
+    return x->runtime.inactivity_timeout;
 }
 
 __PUB_API__ int xante_runtime_set_show_config_saving_question(xante_t *xpp,

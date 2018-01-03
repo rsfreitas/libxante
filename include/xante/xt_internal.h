@@ -55,7 +55,7 @@
 #define __PUB_API__
 
 /** Timeout to close a dialog */
-#define UI_DIALOG_TIMEOUT                       120 /* seconds */
+#define DEFAULT_INACTIVITY_TIMEOUT              120 /* seconds */
 
 /** Supported events */
 #define EV_INIT                                 "xapl_init"
@@ -74,46 +74,47 @@
 #define EV_SYNC_ROUTINE                         "sync-routine"
 #define EV_VALUE_STRLEN                         "value-strlen"
 #define EV_VALUE_CHECK                          "value-check"
+#define EV_EXTRA_BUTTON_PRESSED                 "extra-button-pressed"
 
 /** Environment variables */
 #define ENV_XANTE_DB_PATH                       "XANTE_DB_PATH"
 #define ENV_XANTE_CFG_PATH                      "XANTE_CFG_PATH"
 
-/** String keys of a supported dialog */
-#define XANTE_UI_STR_DIALOG_MENU                "menu"
-#define XANTE_UI_STR_DIALOG_INPUT_INT           "input-int"
-#define XANTE_UI_STR_DIALOG_INPUT_FLOAT         "input-float"
-#define XANTE_UI_STR_DIALOG_INPUT_DATE          "input-date"
-#define XANTE_UI_STR_DIALOG_INPUT_TIME          "input-time"
-#define XANTE_UI_STR_DIALOG_INPUT_STRING        "input-string"
-#define XANTE_UI_STR_DIALOG_INPUT_PASSWD        "input-passwd"
-#define XANTE_UI_STR_DIALOG_CALENDAR            "calendar"
-#define XANTE_UI_STR_DIALOG_TIMEBOX             "timebox"
-#define XANTE_UI_STR_DIALOG_RADIO_CHECKLIST     "radio-checklist"
-#define XANTE_UI_STR_DIALOG_CHECKLIST           "checklist"
-#define XANTE_UI_STR_DIALOG_YESNO               "yesno"
-#define XANTE_UI_STR_DIALOG_DYNAMIC_MENU        "dynamic-menu"
-#define XANTE_UI_STR_DIALOG_DELETE_DYNAMIC_MENU "delete-dynamic-menu"
-#define XANTE_UI_STR_DIALOG_ADD_DYNAMIC_MENU    "add-dynamic-menu"
-#define XANTE_UI_STR_DIALOG_CUSTOM              "custom"
-#define XANTE_UI_STR_DIALOG_PROGRESS            "progress-bar"
-#define XANTE_UI_STR_DIALOG_SPINNER_SYNC        "spinner-sync"
-#define XANTE_UI_STR_DIALOG_DOTS_SYNC           "dots-sync"
-#define XANTE_UI_STR_DIALOG_RANGE               "range"
-#define XANTE_UI_STR_DIALOG_FILE_SELECT         "file-select"
-#define XANTE_UI_STR_DIALOG_DIR_SELECT          "dir-select"
-#define XANTE_UI_STR_DIALOG_FILE_VIEW           "file-view"
-#define XANTE_UI_STR_DIALOG_TAILBOX             "tailbox"
-#define XANTE_UI_STR_DIALOG_SCROLLTEXT          "scrolltext"
-#define XANTE_UI_STR_DIALOG_UPDATE_OBJECT       "update-object"
-#define XANTE_UI_STR_DIALOG_INPUTSCROLL         "inputscroll"
-#define XANTE_UI_STR_DIALOG_MIXEDFORM           "mixedform"
-#define XANTE_UI_STR_DIALOG_BUILDLIST           "buildlist"
-#define XANTE_UI_STR_DIALOG_SPREADSHEET         "spreadsheet"
+/** String keys of a supported widget */
+#define XANTE_STR_WIDGET_MENU                   "menu"
+#define XANTE_STR_WIDGET_INPUT_INT              "input-int"
+#define XANTE_STR_WIDGET_INPUT_FLOAT            "input-float"
+#define XANTE_STR_WIDGET_INPUT_DATE             "input-date"
+#define XANTE_STR_WIDGET_INPUT_TIME             "input-time"
+#define XANTE_STR_WIDGET_INPUT_STRING           "input-string"
+#define XANTE_STR_WIDGET_INPUT_PASSWD           "input-passwd"
+#define XANTE_STR_WIDGET_CALENDAR               "calendar"
+#define XANTE_STR_WIDGET_TIMEBOX                "timebox"
+#define XANTE_STR_WIDGET_RADIO_CHECKLIST        "radio-checklist"
+#define XANTE_STR_WIDGET_CHECKLIST              "checklist"
+#define XANTE_STR_WIDGET_YESNO                  "yesno"
+#define XANTE_STR_WIDGET_DYNAMIC_MENU           "dynamic-menu"
+#define XANTE_STR_WIDGET_DELETE_DYNAMIC_MENU    "delete-dynamic-menu"
+#define XANTE_STR_WIDGET_ADD_DYNAMIC_MENU       "add-dynamic-menu"
+#define XANTE_STR_WIDGET_CUSTOM                 "custom"
+#define XANTE_STR_WIDGET_PROGRESS               "progress-bar"
+#define XANTE_STR_WIDGET_SPINNER_SYNC           "spinner-sync"
+#define XANTE_STR_WIDGET_DOTS_SYNC              "dots-sync"
+#define XANTE_STR_WIDGET_RANGE                  "range"
+#define XANTE_STR_WIDGET_FILE_SELECT            "file-select"
+#define XANTE_STR_WIDGET_DIR_SELECT             "dir-select"
+#define XANTE_STR_WIDGET_FILE_VIEW              "file-view"
+#define XANTE_STR_WIDGET_TAILBOX                "tailbox"
+#define XANTE_STR_WIDGET_SCROLLTEXT             "scrolltext"
+#define XANTE_STR_WIDGET_UPDATE_OBJECT          "update-object"
+#define XANTE_STR_WIDGET_INPUTSCROLL            "inputscroll"
+#define XANTE_STR_WIDGET_MIXEDFORM              "mixedform"
+#define XANTE_STR_WIDGET_BUILDLIST              "buildlist"
+#define XANTE_STR_WIDGET_SPREADSHEET            "spreadsheet"
 
 /** String keys of supported menus */
-#define XANTE_UI_STR_DEFAULT_MENU               "default"
-#define XANTE_UI_STR_DYNAMIC_MENU               "dynamic"
+#define XANTE_STR_DEFAULT_MENU                  "default"
+#define XANTE_STR_DYNAMIC_MENU                  "dynamic"
 
 /** Different ways of creating menus */
 enum xante_menu_creator {
@@ -163,7 +164,7 @@ struct xante_runtime {
     bool                        show_config_saving_question;
     bool                        accent_characters;
     bool                        close_ui;
-    int                         ui_dialog_timeout;          /** seconds */
+    int                         inactivity_timeout;          /** seconds */
 };
 
 /** XanteItem's flag to be validated when parsed from a JTF file */
@@ -207,6 +208,11 @@ struct parser_helper {
     cl_string_t *default_value;
 };
 
+/* This structure holds an item's behaviour while running. */
+struct widget_behaviour {
+    bool        skip_config;
+};
+
 /** UI Menu Item informations */
 struct xante_item {
     /* JTF objects */
@@ -235,8 +241,8 @@ struct xante_item {
     cl_stringlist_t         *checklist_brief_options;
     cl_stringlist_t         *selected_items;
     cl_json_t               *form_options;
-    int                     dialog_checklist_type;
-    enum xante_ui_dialog    dialog_type;
+    int                     widget_checklist_type;
+    enum xante_widget       widget_type;
     struct flag_parser      flags;
     struct cl_ref_s         ref;
     bool                    cancel_update;
@@ -244,6 +250,7 @@ struct xante_item {
     struct window_labels    label;
     struct window_buttons   button;
     struct parser_helper    __helper;
+    struct widget_behaviour behaviour;
 };
 
 /** UI Menu informations */
@@ -263,7 +270,7 @@ struct xante_menu {
 
     /* Internal */
     enum xante_menu_creator     creator;
-    enum xante_ui_menu          menu_type;
+    enum xante_menu_type        menu_type;
     bool                        move_to_be_released;
     cl_list_t                   *items;
     struct cl_ref_s             ref;
@@ -327,8 +334,8 @@ struct xante_app {
     struct cl_ref_s         ref;
 };
 
-/** The structure to hold runtime dialog */
-struct xante_mjtf {
+/** The structure to hold a single widget to run */
+struct xante_single_instance_jtf {
     cl_list_t           *menus;
     struct xante_item   *object;
 };
@@ -343,11 +350,19 @@ struct xante_mjtf {
 
 #define max(a,b)                            ((a) > (b) ? (a) : (b))
 #define min(a,b)                            ((a) < (b) ? (a) : (b))
-#define bit_test(data, bit)                 (((data) & (bit)) == (bit)) ? true : false
+#define bit_test(data, bit)                 ((((data) & (bit)) == (bit)) ? (true) : (false))
 
 /* Exclusive internal library headers */
-#include "ui_dialogs.h"
-#include "addon_dialogs.h"
+#include "libdialog.h"
+#include "widgets.h"
+#include "gadgets.h"
+
+#include "xante/xt_changes.h"
+#include "xante/xt_dm.h"
+#include "xante/xt_instance.h"
+#include "xante/xt_jtf.h"
+#include "xante/xt_si_jtf.h"
+#include "xante/xt_session.h"
 
 #endif
 

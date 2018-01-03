@@ -322,7 +322,7 @@ __PUB_API__ const char *xante_menu_object_id(const xante_menu_t *menu)
     return cl_string_valueof(m->object_id);
 }
 
-__PUB_API__ enum xante_ui_menu xante_menu_type(const xante_menu_t *menu)
+__PUB_API__ enum xante_menu_type xante_menu_type(const xante_menu_t *menu)
 {
     struct xante_menu *m = (struct xante_menu *)menu;
 
