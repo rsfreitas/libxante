@@ -25,7 +25,7 @@
  */
 
 #ifndef _LIBXANTE_XT_AUTH_H
-#define _LIBXANTE_XT_AUTH_H          1
+#define _LIBXANTE_XT_AUTH_H
 
 #ifndef LIBXANTE_COMPILE
 # ifndef _LIBXANTE_H
@@ -39,8 +39,8 @@ int auth_init(struct xante_app *xpp, bool use_auth, enum xante_session session,
 
 void auth_uninit(struct xante_app *xpp);
 int auth_application_init(struct xante_app *xpp);
-enum xante_access_mode auth_get_access_level(const struct xante_app *xpp,
-                                              const struct xante_item *item);
+enum XanteAccessMode auth_get_access_level(const struct xante_app *xpp,
+                                           const struct xante_item *item);
 
 bool auth_check_item_access(const struct xante_app *xpp,
                             const struct xante_item *item);

@@ -383,7 +383,7 @@ struct xante_item *xante_item_create(void)
      * Our default behavior is to let every new item in edit mode. If one
      * desires to block any the JTF must be properly configured.
      */
-    item->mode = XANTE_ACCESS_EDIT;
+    item->mode = XanteAccessEdit;
 
     /*
      * Every item has, at least, the Ok and the Cancel buttons enabled.
@@ -442,7 +442,7 @@ __PUB_API__ const char *xante_item_object_id(const xante_item_t *item)
     return cl_string_valueof(i->object_id);
 }
 
-__PUB_API__ enum xante_access_mode xante_item_access_mode(const xante_item_t *item)
+__PUB_API__ enum XanteAccessMode xante_item_access_mode(const xante_item_t *item)
 {
     struct xante_item *i = (struct xante_item *)item;
 

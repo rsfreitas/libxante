@@ -25,7 +25,7 @@
  */
 
 #ifndef _LIBXANTE_XT_MENU_H
-#define _LIBXANTE_XT_MENU_H          1
+#define _LIBXANTE_XT_MENU_H
 
 #ifndef LIBXANTE_COMPILE
 # ifndef _LIBXANTE_H

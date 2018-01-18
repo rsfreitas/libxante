@@ -25,7 +25,7 @@
  */
 
 #ifndef _LIBXANTE_XT_INTERNAL_H
-#define _LIBXANTE_XT_INTERNAL_H                 1
+#define _LIBXANTE_XT_INTERNAL_H
 
 #ifndef DIALOG_H_included
 # include <dialog.h>
@@ -63,58 +63,10 @@
 #define EV_CONFIG_LOAD                          "xapl_config_load"
 #define EV_CONFIG_UNLOAD                        "xapl_config_unload"
 #define EV_CHANGES_SAVED                        "xapl_changes_saved"
-#define EV_ITEM_SELECTED                        "item-selected"
-#define EV_ITEM_VALUE_CONFIRM                   "item-value-confirm"
-#define EV_ITEM_VALUE_UPDATED                   "item-value-updated"
-#define EV_ITEM_EXIT                            "item-exit"
-#define EV_MENU_EXIT                            "menu-exit"
-#define EV_CUSTOM                               "custom-event"
-#define EV_UPDATE_ROUTINE                       "update-routine"
-#define EV_ITEM_CUSTOM_DATA                     "item-custom-data"
-#define EV_SYNC_ROUTINE                         "sync-routine"
-#define EV_VALUE_STRLEN                         "value-strlen"
-#define EV_VALUE_CHECK                          "value-check"
-#define EV_EXTRA_BUTTON_PRESSED                 "extra-button-pressed"
 
 /** Environment variables */
 #define ENV_XANTE_DB_PATH                       "XANTE_DB_PATH"
 #define ENV_XANTE_CFG_PATH                      "XANTE_CFG_PATH"
-
-/** String keys of a supported widget */
-#define XANTE_STR_WIDGET_MENU                   "menu"
-#define XANTE_STR_WIDGET_INPUT_INT              "input-int"
-#define XANTE_STR_WIDGET_INPUT_FLOAT            "input-float"
-#define XANTE_STR_WIDGET_INPUT_DATE             "input-date"
-#define XANTE_STR_WIDGET_INPUT_TIME             "input-time"
-#define XANTE_STR_WIDGET_INPUT_STRING           "input-string"
-#define XANTE_STR_WIDGET_INPUT_PASSWD           "input-passwd"
-#define XANTE_STR_WIDGET_CALENDAR               "calendar"
-#define XANTE_STR_WIDGET_TIMEBOX                "timebox"
-#define XANTE_STR_WIDGET_RADIO_CHECKLIST        "radio-checklist"
-#define XANTE_STR_WIDGET_CHECKLIST              "checklist"
-#define XANTE_STR_WIDGET_YESNO                  "yesno"
-#define XANTE_STR_WIDGET_DYNAMIC_MENU           "dynamic-menu"
-#define XANTE_STR_WIDGET_DELETE_DYNAMIC_MENU    "delete-dynamic-menu"
-#define XANTE_STR_WIDGET_ADD_DYNAMIC_MENU       "add-dynamic-menu"
-#define XANTE_STR_WIDGET_CUSTOM                 "custom"
-#define XANTE_STR_WIDGET_PROGRESS               "progress-bar"
-#define XANTE_STR_WIDGET_SPINNER_SYNC           "spinner-sync"
-#define XANTE_STR_WIDGET_DOTS_SYNC              "dots-sync"
-#define XANTE_STR_WIDGET_RANGE                  "range"
-#define XANTE_STR_WIDGET_FILE_SELECT            "file-select"
-#define XANTE_STR_WIDGET_DIR_SELECT             "dir-select"
-#define XANTE_STR_WIDGET_FILE_VIEW              "file-view"
-#define XANTE_STR_WIDGET_TAILBOX                "tailbox"
-#define XANTE_STR_WIDGET_SCROLLTEXT             "scrolltext"
-#define XANTE_STR_WIDGET_UPDATE_OBJECT          "update-object"
-#define XANTE_STR_WIDGET_INPUTSCROLL            "inputscroll"
-#define XANTE_STR_WIDGET_MIXEDFORM              "mixedform"
-#define XANTE_STR_WIDGET_BUILDLIST              "buildlist"
-#define XANTE_STR_WIDGET_SPREADSHEET            "spreadsheet"
-
-/** String keys of supported menus */
-#define XANTE_STR_DEFAULT_MENU                  "default"
-#define XANTE_STR_DYNAMIC_MENU                  "dynamic"
 
 /** Different ways of creating menus */
 enum xante_menu_creator {
@@ -216,7 +168,7 @@ struct widget_behaviour {
 /** UI Menu Item informations */
 struct xante_item {
     /* JTF objects */
-    enum xante_access_mode  mode;
+    enum XanteAccessMode    mode;
     cl_string_t             *type;
     cl_string_t             *name;
     cl_string_t             *object_id;

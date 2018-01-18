@@ -345,7 +345,7 @@ static struct xante_item *create_rme_item(struct xante_menu *menu,
 
     item->referenced_menu = cl_string_dup(item->object_id);
     item->type = cl_string_create(XANTE_STR_WIDGET_MENU);
-    item->mode = XANTE_ACCESS_VIEW;
+    item->mode = XanteAccessView;
     item->widget_type = XANTE_WIDGET_MENU_REFERENCE;
 
     return item;

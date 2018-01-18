@@ -350,7 +350,7 @@ void session_init(struct xante_app *xpp, struct xante_item *item,
      * the manager code.
      */
     if (item != NULL) {
-        if (bit_test(item->mode, XANTE_ACCESS_EDIT) == false)
+        if (bit_test(item->mode, XanteAccessEdit) == false)
             session->editable_value = false;
         else
             session->editable_value = true;

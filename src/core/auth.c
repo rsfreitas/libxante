@@ -156,9 +156,9 @@ static void insert_auth_data(sqlite3 *db)
         { "continuous", XANTE_SESSION_CONTINUOUS },
         { "single", XANTE_SESSION_SINGLE }
     }, levels[] = {
-        { "editable", XANTE_ACCESS_EDIT },
-        { "view-only", XANTE_ACCESS_VIEW },
-        { "blocked", XANTE_ACCESS_HIDDEN }
+        { "editable", XanteAccessEdit },
+        { "view-only", XanteAccessView },
+        { "blocked", XanteAccessHidden }
     };
 
     struct table tables[] = {
@@ -880,7 +880,7 @@ static int get_item_access_level(const struct xante_app *xpp,
     cl_list_node_t *node = NULL;
     cl_stringlist_t *row = NULL;
     cl_string_t *db_level = NULL;
-    int level = XANTE_ACCESS_EDIT;
+    int level = XanteAccessEdit;
 
     if (NULL == item->object_id)
         return level;
@@ -1072,19 +1072,19 @@ int auth_application_init(struct xante_app *xpp)
  *
  * @returns Returns the access level.
  */
-enum xante_access_mode auth_get_access_level(const struct xante_app *xpp,
+enum XanteAccessMode auth_get_access_level(const struct xante_app *xpp,
     const struct xante_item *item)
 {
     int mode = -1;
 
     /* We're running without authentication */
     if (xante_runtime_user_authentication((struct xante_app *)xpp) == false)
-        return XANTE_ACCESS_EDIT;
+        return XanteAccessEdit;
 
     mode = get_item_access_level(xpp, item);
 
     if (mode < 0)
-        mode = XANTE_ACCESS_EDIT;
+        mode = XanteAccessEdit;
 
     return mode;
 }
@@ -1102,11 +1102,11 @@ enum xante_access_mode auth_get_access_level(const struct xante_app *xpp,
 bool auth_check_item_access(const struct xante_app *xpp,
     const struct xante_item *item)
 {
-    enum xante_access_mode mode;
+    enum XanteAccessMode mode;
 
     mode = auth_get_access_level(xpp, item);
 
-    if (mode == XANTE_ACCESS_HIDDEN)
+    if (mode == XanteAccessHidden)
         return false;
 
     return true;

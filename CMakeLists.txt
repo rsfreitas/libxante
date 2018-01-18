@@ -30,7 +30,7 @@ if(ALTERNATIVE_DIALOG)
     include_directories("/usr/local/include/dialog")
 endif(ALTERNATIVE_DIALOG)
 
-file(GLOB SOURCES "src/*.c")
+file(GLOB SOURCES "src/core/*.c")
 file(GLOB LIBDIALOG_SOURCES "src/libdialog/*.c")
 file(GLOB WIDGETS_SOURCES "src/widgets/*.c")
 file(GLOB GADGETS_SOURCES "src/gadgets/*.c")

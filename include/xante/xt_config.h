@@ -25,7 +25,7 @@
  */
 
 #ifndef _LIBXANTE_XT_CONFIG_H
-#define _LIBXANTE_XT_CONFIG_H          1
+#define _LIBXANTE_XT_CONFIG_H
 
 #ifndef LIBXANTE_COMPILE
 # ifndef _LIBXANTE_H

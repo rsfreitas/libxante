@@ -25,7 +25,18 @@
  */
 
 #ifndef _LIBXANTE_H
-#define _LIBXANTE_H             1
+#define _LIBXANTE_H
+
+#ifdef LIBXANTE_COMPILE
+# define MAJOR_VERSION          0
+# define MINOR_VERSION          0
+# define RELEASE                14
+
+/* Common declarations to all library versions */
+# include "common/defs.h"
+#endif
+
+#ifndef __cplusplus
 
 #ifndef _COLLECTIONS_H
 # include <collections.h>
@@ -67,13 +78,6 @@ enum xante_widget {
     XANTE_WIDGET_MIXEDFORM,
     XANTE_WIDGET_BUILDLIST,
     XANTE_WIDGET_SPREADSHEET
-};
-
-/** An access mode from a menu or a menu item */
-enum xante_access_mode {
-    XANTE_ACCESS_HIDDEN     = 0,
-    XANTE_ACCESS_VIEW       = (1 << 0),
-    XANTE_ACCESS_EDIT       = (1 << 1)
 };
 
 /** Buttons from a widget */
@@ -164,10 +168,6 @@ struct xante_change_entry {
 };
 
 #ifdef LIBXANTE_COMPILE
-# define MAJOR_VERSION  0
-# define MINOR_VERSION  0
-# define RELEASE        13
-
 # include "xante/xt_internal.h"
 #endif
 
@@ -185,6 +185,15 @@ struct xante_change_entry {
 #include "xante/xt_menu.h"
 #include "xante/xt_runtime.h"
 #include "xante/xt_utils.h"
+
+#else   // __cplusplus
+
+#include "cpp/item.hpp"
+#include "cpp/menu.hpp"
+#include "cpp/jtf.hpp"
+#include "cpp/config.hpp"
+
+#endif  // __cplusplus
 
 #endif
 

@@ -36,72 +36,6 @@
  *
  */
 
-/* JTF object names */
-#define GENERAL             "general"
-#define APPLICATION_NAME    "name"
-#define MODULE_NAME         "module"
-#define CONFIG_PATHNAME     "config_pathname"
-#define LOG_PATHNAME        "log_pathname"
-#define LOG_LEVEL           "log_level"
-#define JTF_VERSION         "version"
-#define JTF_REVISION        "revision"
-#define JTF_BUILD           "build"
-#define JTF_BETA            "beta"
-#define UI                  "ui"
-#define MAIN_MENU           "main_menu"
-#define MENUS               "menus"
-#define NAME                "name"
-#define OBJECT_ID           "object_id"
-#define MODE                "mode"
-#define TYPE                "type"
-#define BLOCK               "block"
-#define ITEM                "item"
-#define HELP                "help"
-#define ITEMS               "items"
-#define OPTIONS             "options"
-#define DEFAULT_VALUE       "default_value"
-#define RANGES              "ranges"
-#define STRING_LENGTH       "string_length"
-#define MAX_RANGE           "max"
-#define MIN_RANGE           "min"
-#define CONFIG              "config"
-#define INTERNAL            "internal"
-#define APPLICATION         "application"
-#define COMPANY             "company"
-#define DYNAMIC             "dynamic"
-#define COPIES              "copies"
-#define BLOCK_PREFIX        "block_prefix"
-#define ORIGIN              "origin"
-#define EVENTS              "events"
-#define DESCRIPTION         "description"
-#define BRIEF               "brief"
-#define REFERENCED_MENU     "referenced_menu"
-#define BLOCKED_KEYS        "blocked_keys"
-#define ESC_KEY             "esc"
-#define SUSPEND_KEY         "suspend_key"
-#define STOP_KEY            "stop_key"
-#define GEOMETRY            "geometry"
-#define WIDTH               "width"
-#define HEIGHT              "height"
-#define DATA                "data"
-#define BTN_OK_LABEL        "ok"
-#define BTN_CANCEL_LABEL    "cancel"
-#define BTN_EXTRA_LABEL     "extra"
-#define BTN_HELP_LABEL      "help"
-#define BUTTONS             "buttons"
-#define TITLE               "title"
-#define BTN_OK              "btn_ok"
-#define BTN_CANCEL          "btn_cancel"
-#define BTN_EXTRA           "btn_extra"
-#define BTN_HELP            "btn_help"
-#define LABELS              "labels"
-
-/*
- *
- * Internal functions
- *
- */
-
 static inline bool object_type_check(enum cl_json_type type,
     enum cl_json_type expected_type)
 {
@@ -212,14 +146,14 @@ static int parse_application_version(cl_json_t *internal,
     cl_json_t *app = NULL;
     cl_string_t *tmp = NULL;
 
-    app = cl_json_get_object_item(internal, APPLICATION);
+    app = cl_json_get_object_item(internal, XANTE_JTF_APPLICATION);
 
     if (NULL == app) {
         errno_set(XANTE_ERROR_JTF_NO_APPLICATION_OBJECT);
         return -1;
     }
 
-    if (parse_object_value(app, JTF_VERSION, CL_JSON_STRING, true,
+    if (parse_object_value(app, XANTE_JTF_VERSION, CL_JSON_STRING, true,
                            (void **)&tmp) < 0)
     {
         return -1;
@@ -228,19 +162,19 @@ static int parse_application_version(cl_json_t *internal,
         cl_string_unref(tmp);
     }
 
-    if (parse_object_value(app, JTF_REVISION, CL_JSON_NUMBER, true,
+    if (parse_object_value(app, XANTE_JTF_REVISION, CL_JSON_NUMBER, true,
                            (void **)&xpp->info.revision) < 0)
     {
         return -1;
     }
 
-    if (parse_object_value(app, JTF_BUILD, CL_JSON_NUMBER, true,
+    if (parse_object_value(app, XANTE_JTF_BUILD, CL_JSON_NUMBER, true,
                            (void **)&xpp->info.build) < 0)
     {
         return -1;
     }
 
-    if (parse_object_value(app, JTF_BETA, CL_JSON_TRUE, true,
+    if (parse_object_value(app, XANTE_JTF_BETA, CL_JSON_TRUE, true,
                            (void **)&xpp->info.beta) < 0)
     {
         return -1;
@@ -261,24 +195,24 @@ static void parse_blocked_keys(const cl_json_t *general, struct xante_app *xpp)
     xpp->info.suspend_key = false;
     xpp->info.stop_key = false;
 
-    blocked_keys = cl_json_get_object_item(general, BLOCKED_KEYS);
+    blocked_keys = cl_json_get_object_item(general, XANTE_JTF_BLOCKED_KEYS);
 
     if (NULL == blocked_keys)
         return;
 
-    if (parse_object_value(blocked_keys, ESC_KEY, CL_JSON_TRUE, false,
+    if (parse_object_value(blocked_keys, XANTE_JTF_ESC_KEY, CL_JSON_TRUE, false,
                            (void **)&xpp->info.esc_key) < 0)
     {
         return;
     }
 
-    if (parse_object_value(blocked_keys, SUSPEND_KEY, CL_JSON_TRUE, false,
-                           (void **)&xpp->info.suspend_key) < 0)
+    if (parse_object_value(blocked_keys, XANTE_JTF_SUSPEND_KEY, CL_JSON_TRUE,
+                           false, (void **)&xpp->info.suspend_key) < 0)
     {
         return;
     }
 
-    if (parse_object_value(blocked_keys, STOP_KEY, CL_JSON_TRUE, false,
+    if (parse_object_value(blocked_keys, XANTE_JTF_STOP_KEY, CL_JSON_TRUE, false,
                            (void **)&xpp->info.stop_key) < 0)
     {
         return;
@@ -290,7 +224,7 @@ static int parse_jtf_info(cl_json_t *jtf, struct xante_app *xpp)
     cl_json_t *general = NULL, *internal = NULL;
     cl_string_t *tmp = NULL;
 
-    internal = cl_json_get_object_item(jtf, INTERNAL);
+    internal = cl_json_get_object_item(jtf, XANTE_JTF_INTERNAL);
 
     if (NULL == internal) {
         errno_set(XANTE_ERROR_JTF_NO_INTERNAL_OBJECT);
@@ -300,15 +234,15 @@ static int parse_jtf_info(cl_json_t *jtf, struct xante_app *xpp)
     if (parse_application_version(internal, xpp) < 0)
         return -1;
 
-    general = cl_json_get_object_item(jtf, GENERAL);
+    general = cl_json_get_object_item(jtf, XANTE_JTF_GENERAL);
 
     if (NULL == general) {
         errno_set(XANTE_ERROR_JTF_NO_GENERAL_OBJECT);
         return -1;
     }
 
-    if (parse_object_value(general, APPLICATION_NAME, CL_JSON_STRING, true,
-                           (void **)&tmp) < 0)
+    if (parse_object_value(general, XANTE_JTF_APPLICATION_NAME, CL_JSON_STRING,
+                           true, (void **)&tmp) < 0)
     {
         return -1;
     } else {
@@ -316,7 +250,7 @@ static int parse_jtf_info(cl_json_t *jtf, struct xante_app *xpp)
         cl_string_unref(tmp);
     }
 
-    if (parse_object_value(general, MODULE_NAME, CL_JSON_STRING, true,
+    if (parse_object_value(general, XANTE_JTF_MODULE_NAME, CL_JSON_STRING, true,
                            (void **)&tmp) < 0)
     {
         return -1;
@@ -325,7 +259,7 @@ static int parse_jtf_info(cl_json_t *jtf, struct xante_app *xpp)
         cl_string_unref(tmp);
     }
 
-    if (parse_object_value(general, CONFIG_PATHNAME, CL_JSON_STRING, true,
+    if (parse_object_value(general, XANTE_JTF_CONFIG_PATHNAME, CL_JSON_STRING, true,
                            (void **)&tmp) < 0)
     {
         return -1;
@@ -334,7 +268,7 @@ static int parse_jtf_info(cl_json_t *jtf, struct xante_app *xpp)
         cl_string_unref(tmp);
     }
 
-    if (parse_object_value(general, LOG_PATHNAME, CL_JSON_STRING, true,
+    if (parse_object_value(general, XANTE_JTF_LOG_PATHNAME, CL_JSON_STRING, true,
                            (void **)&tmp) < 0)
     {
         return -1;
@@ -343,7 +277,7 @@ static int parse_jtf_info(cl_json_t *jtf, struct xante_app *xpp)
         cl_string_unref(tmp);
     }
 
-    if (parse_object_value(general, LOG_LEVEL, CL_JSON_STRING, true,
+    if (parse_object_value(general, XANTE_JTF_LOG_LEVEL, CL_JSON_STRING, true,
                            (void **)&tmp) < 0)
     {
         return -1;
@@ -352,7 +286,7 @@ static int parse_jtf_info(cl_json_t *jtf, struct xante_app *xpp)
         cl_string_unref(tmp);
     }
 
-    if (parse_object_value(general, COMPANY, CL_JSON_STRING, true,
+    if (parse_object_value(general, XANTE_JTF_COMPANY, CL_JSON_STRING, true,
                            (void **)&tmp) < 0)
     {
         return -1;
@@ -361,7 +295,7 @@ static int parse_jtf_info(cl_json_t *jtf, struct xante_app *xpp)
         cl_string_unref(tmp);
     }
 
-    if (parse_object_value(general, DESCRIPTION, CL_JSON_STRING, true,
+    if (parse_object_value(general, XANTE_JTF_DESCRIPTION, CL_JSON_STRING, true,
                            (void **)&tmp) < 0)
     {
         return -1;
@@ -390,7 +324,7 @@ static int parse_item_ranges(const cl_json_t *item, struct xante_item *i)
     if (item_has_ranges(i->widget_type) == false)
         return 0;
 
-    ranges = cl_json_get_object_item(item, RANGES);
+    ranges = cl_json_get_object_item(item, XANTE_JTF_RANGES);
 
     if (NULL == ranges) {
         errno_set(XANTE_ERROR_JTF_NO_RANGES);
@@ -422,7 +356,7 @@ static int parse_item_ranges(const cl_json_t *item, struct xante_item *i)
             break;
      }
 
-    if ((parse_object_value(ranges, STRING_LENGTH, CL_JSON_NUMBER, false,
+    if ((parse_object_value(ranges, XANTE_JTF_STRING_LENGTH, CL_JSON_NUMBER, false,
                             (void **)&i->string_length) < 0) &&
         input_string)
     {
@@ -432,13 +366,13 @@ static int parse_item_ranges(const cl_json_t *item, struct xante_item *i)
     expected_type = (i->widget_type == XANTE_WIDGET_INPUT_FLOAT) ? CL_JSON_NUMBER_FLOAT
                                                                     : CL_JSON_NUMBER;
 
-    if ((parse_object_value(ranges, MIN_RANGE, expected_type, false,
+    if ((parse_object_value(ranges, XANTE_JTF_MIN_RANGE, expected_type, false,
                             (void **)&i->__helper.min) < 0) && min_range)
     {
         return -1;
     }
 
-    if ((parse_object_value(ranges, MAX_RANGE, expected_type, false,
+    if ((parse_object_value(ranges, XANTE_JTF_MAX_RANGE, expected_type, false,
                             (void **)&i->__helper.max) < 0) && max_range)
     {
         return -1;
@@ -456,7 +390,7 @@ static int parse_item_config(const cl_json_t *item, struct xante_item *it,
     if (it->flags.config == false)
         return 0;
 
-    config = cl_json_get_object_item(item, CONFIG);
+    config = cl_json_get_object_item(item, XANTE_JTF_CONFIG);
 
     if (NULL == config) {
         if (single_instance == false) {
@@ -470,13 +404,13 @@ static int parse_item_config(const cl_json_t *item, struct xante_item *it,
         }
     }
 
-    if (parse_object_value(config, BLOCK, CL_JSON_STRING, true,
+    if (parse_object_value(config, XANTE_JTF_BLOCK, CL_JSON_STRING, true,
                            (void **)&it->config_block) < 0)
     {
         return -1;
     }
 
-    if (parse_object_value(config, ITEM, CL_JSON_STRING, true,
+    if (parse_object_value(config, XANTE_JTF_ITEM, CL_JSON_STRING, true,
                            (void **)&it->config_item) < 0)
     {
         return -1;
@@ -490,24 +424,24 @@ static int parse_item_help(const cl_json_t *item, struct xante_item *it,
 {
     cl_json_t *help = NULL;
 
-    help = cl_json_get_object_item(item, HELP);
+    help = cl_json_get_object_item(item, XANTE_JTF_HELP);
 
     if (NULL == help)
         return 0;
 
-    if (parse_object_value(help, BRIEF, CL_JSON_STRING, false,
+    if (parse_object_value(help, XANTE_JTF_BRIEF, CL_JSON_STRING, false,
                            (void **)&it->brief_help) < 0)
     {
         return -1;
     }
 
-    if (parse_object_value(help, DESCRIPTION, CL_JSON_STRING, false,
+    if (parse_object_value(help, XANTE_JTF_DESCRIPTION, CL_JSON_STRING, false,
                            (void **)&it->descriptive_help) < 0)
     {
         return -1;
     }
 
-    if (parse_object_value(help, OPTIONS, CL_JSON_ARRAY, false,
+    if (parse_object_value(help, XANTE_JTF_OPTIONS, CL_JSON_ARRAY, false,
                            brief_options_help) < 0)
     {
         return -1;
@@ -695,14 +629,14 @@ static int parse_dynamic_menu_properties(const cl_json_t *menu,
     if (m->menu_type != XANTE_MENU_DYNAMIC)
         return 0;
 
-    dynamic = cl_json_get_object_item(menu, DYNAMIC);
+    dynamic = cl_json_get_object_item(menu, XANTE_JTF_DYNAMIC);
 
     if (NULL == dynamic) {
         errno_set(XANTE_ERROR_JTF_NO_DYNAMIC_OBJECT);
         return -1;
     }
 
-    if (parse_object_value(dynamic, BLOCK_PREFIX, CL_JSON_STRING, false,
+    if (parse_object_value(dynamic, XANTE_JTF_BLOCK_PREFIX, CL_JSON_STRING, false,
                            (void **)&m->dynamic_block_prefix) < 0)
     {
         return -1;
@@ -711,23 +645,23 @@ static int parse_dynamic_menu_properties(const cl_json_t *menu,
     expected_type = (NULL == m->dynamic_block_prefix) ? CL_JSON_ARRAY
                                                       : CL_JSON_NUMBER;
 
-    if (parse_object_value(dynamic, COPIES, expected_type, false, copies) < 0)
+    if (parse_object_value(dynamic, XANTE_JTF_COPIES, expected_type, false, copies) < 0)
         return -1;
 
-    origin = cl_json_get_object_item(dynamic, ORIGIN);
+    origin = cl_json_get_object_item(dynamic, XANTE_JTF_ORIGIN);
 
     if (NULL == origin) {
         errno_set(XANTE_ERROR_JTF_NO_ORIGIN_OBJECT);
         return -1;
     }
 
-    if (parse_object_value(origin, BLOCK, CL_JSON_STRING, false,
+    if (parse_object_value(origin, XANTE_JTF_BLOCK, CL_JSON_STRING, false,
                            (void **)&m->dynamic_origin_block) < 0)
     {
         return -1;
     }
 
-    if (parse_object_value(origin, ITEM, CL_JSON_STRING, false,
+    if (parse_object_value(origin, XANTE_JTF_ITEM, CL_JSON_STRING, false,
                            (void **)&m->dynamic_origin_item) < 0)
     {
         return -1;
@@ -784,7 +718,7 @@ static int parse_ui(cl_json_t *jtf, struct xante_app *xpp)
     struct xante_menu *menu = NULL;
     int i, t;
 
-    ui = cl_json_get_object_item(jtf, UI);
+    ui = cl_json_get_object_item(jtf, XANTE_JTF_UI);
 
     if (NULL == ui) {
         errno_set(XANTE_ERROR_JTF_NO_UI_OBJECT);
@@ -792,7 +726,7 @@ static int parse_ui(cl_json_t *jtf, struct xante_app *xpp)
     }
 
     /* menus */
-    node = cl_json_get_object_item(ui, MENUS);
+    node = cl_json_get_object_item(ui, XANTE_JTF_MENUS);
 
     if (NULL == node) {
         errno_set(XANTE_ERROR_JTF_NO_MENUS_OBJECT);
@@ -811,7 +745,7 @@ static int parse_ui(cl_json_t *jtf, struct xante_app *xpp)
     }
 
     /* main menu */
-    if (parse_object_value(ui, MAIN_MENU, CL_JSON_STRING, true,
+    if (parse_object_value(ui, XANTE_JTF_MAIN_MENU, CL_JSON_STRING, true,
                            (void **)&xpp->ui.main_menu_object_id) < 0)
     {
         return -1;
@@ -824,18 +758,18 @@ static int parse_geometry(const cl_json_t *node, struct geometry *geometry)
 {
     cl_json_t *jgeometry = NULL;
 
-    jgeometry = cl_json_get_object_item(node, GEOMETRY);
+    jgeometry = cl_json_get_object_item(node, XANTE_JTF_GEOMETRY);
 
     if (NULL == jgeometry)
         return 0;
 
-    if (parse_object_value(jgeometry, WIDTH, CL_JSON_NUMBER, false,
+    if (parse_object_value(jgeometry, XANTE_JTF_WIDTH, CL_JSON_NUMBER, false,
                            (void **)&geometry->width) < 0)
     {
         return -1;
     }
 
-    if (parse_object_value(jgeometry, HEIGHT, CL_JSON_NUMBER, false,
+    if (parse_object_value(jgeometry, XANTE_JTF_HEIGHT, CL_JSON_NUMBER, false,
                            (void **)&geometry->height) < 0)
     {
         return -1;
@@ -871,7 +805,7 @@ static int parse_item_data(const cl_json_t *root, struct xante_item *item,
     cl_json_t *data = NULL;
     enum cl_json_type expected_option = CL_JSON_STRING;
 
-    data = cl_json_get_object_item(root, DATA);
+    data = cl_json_get_object_item(root, XANTE_JTF_DATA);
 
     if (data_object_must_exist(item) && (NULL == data)) {
         errno_set(XANTE_ERROR_JTF_NO_DATA_OBJECT);
@@ -879,7 +813,7 @@ static int parse_item_data(const cl_json_t *root, struct xante_item *item,
         return -1;
     }
 
-    if (parse_object_value(data, DEFAULT_VALUE, CL_JSON_STRING, false,
+    if (parse_object_value(data, XANTE_JTF_DEFAULT_VALUE, CL_JSON_STRING, false,
                            (void **)&item->__helper.default_value) < 0)
     {
         return -1;
@@ -893,14 +827,14 @@ static int parse_item_data(const cl_json_t *root, struct xante_item *item,
         expected_option = CL_JSON_ARRAY;
     }
 
-    if ((parse_object_value(data, OPTIONS, expected_option, false,
+    if ((parse_object_value(data, XANTE_JTF_OPTIONS, expected_option, false,
                             (void **)&item->__helper.options) < 0) &&
         item->flags.options)
     {
         return -1;
     }
 
-    if ((parse_object_value(data, REFERENCED_MENU, CL_JSON_STRING, false,
+    if ((parse_object_value(data, XANTE_JTF_REFERENCED_MENU, CL_JSON_STRING, false,
                             (void **)&item->referenced_menu) < 0) &&
         item->flags.referenced_menu)
     {
@@ -921,30 +855,30 @@ static int parse_item_button_labels(const cl_json_t *labels,
 {
     cl_json_t *buttons = NULL;
 
-    buttons = cl_json_get_object_item(labels, BUTTONS);
+    buttons = cl_json_get_object_item(labels, XANTE_JTF_BUTTONS);
 
     if (NULL == buttons)
         return 0;
 
-    if (parse_object_value(buttons, BTN_OK_LABEL, CL_JSON_STRING, false,
+    if (parse_object_value(buttons, XANTE_JTF_BTN_OK_LABEL, CL_JSON_STRING, false,
                            (void **)&item->label.ok) < 0)
     {
         return -1;
     }
 
-    if (parse_object_value(buttons, BTN_CANCEL_LABEL, CL_JSON_STRING, false,
+    if (parse_object_value(buttons, XANTE_JTF_BTN_CANCEL_LABEL, CL_JSON_STRING, false,
                            (void **)&item->label.cancel) < 0)
     {
         return -1;
     }
 
-    if (parse_object_value(buttons, BTN_EXTRA_LABEL, CL_JSON_STRING, false,
+    if (parse_object_value(buttons, XANTE_JTF_BTN_EXTRA_LABEL, CL_JSON_STRING, false,
                            (void **)&item->label.extra) < 0)
     {
         return -1;
     }
 
-    if (parse_object_value(buttons, BTN_HELP_LABEL, CL_JSON_STRING, false,
+    if (parse_object_value(buttons, XANTE_JTF_BTN_HELP_LABEL, CL_JSON_STRING, false,
                            (void **)&item->label.help) < 0)
     {
         return -1;
@@ -957,12 +891,12 @@ static int parse_item_labels(const cl_json_t *ui, struct xante_item *item)
 {
     cl_json_t *labels = NULL;
 
-    labels = cl_json_get_object_item(ui, LABELS);
+    labels = cl_json_get_object_item(ui, XANTE_JTF_LABELS);
 
     if (NULL == labels)
         return 0;
 
-    if (parse_object_value(labels, TITLE, CL_JSON_STRING, false,
+    if (parse_object_value(labels, XANTE_JTF_TITLE, CL_JSON_STRING, false,
                            (void **)&item->label.title) < 0)
     {
         return -1;
@@ -984,30 +918,30 @@ static int parse_item_buttons(const cl_json_t *ui, struct xante_item *item)
 {
     cl_json_t *buttons = NULL;
 
-    buttons = cl_json_get_object_item(ui, BUTTONS);
+    buttons = cl_json_get_object_item(ui, XANTE_JTF_BUTTONS);
 
     if (NULL == buttons)
         return 0;
 
-    if (parse_object_value(buttons, BTN_OK_LABEL, CL_JSON_TRUE, false,
+    if (parse_object_value(buttons, XANTE_JTF_BTN_OK_LABEL, CL_JSON_TRUE, false,
                            (void **)&item->button.ok) < 0)
     {
         return -1;
     }
 
-    if (parse_object_value(buttons, BTN_CANCEL_LABEL, CL_JSON_TRUE, false,
+    if (parse_object_value(buttons, XANTE_JTF_BTN_CANCEL_LABEL, CL_JSON_TRUE, false,
                            (void **)&item->button.cancel) < 0)
     {
         return -1;
     }
 
-    if (parse_object_value(buttons, BTN_EXTRA_LABEL, CL_JSON_TRUE, false,
+    if (parse_object_value(buttons, XANTE_JTF_BTN_EXTRA_LABEL, CL_JSON_TRUE, false,
                            (void **)&item->button.extra) < 0)
     {
         return -1;
     }
 
-    if (parse_object_value(buttons, BTN_HELP_LABEL, CL_JSON_TRUE, false,
+    if (parse_object_value(buttons, XANTE_JTF_BTN_HELP_LABEL, CL_JSON_TRUE, false,
                            (void **)&item->button.help) < 0)
     {
         return -1;
@@ -1023,7 +957,7 @@ static int parse_item_ui(const cl_json_t *root, struct xante_item *item)
 {
     cl_json_t *ui = NULL;
 
-    ui = cl_json_get_object_item(root, UI);
+    ui = cl_json_get_object_item(root, XANTE_JTF_UI);
 
     if (NULL == ui) {
         /*
@@ -1033,25 +967,25 @@ static int parse_item_ui(const cl_json_t *root, struct xante_item *item)
         return 0;
     }
 
-    if (parse_object_value(ui, BTN_OK, CL_JSON_TRUE, false,
+    if (parse_object_value(ui, XANTE_JTF_BTN_OK, CL_JSON_TRUE, false,
                            (void **)&item->button.ok) < 0)
     {
         return -1;
     }
 
-    if (parse_object_value(ui, BTN_CANCEL, CL_JSON_TRUE, false,
+    if (parse_object_value(ui, XANTE_JTF_BTN_CANCEL, CL_JSON_TRUE, false,
                            (void **)&item->button.cancel) < 0)
     {
         return -1;
     }
 
-    if (parse_object_value(ui, BTN_EXTRA, CL_JSON_TRUE, false,
+    if (parse_object_value(ui, XANTE_JTF_BTN_EXTRA, CL_JSON_TRUE, false,
                            (void **)&item->button.extra) < 0)
     {
         return -1;
     }
 
-    if (parse_object_value(ui, BTN_HELP, CL_JSON_TRUE, false,
+    if (parse_object_value(ui, XANTE_JTF_BTN_HELP, CL_JSON_TRUE, false,
                            (void **)&item->button.help) < 0)
     {
         return -1;
@@ -1099,26 +1033,26 @@ struct xante_item *jtf_parse_item(const cl_json_t *item, bool single_instance)
         return NULL;
 
     /* Objects loaded before pre-adjusment are (almost all) mandatory */
-    if (parse_object_value(item, NAME, CL_JSON_STRING, true,
+    if (parse_object_value(item, XANTE_JTF_NAME, CL_JSON_STRING, true,
                            (void **)&i->name) < 0)
     {
         return NULL;
     }
 
-    if (parse_object_value(item, TYPE, CL_JSON_STRING, true,
+    if (parse_object_value(item, XANTE_JTF_TYPE, CL_JSON_STRING, true,
                            (void **)&i->type) < 0)
     {
         return NULL;
     }
 
-    if (parse_object_value(item, MODE, CL_JSON_NUMBER, false,
+    if (parse_object_value(item, XANTE_JTF_MODE, CL_JSON_NUMBER, false,
                            (void **)&i->mode) < 0)
     {
         return NULL;
     }
 
-    if (parse_object_value(item, OBJECT_ID, CL_JSON_STRING, !single_instance,
-                           (void **)&i->object_id) < 0)
+    if (parse_object_value(item, XANTE_JTF_OBJECT_ID, CL_JSON_STRING,
+                           !single_instance, (void **)&i->object_id) < 0)
     {
         return NULL;
     }
@@ -1132,7 +1066,7 @@ struct xante_item *jtf_parse_item(const cl_json_t *item, bool single_instance)
     if (parse_item_data(item, i, single_instance) < 0)
         return NULL;
 
-    i->events = cl_json_dup(cl_json_get_object_item(item, EVENTS));
+    i->events = cl_json_dup(cl_json_get_object_item(item, XANTE_JTF_EVENTS));
 
     if (parse_item_ui(item, i) < 0)
         return NULL;
@@ -1166,19 +1100,19 @@ struct xante_menu *jtf_parse_menu(const cl_json_t *menu)
     if (NULL == m)
         return NULL;
 
-    if (parse_object_value(menu, NAME, CL_JSON_STRING, true,
+    if (parse_object_value(menu, XANTE_JTF_NAME, CL_JSON_STRING, true,
                            (void **)&m->name) < 0)
     {
         return NULL;
     }
 
-    if (parse_object_value(menu, OBJECT_ID, CL_JSON_STRING, true,
+    if (parse_object_value(menu, XANTE_JTF_OBJECT_ID, CL_JSON_STRING, true,
                            (void **)&m->object_id) < 0)
     {
         return NULL;
     }
 
-    if (parse_object_value(menu, TYPE, CL_JSON_STRING, false,
+    if (parse_object_value(menu, XANTE_JTF_TYPE, CL_JSON_STRING, false,
                            (void **)&m->type) < 0)
     {
         return NULL;
@@ -1196,14 +1130,14 @@ struct xante_menu *jtf_parse_menu(const cl_json_t *menu)
     if (parse_geometry(menu, &m->geometry) < 0)
         return NULL;
 
-    m->events = cl_json_dup(cl_json_get_object_item(menu, EVENTS));
+    m->events = cl_json_dup(cl_json_get_object_item(menu, XANTE_JTF_EVENTS));
 
     /*
      * We must adjust some internal menu informations before loading its
      * items.
      */
     adjusts_menu_info(m, copies);
-    items = cl_json_get_object_item(menu, ITEMS);
+    items = cl_json_get_object_item(menu, XANTE_JTF_ITEMS);
 
     if (NULL == items) {
         errno_set(XANTE_ERROR_JTF_NO_ITEMS_OBJECT);

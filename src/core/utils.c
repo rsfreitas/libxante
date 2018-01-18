@@ -95,7 +95,7 @@ bool is_valid_ui_dialog(enum xante_widget type)
  */
 bool is_item_available(struct xante_item *item)
 {
-    if (item->mode == XANTE_ACCESS_HIDDEN)
+    if (item->mode == XanteAccessHidden)
         return false;
 
     return true;

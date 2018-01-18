@@ -25,7 +25,7 @@
  */
 
 #ifndef _LIBXANTE_XT_ITEM_H
-#define _LIBXANTE_XT_ITEM_H          1
+#define _LIBXANTE_XT_ITEM_H
 
 #ifndef LIBXANTE_COMPILE
 # ifndef _LIBXANTE_H
@@ -69,7 +69,7 @@ const char *xante_item_object_id(const xante_item_t *item);
  *
  * @return On success returns the access mode or -1 otherwise.
  */
-enum xante_access_mode xante_item_access_mode(const xante_item_t *item);
+enum XanteAccessMode xante_item_access_mode(const xante_item_t *item);
 
 /**
  * @name xante_item_default_value
