@@ -31,9 +31,6 @@
 # ifndef _LIBXANTE_H
 #  error "Never use <xt_env.h> directly; include <libxante.h> instead."
 # endif
-#else
-
-/* Internal library declarations */
 #endif
 
 /**

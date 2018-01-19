@@ -24,14 +24,8 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_CHANGES_H
-#define _LIBXANTE_XT_CHANGES_H
-
-#ifndef LIBXANTE_COMPILE
-# ifndef _LIBXANTE_H
-#  error "Never use <xt_changes.h> directly; include <libxante.h> instead."
-# endif
-#else
+#ifndef _LIBXANTE_XT_INTERNAL_CHANGES_H
+#define _LIBXANTE_XT_INTERNAL_CHANGES_H
 
 /* Internal library declarations */
 bool change_has_occourred(struct xante_app *xpp);
@@ -39,8 +33,6 @@ void change_init(struct xante_app *xpp);
 void change_uninit(struct xante_app *xpp);
 int change_add(struct xante_app *xpp, const char *item_name,
                const char *old_value, const char *new_value);
-
-#endif
 
 #endif
 

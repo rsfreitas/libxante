@@ -24,14 +24,8 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_UTILS_H
-#define _LIBXANTE_XT_UTILS_H
-
-#ifndef LIBXANTE_COMPILE
-# ifndef _LIBXANTE_H
-#  error "Never use <xt_utils.h> directly; include <libxante.h> instead."
-# endif
-#else
+#ifndef _LIBXANTE_XT_INTERNAL_UTILS_H
+#define _LIBXANTE_XT_INTERNAL_UTILS_H
 
 /* Internal library declarations */
 bool is_valid_ui_dialog(enum xante_widget type);
@@ -42,19 +36,6 @@ bool item_has_ranges(enum xante_widget dlg_type);
 bool is_menu_item(const cl_string_t *type);
 int idigits(int n);
 bool file_exists(const char *pathname);
-
-#endif
-
-/**
- * @name xante_application_version
- * @brief Gets a string with the application version information.
- *
- * @param [in] xpp: The library main object.
- *
- * @return On success returns a buffer with the application version or NULL
- *         otherwise.
- */
-char *xante_application_version(xante_t *xpp);
 
 #endif
 

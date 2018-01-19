@@ -168,23 +168,23 @@ struct xante_change_entry {
 };
 
 #ifdef LIBXANTE_COMPILE
-# include "xante/xt_internal.h"
+# include "internal/internal.h"
 #endif
 
-#include "xante/xt_auth.h"
-#include "xante/xt_config.h"
-#include "xante/xt_env.h"
-#include "xante/xt_error.h"
-#include "xante/xt_event.h"
-#include "xante/xt_gadget.h"
-#include "xante/xt_info.h"
-#include "xante/xt_init.h"
-#include "xante/xt_item.h"
-#include "xante/xt_log.h"
-#include "xante/xt_manager.h"
-#include "xante/xt_menu.h"
-#include "xante/xt_runtime.h"
-#include "xante/xt_utils.h"
+#include "api/auth.h"
+#include "api/config.h"
+#include "api/env.h"
+#include "api/error.h"
+#include "api/event.h"
+#include "api/gadget.h"
+#include "api/info.h"
+#include "api/init.h"
+#include "api/item.h"
+#include "api/log.h"
+#include "api/manager.h"
+#include "api/menu.h"
+#include "api/runtime.h"
+#include "api/utils.h"
 
 #else   // __cplusplus
 

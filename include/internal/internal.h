@@ -309,12 +309,22 @@ struct xante_single_instance_jtf {
 #include "widgets.h"
 #include "gadgets.h"
 
-#include "xante/xt_changes.h"
-#include "xante/xt_dm.h"
-#include "xante/xt_instance.h"
-#include "xante/xt_jtf.h"
-#include "xante/xt_si_jtf.h"
-#include "xante/xt_session.h"
+#include "auth.h"
+#include "changes.h"
+#include "dm.h"
+#include "event.h"
+#include "instance.h"
+#include "internal.h"
+#include "item.h"
+#include "jtf.h"
+#include "log.h"
+#include "manager.h"
+#include "menu.h"
+#include "runtime.h"
+#include "session.h"
+#include "si_jtf.h"
+#include "session.h"
+#include "utils.h"
 
 #endif
 

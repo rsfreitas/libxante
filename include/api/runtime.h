@@ -31,21 +31,6 @@
 # ifndef _LIBXANTE_H
 #  error "Never use <xt_runtime.h> directly; include <libxante.h> instead."
 # endif
-#else
-
-/* Internal library declarations */
-void runtime_start(struct xante_app *xpp, const char *caller_name);
-void runtime_stop(struct xante_app *xpp);
-
-/* These setters are for read only runtime flags */
-void runtime_set_exit_value(struct xante_app *xpp, int exit_value);
-void runtime_set_ui_active(struct xante_app *xpp, bool ui_active);
-void runtime_set_execute_module(struct xante_app *xpp, bool execute_module);
-void runtime_set_user_authentication(struct xante_app *xpp, bool auth);
-void runtime_set_esc_key(struct xante_app *xpp, bool enabled);
-void runtime_set_suspend_key(struct xante_app *xpp, bool enabled);
-void runtime_set_stop_key(struct xante_app *xpp, bool enabled);
-
 #endif
 
 /**

@@ -31,14 +31,6 @@
 # ifndef _LIBXANTE_H
 #  error "Never use <xt_item.h> directly; include <libxante.h> instead."
 # endif
-#else
-
-/* Internal library declarations */
-void xante_item_destroy(void *a);
-void xante_item_ref(struct xante_item *item);
-void xante_item_unref(struct xante_item *item);
-struct xante_item *xante_item_create(void);
-
 #endif
 
 /**

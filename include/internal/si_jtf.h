@@ -24,20 +24,12 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_SI_JTF_H
-#define _LIBXANTE_XT_SI_JTF_H
-
-#ifndef LIBXANTE_COMPILE
-# ifndef _LIBXANTE_H
-#  error "Never use <xt_si_jtf.h> directly; include <libxante.h> instead."
-# endif
-#else
+#ifndef _LIBXANTE_XT_INTERNAL_SI_JTF_H
+#define _LIBXANTE_XT_INTERNAL_SI_JTF_H
 
 /* Internal library declarations */
 struct xante_single_instance_jtf *si_jtf_load(const char *si);
 void si_jtf_unload(struct xante_single_instance_jtf *si);
-
-#endif
 
 #endif
 

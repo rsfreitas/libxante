@@ -31,12 +31,6 @@
 # ifndef _LIBXANTE_H
 #  error "Never use <xt_manager.h> directly; include <libxante.h> instead."
 # endif
-#else
-
-/* Internal library declarations */
-void ui_data_init(struct xante_app *xpp);
-void ui_data_uninit(struct xante_app *xpp);
-
 #endif
 
 /**

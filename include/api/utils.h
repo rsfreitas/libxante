@@ -3,7 +3,7 @@
  * Description:
  *
  * Author: Rodrigo Freitas
- * Created at: Tue Dec 19 08:47:40 2017
+ * Created at: Tue May  2 20:25:58 2017
  * Project: libxante
  *
  * Copyright (C) 2017 Rodrigo Freitas
@@ -24,22 +24,25 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_SESSION_H
-#define _LIBXANTE_XT_SESSION_H
+#ifndef _LIBXANTE_XT_UTILS_H
+#define _LIBXANTE_XT_UTILS_H
 
 #ifndef LIBXANTE_COMPILE
 # ifndef _LIBXANTE_H
-#  error "Never use <xt_session.h> directly; include <libxante.h> instead."
+#  error "Never use <xt_utils.h> directly; include <libxante.h> instead."
 # endif
-#else
-
-/* Internal library declarations */
-void session_init(struct xante_app *xpp, struct xante_item *item,
-                     session_t *session);
-
-void session_uninit(session_t *session);
-
 #endif
+
+/**
+ * @name xante_application_version
+ * @brief Gets a string with the application version information.
+ *
+ * @param [in] xpp: The library main object.
+ *
+ * @return On success returns a buffer with the application version or NULL
+ *         otherwise.
+ */
+char *xante_application_version(xante_t *xpp);
 
 #endif
 

@@ -31,12 +31,6 @@
 # ifndef _LIBXANTE_H
 #  error "Never use <xt_log.h> directly; include <libxante.h> instead."
 # endif
-#else
-
-/* Internal library declarations */
-int log_init(struct xante_app *xpp);
-void log_uninit(struct xante_app *xpp);
-
 #endif
 
 /**

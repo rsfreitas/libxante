@@ -3,10 +3,10 @@
  * Description:
  *
  * Author: Rodrigo Freitas
- * Created at: Tue Nov 14 09:05:28 2017
- * Project: xt_instance.h
+ * Created at: Tue May  2 21:07:38 2017
+ * Project: libxante
  *
- * Copyright (c) 2017 All rights reserved
+ * Copyright (C) 2017 Rodrigo Freitas
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,19 +24,12 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_INSTANCE_H
-#define _LIBXANTE_XT_INSTANCE_H
-
-#ifndef LIBXANTE_COMPILE
-# ifndef _LIBXANTE_H
-#  error "Never use <xt_instance.h> directly; include <libxante.h> instead."
-# endif
-#else
+#ifndef _LIBXANTE_XT_INTERNAL_LOG_H
+#define _LIBXANTE_XT_INTERNAL_LOG_H
 
 /* Internal library declarations */
-int instance_init(const struct xante_app *xpp, bool single_instance);
-
-#endif
+int log_init(struct xante_app *xpp);
+void log_uninit(struct xante_app *xpp);
 
 #endif
 

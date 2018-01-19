@@ -3,7 +3,7 @@
  * Description:
  *
  * Author: Rodrigo Freitas
- * Created at: Thu May 18 00:13:49 2017
+ * Created at: Tue May  2 21:41:44 2017
  * Project: libxante
  *
  * Copyright (C) 2017 Rodrigo Freitas
@@ -24,24 +24,16 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_DM_H
-#define _LIBXANTE_XT_DM_H
-
-#ifndef LIBXANTE_COMPILE
-# ifndef _LIBXANTE_H
-#  error "Never use <xt_dm.h> directly; include <libxante.h> instead."
-# endif
-#else
+#ifndef _LIBXANTE_XT_INTERNAL_EVENT_H
+#define _LIBXANTE_XT_INTERNAL_EVENT_H
 
 /* Internal library declarations */
-void dm_init(struct xante_app *xpp, cl_cfg_file_t *cfg_file);
-void dm_uninit(struct xante_app *xpp);
-void dm_update(struct xante_app *xpp, struct xante_item *selected_item);
-void dm_delete(struct xante_menu *rme_menu, int position);
-bool dm_insert(struct xante_app *xpp, struct xante_item *item,
-               const char *new_entry_name);
-
-#endif
+int event_init(struct xante_app *xpp, bool use_event);
+void event_uninit(struct xante_app *xpp);
+int event_call(const char *event_name, struct xante_app *xpp, ...);
+void *event_item_custom_data(struct xante_app *xpp, struct xante_item *item);
+int event_update_routine(struct xante_app *xpp, struct xante_item *item,
+                         void *data);
 
 #endif
 
