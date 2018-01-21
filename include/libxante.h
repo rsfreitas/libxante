@@ -25,7 +25,18 @@
  */
 
 #ifndef _LIBXANTE_H
-#define _LIBXANTE_H             1
+#define _LIBXANTE_H
+
+#ifdef LIBXANTE_COMPILE
+# define MAJOR_VERSION          0
+# define MINOR_VERSION          0
+# define RELEASE                14
+
+/* Common declarations to all library versions */
+# include "common/defs.h"
+#endif
+
+#ifndef __cplusplus
 
 #ifndef _COLLECTIONS_H
 # include <collections.h>
@@ -67,13 +78,6 @@ enum xante_widget {
     XANTE_WIDGET_MIXEDFORM,
     XANTE_WIDGET_BUILDLIST,
     XANTE_WIDGET_SPREADSHEET
-};
-
-/** An access mode from a menu or a menu item */
-enum xante_access_mode {
-    XANTE_ACCESS_HIDDEN     = 0,
-    XANTE_ACCESS_VIEW       = (1 << 0),
-    XANTE_ACCESS_EDIT       = (1 << 1)
 };
 
 /** Buttons from a widget */
@@ -164,27 +168,32 @@ struct xante_change_entry {
 };
 
 #ifdef LIBXANTE_COMPILE
-# define MAJOR_VERSION  0
-# define MINOR_VERSION  0
-# define RELEASE        13
-
-# include "xante/xt_internal.h"
+# include "internal/internal.h"
 #endif
 
-#include "xante/xt_auth.h"
-#include "xante/xt_config.h"
-#include "xante/xt_env.h"
-#include "xante/xt_error.h"
-#include "xante/xt_event.h"
-#include "xante/xt_gadget.h"
-#include "xante/xt_info.h"
-#include "xante/xt_init.h"
-#include "xante/xt_item.h"
-#include "xante/xt_log.h"
-#include "xante/xt_manager.h"
-#include "xante/xt_menu.h"
-#include "xante/xt_runtime.h"
-#include "xante/xt_utils.h"
+#include "api/auth.h"
+#include "api/config.h"
+#include "api/env.h"
+#include "api/error.h"
+#include "api/event.h"
+#include "api/gadget.h"
+#include "api/info.h"
+#include "api/init.h"
+#include "api/item.h"
+#include "api/log.h"
+#include "api/manager.h"
+#include "api/menu.h"
+#include "api/runtime.h"
+#include "api/utils.h"
+
+#else   // __cplusplus
+
+#include "cpp/item.hpp"
+#include "cpp/menu.hpp"
+#include "cpp/jtf.hpp"
+#include "cpp/config.hpp"
+
+#endif  // __cplusplus
 
 #endif
 
