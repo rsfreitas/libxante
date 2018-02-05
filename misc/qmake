@@ -1,0 +1,12 @@
+#!/bin/bash
+
+PRO_FILE=$1
+
+if [ -z "$PRO_FILE" ]; then
+    echo "A .pro file must be used when calling this utility."
+    exit 1
+fi
+
+qtchooser -qt=59 -run-tool=qmake $PRO_FILE
+
+exit 0
