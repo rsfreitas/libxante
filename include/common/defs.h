@@ -143,6 +143,7 @@ extern "C" {
 #define XANTE_STR_WIDGET_MIXEDFORM              "mixedform"
 #define XANTE_STR_WIDGET_BUILDLIST              "buildlist"
 #define XANTE_STR_WIDGET_SPREADSHEET            "spreadsheet"
+#define XANTE_STR_GADGET_CLOCK                  "clock"
 
 /** The access mode from a menu or a menu item */
 enum XanteAccessMode {

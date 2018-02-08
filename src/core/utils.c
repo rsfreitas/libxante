@@ -28,6 +28,41 @@
 
 /*
  *
+ * Internal functions
+ *
+ */
+
+static cl_string_t *extract_object_type(const cl_string_t *type)
+{
+    cl_stringlist_t *l = NULL;
+    cl_string_t *prefix = NULL, *object = NULL;
+
+    l = cl_string_split(type, ":");
+
+    if ((NULL == l) || (cl_stringlist_size(l) != 2))
+        goto end_block;
+
+    prefix = cl_stringlist_get(l, 0);
+
+    if (strcmp(cl_string_valueof(prefix), "gadget") != 0)
+        goto end_block;
+
+    object = cl_stringlist_get(l, 1);
+
+end_block:
+    cl_stringlist_destroy(l);
+    cl_string_unref(prefix);
+
+    if (object != NULL) {
+        errno_set(XANTE_ERROR_UNKNOWN_OBJECT_PREFIX);
+        errno_store_additional_content(cl_string_valueof(type));
+    }
+
+    return object;
+}
+
+/*
+ *
  * Internal API
  *
  */
@@ -74,6 +109,7 @@ bool is_valid_ui_dialog(enum xante_widget type)
         case XANTE_WIDGET_MIXEDFORM:
         case XANTE_WIDGET_BUILDLIST:
         case XANTE_WIDGET_SPREADSHEET:
+        case XANTE_GADGET_CLOCK:
             return true;
 
         default:
@@ -131,69 +167,89 @@ enum xante_menu_type translate_string_menu_type(const char *type)
  *
  * @return Returns the numeric value of the widget type.
  */
-enum xante_widget translate_string_widget_type(const char *type)
+enum xante_widget translate_string_widget_type(const cl_string_t *type)
 {
     enum xante_widget widget = XANTE_WIDGET_UNKNOWN;
+    cl_string_t *object = NULL;
+    char *ptype = NULL;
 
-    if (strcmp(type, XANTE_STR_WIDGET_MENU) == 0)
+    /* Are we a gadget? */
+    if (cl_string_find(type, ':') >= 0) {
+        object = extract_object_type(type);
+
+        if (NULL == object)
+            return widget;
+
+        ptype = (char *)cl_string_valueof(object);
+
+        if (strcmp(ptype, XANTE_STR_GADGET_CLOCK) == 0)
+            widget = XANTE_GADGET_CLOCK;
+
+        cl_string_unref(object);
+        return widget;
+    }
+
+    ptype = (char *)cl_string_valueof(type);
+
+    if (strcmp(ptype, XANTE_STR_WIDGET_MENU) == 0)
         widget = XANTE_WIDGET_MENU_REFERENCE;
-    else if (strcmp(type, XANTE_STR_WIDGET_INPUT_INT) == 0)
+    else if (strcmp(ptype, XANTE_STR_WIDGET_INPUT_INT) == 0)
         widget = XANTE_WIDGET_INPUT_INT;
-    else if (strcmp(type, XANTE_STR_WIDGET_INPUT_FLOAT) == 0)
+    else if (strcmp(ptype, XANTE_STR_WIDGET_INPUT_FLOAT) == 0)
         widget = XANTE_WIDGET_INPUT_FLOAT;
-    else if (strcmp(type, XANTE_STR_WIDGET_INPUT_DATE) == 0)
+    else if (strcmp(ptype, XANTE_STR_WIDGET_INPUT_DATE) == 0)
         widget = XANTE_WIDGET_INPUT_DATE;
-    else if (strcmp(type, XANTE_STR_WIDGET_INPUT_STRING) == 0)
+    else if (strcmp(ptype, XANTE_STR_WIDGET_INPUT_STRING) == 0)
         widget = XANTE_WIDGET_INPUT_STRING;
-    else if (strcmp(type, XANTE_STR_WIDGET_INPUT_PASSWD) == 0)
+    else if (strcmp(ptype, XANTE_STR_WIDGET_INPUT_PASSWD) == 0)
         widget = XANTE_WIDGET_INPUT_PASSWD;
-    else if (strcmp(type, XANTE_STR_WIDGET_INPUT_TIME) == 0)
+    else if (strcmp(ptype, XANTE_STR_WIDGET_INPUT_TIME) == 0)
         widget = XANTE_WIDGET_INPUT_TIME;
-    else if (strcmp(type, XANTE_STR_WIDGET_CALENDAR) == 0)
+    else if (strcmp(ptype, XANTE_STR_WIDGET_CALENDAR) == 0)
         widget = XANTE_WIDGET_CALENDAR;
-    else if (strcmp(type, XANTE_STR_WIDGET_TIMEBOX) == 0)
+    else if (strcmp(ptype, XANTE_STR_WIDGET_TIMEBOX) == 0)
         widget = XANTE_WIDGET_TIMEBOX;
-    else if (strcmp(type, XANTE_STR_WIDGET_RADIO_CHECKLIST) == 0)
+    else if (strcmp(ptype, XANTE_STR_WIDGET_RADIO_CHECKLIST) == 0)
         widget = XANTE_WIDGET_RADIO_CHECKLIST;
-    else if (strcmp(type, XANTE_STR_WIDGET_CHECKLIST) == 0)
+    else if (strcmp(ptype, XANTE_STR_WIDGET_CHECKLIST) == 0)
         widget = XANTE_WIDGET_CHECKLIST;
-    else if (strcmp(type, XANTE_STR_WIDGET_YESNO) == 0)
+    else if (strcmp(ptype, XANTE_STR_WIDGET_YESNO) == 0)
         widget = XANTE_WIDGET_YES_NO;
-    else if (strcmp(type, XANTE_STR_WIDGET_DYNAMIC_MENU) == 0)
+    else if (strcmp(ptype, XANTE_STR_WIDGET_DYNAMIC_MENU) == 0)
         widget = XANTE_WIDGET_DYNAMIC_MENU_REFERENCE;
-    else if (strcmp(type, XANTE_STR_WIDGET_DELETE_DYNAMIC_MENU) == 0)
+    else if (strcmp(ptype, XANTE_STR_WIDGET_DELETE_DYNAMIC_MENU) == 0)
         widget = XANTE_WIDGET_DELETE_DYNAMIC_MENU_ITEM;
-    else if (strcmp(type, XANTE_STR_WIDGET_ADD_DYNAMIC_MENU) == 0)
+    else if (strcmp(ptype, XANTE_STR_WIDGET_ADD_DYNAMIC_MENU) == 0)
         widget = XANTE_WIDGET_ADD_DYNAMIC_MENU_ITEM;
-    else if (strcmp(type, XANTE_STR_WIDGET_CUSTOM) == 0)
+    else if (strcmp(ptype, XANTE_STR_WIDGET_CUSTOM) == 0)
         widget = XANTE_WIDGET_CUSTOM;
-    else if (strcmp(type, XANTE_STR_WIDGET_PROGRESS) == 0)
+    else if (strcmp(ptype, XANTE_STR_WIDGET_PROGRESS) == 0)
         widget = XANTE_WIDGET_PROGRESS;
-    else if (strcmp(type, XANTE_STR_WIDGET_SPINNER_SYNC) == 0)
+    else if (strcmp(ptype, XANTE_STR_WIDGET_SPINNER_SYNC) == 0)
         widget = XANTE_WIDGET_SPINNER_SYNC;
-    else if (strcmp(type, XANTE_STR_WIDGET_DOTS_SYNC) == 0)
+    else if (strcmp(ptype, XANTE_STR_WIDGET_DOTS_SYNC) == 0)
         widget = XANTE_WIDGET_DOTS_SYNC;
-    else if (strcmp(type, XANTE_STR_WIDGET_RANGE) == 0)
+    else if (strcmp(ptype, XANTE_STR_WIDGET_RANGE) == 0)
         widget = XANTE_WIDGET_RANGE;
-    else if (strcmp(type, XANTE_STR_WIDGET_FILE_SELECT) == 0)
+    else if (strcmp(ptype, XANTE_STR_WIDGET_FILE_SELECT) == 0)
         widget = XANTE_WIDGET_FILE_SELECT;
-    else if (strcmp(type, XANTE_STR_WIDGET_DIR_SELECT) == 0)
+    else if (strcmp(ptype, XANTE_STR_WIDGET_DIR_SELECT) == 0)
         widget = XANTE_WIDGET_DIR_SELECT;
-    else if (strcmp(type, XANTE_STR_WIDGET_FILE_VIEW) == 0)
+    else if (strcmp(ptype, XANTE_STR_WIDGET_FILE_VIEW) == 0)
         widget = XANTE_WIDGET_FILE_VIEW;
-    else if (strcmp(type, XANTE_STR_WIDGET_TAILBOX) == 0)
+    else if (strcmp(ptype, XANTE_STR_WIDGET_TAILBOX) == 0)
         widget = XANTE_WIDGET_TAILBOX;
-    else if (strcmp(type, XANTE_STR_WIDGET_SCROLLTEXT) == 0)
+    else if (strcmp(ptype, XANTE_STR_WIDGET_SCROLLTEXT) == 0)
         widget = XANTE_WIDGET_SCROLLTEXT;
-    else if (strcmp(type, XANTE_STR_WIDGET_UPDATE_OBJECT) == 0)
+    else if (strcmp(ptype, XANTE_STR_WIDGET_UPDATE_OBJECT) == 0)
         widget = XANTE_WIDGET_UPDATE_OBJECT;
-    else if (strcmp(type, XANTE_STR_WIDGET_INPUTSCROLL) == 0)
+    else if (strcmp(ptype, XANTE_STR_WIDGET_INPUTSCROLL) == 0)
         widget = XANTE_WIDGET_INPUTSCROLL;
-    else if (strcmp(type, XANTE_STR_WIDGET_MIXEDFORM) == 0)
+    else if (strcmp(ptype, XANTE_STR_WIDGET_MIXEDFORM) == 0)
         widget = XANTE_WIDGET_MIXEDFORM;
-    else if (strcmp(type, XANTE_STR_WIDGET_BUILDLIST) == 0)
+    else if (strcmp(ptype, XANTE_STR_WIDGET_BUILDLIST) == 0)
         widget = XANTE_WIDGET_BUILDLIST;
-    else if (strcmp(type, XANTE_STR_WIDGET_SPREADSHEET) == 0)
+    else if (strcmp(ptype, XANTE_STR_WIDGET_SPREADSHEET) == 0)
         widget = XANTE_WIDGET_SPREADSHEET;
 
     return widget;
@@ -211,7 +267,7 @@ bool is_menu_item(const cl_string_t *type)
 {
     enum xante_widget dlg_type;
 
-    dlg_type = translate_string_widget_type(cl_string_valueof(type));
+    dlg_type = translate_string_widget_type(type);
 
     switch (dlg_type) {
         case XANTE_WIDGET_MENU_REFERENCE:
@@ -282,6 +338,27 @@ bool file_exists(const char *pathname)
         return false;
 
     return true;
+}
+
+/**
+ * @name is_gadget
+ * @brief Checks if an object is of a gadget type.
+ *
+ * @param [in] type: The object type.
+ *
+ * @return Returns true or false if the object is a gadget or not.
+ */
+bool is_gadget(enum xante_widget type)
+{
+    switch (type) {
+        case XANTE_GADGET_CLOCK:
+            return true;
+
+        default:
+            break;
+    }
+
+    return false;
 }
 
 /*

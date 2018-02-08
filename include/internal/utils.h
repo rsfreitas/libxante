@@ -31,11 +31,12 @@
 bool is_valid_ui_dialog(enum xante_widget type);
 bool is_item_available(struct xante_item *item);
 enum xante_menu_type translate_string_menu_type(const char *type);
-enum xante_widget translate_string_widget_type(const char *type);
+enum xante_widget translate_string_widget_type(const cl_string_t *type);
 bool item_has_ranges(enum xante_widget dlg_type);
 bool is_menu_item(const cl_string_t *type);
 int idigits(int n);
 bool file_exists(const char *pathname);
+bool is_gadget(enum xante_widget type);
 
 #endif
 

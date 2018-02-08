@@ -100,6 +100,9 @@ void gadget_dispatch_init(void)
     }
 
     /* Add internal gadgets event functions */
+    gadget_clock_register();
+    xante_log_debug("[dispatcher]: Dtable size %d",
+                    cl_hashtable_size(__dispatch_table));
 }
 
 void gadget_dispatch_uninit(void)

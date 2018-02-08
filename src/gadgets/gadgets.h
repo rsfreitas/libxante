@@ -56,5 +56,10 @@ bool gadget_question(struct xante_app *xpp, const char *title, const char *msg,
                      const char *button1_label, const char *button2_label,
                      const char *statusbar_text);
 
+/* clock */
+void gadget_clock_register(void);
+int gadget_clock(session_t *session);
+bool gadget_clock_validate_result(session_t *session);
+
 #endif
 

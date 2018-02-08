@@ -456,8 +456,12 @@ static int parse_item_help(const cl_json_t *item, struct xante_item *it,
  */
 static void pre_adjust_item_info(struct xante_item *item)
 {
-    item->widget_type =
-        translate_string_widget_type(cl_string_valueof(item->type));
+    item->widget_type = translate_string_widget_type(item->type);
+    item->flags.ranges = item_has_ranges(item->widget_type);
+
+    /* Internal gadgets don't need to load some objects. */
+    if (is_gadget(item->widget_type))
+        return;
 
     /* Which properties are mandatory to an item? */
     if ((item->widget_type == XANTE_WIDGET_MENU_REFERENCE) ||
@@ -487,8 +491,6 @@ static void pre_adjust_item_info(struct xante_item *item)
         if (item->widget_type != XANTE_WIDGET_CUSTOM)
             item->flags.options = true;
     }
-
-    item->flags.ranges = item_has_ranges(item->widget_type);
 }
 
 /**

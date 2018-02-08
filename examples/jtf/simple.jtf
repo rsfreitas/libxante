@@ -573,6 +573,12 @@
                                 }
                             }
                         }
+                    },
+                    {
+                        "name": "Clock (gadget)",
+                        "mode": 2,
+                        "type": "gadget:clock",
+                        "object_id": "4321"
                     }
                 ]
             }

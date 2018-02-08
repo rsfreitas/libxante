@@ -81,7 +81,6 @@ typedef struct {
 /* A structure to hold session and information of a running dialog */
 typedef struct session {
     bool                editable_value;
-    bool                call_item_value_confirm;
     struct xante_app    *xpp;
     struct xante_item   *item;
 
