@@ -26,6 +26,8 @@
 
 #include "libxante.h"
 
+#define GADGET_PREFIX           "__gadget_clock__"
+
 static const char *clock_sijtf = "\
 {\
     \"item\": {\
@@ -46,7 +48,11 @@ static const char *clock_sijtf = "\
             }\
         },\
         \"events\": {\
-            \"update-routine\": \"xante:gadget_clock_current_time\"\
+            \"update-routine\": \"xante:gadget_clock_current_time\",\
+            \"item-selected\": \"xante:gadget_clock_item_selected\",\
+            \"item-value-confirm\": \"xante:gadget_clock_item_value_confirm\",\
+            \"item-value-updated\": \"xante:gadget_clock_item_value_updated\",\
+            \"item-exit\": \"xante:gadget_clock_item_exit\"\
         }\
     }\
 }";
@@ -112,7 +118,7 @@ static int fill_item_with_current_datetime(struct xante_item *item,
  * Here we just put the current date/time inside the dialog so the user may
  * change it.
  */
-static int gadget_clock_input_selected(struct xante_app *app __attribute__((unused)),
+static int gadget_clock_input_selected(struct xante_app *xpp __attribute__((unused)),
     struct xante_item *item __attribute__((unused)),
     void *data __attribute__((unused)))
 {
@@ -125,7 +131,7 @@ static int gadget_clock_input_selected(struct xante_app *app __attribute__((unus
  *
  * Here we update the system's date/time.
  */
-static int gadget_clock_updated(struct xante_app *app __attribute__((unused)),
+static int gadget_clock_updated(struct xante_app *xpp __attribute__((unused)),
     struct xante_item *item __attribute__((unused)),
     void *data __attribute__((unused)))
 {
@@ -137,7 +143,7 @@ static int gadget_clock_updated(struct xante_app *app __attribute__((unused)),
  * Event called to confirm the data/time value entered by the user inside the
  * input-string widget.
  */
-static int gadget_clock_input_confirmed(struct xante_app *app __attribute__((unused)),
+static int gadget_clock_input_confirmed(struct xante_app *xpp __attribute__((unused)),
     struct xante_item *item, void *data)
 {
     cl_datetime_t *dt;
@@ -161,10 +167,42 @@ static int gadget_clock_input_confirmed(struct xante_app *app __attribute__((unu
  * fill the item's content with its value, which will be used to be displayed
  * on screen for the user.
  */
-static int gadget_clock_current_time(struct xante_app *app __attribute__((unused)),
+static int gadget_clock_current_time(struct xante_app *xpp __attribute__((unused)),
     struct xante_item *item, void *data __attribute__((unused)))
 {
     return fill_item_with_current_datetime(item, true);
+}
+
+static int gadget_clock_item_selected(struct xante_app *xpp,
+    struct xante_item *item __attribute__((unused)), void *data)
+{
+    gadget_dispatch_run_user_event(xpp, GADGET_PREFIX, EV_ITEM_SELECTED, data);
+    return 0;
+}
+
+static int gadget_clock_item_value_confirm(struct xante_app *xpp,
+    struct xante_item *item __attribute__((unused)), void *data)
+{
+    gadget_dispatch_run_user_event(xpp, GADGET_PREFIX, EV_ITEM_VALUE_CONFIRM,
+                                   data);
+
+    return 0;
+}
+
+static int gadget_clock_item_value_updated(struct xante_app *xpp,
+    struct xante_item *item __attribute__((unused)), void *data)
+{
+    gadget_dispatch_run_user_event(xpp, GADGET_PREFIX, EV_ITEM_VALUE_UPDATED,
+                                   data);
+
+    return 0;
+}
+
+static int gadget_clock_item_exit(struct xante_app *xpp,
+    struct xante_item *item __attribute__((unused)), void *data)
+{
+    gadget_dispatch_run_user_event(xpp, GADGET_PREFIX, EV_ITEM_EXIT, data);
+    return 0;
 }
 
 /*
@@ -186,6 +224,17 @@ void gadget_clock_register(void)
 
     gadget_dispatch_add("gadget_clock_input_confirmed",
                         gadget_clock_input_confirmed);
+
+    gadget_dispatch_add("gadget_clock_item_selected",
+                        gadget_clock_item_selected);
+
+    gadget_dispatch_add("gadget_clock_item_value_confirm",
+                        gadget_clock_item_value_confirm);
+
+    gadget_dispatch_add("gadget_clock_item_value_updated",
+                        gadget_clock_item_value_updated);
+
+    gadget_dispatch_add("gadget_clock_item_exit", gadget_clock_item_exit);
 }
 
 /*
@@ -195,6 +244,12 @@ int gadget_clock(session_t *session)
 {
     enum xante_return_value ret_dialog;
 
+    /*
+     * TODO: Save the original object events so we can call them later. One way
+     *       to do this is save the session->item event's into the dispatch
+     *       table, so we can use it later.
+     */
+    gadget_dispatch_register_user_events(session, GADGET_PREFIX);
     ret_dialog = xante_manager_single_run(session->xpp, clock_sijtf);
 
     return (ret_dialog == XANTE_RETURN_OK) ? DLG_EXIT_OK : DLG_EXIT_CANCEL;

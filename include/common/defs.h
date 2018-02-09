@@ -97,7 +97,7 @@ extern "C" {
 #define XANTE_STR_DEFAULT_MENU                  "default"
 #define XANTE_STR_DYNAMIC_MENU                  "dynamic"
 
-/* FIXME: Put a prefix here */
+/* FIXME: Put the library prefix here */
 /** Object events */
 #define EV_ITEM_SELECTED                        "item-selected"
 #define EV_ITEM_VALUE_CONFIRM                   "item-value-confirm"
