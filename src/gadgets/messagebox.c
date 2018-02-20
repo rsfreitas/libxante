@@ -83,8 +83,8 @@ static int __xante_dlg_messagebox(int width, int height,
  *
  */
 
-__PUB_API__ int xante_dlg_messagebox(struct xante_app *xpp,
-    enum xante_msgbox_type type, const char *title, const char *message, ...)
+__PUB_API__ int xante_dlg_messagebox(xante_t *xpp, enum xante_msgbox_type type,
+    const char *title, const char *message, ...)
 {
     va_list ap;
     char *msg = NULL;

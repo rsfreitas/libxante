@@ -30,11 +30,11 @@
 #ifdef LIBXANTE_COMPILE
 # define MAJOR_VERSION          0
 # define MINOR_VERSION          0
-# define RELEASE                14
+# define RELEASE                15
+#endif
 
 /* Common declarations to all library versions */
-# include "common/defs.h"
-#endif
+#include "common/defs.h"
 
 #ifndef __cplusplus
 
@@ -77,7 +77,10 @@ enum xante_widget {
     XANTE_WIDGET_INPUTSCROLL,
     XANTE_WIDGET_MIXEDFORM,
     XANTE_WIDGET_BUILDLIST,
-    XANTE_WIDGET_SPREADSHEET
+    XANTE_WIDGET_SPREADSHEET,
+
+    /* UI gadgets */
+    XANTE_GADGET_CLOCK
 };
 
 /** Buttons from a widget */

@@ -44,7 +44,7 @@ set(SOURCE
     ${GADGETS_SOURCES})
 
 set(VERSION_SCRIPT
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/lib${PROJECT_NAME}.sym)
+    ${CMAKE_CURRENT_SOURCE_DIR}/misc/lib${PROJECT_NAME}.sym)
 
 set(LIBRARY_HEADER
     ${CMAKE_CURRENT_SOURCE_DIR}/include/lib${PROJECT_NAME}.h)
@@ -67,7 +67,10 @@ execute_process(COMMAND grep RELEASE ${LIBRARY_HEADER}
     COMMAND sed "s/ //"
     OUTPUT_VARIABLE RELEASE)
 
-link_directories("/usr/local/lib")
+set(DESTINATION_BIN_DIR "/usr/local/lib")
+set(DESTINATION_HEADER_DIR "/usr/local/include")
+
+link_directories(${DESTINATION_BIN_DIR})
 
 if(SHARED)
     add_library(${PROJECT_NAME} SHARED ${SOURCE})
@@ -81,5 +84,15 @@ else(SHARED)
     add_library(${PROJECT_NAME} STATIC ${SOURCE})
 endif(SHARED)
 
-install(TARGETS ${PROJECT_NAME} DESTINATION /usr/local/lib)
+install(TARGETS ${PROJECT_NAME} DESTINATION ${DESTINATION_BIN_DIR})
+install(FILES ${LIBRARY_HEADER} DESTINATION ${DESTINATION_HEADER_DIR}/${PROJECT_NAME})
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/api DESTINATION ${DESTINATION_HEADER_DIR}/${PROJECT_NAME})
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/common DESTINATION ${DESTINATION_HEADER_DIR}/${PROJECT_NAME})
+
+# If we're dealing with a shared version, we create its symbolic link
+if(SHARED)
+    set(RELEASE_NAME lib${PROJECT_NAME}.so.${MAJOR_VERSION}.${MINOR_VERSION}.${RELEASE})
+    set(LINK_NAME lib${PROJECT_NAME}.so)
+    install(CODE "execute_process(COMMAND ln -sf ${DESTINATION_BIN_DIR}/${RELEASE_NAME} ${DESTINATION_BIN_DIR}/${LINK_NAME})")
+endif(SHARED)
 

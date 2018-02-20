@@ -53,7 +53,7 @@ static char *update_routine(void *arg)
 
     /*
      * The user must update the content to be displayed inside the
-     * update-routine event.
+     * update-routine event, using the xante_item_update_value function.
      */
     value = item_value(user_arg->item);
 

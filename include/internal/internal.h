@@ -323,7 +323,6 @@ struct xante_single_instance_jtf {
 #include "runtime.h"
 #include "session.h"
 #include "si_jtf.h"
-#include "session.h"
 #include "utils.h"
 
 #endif

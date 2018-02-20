@@ -281,6 +281,14 @@ static struct widget_events __widget_events[] = {
         .value_changed = spreadsheet_value_changed,
         .update_value = NULL,
         .validate_result = NULL
+    },
+
+    {
+        .type = XANTE_GADGET_CLOCK,
+        .run = gadget_clock,
+        .value_changed = NULL,
+        .update_value = NULL,
+        .validate_result = gadget_clock_validate_result
     }
 };
 
@@ -343,7 +351,6 @@ void session_init(struct xante_app *xpp, struct xante_item *item,
     session->change_new_value = NULL;
     session->xpp = xpp;
     session->item = item;
-    session->call_item_value_confirm = false;
 
     /*
      * If we're an item we may have some function which can be executed inside

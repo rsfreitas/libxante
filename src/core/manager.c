@@ -391,35 +391,42 @@ static bool should_call_manager(struct xante_item *item)
  *     the Ok button), the function must fill the dialog result inside the
  *     session->result variable.
  *
- *     Also, if one wants that the event EV_ITEM_VALUE_CONFIRM to be called
- *     when a new value is entered, the session->call_item_value_confirm
- *     must be changed to true.
- *
  * * validate_result:
  *
- *     A function to validate the session->result value and case it is
- *     valid, update the item's internal value. The function must have the
- *     following prototype:
+ *     A function to validate the session->result value and, case it is
+ *     valid, allow to update the item's internal value.
+ *
+ *     The function must have the following prototype:
  *
  *     bool foo_validate(session_t *session);
  *
  *     Where the returned value must tell if the new value, that is contained
  *     in session->result, can replace the current item's value or not.
  *
+ * * value_changed:
+ *
  *     In case of session->result can successfully replace the item's value,
- *     the function must also update three session, so this change may be
- *     inserted into the internal changes lists. The session are:
+ *     this function must also update three @session properties, so this change
+ *     may be inserted into the internal changes lists. The session properties
+ *     are:
  *
  *     - session->change_item_name: the name which will identify the item
- *                                     inside the changes list.
+ *                                  inside the changes list.
  *
  *     - session->change_old_value: the item's old value.
  *
  *     - session->change_new_value: the item's new value.
  *
- * * value_changed:
+ *     This function must have the following prototype:
+ *
+ *     int value_changed(session_t *session);
  *
  * * update_value:
+ *
+ *      The function to replace current item's value with session->result
+ *      content. Its prototype is the following:
+ *
+ *      void value_changed(session_t *session);
  */
 static widget_result_t run_selected_dialog(session_t *session)
 {
@@ -435,7 +442,7 @@ static widget_result_t run_selected_dialog(session_t *session)
     /*
      * The only kind of dialog which we don't need to handle its return
      * value is XANTE_WIDGET_CUSTOM, since the function can do preety
-     * much anything in it and it is its responsibility to handle it.
+     * much anything in it and it is its responsability to handle it.
      */
     if (item->widget_type == XANTE_WIDGET_CUSTOM) {
         event_call(EV_CUSTOM, xpp, item, NULL);
@@ -468,15 +475,13 @@ static widget_result_t run_selected_dialog(session_t *session)
                         break;
 
                 /*
-                 * If an item requires a call to this event it must turn this
-                 * flag on.
+                 * Call event to allow the module confirm if the session->result
+                 * is valid or not.
                  */
-                if (session->call_item_value_confirm) {
-                    if (event_call(EV_ITEM_VALUE_CONFIRM, xpp, item,
-                                   cl_string_valueof(session->result)) < 0)
-                    {
-                        break;
-                    }
+                if (event_call(EV_ITEM_VALUE_CONFIRM, xpp, item,
+                               cl_string_valueof(session->result)) < 0)
+                {
+                    break;
                 }
 
                 if (session->value_changed != NULL)
@@ -585,7 +590,8 @@ static int manager_run_widget(struct xante_app *xpp, cl_list_t *menus,
          * internal change.
          */
         if ((selected_item->widget_type != XANTE_WIDGET_MIXEDFORM) ||
-            (selected_item->widget_type != XANTE_WIDGET_SPREADSHEET))
+            (selected_item->widget_type != XANTE_WIDGET_SPREADSHEET) ||
+            !is_gadget(selected_item->widget_type))
         {
             change_add(xpp, cl_string_valueof(session.change_item_name),
                        cl_string_valueof(session.change_old_value),

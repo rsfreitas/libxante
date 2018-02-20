@@ -45,7 +45,7 @@
  *
  * @return On success returns the button selected or -1 otherwise.
  */
-int xante_dlg_messagebox(struct xante_app *xpp, enum xante_msgbox_type type,
+int xante_dlg_messagebox(xante_t *xpp, enum xante_msgbox_type type,
                          const char *title, const char *message, ...)
                          __attribute__((format(printf, 4, 5)));
 

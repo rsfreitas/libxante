@@ -359,8 +359,13 @@ static int ev_item_value(struct xante_app *xpp, const char *event_name, va_list 
     arg.item = item;
     function = get_function_name(item->events, event_name);
 
-    if (function.found == false)
+    if (function.found == false) {
+        xante_log_debug(cl_tr("Event function from event [%s] not found"),
+                        event_name);
+
         return 0; /* Should we return an error? */
+    }
+
 
     /* Parse the item value */
     switch (item->widget_type) {

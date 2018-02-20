@@ -51,10 +51,21 @@ void gadget_dispatch_add(const char *function,
                          int (*symbol)(struct xante_app *, struct xante_item *,
                                        void *));
 
+void gadget_dispatch_register_user_events(session_t *session,
+                                          const char *prefix);
+
+void gadget_dispatch_run_user_event(struct xante_app *xpp, const char *prefix,
+                                    const char *event_name, void *data);
+
 /* question */
 bool gadget_question(struct xante_app *xpp, const char *title, const char *msg,
                      const char *button1_label, const char *button2_label,
                      const char *statusbar_text);
+
+/* clock */
+void gadget_clock_register(void);
+int gadget_clock(session_t *session);
+bool gadget_clock_validate_result(session_t *session);
 
 #endif
 
