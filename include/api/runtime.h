@@ -24,12 +24,12 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_RUNTIME_H
-#define _LIBXANTE_XT_RUNTIME_H
+#ifndef _LIBXANTE_API_RUNTIME_H
+#define _LIBXANTE_API_RUNTIME_H
 
 #ifndef LIBXANTE_COMPILE
 # ifndef _LIBXANTE_H
-#  error "Never use <xt_runtime.h> directly; include <libxante.h> instead."
+#  error "Never use <runtime.h> directly; include <libxante.h> instead."
 # endif
 #endif
 
@@ -113,7 +113,7 @@ bool xante_runtime_force_config_file_saving(const xante_t *xpp);
 
 /**
  * @name xante_runtime_set_inactivity_timeout
- * @brief Sets the timeout to close an UI dialog.
+ * @brief Sets the timeout to close an UI object.
  *
  * @param [in] xpp: The library main object.
  * @param [in] timeout: The timeout in seconds.
@@ -124,7 +124,7 @@ int xante_runtime_set_inactivity_timeout(xante_t *xpp, unsigned int timeout);
 
 /**
  * @name xante_runtime_inactivity_timeout
- * @brief Retrives the current timeout to close a dialog.
+ * @brief Retrives the current timeout to close an object.
  *
  * @param [in] xpp: The library main object.
  *
@@ -138,7 +138,7 @@ int xante_runtime_inactivity_timeout(const xante_t *xpp);
  *        will be saved or not.
  *
  * @param [in] xpp: The library main object.
- * @param [in] show_question: The boolean value to enable/disable the dialog.
+ * @param [in] show_question: The boolean value to enable/disable the object.
  *
  * @return On success returns 0 or -1 otherwise.
  */
@@ -147,8 +147,8 @@ int xante_runtime_set_show_config_saving_question(xante_t *xpp,
 
 /**
  * @name xante_runtime_show_config_saving_question
- * @brief Retrieves if the configuration file dialog question is going to be
- *        used or not.
+ * @brief Retrieves if the configuration file object question is going to be
+ *        displayed or not.
  *
  * @param [in] xpp: The library main object.
  *
@@ -158,7 +158,7 @@ bool xante_runtime_show_config_saving_question(const xante_t *xpp);
 
 /**
  * @name xante_runtime_set_accent_characters
- * @brief Enable/Disable accent characters in the input dialog.
+ * @brief Enables/Disables accent characters in the input object.
  *
  * @param [in] xpp: The library main object.
  * @param [in] use_accents: The boolean value to enable/disable.

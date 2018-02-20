@@ -112,11 +112,11 @@ void timebox_update_value(session_t *session)
 }
 
 /**
- * @name ui_timebox
- * @brief Creates a dialog to choose a time in a timebox.
+ * @name timebox
+ * @brief Creates an object to choose a time in a timebox.
  *
  * @return Returns a ui_return_t value indicating if the item's value has been
- *         changed (true) or not (false) with the dialog selected button.
+ *         changed (true) or not (false) with the object selected button.
  */
 int timebox(session_t *session)
 {
@@ -125,12 +125,12 @@ int timebox(session_t *session)
     char *result = NULL;
 
     session->width = (item->geometry.width == 0) ? DEFAULT_WIDTH
-                                                   : item->geometry.width;
+                                                 : item->geometry.width;
 
     session->height = (item->geometry.height == 0) ? DEFAULT_HEIGHT
-                                                     : item->geometry.height;
+                                                   : item->geometry.height;
 
-    /* Adjusts the dialog content using the item content */
+    /* Adjusts the object content using the item content */
     split_item_value(item, &hour, &minutes, &seconds);
 
     /* Adjusts the window message */

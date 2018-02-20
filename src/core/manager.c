@@ -1,6 +1,6 @@
 
 /*
- * Description: Handles the dialog (window) manager.
+ * Description: Handles the "window" manager.
  *
  * Author: Rodrigo Freitas
  * Created at: Fri May  5 21:08:15 2017
@@ -111,7 +111,7 @@ static bool item_may_have_value(const struct xante_item *item)
 {
     switch (item->widget_type) {
         /*
-         * These are all dialogs that may have values and their values are
+         * These are all objects that may have values and their values are
          * viewed beside its name inside a menu. So the user may know its
          * current value.
          */
@@ -248,7 +248,7 @@ static void build_session(const struct xante_menu *menu,
     prepare_content(menu, session);
 }
 
-static void prepare_dialog_look(struct xante_app *xpp,
+static void prepare_object_look(struct xante_app *xpp,
     const char *cancel_label)
 {
     int timeout = -1;
@@ -269,7 +269,7 @@ static void prepare_dialog_look(struct xante_app *xpp,
     free(text);
 }
 
-static void release_dialog_labels(void)
+static void release_object_labels(void)
 {
     if (dialog_vars.cancel_label != NULL) {
         free(dialog_vars.cancel_label);
@@ -278,7 +278,7 @@ static void release_dialog_labels(void)
 }
 
 /* Rename menus to something better */
-static widget_result_t call_menu_dialog(struct xante_app *xpp,
+static widget_result_t call_menu_object(struct xante_app *xpp,
     cl_list_t *menus, struct xante_item *selected_item)
 {
     struct xante_menu *referenced_menu = NULL;
@@ -368,27 +368,27 @@ static bool should_call_manager(struct xante_item *item)
 }
 
 /*
- * This function is where a internal dialog is called according a selected item
+ * This function is where a internal object is called according a selected item
  * type.
  *
- * The selected button validation is made here, so the dialog functions don't
+ * The selected button validation is made here, so the object functions don't
  * need to do it.
  *
- * There are a couple of functions that a dialog must provide to be correctly
+ * There are a couple of functions that an object must provide to be correctly
  * executed and validated here:
  *
  * * run:
  *
- *     The function which calls the dialog. It must have the following
+ *     The function which calls the object. It must have the following
  *     prototype:
  *
- *     int foo_dialog(session_t *session);
+ *     int foo_object(session_t *session);
  *
  *     Where the returned value must indicate which button was selected to
  *     close it.
  *
  *     And, in case o returning DLG_EXIT_OK (which is when the user selects
- *     the Ok button), the function must fill the dialog result inside the
+ *     the Ok button), the function must fill the object result inside the
  *     session->result variable.
  *
  * * validate_result:
@@ -428,7 +428,7 @@ static bool should_call_manager(struct xante_item *item)
  *
  *      void value_changed(session_t *session);
  */
-static widget_result_t run_selected_dialog(session_t *session)
+static widget_result_t run_selected_object(session_t *session)
 {
     struct xante_app *xpp = session->xpp;
     struct xante_item *item = session->item;
@@ -440,7 +440,7 @@ static widget_result_t run_selected_dialog(session_t *session)
     ret_dialog.updated_value = false;
 
     /*
-     * The only kind of dialog which we don't need to handle its return
+     * The only kind of object which we don't need to handle its return
      * value is XANTE_WIDGET_CUSTOM, since the function can do preety
      * much anything in it and it is its responsability to handle it.
      */
@@ -452,7 +452,7 @@ static widget_result_t run_selected_dialog(session_t *session)
     if (NULL == session->run) {
         xante_dlg_messagebox(xpp, XANTE_MSGBOX_ERROR, cl_tr("Error"),
                              cl_tr("The selected item doesn't have a function "
-                                   "to run its dialog!"));
+                                   "to run its object!"));
 
         return ret_dialog;
     }
@@ -503,7 +503,7 @@ static widget_result_t run_selected_dialog(session_t *session)
 #endif
 
             case DLG_EXIT_ESC:
-                /* Don't let the user close the dialog */
+                /* Don't let the user close the object */
                 if (xante_runtime_esc_key(xpp))
                     break;
 
@@ -532,13 +532,13 @@ static widget_result_t run_selected_dialog(session_t *session)
 
 /**
  * @name manager_run_widget
- * @brief Create and run a dialog according to the item passed as argument.
+ * @brief Create and run an object according to the item passed as argument.
  *
  * @param [in,out] xpp: The library main object.
  * @param [in,out] menus: The list of menus accessible through internal objects.
  * @param [in,out] selected_item: The selected item object.
  *
- * @return Returns the button used by the user to end the dialog.
+ * @return Returns the button used by the user to end the object.
  */
 static int manager_run_widget(struct xante_app *xpp, cl_list_t *menus,
     struct xante_item *selected_item)
@@ -560,14 +560,14 @@ static int manager_run_widget(struct xante_app *xpp, cl_list_t *menus,
     if (event_call(EV_ITEM_SELECTED, xpp, selected_item) < 0)
         return DLG_EXIT_CANCEL;
 
-    /* Prepare dialog common session */
+    /* Prepare object common session */
     session_init(xpp, selected_item, &session);
     dlgx_session_init(xpp, selected_item, session.editable_value);
 
     if (should_call_manager(selected_item))
-        ret_dialog = call_menu_dialog(xpp, menus, selected_item);
+        ret_dialog = call_menu_object(xpp, menus, selected_item);
     else
-        ret_dialog = run_selected_dialog(&session);
+        ret_dialog = run_selected_object(&session);
 
     xante_log_info("%s: %d, %d", __FUNCTION__,
             ret_dialog.selected_button,
@@ -613,7 +613,7 @@ static int manager_run_widget(struct xante_app *xpp, cl_list_t *menus,
 
 /**
  * @name manager_run
- * @brief Creates a dialog of menu type.
+ * @brief Creates an object of menu type.
  *
  * @param [in,out] xpp: The main library object.
  * @param [in] menus: The list of menus accessible through internal objects.
@@ -629,7 +629,7 @@ static int manager_run(struct xante_app *xpp, cl_list_t *menus,
     session_t session;
     int ret_dialog = DLG_EXIT_OK, selected_index = -1;
 
-    release_dialog_labels();
+    release_object_labels();
 
     do {
         if (xante_runtime_close_ui(xpp) == true)
@@ -637,7 +637,7 @@ static int manager_run(struct xante_app *xpp, cl_list_t *menus,
 
         session_init(xpp, NULL, &session);
         build_session(entry_menu, &session);
-        prepare_dialog_look(xpp, cancel_label);
+        prepare_object_look(xpp, cancel_label);
 
 #ifdef ALTERNATIVE_DIALOG
         ret_dialog = dlg_menu(cl_string_valueof(entry_menu->name), "",
@@ -669,7 +669,7 @@ static int manager_run(struct xante_app *xpp, cl_list_t *menus,
 #endif
 
             case DLG_EXIT_ESC:
-                /* Don't let the user close the dialog */
+                /* Don't let the user close the object */
                 if (xante_runtime_esc_key(xpp))
                     break;
 
@@ -697,7 +697,7 @@ static int manager_run(struct xante_app *xpp, cl_list_t *menus,
                 break;
         }
 
-        release_dialog_labels();
+        release_object_labels();
         session_uninit(&session);
     } while (loop);
 

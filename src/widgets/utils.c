@@ -32,7 +32,7 @@
  *
  */
 
-char *widget_statusbar_text(enum xante_widget type, bool editable,
+char *widget_statusbar_text(enum xante_object type, bool editable,
     bool block_esc_key)
 {
     cl_string_t *t = NULL;

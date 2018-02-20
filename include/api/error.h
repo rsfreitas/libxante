@@ -24,12 +24,12 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_ERROR_H
-#define _LIBXANTE_XT_ERROR_H
+#ifndef _LIBXANTE_API_ERROR_H
+#define _LIBXANTE_API_ERROR_H
 
 #ifndef LIBXANTE_COMPILE
 # ifndef _LIBXANTE_H
-#  error "Never use <xt_error.h> directly; include <libxante.h> instead."
+#  error "Never use <error.h> directly; include <libxante.h> instead."
 # endif
 #endif
 

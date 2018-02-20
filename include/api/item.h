@@ -24,12 +24,12 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_ITEM_H
-#define _LIBXANTE_XT_ITEM_H
+#ifndef _LIBXANTE_API_ITEM_H
+#define _LIBXANTE_API_ITEM_H
 
 #ifndef LIBXANTE_COMPILE
 # ifndef _LIBXANTE_H
-#  error "Never use <xt_item.h> directly; include <libxante.h> instead."
+#  error "Never use <item.h> directly; include <libxante.h> instead."
 # endif
 #endif
 
@@ -86,14 +86,14 @@ cl_object_t *xante_item_default_value(const xante_item_t *item);
 cl_object_t *xante_item_value(const xante_item_t *item);
 
 /**
- * @name xante_item_dialog_type
- * @brief Gives the dialog type of an item object.
+ * @name xante_item_object_type
+ * @brief Gives the object type of an item.
  *
  * @param [in] item: The item object.
  *
- * @return On success returns the item dialog type or -1 otherwise.
+ * @return On success returns the item object type or -1 otherwise.
  */
-enum xante_ui_dialog xante_item_dialog_type(const xante_item_t *item);
+enum xante_object xante_item_object_type(const xante_item_t *item);
 
 /**
  * @name xante_item_checklist_type

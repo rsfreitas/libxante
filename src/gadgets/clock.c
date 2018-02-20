@@ -115,7 +115,7 @@ static int fill_item_with_current_datetime(struct xante_item *item,
  * Event called right after a user chooses to change date/time by selecting
  * the Change button.
  *
- * Here we just put the current date/time inside the dialog so the user may
+ * Here we just put the current date/time inside the object so the user may
  * change it.
  */
 static int gadget_clock_input_selected(struct xante_app *xpp __attribute__((unused)),
@@ -245,9 +245,9 @@ int gadget_clock(session_t *session)
     enum xante_return_value ret_dialog;
 
     /*
-     * TODO: Save the original object events so we can call them later. One way
-     *       to do this is save the session->item event's into the dispatch
-     *       table, so we can use it later.
+     * Saves the original object events so we can call them later. One way
+     * to do this is save the session->item event's into the dispatch
+     * table, so we can use it later.
      */
     gadget_dispatch_register_user_events(session, GADGET_PREFIX);
     ret_dialog = xante_manager_single_run(session->xpp, clock_sijtf);

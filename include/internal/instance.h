@@ -24,8 +24,8 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_INTERNAL_INSTANCE_H
-#define _LIBXANTE_XT_INTERNAL_INSTANCE_H
+#ifndef _LIBXANTE_INTERNAL_INSTANCE_H
+#define _LIBXANTE_INTERNAL_INSTANCE_H
 
 /* Internal library declarations */
 int instance_init(const struct xante_app *xpp, bool single_instance);

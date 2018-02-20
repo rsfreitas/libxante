@@ -24,24 +24,24 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_GADGET_H
-#define _LIBXANTE_XT_GADGET_H
+#ifndef _LIBXANTE_API_GADGET_H
+#define _LIBXANTE_API_GADGET_H
 
 #ifndef LIBXANTE_COMPILE
 # ifndef _LIBXANTE_H
-#  error "Never use <xt_gadget.h> directly; include <libxante.h> instead."
+#  error "Never use <gadget.h> directly; include <libxante.h> instead."
 # endif
 #endif
 
 /**
  * @name xante_dlg_messagebox
- * @brief Creates a message box dialog.
+ * @brief Creates a message box object.
  *
  * @param [in] xpp: The library main object.
  * @param [in] type: The message box type (info, error, warning).
- * @param [in] title: The dialog title.
- * @param [in] message: The dialog message format.
- * @param [in] ...: The dialog message content.
+ * @param [in] title: The object window title.
+ * @param [in] message: The object message format (error, warning, ok).
+ * @param [in] ...: The object message.
  *
  * @return On success returns the button selected or -1 otherwise.
  */

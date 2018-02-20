@@ -26,7 +26,7 @@
 
 #include "libxante.h"
 
-/* The dialog size onto the screen */
+/* The object size onto the screen */
 #define DIALOG_HEIGHT                       26
 #define DIALOG_WIDTH                        75
 
@@ -43,10 +43,10 @@ int file_view(session_t *session)
     cl_object_t *value = NULL;
 
     session->width = (item->geometry.width == 0) ? DIALOG_WIDTH
-                                                   : item->geometry.width;
+                                                 : item->geometry.width;
 
     session->height = (item->geometry.height == 0) ? DIALOG_HEIGHT
-                                                     : item->geometry.height;
+                                                   : item->geometry.height;
 
     /* Gets the item voalue */
     value = item_value(item);

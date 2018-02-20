@@ -27,7 +27,7 @@
 #include "libxante.h"
 
 struct widget_events {
-    enum xante_widget   type;
+    enum xante_object   type;
     int                 (*run)(struct session *);
     bool                (*validate_result)(struct session *);
     bool                (*value_changed)(struct session *);
@@ -181,7 +181,7 @@ static struct widget_events __widget_events[] = {
 
     {
         .type = XANTE_WIDGET_SPINNER_SYNC,
-        .run = sync_dialog,
+        .run = sync_object,
         .value_changed = NULL,
         .update_value = NULL,
         .validate_result = NULL
@@ -189,7 +189,7 @@ static struct widget_events __widget_events[] = {
 
     {
         .type = XANTE_WIDGET_DOTS_SYNC,
-        .run = sync_dialog,
+        .run = sync_object,
         .value_changed = NULL,
         .update_value = NULL,
         .validate_result = NULL
@@ -301,7 +301,7 @@ static struct widget_events __widget_events[] = {
  *
  */
 
-static struct widget_events *get_function_events(enum xante_widget type)
+static struct widget_events *get_function_events(enum xante_object type)
 {
     unsigned int i;
 

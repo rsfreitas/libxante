@@ -46,8 +46,10 @@
 #define XANTE_STR_LINE_BREAK    '^'
 
 /** Supported UI widgets */
-enum xante_widget {
+enum xante_object {
     XANTE_WIDGET_UNKNOWN,
+
+    /* UI widgets */
     XANTE_WIDGET_MENU_REFERENCE,
     XANTE_WIDGET_INPUT_INT,
     XANTE_WIDGET_INPUT_FLOAT,

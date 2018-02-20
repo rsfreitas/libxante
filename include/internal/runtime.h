@@ -24,8 +24,8 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_INTERNAL_RUNTIME_H
-#define _LIBXANTE_XT_INTERNAL_RUNTIME_H
+#ifndef _LIBXANTE_INTERNAL_RUNTIME_H
+#define _LIBXANTE_INTERNAL_RUNTIME_H
 
 /* Internal library declarations */
 void runtime_start(struct xante_app *xpp, const char *caller_name);

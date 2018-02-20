@@ -61,7 +61,7 @@ LIBXANTE_0.1 {
         xante_item_access_mode;
         xante_item_default_value;
         xante_item_value;
-        xante_item_dialog_type;
+        xante_item_object_type;
         xante_item_checklist_type;
         xante_item_update_value;
         xante_item_cancel_progress;

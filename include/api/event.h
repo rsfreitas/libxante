@@ -24,12 +24,12 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_EVENT_H
-#define _LIBXANTE_XT_EVENT_H
+#ifndef _LIBXANTE_API_EVENT_H
+#define _LIBXANTE_API_EVENT_H
 
 #ifndef LIBXANTE_COMPILE
 # ifndef _LIBXANTE_H
-#  error "Never use <xt_event.h> directly; include <libxante.h> instead."
+#  error "Never use <event.h> directly; include <libxante.h> instead."
 # endif
 #endif
 

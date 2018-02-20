@@ -40,8 +40,8 @@
  * @brief Creates a gadget to choose between two options.
  *
  * @param [in] xpp: The library main object.
- * @param [in] title: The dialog title.
- * @param [in] msg: The dialog message to be displayed.
+ * @param [in] title: The window title.
+ * @param [in] msg: The window message to be displayed.
  * @param [in] button1_label: A label for the first button.
  * @param [in] button2_label: A label fot the second button.
  * @param [in] statusbar_text: An alternative statusbar text.

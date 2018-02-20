@@ -80,12 +80,12 @@ int update_object(session_t *session)
         .item = item
     };
 
-    /* Prepare dialog */
+    /* Prepare object */
     session->width = (item->geometry.width == 0) ? DIALOG_WIDTH
-                                                    : item->geometry.width;
+                                                 : item->geometry.width;
 
     session->height = (item->geometry.height == 0) ? DIALOG_HEIGHT
-                                                      : item->geometry.height;
+                                                   : item->geometry.height;
 
     /* Gets the user custom data */
     user_arg.data = event_item_custom_data(xpp, item);

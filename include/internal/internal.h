@@ -24,8 +24,8 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_INTERNAL_H
-#define _LIBXANTE_XT_INTERNAL_H
+#ifndef _LIBXANTE_INTERNAL_H
+#define _LIBXANTE_INTERNAL_H
 
 #ifndef DIALOG_H_included
 # include <dialog.h>
@@ -194,7 +194,7 @@ struct xante_item {
     cl_stringlist_t         *selected_items;
     cl_json_t               *form_options;
     int                     widget_checklist_type;
-    enum xante_widget       widget_type;
+    enum xante_object       widget_type;
     struct flag_parser      flags;
     struct cl_ref_s         ref;
     bool                    cancel_update;

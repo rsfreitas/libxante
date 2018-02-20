@@ -26,7 +26,7 @@
 
 #include "libxante.h"
 
-/* The dialog size onto the screen */
+/* The object size onto the screen */
 #define DIALOG_HEIGHT                       12
 #define DIALOG_WIDTH                        60
 
@@ -87,10 +87,10 @@ int fselect(session_t *session)
     char *chosen_path = NULL;
 
     session->width = (item->geometry.width == 0) ? DIALOG_WIDTH
-                                                   : item->geometry.width;
+                                                 : item->geometry.width;
 
     session->height = (item->geometry.height == 0) ? DIALOG_HEIGHT
-                                                     : item->geometry.height;
+                                                   : item->geometry.height;
 
     if (item->widget_type == XANTE_WIDGET_FILE_SELECT) {
         ret_dialog = dialog_fselect(cl_string_valueof(item->name),

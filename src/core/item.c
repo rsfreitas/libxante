@@ -484,7 +484,7 @@ __PUB_API__ cl_object_t *xante_item_value(const xante_item_t *item)
     return cl_object_ref(i->value);
 }
 
-__PUB_API__ enum xante_widget xante_item_widget_type(const xante_item_t *item)
+__PUB_API__ enum xante_object xante_item_object_type(const xante_item_t *item)
 {
     struct xante_item *i = (struct xante_item *)item;
 

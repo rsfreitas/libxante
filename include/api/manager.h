@@ -24,12 +24,12 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_MANAGER_H
-#define _LIBXANTE_XT_MANAGER_H
+#ifndef _LIBXANTE_API_MANAGER_H
+#define _LIBXANTE_API_MANAGER_H
 
 #ifndef LIBXANTE_COMPILE
 # ifndef _LIBXANTE_H
-#  error "Never use <xt_manager.h> directly; include <libxante.h> instead."
+#  error "Never use <manager.h> directly; include <libxante.h> instead."
 # endif
 #endif
 
@@ -49,15 +49,15 @@ enum xante_return_value xante_manager_run(xante_t *xpp);
 
 /**
  * @name xante_manager_single_run
- * @brief Puts a MJTF dialog to run.
+ * @brief Puts a SIJTF object to run.
  *
  * This function may be called inside a module event function and also, this
  * event may run with an already running application or not. This way this
  * function is in charge to know this situation and does all required
- * initialization to run the dialog.
+ * initialization to run the object.
  *
  * @param [in,out] xpp: The library main object.
- * @param [in] raw_mjtf: The MJTF dialog in a string format.
+ * @param [in] raw_mjtf: The SIJTF object in a string format.
  *
  * @return Return an exit value indicating what happened inside (see enum
  *         xante_return_value declaration).

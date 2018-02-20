@@ -26,7 +26,7 @@
 
 #include "libxante.h"
 
-/* The dialog size onto the screen */
+/* The object size onto the screen */
 #define DIALOG_HEIGHT               5
 #define DIALOG_WIDTH                60
 
@@ -37,7 +37,7 @@ struct sync_thread {
 };
 
 struct sync {
-    enum xante_widget   type;
+    enum xante_object   type;
     int                 step_limit;
 };
 
@@ -61,7 +61,7 @@ static void task_signal(int signum)
     }
 }
 
-static struct sync *get_sync(enum xante_widget sync)
+static struct sync *get_sync(enum xante_object sync)
 {
     unsigned int i;
 
@@ -72,7 +72,7 @@ static struct sync *get_sync(enum xante_widget sync)
     return NULL;
 }
 
-static void update_synctext(cl_string_t *text, int step, enum xante_widget sync)
+static void update_synctext(cl_string_t *text, int step, enum xante_object sync)
 {
     char c;
     int i;
@@ -134,7 +134,7 @@ static void *call_task(cl_thread_t *thread)
 }
 
 /*
- * This is the thread that updates the sync bar dialog.
+ * This is the thread that updates the sync bar object.
  */
 static void *make_sync(cl_thread_t *thread)
 {
@@ -236,17 +236,17 @@ static void *make_sync(cl_thread_t *thread)
 
 /**
  * @name ui_sync
- * @brief Creates a dialog of sync type.
+ * @brief Creates an object of sync type.
  *
- * This dialog runs a task with a specific ending delimiter and shows a
+ * This object runs a task with a specific ending delimiter and shows a
  * sync bar to ilustrate the evolution of it.
  *
  * The \a item must have two events filled
  *
  * @return Returns a ui_return_t value indicating if the item's value has been
- *         changed (true) or not (false) with the dialog selected button.
+ *         changed (true) or not (false) with the object selected button.
  */
-int sync_dialog(session_t *session)
+int sync_object(session_t *session)
 {
     void *data;
     cl_thread_t *thread;

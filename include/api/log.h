@@ -24,12 +24,12 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_LOG_H
-#define _LIBXANTE_XT_LOG_H
+#ifndef _LIBXANTE_API_LOG_H
+#define _LIBXANTE_API_LOG_H
 
 #ifndef LIBXANTE_COMPILE
 # ifndef _LIBXANTE_H
-#  error "Never use <xt_log.h> directly; include <libxante.h> instead."
+#  error "Never use <log.h> directly; include <libxante.h> instead."
 # endif
 #endif
 

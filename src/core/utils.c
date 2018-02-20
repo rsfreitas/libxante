@@ -68,7 +68,7 @@ end_block:
  */
 
 /**
- * @name is_valid_ui_dialog
+ * @name is_valid_ui_object
  * @brief Checks if a given widget type is valid inside the library
  *        environment.
  *
@@ -76,7 +76,7 @@ end_block:
  *
  * @return Returns true if is a valid widget type or false otherwise.
  */
-bool is_valid_ui_dialog(enum xante_widget type)
+bool is_valid_ui_object(enum xante_object type)
 {
     switch (type) {
         case XANTE_WIDGET_MENU_REFERENCE:
@@ -167,9 +167,9 @@ enum xante_menu_type translate_string_menu_type(const char *type)
  *
  * @return Returns the numeric value of the widget type.
  */
-enum xante_widget translate_string_widget_type(const cl_string_t *type)
+enum xante_object translate_string_widget_type(const cl_string_t *type)
 {
-    enum xante_widget widget = XANTE_WIDGET_UNKNOWN;
+    enum xante_object widget = XANTE_WIDGET_UNKNOWN;
     cl_string_t *object = NULL;
     char *ptype = NULL;
 
@@ -265,7 +265,7 @@ enum xante_widget translate_string_widget_type(const cl_string_t *type)
  */
 bool is_menu_item(const cl_string_t *type)
 {
-    enum xante_widget dlg_type;
+    enum xante_object dlg_type;
 
     dlg_type = translate_string_widget_type(type);
 
@@ -290,7 +290,7 @@ bool is_menu_item(const cl_string_t *type)
  *
  * @return Returns true is is an input kind or false if not.
  */
-bool item_has_ranges(enum xante_widget dlg_type)
+bool item_has_ranges(enum xante_object dlg_type)
 {
     switch (dlg_type) {
         case XANTE_WIDGET_INPUT_INT:
@@ -348,7 +348,7 @@ bool file_exists(const char *pathname)
  *
  * @return Returns true or false if the object is a gadget or not.
  */
-bool is_gadget(enum xante_widget type)
+bool is_gadget(enum xante_object type)
 {
     switch (type) {
         case XANTE_GADGET_CLOCK:

@@ -265,7 +265,7 @@ static void build_session(session_t *session, char *input,
     session->text = cl_string_dup(item->options);
     cl_string_rplchr(session->text, XANTE_STR_LINE_BREAK, '\n');
     session->width = (item->geometry.width == 0) ? dlgx_get_input_window_width(item)
-                                                    : item->geometry.width;
+                                                 : item->geometry.width;
 
     session->height = (item->geometry.height == 0)
                         ? dlgx_count_lines_by_delimiters(cl_string_valueof(session->text)) +
@@ -390,11 +390,11 @@ void input_update_value(session_t *session)
 }
 
 /**
- * @name ui_input
- * @brief Creates a dialog to do some data input.
+ * @name input
+ * @brief Creates an object to do some data input.
  *
  * @return Returns a ui_return_t value indicating if the item's value has been
- *         changed (true) or not (false) with the dialog selected button.
+ *         changed (true) or not (false) with the object selected button.
  */
 int input(session_t *session)
 {
@@ -407,7 +407,7 @@ int input(session_t *session)
         .item = item,
     };
 
-    /* Prepares dialog content and session */
+    /* Prepares object content and session */
     build_session(session, input_result, sizeof(input_result));
 
     if (item->widget_type == XANTE_WIDGET_INPUT_PASSWD) {

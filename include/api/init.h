@@ -24,12 +24,12 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_INIT_H
-#define _LIBXANTE_XT_INIT_H
+#ifndef _LIBXANTE_API_INIT_H
+#define _LIBXANTE_API_INIT_H
 
 #ifndef LIBXANTE_COMPILE
 # ifndef _LIBXANTE_H
-#  error "Never use <xt_init.h> directly; include <libxante.h> instead."
+#  error "Never use <init.h> directly; include <libxante.h> instead."
 # endif
 #endif
 

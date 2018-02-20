@@ -230,7 +230,7 @@ static void build_session(const struct xante_item *item,
 
     session->displayed_items = dlgx_get_dlg_items(session->number_of_items);
 
-    /* XXX: This 1 is from the dialog text message. */
+    /* XXX: The +1 is from the object text message. */
     session->height = (item->geometry.height == 0)
                             ? (session->number_of_items + DIALOG_HEIGHT_WITHOUT_TEXT + 1)
                             : item->geometry.height;
@@ -475,7 +475,7 @@ int mixedform(session_t *session)
     cl_json_t *fields = NULL;
     char *result = NULL;
 
-    /* Prepares dialog content */
+    /* Prepares object content */
     fields = get_fields_node(item);
     form_title = get_title(item);
     build_session(item, fields, session);

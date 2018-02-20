@@ -26,13 +26,13 @@
 
 #include "libxante.h"
 
-/* The dialog size onto the screen */
+/* The object size onto the screen */
 #define DIALOG_HEIGHT                   7
 #define DIALOG_WIDTH                    60
 
 struct progress_thread {
     session_t     *session;
-    void                *data;
+    void          *data;
 };
 
 /*
@@ -42,7 +42,7 @@ struct progress_thread {
  */
 
 /*
- * This is the thread that updates the progress bar dialog.
+ * This is the thread that updates the progress bar object.
  */
 static void *make_progress(cl_thread_t *thread)
 {
@@ -54,10 +54,10 @@ static void *make_progress(cl_thread_t *thread)
 
     cl_thread_set_state(thread, CL_THREAD_ST_CREATED);
     session->width = (item->geometry.width == 0) ? DIALOG_WIDTH
-                                                   : item->geometry.width;
+                                                 : item->geometry.width;
 
     session->height = (item->geometry.height == 0) ? DIALOG_HEIGHT
-                                                     : item->geometry.height;
+                                                   : item->geometry.height;
 
     cl_thread_set_state(thread, CL_THREAD_ST_INITIALIZED);
 
@@ -86,10 +86,10 @@ static void *make_progress(cl_thread_t *thread)
  */
 
 /**
- * @name ui_progress
- * @brief Creates a dialog of progress type.
+ * @name progress
+ * @brief Creates an object of progress type.
  *
- * This dialog runs a task with a specific ending delimiter and shows a
+ * This object runs a task with a specific ending delimiter and shows a
  * progress bar to ilustrate the evolution of it.
  *
  * The \a item must have two events filled:
@@ -104,10 +104,10 @@ static void *make_progress(cl_thread_t *thread)
  * function 'xante_item_cancel_update'.
  *
  * @param [in] xpp: The main library object.
- * @param [in] item: The item to be used inside the dialog.
+ * @param [in] item: The item to be used inside the object.
  *
  * @return Returns a ui_return_t value indicating if the item's value has been
- *         changed (true) or not (false) with the dialog selected button.
+ *         changed (true) or not (false) with the object selected button.
  */
 int progress(session_t *session)
 {

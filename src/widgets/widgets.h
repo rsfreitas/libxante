@@ -45,16 +45,16 @@
 /* Message box window without text */
 #define MSGBOX_HEIGHT_WITHOUT_TEXT  4
 
-/* Form dialog without text */
+/* Form object without text */
 #define FORM_HEIGHT_WITHOUT_TEXT    7
 
 /* Window border size */
 #define WINDOW_BORDER_SIZE          10
 
-/* Default fixed columns of a dialog */
+/* Default fixed columns of an object */
 #define DIALOG_COLUMNS              4
 
-/* Columns of a dialog with an internal dialog */
+/* Columns of an object with an internal object */
 #define WINDOW_COLUMNS              (DIALOG_COLUMNS + 2)
 
 /* Maximum number of characters that a user may type */
@@ -64,7 +64,7 @@
 #define DATE_MAX_INPUT_LENGTH       10
 #define TIME_MAX_INPUT_LENGTH       8
 
-/* A structure to hold every value returned by a previously called dialog */
+/* A structure to hold every value returned by a previously called object */
 typedef struct {
     int     selected_button;
     bool    updated_value;
@@ -78,7 +78,7 @@ typedef struct {
     cl_string_t *new_value;
 } widget_result_t;
 
-/* A structure to hold session and information of a running dialog */
+/* A structure to hold session and information of a running object */
 typedef struct session {
     bool                editable_value;
     struct xante_app    *xpp;
@@ -95,10 +95,10 @@ typedef struct session {
     int                 longest_field_name; /** Mixedform's longest field name */
     char                *scroll_content;    /** Scrollable UI text content */
     cl_string_t         *result;            /** A string to hold the result
-                                                from a dialog. */
+                                                from an object. */
 
     cl_string_t         *text;              /** A manipulated text to be
-                                                displayed on the dialog */
+                                                displayed on the object */
 
     cl_string_t         *change_item_name;
     cl_string_t         *change_old_value;
@@ -122,7 +122,7 @@ typedef struct session {
 } session_t;
 
 /* widgets */
-char *widget_statusbar_text(enum xante_widget type, bool editable,
+char *widget_statusbar_text(enum xante_object type, bool editable,
                             bool block_esc_key);
 
 /*
@@ -171,7 +171,7 @@ bool add_dm_value_changed(session_t *session);
 int progress(session_t *session);
 
 /* sync */
-int sync_dialog(session_t *session);
+int sync_object(session_t *session);
 
 /* file-select */
 int fselect(session_t *session);
