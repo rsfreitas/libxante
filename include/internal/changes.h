@@ -24,8 +24,8 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_INTERNAL_CHANGES_H
-#define _LIBXANTE_XT_INTERNAL_CHANGES_H
+#ifndef _LIBXANTE_INTERNAL_CHANGES_H
+#define _LIBXANTE_INTERNAL_CHANGES_H
 
 /* Internal library declarations */
 bool change_has_occourred(struct xante_app *xpp);

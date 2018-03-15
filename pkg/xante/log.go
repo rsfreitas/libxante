@@ -22,14 +22,66 @@
 //
 package xante
 
-func Info() {
+/*
+#cgo CFLAGS: -D_GO_API_ -I/usr/local/include -fgnu89-inline
+#cgo LDFLAGS: -L/usr/local/lib -lxante -lcollections
+#include <stdlib.h>
+#include <xante/libxante.h>
+*/
+import "C"
+import (
+	"unsafe"
+)
+
+// XanteLog represents the available logger.
+type XanteLog struct{}
+
+// NewLogger creates a new XanteLog structure.
+func NewLogger() *XanteLog {
+	return &XanteLog{}
 }
 
-func Debug() {
+// Info writes a message into the log file as an information type.
+func (l *XanteLog) Info(content string) {
+	f := C.CString("function")
+	defer C.free(unsafe.Pointer(f))
+
+	c := C.CString(content)
+	defer C.free(unsafe.Pointer(c))
+
+	C.xante_log_ex(C.CL_LOG_INFO, f, C.int(0), c)
 }
 
-func Warn() {
+// Debug writes a message into the log file as a debug type.
+func (l *XanteLog) Debug(function, content string) {
+	f := C.CString(function)
+	defer C.free(unsafe.Pointer(f))
+
+	c := C.CString(content)
+	defer C.free(unsafe.Pointer(c))
+
+	// TODO: Adjust the source line number
+	C.xante_log_ex(C.CL_LOG_DEBUG, f, C.int(0), c)
 }
 
-func Error() {
+// Warn writes a message into the log file as a warning type.
+func (l *XanteLog) Warn(content string) {
+	f := C.CString("function")
+	defer C.free(unsafe.Pointer(f))
+
+	c := C.CString(content)
+	defer C.free(unsafe.Pointer(c))
+
+	C.xante_log_ex(C.CL_LOG_WARNG, f, C.int(0), c)
+}
+
+// Error writes a message into the log file as an error type.
+func (l *XanteLog) Error(content string) {
+	f := C.CString("function")
+	defer C.free(unsafe.Pointer(f))
+
+	c := C.CString(content)
+	defer C.free(unsafe.Pointer(c))
+
+	C.xante_log_ex(C.CL_LOG_ERROR, f, C.int(0), c)
 }

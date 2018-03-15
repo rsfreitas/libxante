@@ -626,7 +626,7 @@ int spreadsheet(session_t *session)
     struct xante_item *item = session->item;
     int ret_dialog = DLG_EXIT_OK;
 
-    /* Prepares dialog content */
+    /* Prepares object content */
     build_session(session);
 
     ret_dialog = dlgx_spreadsheet(cl_string_valueof(item->name),

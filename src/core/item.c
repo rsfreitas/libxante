@@ -28,7 +28,7 @@
 #include "libxante.h"
 
 /*
- * Informations to be used inside functions called while traversing a list
+ * Information to be used inside functions called while traversing a list
  * of items.
  */
 struct search_data {
@@ -362,7 +362,7 @@ void xante_item_unref(struct xante_item *item)
 
 /**
  * @name new_xante_item
- * @brief Creates a new xante_item to hold informations about a menu item.
+ * @brief Creates a new xante_item to hold information about a menu item.
  *
  * To release an object of this type, one may call the 'xante_item_unref'.
  *
@@ -467,6 +467,11 @@ __PUB_API__ cl_object_t *xante_item_default_value(const xante_item_t *item)
         return NULL;
     }
 
+    if (NULL == i->default_value) {
+        errno_set(XANTE_ERROR_ITEM_HAS_NO_INTERNAL_VALUE);
+        return NULL;
+    }
+
     return cl_object_ref(i->default_value);
 }
 
@@ -481,10 +486,15 @@ __PUB_API__ cl_object_t *xante_item_value(const xante_item_t *item)
         return NULL;
     }
 
+    if (NULL == i->value) {
+        errno_set(XANTE_ERROR_ITEM_HAS_NO_INTERNAL_VALUE);
+        return NULL;
+    }
+
     return cl_object_ref(i->value);
 }
 
-__PUB_API__ enum xante_widget xante_item_widget_type(const xante_item_t *item)
+__PUB_API__ enum xante_object xante_item_object_type(const xante_item_t *item)
 {
     struct xante_item *i = (struct xante_item *)item;
 
@@ -551,6 +561,12 @@ __PUB_API__ int xante_item_update_value(xante_item_t *item, const char *fmt, ...
     i->value = data;
 
     return 0;
+}
+
+__PUB_API__ int xante_item_update_value_ex(xante_item_t *item,
+    const char *content)
+{
+    return xante_item_update_value(item, "%s", content);
 }
 
 __PUB_API__ int xante_item_cancel_update(xante_item_t *item)

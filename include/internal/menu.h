@@ -24,8 +24,8 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_INTERNAL_MENU_H
-#define _LIBXANTE_XT_INTERNAL_MENU_H
+#ifndef _LIBXANTE_INTERNAL_MENU_H
+#define _LIBXANTE_INTERNAL_MENU_H
 
 /* Internal library declarations */
 void xante_menu_ref(struct xante_menu *menu);

@@ -24,8 +24,8 @@
  * USA
  */
 
-#ifndef _LIBXANTE_DEFS_H
-#define _LIBXANTE_DEFS_H                        1
+#ifndef _LIBXANTE_COMMON_DEFS_H
+#define _LIBXANTE_COMMON_DEFS_H
 
 #ifdef __cplusplus
 extern "C" {

@@ -26,7 +26,7 @@
 
 #include "libxante.h"
 
-/* The dialog size onto the screen */
+/* The object size onto the screen */
 #define DIALOG_HEIGHT                       26
 #define DIALOG_WIDTH                        75
 

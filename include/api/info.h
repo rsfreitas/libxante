@@ -24,12 +24,12 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_INFO_H
-#define _LIBXANTE_XT_INFO_H
+#ifndef _LIBXANTE_API_INFO_H
+#define _LIBXANTE_API_INFO_H
 
 #ifndef LIBXANTE_COMPILE
 # ifndef _LIBXANTE_H
-#  error "Never use <xt_info.h> directly; include <libxante.h> instead."
+#  error "Never use <info.h> directly; include <libxante.h> instead."
 # endif
 #endif
 
@@ -146,11 +146,11 @@ bool xante_beta(const xante_t *xpp);
 
 /**
  * @name xante_info
- * @brief Gives all informations about an application in a JSON string.
+ * @brief Gives all information about an application in a JSON string.
  *
  * @param [in] xpp: The library main object.
  *
- * @return On success returns the JSON string with all application informations
+ * @return On success returns the JSON string with all application information
  *         or NULL otherwise.
  */
 const char *xante_info(const xante_t *xpp);

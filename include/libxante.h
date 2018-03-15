@@ -30,7 +30,7 @@
 #ifdef LIBXANTE_COMPILE
 # define MAJOR_VERSION          0
 # define MINOR_VERSION          0
-# define RELEASE                15
+# define RELEASE                16
 #endif
 
 /* Common declarations to all library versions */
@@ -39,15 +39,17 @@
 #ifndef __cplusplus
 
 #ifndef _COLLECTIONS_H
-# include <collections.h>
+# include <collections/collections.h>
 #endif
 
 /** Supported line break character to be used inside JTF strings */
 #define XANTE_STR_LINE_BREAK    '^'
 
 /** Supported UI widgets */
-enum xante_widget {
+enum xante_object {
     XANTE_WIDGET_UNKNOWN,
+
+    /* UI widgets */
     XANTE_WIDGET_MENU_REFERENCE,
     XANTE_WIDGET_INPUT_INT,
     XANTE_WIDGET_INPUT_FLOAT,
@@ -124,18 +126,6 @@ enum xante_init_flags {
                                         // instance mode.
 };
 
-/** Event arguments */
-enum xante_event_argument_type {
-    XANTE_EVENT_DATA_UNKNOWN = -1,
-    XANTE_EVENT_DATA_XANTE_T,
-    XANTE_EVENT_DATA_XANTE_MENU_T,
-    XANTE_EVENT_DATA_XANTE_ITEM_T,
-    XANTE_EVENT_DATA_XANTE_ITEM_VALUE,
-    XANTE_EVENT_DATA_XANTE_CONFIG,
-    XANTE_EVENT_DATA_XANTE_CHANGES_LIST,
-    XANTE_EVENT_DATA_CUSTOM
-};
-
 /** Return values of an application */
 enum xante_return_value {
     XANTE_RETURN_ERROR = -1,        //** Internal error.
@@ -178,7 +168,6 @@ struct xante_change_entry {
 #include "api/config.h"
 #include "api/env.h"
 #include "api/error.h"
-#include "api/event.h"
 #include "api/gadget.h"
 #include "api/info.h"
 #include "api/init.h"

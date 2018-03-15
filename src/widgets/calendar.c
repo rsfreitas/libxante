@@ -112,11 +112,11 @@ void calendar_update_value(session_t *session)
 }
 
 /**
- * @name ui_calendar
- * @brief Creates a dialog to choose a date in a calendar.
+ * @name calendar
+ * @brief Creates an object to choose a date in a calendar.
  *
  * @return Returns a ui_return_t value indicating if the item's value has been
- *         changed (true) or not (false) with the dialog selected button.
+ *         changed (true) or not (false) with the object selected button.
  */
 int calendar(session_t *session)
 {
@@ -130,7 +130,7 @@ int calendar(session_t *session)
     session->height = (item->geometry.height == 0) ? DEFAULT_HEIGHT
                                                    : item->geometry.height;
 
-    /* Adjusts the dialog content using the item content */
+    /* Adjusts the object content using the item content */
     split_item_value(item, &day, &month, &year);
 
     /* Adjusts the window message */

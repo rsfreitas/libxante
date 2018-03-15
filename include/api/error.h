@@ -24,12 +24,12 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_ERROR_H
-#define _LIBXANTE_XT_ERROR_H
+#ifndef _LIBXANTE_API_ERROR_H
+#define _LIBXANTE_API_ERROR_H
 
 #ifndef LIBXANTE_COMPILE
 # ifndef _LIBXANTE_H
-#  error "Never use <xt_error.h> directly; include <libxante.h> instead."
+#  error "Never use <error.h> directly; include <libxante.h> instead."
 # endif
 #endif
 
@@ -58,8 +58,6 @@ enum xante_error_code {
     XANTE_ERROR_JTF_NO_APPLICATION_OBJECT,
     XANTE_ERROR_PLUGIN_LOAD_ERROR,
     XANTE_ERROR_PLUGIN_WITHOUT_INFO,
-    XANTE_ERROR_PLUGIN_WITHOUT_API,
-    XANTE_ERROR_PLUGIN_WITHOUT_MANDATORY_FUNCTION,
     XANTE_ERROR_PLUGIN_INIT_ERROR,
     XANTE_ERROR_NO_ENV_DB_PATH,
     XANTE_ERROR_DB_ACCESS_FAILED,
@@ -86,6 +84,7 @@ enum xante_error_code {
     XANTE_ERROR_INVALID_FORM_JSON,                  //*
     XANTE_ERROR_JTF_NO_DATA_OBJECT,                 //*
     XANTE_ERROR_UNKNOWN_OBJECT_PREFIX,              //*
+    XANTE_ERROR_ITEM_HAS_NO_INTERNAL_VALUE,
 
     XANTE_MAX_ERROR_CODE
 };

@@ -24,8 +24,8 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_INTERNAL_ITEM_H
-#define _LIBXANTE_XT_INTERNAL_ITEM_H
+#ifndef _LIBXANTE_INTERNAL_ITEM_H
+#define _LIBXANTE_INTERNAL_ITEM_H
 
 /* Internal library declarations */
 void xante_item_destroy(void *a);

@@ -28,7 +28,7 @@
 
 /*
  * XXX: This DIALOG_WIDTH is important because we use half of its value
- *      to build the cprompt of the dialog.
+ *      to build the cprompt of the object.
  */
 #define DIALOG_WIDTH                60
 #define DIALOG_HEIGHT               22
@@ -159,7 +159,7 @@ int buildlist(session_t *session)
     int ret_dialog = DLG_EXIT_OK, selected_item = 0;;
     cl_string_t *cprompt = NULL;
 
-    /* Prepares dialog content */
+    /* Prepares object content */
     build_session(session);
     cprompt = cl_string_create(cl_tr("Select an option to move it from origin to "
                                      "destination\n%-30s%-30s"),

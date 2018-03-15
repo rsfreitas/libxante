@@ -24,8 +24,8 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_INTERNAL_SESSION_H
-#define _LIBXANTE_XT_INTERNAL_SESSION_H
+#ifndef _LIBXANTE_INTERNAL_SESSION_H
+#define _LIBXANTE_INTERNAL_SESSION_H
 
 /* Internal library declarations */
 void session_init(struct xante_app *xpp, struct xante_item *item,

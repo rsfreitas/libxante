@@ -24,8 +24,8 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_INTERNAL_SI_JTF_H
-#define _LIBXANTE_XT_INTERNAL_SI_JTF_H
+#ifndef _LIBXANTE_INTERNAL_SI_JTF_H
+#define _LIBXANTE_INTERNAL_SI_JTF_H
 
 /* Internal library declarations */
 struct xante_single_instance_jtf *si_jtf_load(const char *si);

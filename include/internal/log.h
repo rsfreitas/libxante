@@ -24,8 +24,8 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_INTERNAL_LOG_H
-#define _LIBXANTE_XT_INTERNAL_LOG_H
+#ifndef _LIBXANTE_INTERNAL_LOG_H
+#define _LIBXANTE_INTERNAL_LOG_H
 
 /* Internal library declarations */
 int log_init(struct xante_app *xpp);

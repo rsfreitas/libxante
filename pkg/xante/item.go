@@ -22,5 +22,56 @@
 //
 package xante
 
+/*
+#cgo CFLAGS: -I/usr/local/include/xante
+#cgo LDFLAGS: -lxante
+#include <stdlib.h>
+#include <libxante.h>
+*/
+import "C"
+import (
+	"unsafe"
+
+	"collections/pkg/collections"
+)
+
+// XanteItem is the Go version of a xante_item_t object.
 type XanteItem struct {
+	data       unsafe.Pointer
+	Type       uint32
+	Name       string
+	ObjectId   string
+	AccessMode uint32
+}
+
+// Value gets the current item value as a string.
+func (i *XanteItem) Value() string {
+	value := C.xante_item_value(i.data)
+
+	if C.xante_get_last_error() != 0 {
+		return ""
+	}
+
+	object := collections.NewObject(value)
+
+	return object.Get()
+}
+
+// SetValue updates the item current value.
+func (i *XanteItem) SetValue(content string) {
+	cs := C.CString(content)
+	defer C.free(unsafe.Pointer(cs))
+
+	C.xante_item_update_value_ex(i.data, cs)
+}
+
+// LoadXanteItem creates a XanteItem structure from @data.
+func LoadXanteItem(data unsafe.Pointer) *XanteItem {
+	return &XanteItem{
+		data:       data,
+		Type:       C.xante_item_object_type(data),
+		Name:       C.GoString(C.xante_item_name(data)),
+		ObjectId:   C.GoString(C.xante_item_object_id(data)),
+		AccessMode: C.xante_item_access_mode(data),
+	}
 }

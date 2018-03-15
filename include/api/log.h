@@ -24,12 +24,12 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_LOG_H
-#define _LIBXANTE_XT_LOG_H
+#ifndef _LIBXANTE_API_LOG_H
+#define _LIBXANTE_API_LOG_H
 
 #ifndef LIBXANTE_COMPILE
 # ifndef _LIBXANTE_H
-#  error "Never use <xt_log.h> directly; include <libxante.h> instead."
+#  error "Never use <log.h> directly; include <libxante.h> instead."
 # endif
 #endif
 
@@ -45,6 +45,13 @@
  */
 void xante_log(enum cl_log_level level, const char *function, int line,
                const char *fmt, ...) __attribute__((format(printf, 4, 5)));
+
+/*
+ * This is just a wrapper to be used on places where variadic functions
+ * aren't supported, such as Go.
+ */
+void xante_log_ex(enum cl_log_level level, const char *function, int line,
+                  const char *content);
 
 /**
  * Macros to log messages with several levels.

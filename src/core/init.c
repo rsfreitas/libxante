@@ -126,7 +126,7 @@ __PUB_API__ xante_t *xante_init(const char *caller_name, const char *jtf_pathnam
 
     /*
      * The JTF parsing must be divided and the first part is done here since we
-     * need to have some relevant informations to keep going through this
+     * need to have some relevant information to keep going through this
      * function and initialize/check everything else.
      */
     if (jtf_parse_application_info(jtf_pathname, xpp) < 0)

@@ -1,7 +1,7 @@
 
 /*
- * Description: Functions to handle the creation of dialog from inside a
- *              module.
+ * Description: Functions to handle the creation of an object from inside a
+ *              module or the library itself.
  *
  * Author: Rodrigo Freitas
  * Created at: Tue Nov 21 19:24:44 2017

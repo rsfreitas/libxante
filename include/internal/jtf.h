@@ -24,8 +24,8 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_INTERNAL_JTF_H
-#define _LIBXANTE_XT_INTERNAL_JTF_H
+#ifndef _LIBXANTE_INTERNAL_JTF_H
+#define _LIBXANTE_INTERNAL_JTF_H
 
 /* Internal library declarations */
 struct xante_item *jtf_parse_item(const cl_json_t *item, bool single_instance);

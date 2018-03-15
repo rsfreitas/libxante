@@ -24,8 +24,8 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_INTERNAL_DM_H
-#define _LIBXANTE_XT_INTERNAL_DM_H
+#ifndef _LIBXANTE_INTERNAL_DM_H
+#define _LIBXANTE_INTERNAL_DM_H
 
 /* Internal library declarations */
 void dm_init(struct xante_app *xpp, cl_cfg_file_t *cfg_file);

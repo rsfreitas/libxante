@@ -164,3 +164,9 @@ __PUB_API__ int xante_dlg_messagebox(xante_t *xpp, enum xante_msgbox_type type,
     return key;
 }
 
+__PUB_API__ int xante_dlg_messagebox_ex(xante_t *xpp, enum xante_msgbox_type type,
+    const char *title, const char *message)
+{
+    return xante_dlg_messagebox(xpp, type, title, "%s", message);
+}
+

@@ -8,7 +8,7 @@ With this mechanism one may build custom dialogs to be called on an
 active application.
 
 Its format is very similar to the JTF file, but instead having all
-specific application informations it only has the widgets part, with a
+specific application information it only has the widgets part, with a
 few modifications.
 
 While in the JTF you must have all information about any accessible

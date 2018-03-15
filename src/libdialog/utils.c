@@ -243,7 +243,7 @@ static int clear_backtitle(xante_t *xpp)
 
 /**
  * @name dlgx_text_init
- * @brief Initializes a dlgx_text structure with informations on how to show
+ * @brief Initializes a dlgx_text structure with information on how to show
  *        @text into the @window.
  *
  * @param [in] window: The window where text will be showed.

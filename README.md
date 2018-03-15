@@ -11,7 +11,7 @@ LGPLv2
 This library is intended to build and run dialog based applications, where one
 dialog, as called, overlaps the older one.
 
-Heavily dependent on libdialog to control terminal settings and some standard
+It is heavily dependent on libdialog to control terminal settings and some standard
 dialogs. Such as:
 
 * Menu

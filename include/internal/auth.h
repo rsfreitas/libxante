@@ -24,8 +24,8 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_INTERNAL_AUTH_H
-#define _LIBXANTE_XT_INTERNAL_AUTH_H
+#ifndef _LIBXANTE_INTERNAL_AUTH_H
+#define _LIBXANTE_INTERNAL_AUTH_H
 
 /* Internal library declarations */
 int auth_init(struct xante_app *xpp, bool use_auth, enum xante_session session,

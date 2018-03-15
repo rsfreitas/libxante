@@ -24,8 +24,8 @@
  * USA
  */
 
-#ifndef _LIBXANTE_XT_INTERNAL_EVENT_H
-#define _LIBXANTE_XT_INTERNAL_EVENT_H
+#ifndef _LIBXANTE_INTERNAL_EVENT_H
+#define _LIBXANTE_INTERNAL_EVENT_H
 
 /* Internal library declarations */
 int event_init(struct xante_app *xpp, bool use_event);

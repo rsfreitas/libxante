@@ -54,11 +54,11 @@ struct xante_storage_error {
  * it.
  */
 static const char *__description[] = {
-    cl_tr_noop("Ok"),
-    cl_tr_noop("No internal memory available"),
-    cl_tr_noop("A NULL argument was passed"),
-    cl_tr_noop("An invalid argument was passed"),
-    cl_tr_noop("Unable to parse JTF file. Wrong format."),
+    cl_tr_noop("ok"),
+    cl_tr_noop("no internal memory available"),
+    cl_tr_noop("a NULL argument was passed"),
+    cl_tr_noop("an invalid argument was passed"),
+    cl_tr_noop("unable to parse JTF file. Wrong format."),
     cl_tr_noop("JTF file has no 'general' object"),
     cl_tr_noop("JTF object was not found"),                             //*
     cl_tr_noop("JTF object has no value"),                              //*
@@ -70,35 +70,34 @@ static const char *__description[] = {
     cl_tr_noop("JTF file has no 'config' object"),
     cl_tr_noop("JTF file has no 'internal' object"),
     cl_tr_noop("JTF file has no 'application' object"),
-    cl_tr_noop("Plugin initialization failed"),
-    cl_tr_noop("Plugin without internal info"),
-    cl_tr_noop("Plugin without internal API"),
-    cl_tr_noop("Plugin without mandatory function"),
-    cl_tr_noop("Plugin EV_INIT error"),
-    cl_tr_noop("No environment database variable found"),
-    cl_tr_noop("Unable to access database file"),
-    cl_tr_noop("Unable to save JXDBI file"),
-    cl_tr_noop("Unable to open database file"),
-    cl_tr_noop("User not found in the database"),
-    cl_tr_noop("Group not found in the database"),
-    cl_tr_noop("Application not found in the database"),
-    cl_tr_noop("Multiple user entries found in the database"),
-    cl_tr_noop("Multiple group entries found in the database"),
-    cl_tr_noop("Multiple application entries found in the database"),
-    cl_tr_noop("Unable to retrieve login information"),
-    cl_tr_noop("Database already exists"),
+    cl_tr_noop("plugin initialization failed"),
+    cl_tr_noop("plugin without internal info"),
+    cl_tr_noop("plugin EV_INIT error"),
+    cl_tr_noop("no environment database variable found"),
+    cl_tr_noop("unable to access database file"),
+    cl_tr_noop("unable to save JXDBI file"),
+    cl_tr_noop("unable to open database file"),
+    cl_tr_noop("user not found in the database"),
+    cl_tr_noop("group not found in the database"),
+    cl_tr_noop("application not found in the database"),
+    cl_tr_noop("multiple user entries found in the database"),
+    cl_tr_noop("multiple group entries found in the database"),
+    cl_tr_noop("multiple application entries found in the database"),
+    cl_tr_noop("unable to retrieve login information"),
+    cl_tr_noop("database already exists"),
     cl_tr_noop("JTF menu has no 'dynamic' object"),
     cl_tr_noop("JTF menu has no 'origin' object"),
-    cl_tr_noop("Wrong JTF object type"),                                //*
-    cl_tr_noop("Unknown event data type"),
-    cl_tr_noop("An instance of this application is already running"),
-    cl_tr_noop("Internal invalid data conversion"),
-    cl_tr_noop("The MJTF has no object to be loaded"),
-    cl_tr_noop("Menu was not found"),                                   //*
-    cl_tr_noop("The head of menu list was not found"),
-    cl_tr_noop("Item was not found"),                                   //*
-    cl_tr_noop("Invalid form JSON"),                                    //*
-    cl_tr_noop("Item has no data object"),                              //*
+    cl_tr_noop("wrong JTF object type"),                                //*
+    cl_tr_noop("unknown event data type"),
+    cl_tr_noop("an instance of this application is already running"),
+    cl_tr_noop("internal invalid data conversion"),
+    cl_tr_noop("the MJTF has no object to be loaded"),
+    cl_tr_noop("menu was not found"),                                   //*
+    cl_tr_noop("the head of menu list was not found"),
+    cl_tr_noop("item was not found"),                                   //*
+    cl_tr_noop("invalid form JSON"),                                    //*
+    cl_tr_noop("item has no data object"),                              //*
+    cl_tr_noop("item has no internal value"),
 };
 
 static const char *__unknown_error = cl_tr_noop("Unknown error");

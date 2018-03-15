@@ -1,6 +1,6 @@
 
 /*
- * Description: Handles a yesno dialog.
+ * Description: Handles a yesno object.
  *
  * Author: Rodrigo Freitas
  * Created at: Fri May  5 21:08:15 2017
@@ -66,10 +66,10 @@ void yesno_update_value(session_t *session)
 
 /**
  * @name ui_yesno
- * @brief Creates a dialog to choose between two options.
+ * @brief Creates an object to choose between two options.
  *
  * @return Returns a ui_return_t value indicating if the item's value has been
- *         changed (true) or not (false) with the dialog selected button.
+ *         changed (true) or not (false) with the object selected button.
  */
 int yesno(session_t *session)
 {
@@ -95,7 +95,7 @@ int yesno(session_t *session)
     /* Adjusts the window message */
     session->text = cl_string_dup(item->options);
     session->width = (item->geometry.width == 0) ? DEFAULT_WIDTH
-                                                   : item->geometry.width;
+                                                 : item->geometry.width;
 
     session->height = (item->geometry.height == 0)
                              ? dlgx_count_lines(cl_string_valueof(session->text),
@@ -113,10 +113,10 @@ int yesno(session_t *session)
         /* Set up details to save inside the internal changes list */
         session->change_item_name = cl_string_ref(item->name);
         session->change_old_value = cl_string_create("%s",
-                                                        dialog_vars.no_label);
+                                                     dialog_vars.no_label);
 
         session->change_new_value = cl_string_create("%s",
-                                                        dialog_vars.yes_label);
+                                                     dialog_vars.yes_label);
     }
 
     return ret_dialog;

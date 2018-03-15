@@ -28,6 +28,15 @@
 
 #include "libxante.h"
 
+/* Plugin function argument names */
+#define ARG_XANTE_APP       "xpp"
+#define ARG_XANTE_MENU      "menu"
+#define ARG_XANTE_ITEM      "item"
+#define ARG_CFG_FILE        "cfg-file"
+#define ARG_VALUE           "value"
+#define ARG_CHANGES         "changes"
+#define ARG_DATA            "data"
+
 struct module_function {
     bool    found;
     bool    need_internal_dispatch;
@@ -36,85 +45,20 @@ struct module_function {
     char    name[512];
 };
 
-struct xante_event_argument {
-    struct xante_app        *xpp;
-    struct xante_menu       *menu;
-    struct xante_item       *item;
-    cl_cfg_file_t           *cfg_file;
-    cl_object_t             *value;
-    cl_list_t               *changes;
-    void                    *data;
-};
-
-static const char *__mandatory_functions[] = {
-    EV_INIT,
-    EV_UNINIT,
-    EV_CONFIG_LOAD,
-    EV_CONFIG_UNLOAD,
-    EV_CHANGES_SAVED
-};
-
-#define MANDATORY_FUNCTIONS         \
-    (sizeof(__mandatory_functions) / sizeof(__mandatory_functions[0]))
-
 /*
  *
  * Internal functions
  *
  */
 
-static bool find_function(cl_stringlist_t *functions, const char *name)
-{
-    int i, t, ret;
-    cl_string_t *f;
-    bool found = false;
-
-    t = cl_stringlist_size(functions);
-
-    for (i = 0; i < t; i++) {
-        f = cl_stringlist_get(functions, i);
-        ret = strcmp(cl_string_valueof(f), name);
-        cl_string_unref(f);
-
-        if (ret == 0) {
-            found = true;
-            break;
-        }
-    }
-
-    return found;
-}
-
-static bool validate_mandatory_events(struct xante_app *xpp)
-{
-    unsigned int i;
-
-    for (i = 0; i < MANDATORY_FUNCTIONS; i++) {
-        if (find_function(xpp->module.functions,
-                          __mandatory_functions[i]) == false)
-        {
-            return false;
-        }
-    }
-
-    return true;
-}
-
 static int ev_void(struct xante_app *xpp, const char *event_name)
 {
     cl_object_t *ret = NULL;
     int event_return = 0;
-    struct xante_event_argument arg = {
-        .xpp = xpp,
-        .menu = NULL,
-        .item = NULL,
-        .value = NULL,
-        .cfg_file = NULL,
-        .changes = NULL,
-        .data = NULL,
-    };
 
-    ret = cl_plugin_call(xpp->module.module, event_name, "xpp_arg", &arg,
+    xante_log_info("%s: chamando %s", __FUNCTION__, event_name);
+    ret = cl_plugin_call(xpp->module.module, event_name, CL_INT,
+                         ARG_XANTE_APP, CL_POINTER, false, xpp, -1, NULL,
                          NULL);
 
     if (strcmp(event_name, EV_INIT) == 0)
@@ -129,18 +73,13 @@ static void ev_config(struct xante_app *xpp, const char *event_name, va_list ap)
 {
     cl_object_t *ret = NULL;
     cl_cfg_file_t *cfg_file = NULL;
-    struct xante_event_argument arg = {
-        .xpp = xpp,
-        .menu = NULL,
-        .item = NULL,
-        .value = NULL,
-        .changes = NULL,
-        .data = NULL,
-    };
 
     cfg_file = va_arg(ap, void *);
-    arg.cfg_file = cfg_file;
-    ret = cl_plugin_call(xpp->module.module, event_name, "xpp_arg", &arg, NULL);
+    ret = cl_plugin_call(xpp->module.module, event_name, CL_VOID,
+                         ARG_XANTE_APP, CL_POINTER, false, xpp, -1, NULL,
+                         ARG_CFG_FILE, CL_POINTER, false, cfg_file, -1, NULL,
+                         NULL);
+
     cl_object_unref(ret);
 }
 
@@ -206,24 +145,14 @@ static struct module_function get_function_name(cl_json_t *events,
 
 static int ev_item(struct xante_app *xpp, const char *event_name, va_list ap)
 {
-    cl_object_t *ret = NULL;
+    cl_object_t *ret = NULL, *data = NULL;
     cl_plugin_t *pl = NULL;
     struct xante_item *item = NULL;
     struct module_function function;
     int event_return = -1;
     bool unload = false;
-    struct xante_event_argument arg = {
-        .xpp = xpp,
-        .menu = NULL,
-        .item = NULL,
-        .value = NULL,
-        .cfg_file = NULL,
-        .changes = NULL,
-        .data = NULL,
-    };
 
     item = va_arg(ap, void *);
-    arg.item = item;
     function = get_function_name(item->events, event_name);
 
     if (function.found == false) {
@@ -234,7 +163,7 @@ static int ev_item(struct xante_app *xpp, const char *event_name, va_list ap)
     }
 
     /*
-     * We need to pass the custom data, otherwise this routine call (maybe)
+     * We need to pass the custom data, otherwise these routine calls (maybe)
      * won't result in something useful.
      */
     if ((strcmp(event_name, EV_UPDATE_ROUTINE) == 0) ||
@@ -242,13 +171,12 @@ static int ev_item(struct xante_app *xpp, const char *event_name, va_list ap)
         (strcmp(event_name, EV_VALUE_CHECK) == 0) ||
         (strcmp(event_name, EV_VALUE_STRLEN) == 0))
     {
-        arg.data = va_arg(ap, void *);
+        data = va_arg(ap, void *);
     }
 
-    if (function.need_internal_dispatch) {
-        event_return = gadget_dispatch_call(function.name, xpp, item,
-                                            arg.data);
-    } else {
+    if (function.need_internal_dispatch)
+        event_return = gadget_dispatch_call(function.name, xpp, item, data);
+    else {
         if (function.external_module == false)
             pl = xpp->module.module;
         else {
@@ -266,9 +194,11 @@ static int ev_item(struct xante_app *xpp, const char *event_name, va_list ap)
             unload = true;
         }
 
-        ret = cl_plugin_foreign_call(pl, function.name, CL_INT,
-                                     CL_PLUGIN_ARGS_POINTER, "xpp_arg", CL_POINTER,
-                                     &arg, NULL);
+        ret = cl_plugin_call(pl, function.name, CL_INT,
+                             ARG_XANTE_APP, CL_POINTER, false, xpp, -1, NULL,
+                             ARG_XANTE_ITEM, CL_POINTER, false, item, -1, NULL,
+                             ARG_DATA, CL_POINTER, false, data, -1, NULL,
+                             NULL);
 
         if (NULL == ret) {
             if ((strcmp(event_name, EV_CUSTOM) == 0) ||
@@ -308,26 +238,17 @@ static int ev_menu(struct xante_app *xpp, const char *event_name, va_list ap)
     struct xante_menu *menu = NULL;
     int event_return = 0;
     struct module_function function;
-    struct xante_event_argument arg = {
-        .xpp = xpp,
-        .menu = NULL,
-        .item = NULL,
-        .value = NULL,
-        .cfg_file = NULL,
-        .changes = NULL,
-        .data = NULL,
-    };
 
     menu = va_arg(ap, void *);
-    arg.menu = menu;
     function = get_function_name(menu->events, event_name);
 
     if (function.found == false)
         return 0; /* Should we return an error? */
 
-    ret = cl_plugin_foreign_call(xpp->module.module, function.name, CL_INT,
-                                 CL_PLUGIN_ARGS_POINTER, "xpp_arg", CL_POINTER,
-                                 &arg, NULL);
+    ret = cl_plugin_call(xpp->module.module, function.name, CL_INT,
+                         ARG_XANTE_APP, CL_POINTER, false, xpp, -1, NULL,
+                         ARG_XANTE_MENU, CL_POINTER, false, menu, -1, NULL,
+                         NULL);
 
     if (strcmp(event_name, EV_MENU_EXIT) == 0)
         event_return = CL_OBJECT_AS_INT(ret);
@@ -340,23 +261,13 @@ static int ev_menu(struct xante_app *xpp, const char *event_name, va_list ap)
 static int ev_item_value(struct xante_app *xpp, const char *event_name, va_list ap)
 {
     struct xante_item *item = NULL;
-    cl_object_t *ret = NULL;
+    cl_object_t *ret = NULL, *value = NULL;
     cl_plugin_t *pl = NULL;
     int event_return = 0;
     bool unload = false;
     struct module_function function;
-    struct xante_event_argument arg = {
-        .xpp = xpp,
-        .menu = NULL,
-        .item = NULL,
-        .value = NULL,
-        .cfg_file = NULL,
-        .changes = NULL,
-        .data = NULL,
-    };
 
     item = va_arg(ap, void *);
-    arg.item = item;
     function = get_function_name(item->events, event_name);
 
     if (function.found == false) {
@@ -373,11 +284,11 @@ static int ev_item_value(struct xante_app *xpp, const char *event_name, va_list 
         case XANTE_WIDGET_CHECKLIST:
         case XANTE_WIDGET_RADIO_CHECKLIST:
         case XANTE_WIDGET_YES_NO:
-            arg.value = cl_object_create(CL_INT, va_arg(ap, int));
+            value = cl_object_create(CL_INT, va_arg(ap, int));
             break;
 
         case XANTE_WIDGET_INPUT_FLOAT:
-            arg.value = cl_object_create(CL_FLOAT, (float)va_arg(ap, double));
+            value = cl_object_create(CL_FLOAT, (float)va_arg(ap, double));
             break;
 
         case XANTE_WIDGET_INPUT_DATE:
@@ -386,17 +297,16 @@ static int ev_item_value(struct xante_app *xpp, const char *event_name, va_list 
         case XANTE_WIDGET_INPUT_TIME:
         case XANTE_WIDGET_CALENDAR:
         case XANTE_WIDGET_TIMEBOX:
-            arg.value = cl_object_create(CL_STRING, va_arg(ap, char *));
+            value = cl_object_create(CL_STRING, va_arg(ap, char *));
             break;
 
         default:
             break;
     }
 
-    if (function.need_internal_dispatch) {
-        event_return = gadget_dispatch_call(function.name, xpp, item,
-                                            arg.value);
-    } else {
+    if (function.need_internal_dispatch)
+        event_return = gadget_dispatch_call(function.name, xpp, item, value);
+    else {
         if (function.external_module == false)
             pl = xpp->module.module;
         else {
@@ -404,9 +314,11 @@ static int ev_item_value(struct xante_app *xpp, const char *event_name, va_list 
             unload = true;
         }
 
-        ret = cl_plugin_foreign_call(pl, function.name, CL_INT,
-                                     CL_PLUGIN_ARGS_POINTER, "xpp_arg", CL_POINTER,
-                                     &arg, NULL);
+        ret = cl_plugin_call(pl, function.name, CL_INT,
+                             ARG_XANTE_APP, CL_POINTER, false, xpp, -1, NULL,
+                             ARG_XANTE_ITEM, CL_POINTER, false, item, -1, NULL,
+                             ARG_VALUE, CL_POINTER, false, value, -1, NULL,
+                             NULL);
 
         if (strcmp(event_name, EV_ITEM_VALUE_CONFIRM) == 0)
             event_return = CL_OBJECT_AS_INT(ret);
@@ -417,8 +329,8 @@ static int ev_item_value(struct xante_app *xpp, const char *event_name, va_list 
             cl_plugin_unload(pl);
     }
 
-    if (arg.value != NULL)
-        cl_object_unref(arg.value);
+    if (value != NULL)
+        cl_object_unref(value);
 
     return event_return;
 }
@@ -440,8 +352,8 @@ static void *ev_item_custom_data(struct xante_app *xpp,
     if (function.found == false)
         return NULL; /* Should we return an error? */
 
-    ret = cl_plugin_foreign_call(xpp->module.module, function.name, CL_POINTER,
-                                 CL_PLUGIN_ARGS_VOID, NULL);
+    ret = cl_plugin_call(xpp->module.module, function.name, CL_POINTER,
+                         NULL);
 
     if (NULL == ret)
         return NULL;
@@ -456,17 +368,12 @@ static int ev_changes(struct xante_app *xpp)
 {
     cl_object_t *ret = NULL;
     int event_return = 0;
-    struct xante_event_argument arg = {
-        .xpp = xpp,
-        .menu = NULL,
-        .item = NULL,
-        .value = NULL,
-        .cfg_file = NULL,
-        .changes = xpp->changes.user_changes,
-        .data = NULL,
-    };
 
-    ret = cl_plugin_call(xpp->module.module, EV_CHANGES_SAVED, "xpp_arg", &arg, NULL);
+    ret = cl_plugin_call(xpp->module.module, EV_CHANGES_SAVED, CL_INT,
+                         ARG_XANTE_APP, CL_POINTER, false, xpp, -1, NULL,
+                         ARG_CHANGES, CL_POINTER, false,
+                         xpp->changes.user_changes, -1, NULL, NULL);
+
     event_return = CL_OBJECT_AS_INT(ret);
     cl_object_unref(ret);
 
@@ -577,18 +484,6 @@ int event_init(struct xante_app *xpp, bool use_module)
         return -1;
     }
 
-    xpp->module.functions = cl_plugin_functions(xpp->module.info);
-
-    if (NULL == xpp->module.functions) {
-        errno_set(XANTE_ERROR_PLUGIN_WITHOUT_API);
-        return -1;
-    }
-
-    if (validate_mandatory_events(xpp) == false) {
-        errno_set(XANTE_ERROR_PLUGIN_WITHOUT_MANDATORY_FUNCTION);
-        return -1;
-    }
-
     if (event_call(EV_INIT, xpp, NULL) < 0) {
         errno_set(XANTE_ERROR_PLUGIN_INIT_ERROR);
         return -1;
@@ -635,54 +530,5 @@ void event_uninit(struct xante_app *xpp)
 void *event_item_custom_data(struct xante_app *xpp, struct xante_item *item)
 {
     return ev_item_custom_data(xpp, item);
-}
-
-/*
- *
- * API
- *
- */
-
-__PUB_API__ void *xante_event_argument(xante_event_arg_t *arg,
-    enum xante_event_argument_type data_type)
-{
-    struct xante_event_argument *evt_arg = (struct xante_event_argument *)arg;
-
-    errno_clear();
-
-    if (NULL == arg) {
-        errno_set(XANTE_ERROR_NULL_ARG);
-        return NULL;
-    }
-
-    switch (data_type) {
-        case XANTE_EVENT_DATA_XANTE_T:
-            return evt_arg->xpp;
-
-        case XANTE_EVENT_DATA_XANTE_MENU_T:
-            return evt_arg->menu;
-
-        case XANTE_EVENT_DATA_XANTE_ITEM_T:
-            return evt_arg->item;
-
-        case XANTE_EVENT_DATA_XANTE_ITEM_VALUE:
-            return evt_arg->value;
-
-        case XANTE_EVENT_DATA_XANTE_CONFIG:
-            return evt_arg->cfg_file;
-
-        case XANTE_EVENT_DATA_XANTE_CHANGES_LIST:
-            return evt_arg->changes;
-
-        case XANTE_EVENT_DATA_CUSTOM:
-            return evt_arg->data;
-
-        default:
-            break;
-    }
-
-    errno_set(XANTE_ERROR_UNKNOWN_EVENT_DATA_TYPE);
-
-    return NULL;
 }
 

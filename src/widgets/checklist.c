@@ -85,7 +85,7 @@ static void build_session(const struct xante_item *item,
     session->width = (item->geometry.width == 0) ? DEFAULT_WIDTH
                                                     : item->geometry.width;
 
-    /* The +1 on height is because we have a prompt inside the dialog */
+    /* The +1 on height is because we have a prompt inside the object */
     session->displayed_items = dlgx_get_dlg_items(session->number_of_items);
     session->height = (item->geometry.height == 0)
                 ? (session->displayed_items + DIALOG_HEIGHT_WITHOUT_TEXT + 1)
@@ -233,14 +233,14 @@ void checklist_update_value(session_t *session)
 }
 
 /**
- * @name ui_checklist
- * @brief Creates a dialog to choose an option inside a list of options.
+ * @name checklist
+ * @brief Creates an object to choose an option inside a list of options.
  *
  * Since we (and libdialog) use an int variable to store the selected options,
  * we only have 32 available options.
  *
  * @return Returns a ui_return_t value indicating if the item's value has been
- *         changed (true) or not (false) with the dialog selected button.
+ *         changed (true) or not (false) with the object selected button.
  */
 int checklist(session_t *session)
 {
@@ -248,7 +248,7 @@ int checklist(session_t *session)
     struct xante_item *item = session->item;
     int ret_dialog = DLG_EXIT_OK, selected_index = -1, selected_items;
 
-    /* Prepares dialog content */
+    /* Prepares object content */
     build_session(item, session);
 
 #ifdef ALTERNATIVE_DIALOG

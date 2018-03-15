@@ -1,6 +1,7 @@
 LIBXANTE_0.1 {
     global:
         xante_log;
+        xante_log_ex;
         xante_strerror;
         xante_get_last_error;
         xante_init;
@@ -26,12 +27,18 @@ LIBXANTE_0.1 {
         xante_runtime_ui_active;
         xante_runtime_user_authentication;
         xante_runtime_caller_name;
+        xante_runtime_esc_key;
+        xante_runtime_suspend_key;
+        xante_runtime_stop_key;
+        xante_runtime_inactivity_timeout;
+        xante_runtime_set_inactivity_timeout;
         xante_manager_run;
         xante_manager_single_run;
         xante_load_config;
         xante_write_config;
         xante_event_argument;
         xante_dlg_messagebox;
+        xante_dlg_messagebox_ex;
         xante_dlg_clear_backtitle;
         xante_application_version;
         xante_object_id_calc;
@@ -61,9 +68,10 @@ LIBXANTE_0.1 {
         xante_item_access_mode;
         xante_item_default_value;
         xante_item_value;
-        xante_item_dialog_type;
+        xante_item_object_type;
         xante_item_checklist_type;
         xante_item_update_value;
+        xante_item_update_value_ex;
         xante_item_cancel_progress;
         xante_menu_name;
         xante_menu_object_id;

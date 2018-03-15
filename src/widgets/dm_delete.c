@@ -115,10 +115,10 @@ bool delete_dm_value_changed(session_t *session)
 }
 
 /**
- * @name ui_delete_dm
- * @brief Creates a dialog to delete entries from a dynamic menu.
+ * @name delete_dm
+ * @brief Creates an object to delete entries from a dynamic menu.
  *
- * The dialog will be a radio-checklist with the current dynamic menu options.
+ * The object will be a radio-checklist with the current dynamic menu options.
  *
  * @return Returns a ui_return_t value indicating if an item was deleted or not.
  */
@@ -147,7 +147,7 @@ int delete_dm(session_t *session)
         return DLG_EXIT_OK;
     }
 
-    /* Prepare dialog content */
+    /* Prepare object content */
     build_session(dm_menu, session);
 
 #ifdef ALTERNATIVE_DIALOG
