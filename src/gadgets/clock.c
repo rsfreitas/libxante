@@ -163,7 +163,7 @@ static int gadget_clock_input_confirmed(struct xante_app *xpp __attribute__((unu
 }
 
 /*
- * Event called to retrieve current date/time informations from SO and to
+ * Event called to retrieve current date/time information from SO and to
  * fill the item's content with its value, which will be used to be displayed
  * on screen for the user.
  */

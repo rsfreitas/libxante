@@ -49,5 +49,12 @@ int xante_dlg_messagebox(xante_t *xpp, enum xante_msgbox_type type,
                          const char *title, const char *message, ...)
                          __attribute__((format(printf, 4, 5)));
 
+/*
+ * This is just a wrapper to be used on places where variadic functions
+ * aren't supported, such as Go.
+ */
+int xante_dlg_messagebox_ex(xante_t *xpp, enum xante_msgbox_type type,
+                            const char *title, const char *message);
+
 #endif
 

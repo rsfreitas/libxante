@@ -149,10 +149,10 @@ void xante_menu_unref(struct xante_menu *menu)
 
 /**
  * @name xante_menu_create
- * @brief Creates a new xante_menu to hold items and informations about an UI
+ * @brief Creates a new xante_menu to hold items and information about an UI
  *        menu.
  *
- * This function creates a new xante_menu structure, holding some informations,
+ * This function creates a new xante_menu structure, holding some information,
  * such as its name, its object_id and who is creating the menu.
  *
  * To release an object of this type, one may call the 'xante_menu_unref'.

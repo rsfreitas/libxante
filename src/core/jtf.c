@@ -494,7 +494,7 @@ static void pre_adjust_item_info(struct xante_item *item)
 }
 
 /**
- * Do some adjustments inside an item after its informations is
+ * Do some adjustments inside an item after its information is
  * completely loaded from the JTF file.
  *
  * For example, here we must split a checklist options into a cl_stringlist_t
@@ -673,7 +673,7 @@ static int parse_dynamic_menu_properties(const cl_json_t *menu,
 }
 
 /**
- * Do some pre adjustments inside a menu after some of its informations
+ * Do some pre adjustments inside a menu after some of its information
  * was loaded from the JTF file.
  *
  * @param [in,out] menu: Them menu to be adjusted.
@@ -686,7 +686,7 @@ static void pre_adjust_menu_info(struct xante_menu *menu)
 }
 
 /**
- * Do some adjustments inside a menu after its informations is
+ * Do some adjustments inside a menu after its information is
  * completely loaded from the JTF file.
  *
  * @param [in,out] menu: Them menu to be adjusted.
@@ -782,7 +782,7 @@ static int parse_geometry(const cl_json_t *node, struct geometry *geometry)
 
 /*
  * Checks if an item must have a data object according its loaded
- * informations so far.
+ * information so far.
  */
 static bool data_object_must_exist(const struct xante_item *item)
 {
@@ -953,7 +953,7 @@ static int parse_item_buttons(const cl_json_t *ui, struct xante_item *item)
 }
 
 /*
- * Here all informations related the item's UI are parsed.
+ * Here all information related the item's UI are parsed.
  */
 static int parse_item_ui(const cl_json_t *root, struct xante_item *item)
 {
@@ -963,7 +963,7 @@ static int parse_item_ui(const cl_json_t *root, struct xante_item *item)
 
     if (NULL == ui) {
         /*
-         * All ui (object) related informations are not required, so if the
+         * All ui (object) related information are not required, so if the
          * object does not exist we don't care and just return OK.
          */
         return 0;
@@ -1122,7 +1122,7 @@ struct xante_menu *jtf_parse_menu(const cl_json_t *menu)
 
     /*
      * Before continue parsing the menu properties we must adjust some
-     * internal informations.
+     * internal information.
      */
     pre_adjust_menu_info(m);
 
@@ -1135,7 +1135,7 @@ struct xante_menu *jtf_parse_menu(const cl_json_t *menu)
     m->events = cl_json_dup(cl_json_get_object_item(menu, XANTE_JTF_EVENTS));
 
     /*
-     * We must adjust some internal menu informations before loading its
+     * We must adjust some internal menu information before loading its
      * items.
      */
     adjusts_menu_info(m, copies);
@@ -1162,7 +1162,7 @@ struct xante_menu *jtf_parse_menu(const cl_json_t *menu)
 
 /**
  * @name jtf_parse_application_info
- * @brief Parses only the application relevant informations.
+ * @brief Parses only the application relevant information.
  *
  * @param [in] pathname: The JTF pathname.
  * @param [in,out] xpp: The previously created xante_app structure.
@@ -1181,7 +1181,7 @@ int jtf_parse_application_info(const char *pathname, struct xante_app *xpp)
 
     /*
      * We need to initialize libcollections here, since we're using its JSON
-     * API, and we need to have some relevant informations to validate the
+     * API, and we need to have some relevant information to validate the
      * application initialization process.
      */
     cl_init(NULL);
@@ -1193,7 +1193,7 @@ int jtf_parse_application_info(const char *pathname, struct xante_app *xpp)
         return -1;
     }
 
-    /* Parse main JTF informations */
+    /* Parse main JTF information */
     ret = parse_jtf_info(jtf, xpp);
     cl_json_delete(jtf);
     cl_uninit();

@@ -1,6 +1,6 @@
 
 /*
- * Description: API to expose relevant informations from the main library
+ * Description: API to expose relevant information from the main library
  *              object.
  *
  * Author: Rodrigo Freitas
@@ -188,7 +188,7 @@ __PUB_API__ bool xante_beta(const xante_t *xpp)
 }
 
 /*
- * Here we give all informations in a JSON string format.
+ * Here we give all information in a JSON string format.
  */
 __PUB_API__ const char *xante_info(const xante_t *xpp)
 {

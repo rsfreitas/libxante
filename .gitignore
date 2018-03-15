@@ -34,3 +34,6 @@
 
 # Build directories
 build*/
+
+# Go plugin temporary files
+examples/plugin/go/go-test.h

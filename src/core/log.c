@@ -123,3 +123,9 @@ __PUB_API__ void xante_log(enum cl_log_level level, const char *function,
         cl_log_vprintf(__log_xpp, level, fmt, ap);
 }
 
+__PUB_API__ void xante_log_ex(enum cl_log_level level, const char *function,
+    int line, const char *content)
+{
+    return xante_log(level, function, line, "%s", content);
+}
+

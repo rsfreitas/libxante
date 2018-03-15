@@ -620,7 +620,7 @@ static int validate_user_access(struct xante_app *xpp)
     }
 
     /*
-     * If we find the user we store its required informations, such as:
+     * If we find the user we store its required information, such as:
      *
      * - name (real name)
      * - group id

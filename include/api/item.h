@@ -118,6 +118,12 @@ int xante_item_checklist_type(const xante_item_t *item);
 int xante_item_update_value(xante_item_t *item, const char *fmt, ...)
                             __attribute__((format(printf, 2, 3)));
 
+/*
+ * This is just a wrapper to be used on places where variadic functions
+ * aren't supported, such as Go.
+ */
+int xante_item_update_value_ex(xante_item_t *item, const char *content);
+
 /**
  * @name xante_item_search
  * @brief Searches for an item inside the application environment.

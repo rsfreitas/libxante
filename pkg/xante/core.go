@@ -22,5 +22,97 @@
 //
 package xante
 
-type Xante struct {
+/*
+#cgo CFLAGS: -D_GO_API_ -I/usr/local/include -fgnu89-inline
+#cgo LDFLAGS: -L/usr/local/lib -lxante -lcollections
+#include <stdlib.h>
+#include <xante/libxante.h>
+*/
+import "C"
+import (
+	"unsafe"
+)
+
+// Supported objects
+const (
+	MenuReference = 1 + iota
+	InputInt
+	InputFloat
+	InputDate
+	InputString
+	InputPasswd
+	InputTime
+	Calendar
+	Timebox
+	RadioChecklist
+	Checklist
+	YesNo
+	DynamicMenuReference
+	DeleteDynameMenuItem
+	AddDynamicMenuItem
+	Custom
+	Progress
+	SpinnerSync
+	SpinnerDots
+	Range
+	FileSelect
+	DirSelect
+	FileView
+	Tailbox
+	Scrolltext
+	UpdateObject
+	Inputscroll
+	Mixedform
+	Buildlist
+	Spreadsheet
+	Clock
+)
+
+// Supported menus
+const (
+	DefaultMenu = 1 + iota
+	DynamicMenu
+)
+
+// Type of message displayed inside on a message box.
+type MsgType int
+
+// Supported types of message displayed inside on a message box.
+const (
+	MsgInfo MsgType = 0 + iota
+	MsgWarning
+	MsgError
+)
+
+// XanteApp is the Go version of a xante_t object.
+type XanteApp struct {
+	data unsafe.Pointer
+}
+
+// LoadXanteApp is responsible to populate a XanteApp structure with @data.
+func LoadXanteApp(data unsafe.Pointer) *XanteApp {
+	return &XanteApp{
+		data: data,
+	}
+}
+
+// MsgBox runs a message box dialog to show a message to the user.
+func (x *XanteApp) MsgBox(msgType MsgType, title string, message string) {
+	cTitle := C.CString(title)
+	defer C.free(unsafe.Pointer(cTitle))
+
+	cMessage := C.CString(message)
+	defer C.free(unsafe.Pointer(cMessage))
+
+	C.xante_dlg_messagebox_ex(x.data, uint32(msgType), cTitle, cMessage)
+}
+
+// Dialog creates and runs a user custom dialog when called. It is important
+// to remember that @dialog must be a JSON string understood by libxante with
+// the desired dialog.
+func (x *XanteApp) Dialog(dialog string) {
+	cDialog := C.CString(dialog)
+	defer C.free(unsafe.Pointer(cDialog))
+
+	C.xante_manager_single_run(x.data, cDialog)
 }

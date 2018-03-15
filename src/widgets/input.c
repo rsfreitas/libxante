@@ -31,7 +31,7 @@
 
 /*
  * Since the callbacks used by the dlgx_inputscroll function receives a
- * void *, this structure is built to hold some informations needed to
+ * void *, this structure is built to hold some information needed to
  * call events from the module while inside them.
  */
 struct inputscroll_data {

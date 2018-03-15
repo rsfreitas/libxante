@@ -41,8 +41,8 @@
 
 /*
  * An internal representation of a public function. It does not affect the code
- * or the function visibility. Its objective is only to let clear what is and
- * what is not been exported from library by looking at the code.
+ * or the function visibility. Its objective is only to let it clear what is and
+ * what is not being exported from the library by looking at the code.
  *
  * Every exported function must have this at the beginning of its declaration.
  * Example:
@@ -75,7 +75,7 @@ enum xante_menu_creator {
 };
 
 /**
- * Application informations loaded from the JTF file (general object). These
+ * Application information loaded from the JTF file (general object). These
  * all must be primitive types since libcollections is initialized after load
  * them.
  */
@@ -97,7 +97,7 @@ struct xante_info {
     bool    stop_key;
 };
 
-/** Application runtime informations */
+/** Application runtime information */
 struct xante_runtime {
     /* Read only */
     enum xante_return_value     exit_value;
@@ -165,7 +165,7 @@ struct widget_behaviour {
     bool        skip_config;
 };
 
-/** UI Menu Item informations */
+/** UI Menu Item information */
 struct xante_item {
     /* JTF objects */
     enum XanteAccessMode    mode;
@@ -205,7 +205,7 @@ struct xante_item {
     struct widget_behaviour behaviour;
 };
 
-/** UI Menu informations */
+/** UI Menu information */
 struct xante_menu {
     /* JTF objects */
     cl_string_t                 *name;
@@ -229,7 +229,7 @@ struct xante_menu {
     struct geometry             geometry;
 };
 
-/** UI informations */
+/** UI information */
 struct xante_ui {
     /* From JTF */
     cl_string_t             *main_menu_object_id;

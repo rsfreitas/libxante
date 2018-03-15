@@ -188,7 +188,7 @@ static struct xante_item *dup_item(struct xante_menu *menu, int item_index,
     item = cl_list_node_content(node);
     d_item = xante_item_create();
 
-    /* Duplicate all item informations */
+    /* Duplicate all item information */
     d_item->name = cl_string_dup(item->name);
     d_item->type = cl_string_dup(item->type);
     d_item->descriptive_help = cl_string_dup(item->descriptive_help);
@@ -327,7 +327,7 @@ static struct xante_item *create_rme_item(struct xante_menu *menu,
 
     item = xante_item_create();
 
-    /* Create the required item's informations */
+    /* Create the required item's information */
 
     if (input_name != NULL)
         item->name = cl_string_create("%s", input_name);

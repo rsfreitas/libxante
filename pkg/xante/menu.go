@@ -1,5 +1,5 @@
 //
-// Description: Common gadgets
+// Description: Handles the XanteMenu object.
 // Author: Rodrigo Freitas
 // Created at: Dom Jan 21 19:48:11 -02 2018
 //
@@ -21,3 +21,32 @@
 // USA
 //
 package xante
+
+/*
+#cgo CFLAGS: -I/usr/local/include/xante
+#cgo LDFLAGS: -lxante
+#include <libxante.h>
+*/
+import "C"
+import (
+	"unsafe"
+)
+
+// XanteMenu is the Go version of a xante_menu_t object.
+type XanteMenu struct {
+	data     unsafe.Pointer
+	Name     string
+	ObjectId string
+	Type     uint32
+}
+
+// LoadXanteMenu is responsible to load basic information related to a
+// xante_menu_t.
+func LoadXanteMenu(data unsafe.Pointer) *XanteMenu {
+	return &XanteMenu{
+		data:     data,
+		Name:     C.GoString(C.xante_menu_name(data)),
+		ObjectId: C.GoString(C.xante_menu_object_id(data)),
+		Type:     C.xante_menu_type(data),
+	}
+}

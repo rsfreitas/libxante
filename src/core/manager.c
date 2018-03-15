@@ -712,7 +712,7 @@ static int manager_run(struct xante_app *xpp, cl_list_t *menus,
 
 /**
  * @name ui_data_init
- * @brief Initializes everything related to UI informations.
+ * @brief Initializes everything related to UI information.
  *
  * @param [in,out] xpp: The previously created xante_app structure.
  */
@@ -726,7 +726,7 @@ void ui_data_init(struct xante_app *xpp)
 
 /**
  * @name ui_data_uninit
- * @brief Releases all informations related to the UI.
+ * @brief Releases all information related to the UI.
  *
  * @param [in,out] xpp: The previously created xante_app structure.
  */
