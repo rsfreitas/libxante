@@ -37,3 +37,8 @@ build*/
 
 # Go plugin temporary files
 examples/plugin/go/go-test.h
+
+# Rust temporary files
+Cargo.lock
+examples/plugin/rust/target
+xante/target
