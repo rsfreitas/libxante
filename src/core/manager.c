@@ -62,21 +62,21 @@ static void ui_uninit(struct xante_app *xpp)
     runtime_set_ui_active(xpp, false);
 }
 
-static int ui_single_run(struct xante_app *xpp, struct xante_single_instance_jtf *si)
+static int ui_single_run(struct xante_app *xpp, struct xante_jts *jts)
 {
     char *btn_cancel_label = NULL;
     struct xante_menu *first = NULL;
     int ret_dialog = DLG_EXIT_CANCEL;
 
     /* Are we dealing with a complete menu? */
-    if (si->menus != NULL) {
+    if (jts->menus != NULL) {
         btn_cancel_label = strdup(cl_tr("Back"));
-        first = xante_menu_head(si->menus);
-        ret_dialog = manager_run(xpp, si->menus, first, btn_cancel_label);
+        first = xante_menu_head(jts->menus);
+        ret_dialog = manager_run(xpp, jts->menus, first, btn_cancel_label);
         xante_menu_unref(first);
         free(btn_cancel_label);
     } else /* Or a single item? */
-        ret_dialog = manager_run_widget(xpp, NULL, si->object);
+        ret_dialog = manager_run_widget(xpp, NULL, jts->object);
 
     return ret_dialog;
 }
@@ -836,7 +836,7 @@ __PUB_API__ enum xante_return_value xante_manager_single_run(xante_t *xpp,
     enum xante_return_value exit_status = XANTE_RETURN_OK;
     int ret_dialog = DLG_EXIT_CANCEL;
     bool close_libdialog = false;
-    struct xante_single_instance_jtf *si = NULL;
+    struct xante_jts *jts = NULL;
 
     errno_clear();
 
@@ -845,9 +845,9 @@ __PUB_API__ enum xante_return_value xante_manager_single_run(xante_t *xpp,
         return XANTE_RETURN_ERROR;
     }
 
-    si = si_jtf_load(raw_si);
+    jts = jts_load(raw_si);
 
-    if (NULL == si)
+    if (NULL == jts)
         return XANTE_RETURN_ERROR;
 
     if (xante_runtime_ui_active(xpp) == false) {
@@ -855,10 +855,10 @@ __PUB_API__ enum xante_return_value xante_manager_single_run(xante_t *xpp,
         close_libdialog = true;
     }
 
-    ret_dialog = ui_single_run(xpp, si);
+    ret_dialog = ui_single_run(xpp, jts);
 
-    if (si != NULL)
-        si_jtf_unload(si);
+    if (jts != NULL)
+        jts_unload(jts);
 
 #ifdef ALTERNATIVE_DIALOG
     exit_status = (ret_dialog == DLG_EXIT_TIMEOUT) ? XANTE_RETURN_TIMEOUT

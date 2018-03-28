@@ -172,50 +172,42 @@ void XanteItem::write(QJsonObject &root) const
 
 void XanteItem::preLoad(void)
 {
-    m_typeDescription.insert(XanteItem::Type::Menu,
-                             QString(XANTE_STR_WIDGET_MENU));
+    const char *item_name[] = {
+        XANTE_STR_WIDGET_MENU,
+        XANTE_STR_WIDGET_INPUT_INT,
+        XANTE_STR_WIDGET_INPUT_FLOAT,
+        XANTE_STR_WIDGET_INPUT_DATE,
+        XANTE_STR_WIDGET_INPUT_TIME,
+        XANTE_STR_WIDGET_INPUT_STRING,
+        XANTE_STR_WIDGET_INPUT_PASSWD,
+        XANTE_STR_WIDGET_CALENDAR,
+        XANTE_STR_WIDGET_TIMEBOX,
+        XANTE_STR_WIDGET_RADIO_CHECKLIST,
+        XANTE_STR_WIDGET_CHECKLIST,
+        XANTE_STR_WIDGET_YESNO,
+        XANTE_STR_WIDGET_DYNAMIC_MENU,
+        XANTE_STR_WIDGET_DELETE_DYNAMIC_MENU,
+        XANTE_STR_WIDGET_ADD_DYNAMIC_MENU,
+        XANTE_STR_WIDGET_CUSTOM,
+        XANTE_STR_WIDGET_PROGRESS,
+        XANTE_STR_WIDGET_SPINNER_SYNC,
+        XANTE_STR_WIDGET_DOTS_SYNC,
+        XANTE_STR_WIDGET_RANGE,
+        XANTE_STR_WIDGET_FILE_SELECT,
+        XANTE_STR_WIDGET_DIR_SELECT,
+        XANTE_STR_WIDGET_FILE_VIEW,
+        XANTE_STR_WIDGET_TAILBOX,
+        XANTE_STR_WIDGET_SCROLLTEXT,
+        XANTE_STR_WIDGET_UPDATE_OBJECT,
+        XANTE_STR_WIDGET_INPUTSCROLL,
+        XANTE_STR_WIDGET_MIXEDFORM,
+        XANTE_STR_WIDGET_BUILDLIST,
+        XANTE_STR_WIDGET_SPREADSHEET,
+        XANTE_STR_GADGET_CLOCK,
+    };
 
-    m_typeDescription.insert(XanteItem::Type::InputInt,
-                             QString(XANTE_STR_WIDGET_INPUT_INT));
-
-    m_typeDescription.insert(XanteItem::Type::InputFloat,
-                             QString(XANTE_STR_WIDGET_INPUT_FLOAT));
-
-    m_typeDescription.insert(XanteItem::Type::InputDate,
-                             QString(XANTE_STR_WIDGET_INPUT_DATE));
-
-    m_typeDescription.insert(XanteItem::Type::InputTime,
-                             QString(XANTE_STR_WIDGET_INPUT_TIME));
-
-    m_typeDescription.insert(XanteItem::Type::InputString,
-                             QString(XANTE_STR_WIDGET_INPUT_STRING));
-
-    m_typeDescription.insert(XanteItem::Type::InputPasswd,
-                             QString(XANTE_STR_WIDGET_INPUT_PASSWD));
-
-    m_typeDescription.insert(XanteItem::Type::Calendar,
-                             QString(XANTE_STR_WIDGET_CALENDAR));
-
-    m_typeDescription.insert(XanteItem::Type::Timebox,
-                             QString(XANTE_STR_WIDGET_TIMEBOX));
-
-    m_typeDescription.insert(XanteItem::Type::RadioChecklist,
-                             QString(XANTE_STR_WIDGET_RADIO_CHECKLIST));
-
-    m_typeDescription.insert(XanteItem::Type::Checklist,
-                             QString(XANTE_STR_WIDGET_CHECKLIST));
-
-    m_typeDescription.insert(XanteItem::Type::YesNo,
-                             QString(XANTE_STR_WIDGET_YESNO));
-
-    m_typeDescription.insert(XanteItem::Type::DynamicMenu,
-                             QString(XANTE_STR_WIDGET_DYNAMIC_MENU));
-
-    m_typeDescription.insert(XanteItem::Type::DeleteDynamicMenu,
-                             QString(XANTE_STR_WIDGET_DELETE_DYNAMIC_MENU));
-
-    m_typeDescription.insert(XanteItem::Type::AddDynamicMenu,
-                             QString(XANTE_STR_WIDGET_ADD_DYNAMIC_MENU));
+    for (int i = XanteItem::Type::Menu, j = 0; i < XanteItem::Type::MaxTypes; i++, j++)
+        m_typeDescription.insert((enum XanteItem::Type)i, QString(item_name[j]));
 }
 
 /**
@@ -244,38 +236,7 @@ XanteItem::XanteItem(QString applicationName, QString menuName, QString name)
 
 enum XanteItem::Type XanteItem::toXanteItem(const QString &type)
 {
-    if (type == "menu")
-        return XanteItem::Type::Menu;
-    else if (type == "input-int")
-        return XanteItem::Type::InputInt;
-    else if (type == "input-float")
-        return XanteItem::Type::InputFloat;
-    else if (type == "input-date")
-        return XanteItem::Type::InputDate;
-    else if (type == "input-time")
-        return XanteItem::Type::InputTime;
-    else if (type == "input-string")
-        return XanteItem::Type::InputString;
-    else if (type == "input-passwd")
-        return XanteItem::Type::InputPasswd;
-    else if (type == "calendar")
-        return XanteItem::Type::Calendar;
-    else if (type == "timebox")
-        return XanteItem::Type::Timebox;
-    else if (type == "radio-checklist")
-        return XanteItem::Type::RadioChecklist;
-    else if (type == "checklist")
-        return XanteItem::Type::Checklist;
-    else if (type == "yesno")
-        return XanteItem::Type::YesNo;
-    else if (type == "dynamic-menu")
-        return XanteItem::Type::DynamicMenu;
-    else if (type == "delete-dynamic-menu")
-        return XanteItem::Type::DeleteDynamicMenu;
-    else if (type == "add-dynamic-menu")
-        return XanteItem::Type::AddDynamicMenu;
-
-    return XanteItem::Type::Unknown;
+    return m_typeDescription.key(type, XanteItem::Type::Unknown);
 }
 
 void XanteItem::parseCommonData(QJsonObject item)

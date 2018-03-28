@@ -102,7 +102,12 @@ bool XanteJTF::save(QString filename)
     QJsonObject jtfObject;
     writeJtfData(jtfObject);
     QJsonDocument doc(jtfObject);
+
+#ifdef DEBUG
     file.write(doc.toJson(QJsonDocument::Compact));
+#else
+    file.write(doc.toJson(QJsonDocument::Indented));
+#endif
 
     return true;
 }

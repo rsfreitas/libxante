@@ -52,6 +52,21 @@ class XanteItem
             DynamicMenu,
             DeleteDynamicMenu,
             AddDynamicMenu,
+            Custom,
+            Progress,
+            SpinnerSync,
+            DotsSync,
+            Range,
+            FileSelect,
+            DirSelect,
+            FileView,
+            Tailbox,
+            Scrolltext,
+            UpdateObject,
+            Inputscroll,
+            Mixedform,
+            Buildlist,
+            Spreadsheet,
 
             MaxTypes
         };
@@ -284,6 +299,7 @@ class XanteItem
                 m_descriptiveHelp, m_configBlock, m_configItem, m_fixedOption,
                 m_defaultValue, m_menuReferenceId;
 
+        QMap<QString, enum XanteItem::Type> m_supportedObjects;
         QVariant m_minInputRange, m_maxInputRange;
         QList<QString> m_options, m_helpOptions;
         QMap<enum XanteItem::Type, QString> m_typeDescription;

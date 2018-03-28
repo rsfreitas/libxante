@@ -30,7 +30,7 @@
 #ifdef LIBXANTE_COMPILE
 # define MAJOR_VERSION          0
 # define MINOR_VERSION          0
-# define RELEASE                16
+# define RELEASE                17
 #endif
 
 /* Common declarations to all library versions */

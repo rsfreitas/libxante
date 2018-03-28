@@ -14,6 +14,7 @@ use rcollections::object::ClObject;
 
 extern {
     fn xante_get_last_error() -> i32;
+    fn xante_manager_single_run(xpp: *const u8, dialog: *const c_char) -> i32;
     fn xante_dlg_messagebox_ex(xpp: *const u8, msg_type: i32, title: *const c_char,
                                message: *const c_char) -> i32;
 }
@@ -65,6 +66,14 @@ impl XanteApp {
             xante_dlg_messagebox_ex(self.data, msg_type as i32,
                                     t.as_ptr(),
                                     m.as_ptr());
+        }
+    }
+
+    pub fn dialog(&self, dialog: &str) -> i32 {
+        let d = CString::new(dialog).unwrap();
+
+        unsafe {
+            xante_manager_single_run(self.data, d.as_ptr())
         }
     }
 
