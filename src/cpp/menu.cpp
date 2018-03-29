@@ -51,6 +51,9 @@ void XanteMenu::preLoad(void)
                              QString(XANTE_STR_DEFAULT_MENU));
 }
 
+/*
+ * Parses the main objects of a menu.
+ */
 void XanteMenu::parseCommonData(QJsonObject menu)
 {
     int tmp;
@@ -61,6 +64,9 @@ void XanteMenu::parseCommonData(QJsonObject menu)
     m_mode = (enum XanteAccessMode)tmp;
 }
 
+/*
+ * Parses the "events" object inside a menu.
+ */
 void XanteMenu::parseEventsData(QJsonObject menu)
 {
     QJsonValue value = menu[XANTE_JTF_EVENTS];
@@ -84,6 +90,9 @@ void XanteMenu::parseEventsData(QJsonObject menu)
     }
 }
 
+/*
+ * Parses the "dynamic" object inside a menu.
+ */
 void XanteMenu::parseDynamicData(QJsonObject menu)
 {
     QJsonValue value = menu[XANTE_JTF_TYPE];
@@ -123,6 +132,24 @@ void XanteMenu::parseDynamicData(QJsonObject menu)
     }
 }
 
+/*
+ * Parses the "geometry" object inside a menu.
+ */
+void XanteMenu::parseGeometryData(QJsonObject menu)
+{
+    QJsonValue value = menu[XANTE_JTF_GEOMETRY];
+
+    if (value.isObject() == false)
+        return; // nothing to parse
+
+    QJsonObject geometry = value.toObject();
+    m_width = geometry[XANTE_JTF_WIDTH].toInt();
+    m_height = geometry[XANTE_JTF_HEIGHT].toInt();
+}
+
+/*
+ * Parses the "item" object from a menu.
+ */
 void XanteMenu::parseItems(QJsonObject menu)
 {
     QJsonArray jitems = menu[XANTE_JTF_ITEMS].toArray();
@@ -133,11 +160,15 @@ void XanteMenu::parseItems(QJsonObject menu)
     }
 }
 
+/*
+ * Parses a menu object, an item from its array.
+ */
 void XanteMenu::parse(QJsonObject menu)
 {
     parseCommonData(menu);
     parseEventsData(menu);
     parseDynamicData(menu);
+    parseGeometryData(menu);
     parseItems(menu);
 }
 
@@ -211,6 +242,16 @@ QJsonObject XanteMenu::writeDynamic(void) const
     return dynamic;
 }
 
+QJsonObject XanteMenu::writeGeometry(void) const
+{
+    QJsonObject geometry;
+
+    geometry[XANTE_JTF_WIDTH] = m_width;
+    geometry[XANTE_JTF_HEIGHT] = m_height;
+
+    return geometry;
+}
+
 void XanteMenu::write(QJsonObject &root) const
 {
     QJsonArray jitems;
@@ -231,6 +272,9 @@ void XanteMenu::write(QJsonObject &root) const
 
     if (m_type == XanteMenu::Type::Dynamic)
         root[XANTE_JTF_DYNAMIC] = writeDynamic();
+
+    if ((m_width != -1) || (m_height != -1))
+        root[XANTE_JTF_GEOMETRY] = writeGeometry();
 
     root[XANTE_JTF_ITEMS] = jitems;
 }

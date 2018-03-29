@@ -13,7 +13,7 @@ it may reference an application skeleton.
 ```
 {
     "internal": {
-        "revision": int,
+        "jtf_revision": int,
         "language": string,
         "application": {
             "version": string,
@@ -53,7 +53,6 @@ it may reference an application skeleton.
                     }
                 },
                 "events": {
-                    "selected": string,
                     "exit": string
                 },
                 "geometry": {

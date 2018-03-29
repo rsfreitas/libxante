@@ -109,6 +109,50 @@ QJsonObject XanteItem::writeEvents(void) const
     return events;
 }
 
+QJsonObject XanteItem::writeData(void) const
+{
+    QJsonObject data;
+
+    if (hasInputRanges())
+        data[XANTE_JTF_RANGES] = writeInputRanges();
+
+    if (hasConfig())
+        data[XANTE_JTF_CONFIG] = writeConfig();
+
+    if (hasOptions())
+        writeOptions(data);
+
+    if (m_defaultValue.isEmpty() == false)
+        data[XANTE_JTF_DEFAULT_VALUE] = m_defaultValue;
+
+    if ((m_type == XanteItem::Type::Menu) ||
+        (m_type == XanteItem::Type::DeleteDynamicMenu))
+    {
+        data[XANTE_JTF_REFERENCED_MENU] = m_menuReferenceId;
+    }
+
+    return data;
+}
+
+QJsonObject XanteItem::writeButtons(void) const
+{
+    QJsonObject buttons;
+
+    if (m_btnOk.isEmpty() == false)
+        buttons[XANTE_JTF_BTN_OK] = m_btnOk;
+
+    if (m_btnCancel.isEmpty() == false)
+        buttons[XANTE_JTF_BTN_CANCEL] = m_btnCancel;
+
+    if (m_btnExtra.isEmpty() == false)
+        buttons[XANTE_JTF_BTN_EXTRA] = m_btnExtra;
+
+    if (m_btnHelp.isEmpty() == false)
+        buttons[XANTE_JTF_BTN_HELP] = m_btnHelp;
+
+    return buttons;
+}
+
 QJsonObject XanteItem::writeHelp(void) const
 {
     QJsonObject help;
@@ -135,39 +179,73 @@ QJsonObject XanteItem::writeHelp(void) const
     return help;
 }
 
+QJsonObject XanteItem::writeLabels(void) const
+{
+    QJsonObject labels;
+
+    if (hasButtons())
+        labels[XANTE_JTF_BUTTONS] = writeButtons();
+
+    if (hasHelp())
+        labels[XANTE_JTF_HELP] = writeHelp();
+
+    if (m_title.isEmpty() == false)
+        labels[XANTE_JTF_TITLE] = m_title;
+
+    return labels;
+}
+
+QJsonObject XanteItem::writeGeometry(void) const
+{
+    QJsonObject geometry;
+
+    if (m_width != -1)
+        geometry[XANTE_JTF_WIDTH] = m_width;
+
+    if (m_height != -1)
+        geometry[XANTE_JTF_HEIGHT] = m_height;
+
+    return geometry;
+}
+
+QJsonObject XanteItem::writeUi(void) const
+{
+    QJsonObject ui;
+
+    if (hasLabels())
+        ui[XANTE_JTF_LABELS] = writeLabels();
+
+    if (hasGeometry())
+        ui[XANTE_JTF_GEOMETRY] = writeGeometry();
+
+    if (m_btnExtraEnabled)
+        ui[XANTE_JTF_BTN_EXTRA] = m_btnExtraEnabled;
+
+    return ui;
+}
+
 /*
  * Writes the current content of a XanteItem object into a JSON object.
  */
 void XanteItem::write(QJsonObject &root) const
 {
+#ifdef DEBUG
+    qDebug() << debug();
+#endif
+
     root[XANTE_JTF_NAME] = m_name;
     root[XANTE_JTF_OBJECT_ID] = m_objectId;
     root[XANTE_JTF_MODE] = m_mode;
     root[XANTE_JTF_TYPE] = m_typeDescription.value(m_type);
 
-    if (m_defaultValue.isEmpty() == false)
-        root[XANTE_JTF_DEFAULT_VALUE] = m_defaultValue;
+    if (hasData())
+        root[XANTE_JTF_DATA] = writeData();
 
-    if ((m_type == XanteItem::Type::Menu) ||
-        (m_type == XanteItem::Type::DeleteDynamicMenu))
-    {
-        root[XANTE_JTF_REFERENCED_MENU] = m_menuReferenceId;
-    }
-
-    if (hasOptions())
-        writeOptions(root);
-
-    if (hasInputRanges())
-        root[XANTE_JTF_RANGES] = writeInputRanges();
-
-    if (hasConfig())
-        root[XANTE_JTF_CONFIG] = writeConfig();
+    if (hasUi())
+        root[XANTE_JTF_UI] = writeUi();
 
     if (hasEvents())
         root[XANTE_JTF_EVENTS] = writeEvents();
-
-    if (hasHelp())
-        root[XANTE_JTF_HELP] = writeHelp();
 }
 
 void XanteItem::preLoad(void)
@@ -232,6 +310,12 @@ XanteItem::XanteItem(QString applicationName, QString menuName, QString name)
     this->name(name);
     mode(XanteAccessMode::XanteAccessEdit);
     type(XanteItem::Type::Menu);
+
+    /*
+     * We also need to fill the menuReferenceId and allow this item to be
+     * correctly parsed by libxanted.
+     */
+    m_menuReferenceId = XanteJTF::objectIdCalc(applicationName, menuName);
 }
 
 enum XanteItem::Type XanteItem::toXanteItem(const QString &type)
@@ -239,33 +323,25 @@ enum XanteItem::Type XanteItem::toXanteItem(const QString &type)
     return m_typeDescription.key(type, XanteItem::Type::Unknown);
 }
 
+/*
+ * Parses the main objects from an item.
+ */
 void XanteItem::parseCommonData(QJsonObject item)
 {
     int tmp;
 
     /* Load item from JSON */
-
     m_name = item[XANTE_JTF_NAME].toString();
     m_objectId = item[XANTE_JTF_OBJECT_ID].toString();
-    m_defaultValue = item[XANTE_JTF_DEFAULT_VALUE].toString();
-    m_menuReferenceId = item[XANTE_JTF_REFERENCED_MENU].toString();
 
     tmp = item[XANTE_JTF_MODE].toInt();
     m_mode = (enum XanteAccessMode)tmp;
     m_type = toXanteItem(item[XANTE_JTF_TYPE].toString());
-
-    QJsonValue value = item[XANTE_JTF_OPTIONS];
-
-    if (value.type() == QJsonValue::String)
-        m_fixedOption = value.toString();
-    else {
-        QJsonArray options = value.toArray();
-
-        foreach(const QJsonValue &v, options)
-            m_options.append(v.toString());
-    }
 }
 
+/*
+ * Parses the "events" object from an item.
+ */
 void XanteItem::parseEventsData(QJsonObject item)
 {
     QJsonValue value = item[XANTE_JTF_EVENTS];
@@ -293,9 +369,12 @@ void XanteItem::parseEventsData(QJsonObject item)
     }
 }
 
-void XanteItem::parseConfigData(QJsonObject item)
+/*
+ * Parses the "config" object from the "data" object inside an item.
+ */
+void XanteItem::parseConfigData(QJsonObject data)
 {
-    QJsonValue value = item[XANTE_JTF_CONFIG];
+    QJsonValue value = data[XANTE_JTF_CONFIG];
 
     if (value.type() != QJsonValue::Object)
         return;
@@ -306,9 +385,12 @@ void XanteItem::parseConfigData(QJsonObject item)
     m_configItem = config[XANTE_JTF_ITEM].toString();
 }
 
-void XanteItem::parseRangesData(QJsonObject item)
+/*
+ * Parses the "ranges" object from the "data" object inside an item.
+ */
+void XanteItem::parseRangesData(QJsonObject data)
 {
-    QJsonValue value = item[XANTE_JTF_RANGES];
+    QJsonValue value = data[XANTE_JTF_RANGES];
 
     if (value.type() != QJsonValue::Object)
         return;
@@ -320,9 +402,58 @@ void XanteItem::parseRangesData(QJsonObject item)
     m_maxInputRange = QVariant(inputRanges[XANTE_JTF_MAX_RANGE].toDouble());
 }
 
-void XanteItem::parseHelpData(QJsonObject item)
+/*
+ * Parses the "data" object from an item.
+ */
+void XanteItem::parseData(QJsonObject item)
 {
-    QJsonValue value = item[XANTE_JTF_HELP];
+    QJsonValue value = item[XANTE_JTF_DATA];
+
+    if (value.isObject() == false)
+        return; // nothing to parse
+
+    QJsonObject data = value.toObject();
+
+    m_menuReferenceId = data[XANTE_JTF_REFERENCED_MENU].toString();
+    m_defaultValue = data[XANTE_JTF_DEFAULT_VALUE].toString();
+    value = data[XANTE_JTF_OPTIONS];
+
+    if (value.type() == QJsonValue::String)
+        m_fixedOption = value.toString();
+    else {
+        QJsonArray options = value.toArray();
+
+        foreach(const QJsonValue &v, options)
+            m_options.append(v.toString());
+    }
+
+    parseConfigData(data);
+    parseRangesData(data);
+}
+
+/*
+ * Parses the "buttons" object from the "labels" object inside an item.
+ */
+void XanteItem::parseButtonsData(QJsonObject labels)
+{
+    QJsonValue value = labels[XANTE_JTF_LABELS];
+
+    if (value.isObject() == false)
+        return; // nothing to parse
+
+    QJsonObject buttons = value.toObject();
+    m_btnOk = buttons[XANTE_JTF_BTN_OK_LABEL].toString();
+    m_btnCancel = buttons[XANTE_JTF_BTN_CANCEL_LABEL].toString();
+    m_btnExtra = buttons[XANTE_JTF_BTN_EXTRA_LABEL].toString();
+    m_btnHelp = buttons[XANTE_JTF_BTN_HELP_LABEL].toString();
+}
+
+/*
+ * Parses the "help" object from the "labels" object inside an item.
+ */
+void XanteItem::parseHelpData(QJsonObject labels)
+{
+    QJsonValue value = labels[XANTE_JTF_HELP];
 
     if (value.type() != QJsonValue::Object)
         return;
@@ -338,13 +469,61 @@ void XanteItem::parseHelpData(QJsonObject item)
         m_helpOptions.append(v.toString());
 }
 
+/*
+ * Parses the "labels" object from an "ui" object inside an item.
+ */
+void XanteItem::parseLabelsData(QJsonObject ui)
+{
+    QJsonValue value = ui[XANTE_JTF_LABELS];
+
+    if (value.isObject() == false)
+        return; // nothing to parse
+
+    QJsonObject labels = value.toObject();
+    m_title = labels[XANTE_JTF_TITLE].toString();
+
+    parseButtonsData(labels);
+    parseHelpData(labels);
+}
+
+/*
+ * Parses the "geometry" object inside a menu.
+ */
+void XanteItem::parseGeometryData(QJsonObject ui)
+{
+    QJsonValue value = ui[XANTE_JTF_GEOMETRY];
+
+    if (value.isObject() == false)
+        return; // nothing to parse
+
+    QJsonObject geometry = value.toObject();
+    m_width = geometry[XANTE_JTF_WIDTH].toInt();
+    m_height = geometry[XANTE_JTF_HEIGHT].toInt();
+}
+
+/*
+ * Parses the "ui" object from an item.
+ */
+void XanteItem::parseUiData(QJsonObject item)
+{
+    QJsonValue value = item[XANTE_JTF_UI];
+
+    if (value.isObject() == false)
+        return; // nothing to parse
+
+    QJsonObject ui = value.toObject();
+    m_btnExtraEnabled = ui[XANTE_JTF_BTN_EXTRA].toBool();
+
+    parseLabelsData(ui);
+    parseGeometryData(ui);
+}
+
 void XanteItem::parse(QJsonObject item)
 {
     parseCommonData(item);
     parseEventsData(item);
-    parseConfigData(item);
-    parseRangesData(item);
-    parseHelpData(item);
+    parseData(item);
+    parseUiData(item);
 }
 
 /**

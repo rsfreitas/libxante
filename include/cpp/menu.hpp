@@ -224,7 +224,7 @@ class XanteMenu
         enum XanteAccessMode m_mode;
         enum XanteMenu::Type m_type;
         enum XanteMenu::DynamicType m_dynamicType = XanteMenu::DynamicType::FixedSize;
-        int m_dynamicCopies = 0;
+        int m_dynamicCopies = 0, m_width = -1, m_height = -1;
         QStringList m_copies;
         QList<XanteItem> m_items;
         QMap<enum XanteMenu::Type, QString> m_typeDescription;
@@ -235,10 +235,12 @@ class XanteMenu
         void parseCommonData(QJsonObject menu);
         void parseEventsData(QJsonObject menu);
         void parseDynamicData(QJsonObject menu);
+        void parseGeometryData(QJsonObject menu);
         void parseItems(QJsonObject menu);
 
         QJsonObject writeEvents(void) const;
         QJsonObject writeDynamic(void) const;
+        QJsonObject writeGeometry(void) const;
 };
 
 #endif

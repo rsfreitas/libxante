@@ -95,12 +95,39 @@ class XanteItem
         bool hasConfig(void) const { return (m_type >= XanteItem::Type::InputInt) &&
                                             (m_type <= XanteItem::Type::YesNo); }
 
+        bool hasData(void) const {
+            return hasInputRanges() || hasConfig() || hasOptions() ||
+                   (m_menuReferenceId.isEmpty() == false) ||
+                   (m_defaultValue.isEmpty() == false);
+        }
+
+        bool hasGeometry(void) const {
+            return (m_width != -1) || (m_height != -1);
+        }
+
+        bool hasButtons(void) const {
+            return (m_btnOk.isEmpty() == false) ||
+                   (m_btnCancel.isEmpty() == false) ||
+                   (m_btnExtra.isEmpty() == false) ||
+                   (m_btnHelp.isEmpty() == false);
+        }
+
         bool hasHelp(void) const {
             return (m_briefHelp.isEmpty() == false) ||
                    (m_descriptiveHelp.isEmpty() == false) ||
                    (((m_type == XanteItem::Type::Checklist) ||
                      (m_type == XanteItem::Type::RadioChecklist)) &&
                     m_helpOptions.size() != 0);
+        }
+
+        bool hasLabels(void) const {
+            return hasButtons() || hasHelp() ||
+                   (m_title.isEmpty() == false);
+        }
+
+        bool hasUi(void) const {
+            return hasLabels() || hasGeometry() ||
+                   m_btnExtraEnabled;
         }
 
         bool operator ==(const XanteItem &other) const {
@@ -297,8 +324,10 @@ class XanteItem
     private:
         QString m_applicationName, m_menuName, m_name, m_objectId, m_briefHelp,
                 m_descriptiveHelp, m_configBlock, m_configItem, m_fixedOption,
-                m_defaultValue, m_menuReferenceId;
+                m_defaultValue, m_menuReferenceId, m_title, m_btnOk, m_btnCancel,
+                m_btnExtra, m_btnHelp;
 
+        bool m_btnExtraEnabled = false;
         QMap<QString, enum XanteItem::Type> m_supportedObjects;
         QVariant m_minInputRange, m_maxInputRange;
         QList<QString> m_options, m_helpOptions;
@@ -306,21 +335,31 @@ class XanteItem
         QMap<enum XanteItem::Event, QString> m_events;
         enum XanteAccessMode m_mode;
         enum XanteItem::Type m_type;
-        int m_stringLength = 0;
+        int m_stringLength = 0, m_width = -1, m_height = -1;
 
         void preLoad(void);
         void parse(QJsonObject item);
         void parseCommonData(QJsonObject item);
         void parseEventsData(QJsonObject item);
-        void parseConfigData(QJsonObject item);
-        void parseRangesData(QJsonObject item);
-        void parseHelpData(QJsonObject item);
+        void parseData(QJsonObject item);
+        void parseConfigData(QJsonObject data);
+        void parseRangesData(QJsonObject data);
+        void parseUiData(QJsonObject item);
+        void parseLabelsData(QJsonObject ui);
+        void parseButtonsData(QJsonObject labels);
+        void parseHelpData(QJsonObject labels);
+        void parseGeometryData(QJsonObject ui);
 
         void writeOptions(QJsonObject &root) const;
         QJsonObject writeInputRanges(void) const;
         QJsonObject writeConfig(void) const;
         QJsonObject writeEvents(void) const;
         QJsonObject writeHelp(void) const;
+        QJsonObject writeData(void) const;
+        QJsonObject writeUi(void) const;
+        QJsonObject writeLabels(void) const;
+        QJsonObject writeButtons(void) const;
+        QJsonObject writeGeometry(void) const;
 
         enum XanteItem::Type toXanteItem(const QString &type);
 };
