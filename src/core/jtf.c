@@ -364,7 +364,7 @@ static int parse_item_ranges(const cl_json_t *item, struct xante_item *i)
     }
 
     expected_type = (i->widget_type == XANTE_WIDGET_INPUT_FLOAT) ? CL_JSON_NUMBER_FLOAT
-                                                                    : CL_JSON_NUMBER;
+                                                                 : CL_JSON_NUMBER;
 
     if ((parse_object_value(ranges, XANTE_JTF_MIN_RANGE, expected_type, false,
                             (void **)&i->__helper.min) < 0) && min_range)
@@ -540,7 +540,7 @@ static int adjusts_item_info(struct xante_item *item)
 
             item->widget_checklist_type =
                 (item->widget_type == XANTE_WIDGET_CHECKLIST) ? FLAG_CHECK
-                                                                 : FLAG_RADIO;
+                                                              : FLAG_RADIO;
 
             if (item->__helper.brief_options_help != NULL) {
                 t = cl_json_get_array_size(item->__helper.brief_options_help);

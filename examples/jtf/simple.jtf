@@ -12,7 +12,7 @@
     "general": {
         "name": "config-test",
         "description": "Test of configurations",
-        "module": "/usr/local/lib/go-test.so",
+        "module": "/usr/local/lib/test.so",
         "config_pathname": "/tmp",
         "log_pathname": "/tmp",
         "log_level": "debug",
@@ -412,7 +412,7 @@
                         "object_id": "5",
                         "data": {
                             "options": [ "Option 1", "Option 2", "Option 3" ],
-                            "default_value": "6",
+                            "default_value": "5",
                             "config": {
                                 "block": "Main",
                                 "item": "checklist"

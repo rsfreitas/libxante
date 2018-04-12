@@ -6,8 +6,8 @@ a specific application.
 
 ## Format
 
-A JXDBI file is a JSON file with specific fields, extracted from an
-application JTF file.
+A JXDBI file is a JSON file with specific fields, extracted from an application
+JTF file.
 
 ## Details
 ```

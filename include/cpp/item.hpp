@@ -52,6 +52,21 @@ class XanteItem
             DynamicMenu,
             DeleteDynamicMenu,
             AddDynamicMenu,
+            Custom,
+            Progress,
+            SpinnerSync,
+            DotsSync,
+            Range,
+            FileSelect,
+            DirSelect,
+            FileView,
+            Tailbox,
+            Scrolltext,
+            UpdateObject,
+            Inputscroll,
+            Mixedform,
+            Buildlist,
+            Spreadsheet,
 
             MaxTypes
         };
@@ -61,6 +76,13 @@ class XanteItem
             Exit,
             ValueConfirmed,
             ValueChanged,
+            ExtraButtonPressed,
+            CustomFunction,
+            UpdateRoutine,
+            CustomData,
+            SyncRoutine,
+            ValueStrlen,
+            ValueCheck,
 
             MaxEvents
         };
@@ -69,16 +91,60 @@ class XanteItem
         XanteItem(QString applicationName, QString menuName, QJsonObject item);
         XanteItem(QString applicationName, QString menuName, QString name);
 
+        static bool needsSettings(enum XanteItem::Type type);
+        static bool needsMinRange(enum XanteItem::Type type);
+        static bool needsMaxRange(enum XanteItem::Type type);
+        static bool needsStringLengthRange(enum XanteItem::Type type);
+        static bool needsDescription(enum XanteItem::Type type);
+        static bool needsOptions(enum XanteItem::Type type);
+        static bool needsDefaultValue(enum XanteItem::Type type);
+        static bool needsMenuReference(enum XanteItem::Type type);
+        static bool needsRange(enum XanteItem::Type type) {
+            return needsMinRange(type) || needsMaxRange(type) ||
+                   needsStringLengthRange(type);
+        }
+
         void write(QJsonObject &root) const;
         bool hasEvents(void) const { return m_events.size() != 0; }
-        bool hasOptions(void) const { return (m_type >= XanteItem::Type::InputInt) &&
-                                             (m_type <= XanteItem::Type::DeleteDynamicMenu); }
 
-        bool hasInputRanges(void) const { return (m_type >= XanteItem::Type::InputInt) &&
-                                                 (m_type <= XanteItem::Type::InputPasswd); }
+        bool hasOptions(void) const {
+            return (m_fixedOption.isEmpty() == false) ||
+                   (m_options.size() != 0);
+        }
 
-        bool hasConfig(void) const { return (m_type >= XanteItem::Type::InputInt) &&
-                                            (m_type <= XanteItem::Type::YesNo); }
+        bool hasInputRanges(void) const {
+            QPair<QVariant, QVariant> p = minMax();
+            bool mm = false;
+
+            if (p.first.type() == QVariant::Int)
+                mm = (p.first.toInt() != 0) || (p.second.toInt() != 0);
+            else
+                mm = (p.first.toDouble() != 0) || (p.second.toDouble() != 0);
+
+            return (m_stringLength != 0) || mm;
+        }
+
+        bool hasConfig(void) const {
+            return (m_configBlock.isEmpty() == false) &&
+                   (m_configEntry.isEmpty() == false);
+        }
+
+        bool hasData(void) const {
+            return hasInputRanges() || hasConfig() || hasOptions() ||
+                   (m_menuReferenceId.isEmpty() == false) ||
+                   (m_defaultValue.isEmpty() == false);
+        }
+
+        bool hasGeometry(void) const {
+            return (m_width != -1) && (m_height != -1);
+        }
+
+        bool hasButtons(void) const {
+            return (m_btnOk.isEmpty() == false) ||
+                   (m_btnCancel.isEmpty() == false) ||
+                   (m_btnExtra.isEmpty() == false) ||
+                   (m_btnHelp.isEmpty() == false);
+        }
 
         bool hasHelp(void) const {
             return (m_briefHelp.isEmpty() == false) ||
@@ -86,6 +152,16 @@ class XanteItem
                    (((m_type == XanteItem::Type::Checklist) ||
                      (m_type == XanteItem::Type::RadioChecklist)) &&
                     m_helpOptions.size() != 0);
+        }
+
+        bool hasLabels(void) const {
+            return hasButtons() || hasHelp() ||
+                   (m_title.isEmpty() == false);
+        }
+
+        bool hasUi(void) const {
+            return hasLabels() || hasGeometry() ||
+                   m_btnExtraEnabled;
         }
 
         bool operator ==(const XanteItem &other) const {
@@ -96,18 +172,25 @@ class XanteItem
                 (m_briefHelp == other.m_briefHelp) &&
                 (m_descriptiveHelp == other.m_descriptiveHelp) &&
                 (m_configBlock == other.m_configBlock) &&
-                (m_configItem == other.m_configItem) &&
+                (m_configEntry == other.m_configEntry) &&
                 (m_fixedOption == other.m_fixedOption) &&
                 (m_defaultValue == other.m_defaultValue) &&
                 (m_menuReferenceId == other.m_menuReferenceId) &&
-                (m_minInputRange == other.m_minInputRange) &&
-                (m_maxInputRange == other.m_maxInputRange) &&
+                (m_mode == other.m_mode) &&
+                (m_minInputRange == other.m_minInputRange) && // erro aqui
+                (m_maxInputRange == other.m_maxInputRange) && // erro aqui
+                (m_stringLength == other.m_stringLength) &&
                 (m_options == other.m_options) &&
                 (m_helpOptions == other.m_helpOptions) &&
                 (m_events == other.m_events) &&
-                (m_mode == other.m_mode) &&
                 (m_type == other.m_type) &&
-                (m_stringLength == other.m_stringLength);
+                (m_btnOk == other.m_btnOk) &&
+                (m_btnCancel == other.m_btnCancel) &&
+                (m_btnExtra == other.m_btnExtra) &&
+                (m_btnHelp == other.m_btnHelp) &&
+                (m_width == other.m_width) &&
+                (m_height == other.m_height) &&
+                (m_btnExtraEnabled == other.m_btnExtraEnabled);
         }
 
         bool operator !=(const XanteItem &other) const {
@@ -125,7 +208,7 @@ class XanteItem
             m_briefHelp = other.m_briefHelp;
             m_descriptiveHelp = other.m_descriptiveHelp;
             m_configBlock = other.m_configBlock;
-            m_configItem = other.m_configItem;
+            m_configEntry = other.m_configEntry;
             m_fixedOption = other.m_fixedOption;
             m_defaultValue = other.m_defaultValue;
             m_menuReferenceId = other.m_menuReferenceId;
@@ -138,6 +221,13 @@ class XanteItem
             m_type = other.m_type;
             m_stringLength = other.m_stringLength;
             m_typeDescription = other.m_typeDescription;
+            m_btnOk = other.m_btnOk;
+            m_btnCancel = other.m_btnCancel;
+            m_btnExtra = other.m_btnExtra;
+            m_btnHelp = other.m_btnHelp;
+            m_width = other.m_width;
+            m_height = other.m_height;
+            m_btnExtraEnabled = other.m_btnExtraEnabled;
 
             return *this;
         }
@@ -146,9 +236,11 @@ class XanteItem
             QString info = QString(
                     "{applicationName: '%1', menuName: '%2', name: '%3', "
                     "objectId: '%4', briefHelp: '%5', descriptiveHelp: '%6', "
-                    "configBlock: '%7', configItem: '%8', fixedOption: '%9', "
+                    "configBlock: '%7', configEntry: '%8', fixedOption: '%9', "
                     "defaultValue: '%10', menuReferenceId: '%11', mode: '%12', "
-                    "type: '%13', min: '%14', max: '%15', stringLength: '%16'")
+                    "type: '%13', min: '%14', max: '%15', stringLength: '%16', "
+                    "btnExtraEnabled: '%17', btnOk: '%18', btnCancel: '%19', "
+                    "btnExtra: '%20', btnHelp: '%21', width: '%22', height: '%23'")
                 .arg(m_applicationName)
                 .arg(m_menuName)
                 .arg(m_name)
@@ -156,7 +248,7 @@ class XanteItem
                 .arg(m_briefHelp)
                 .arg(m_descriptiveHelp)
                 .arg(m_configBlock)
-                .arg(m_configItem)
+                .arg(m_configEntry)
                 .arg(m_fixedOption)
                 .arg(m_defaultValue)
                 .arg(m_menuReferenceId)
@@ -166,7 +258,14 @@ class XanteItem
                                                              : m_minInputRange.toInt())
                 .arg((m_type == XanteItem::Type::InputFloat) ? m_maxInputRange.toFloat()
                                                              : m_maxInputRange.toInt())
-                .arg(m_stringLength);
+                .arg(m_stringLength)
+                .arg(m_btnExtraEnabled)
+                .arg(m_btnOk)
+                .arg(m_btnCancel)
+                .arg(m_btnExtra)
+                .arg(m_btnHelp)
+                .arg(m_width)
+                .arg(m_height);
 
             if (m_events.size() > 0) {
                 QMap<enum XanteItem::Event, QString>::const_iterator it;
@@ -217,11 +316,14 @@ class XanteItem
         const QString configBlock(void) const { return m_configBlock; }
         void configBlock(QString configBlock) { m_configBlock = configBlock; }
 
-        const QString configItem(void) const { return m_configItem; }
-        void configItem(QString configItem) { m_configItem = configItem; }
+        const QString configEntry(void) const { return m_configEntry; }
+        void configEntry(QString configEntry) { m_configEntry = configEntry; }
 
         enum XanteItem::Type type(void) const { return m_type; }
         void type(enum XanteItem::Type type) { m_type = type; }
+        const QString typeDescription(void) const {
+            return m_typeDescription.value(m_type);
+        }
 
         enum XanteAccessMode mode(void) const { return m_mode; }
         void mode(enum XanteAccessMode mode) { m_mode = mode; }
@@ -279,32 +381,66 @@ class XanteItem
                 m_helpOptions.append(help);
         }
 
+        void btnExtraEnabled(bool choice) { m_btnExtraEnabled = choice; }
+        bool btnExtraEnabled(void) const { return m_btnExtraEnabled; }
+
+        void title(QString title) { m_title = title; }
+        const QString title(void) const { return m_title; }
+
+        void okLabel(QString label) { m_btnOk = label; }
+        const QString okLabel(void) const { return m_btnOk; }
+
+        void cancelLabel(QString label) { m_btnCancel = label; }
+        const QString cancelLabel(void) const { return m_btnCancel; }
+
+        void extraLabel(QString label) { m_btnExtra = label; }
+        const QString extraLabel(void) const { return m_btnExtra; }
+
+        void helpLabel(QString label) { m_btnHelp = label; }
+        const QString helpLabel(void) const { return m_btnHelp; }
+
+        void size(QSize size) { m_width = size.width(); m_height = size.height(); }
+        QSize size(void) const { return QSize(m_width, m_height); }
+
     private:
         QString m_applicationName, m_menuName, m_name, m_objectId, m_briefHelp,
-                m_descriptiveHelp, m_configBlock, m_configItem, m_fixedOption,
-                m_defaultValue, m_menuReferenceId;
+                m_descriptiveHelp, m_configBlock, m_configEntry, m_fixedOption,
+                m_defaultValue, m_menuReferenceId, m_title, m_btnOk, m_btnCancel,
+                m_btnExtra, m_btnHelp;
 
+        bool m_btnExtraEnabled = false;
+        QMap<QString, enum XanteItem::Type> m_supportedObjects;
         QVariant m_minInputRange, m_maxInputRange;
         QList<QString> m_options, m_helpOptions;
         QMap<enum XanteItem::Type, QString> m_typeDescription;
         QMap<enum XanteItem::Event, QString> m_events;
         enum XanteAccessMode m_mode;
         enum XanteItem::Type m_type;
-        int m_stringLength = 0;
+        int m_stringLength = 0, m_width = -1, m_height = -1;
 
         void preLoad(void);
         void parse(QJsonObject item);
         void parseCommonData(QJsonObject item);
         void parseEventsData(QJsonObject item);
-        void parseConfigData(QJsonObject item);
-        void parseRangesData(QJsonObject item);
-        void parseHelpData(QJsonObject item);
+        void parseData(QJsonObject item);
+        void parseConfigData(QJsonObject data);
+        void parseRangesData(QJsonObject data);
+        void parseUiData(QJsonObject item);
+        void parseLabelsData(QJsonObject ui);
+        void parseButtonsData(QJsonObject labels);
+        void parseHelpData(QJsonObject labels);
+        void parseGeometryData(QJsonObject ui);
 
         void writeOptions(QJsonObject &root) const;
         QJsonObject writeInputRanges(void) const;
         QJsonObject writeConfig(void) const;
         QJsonObject writeEvents(void) const;
         QJsonObject writeHelp(void) const;
+        QJsonObject writeData(void) const;
+        QJsonObject writeUi(void) const;
+        QJsonObject writeLabels(void) const;
+        QJsonObject writeButtons(void) const;
+        QJsonObject writeGeometry(void) const;
 
         enum XanteItem::Type toXanteItem(const QString &type);
 };

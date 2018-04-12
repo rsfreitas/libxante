@@ -24,12 +24,12 @@
  * USA
  */
 
-#ifndef _LIBXANTE_INTERNAL_SI_JTF_H
-#define _LIBXANTE_INTERNAL_SI_JTF_H
+#ifndef _LIBXANTE_INTERNAL_JTS_H
+#define _LIBXANTE_INTERNAL_JTS_H
 
 /* Internal library declarations */
-struct xante_single_instance_jtf *si_jtf_load(const char *si);
-void si_jtf_unload(struct xante_single_instance_jtf *si);
+struct xante_jts *jts_load(const char *jts);
+void jts_unload(struct xante_jts *jts);
 
 #endif
 

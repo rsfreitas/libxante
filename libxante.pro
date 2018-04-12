@@ -9,7 +9,7 @@ INCLUDEPATH += $$CURRENT_ROOT_PATH/include
 QT += core
 LIBS +=
 CONFIG += staticlib debug
-DEFINES += LIBXANTE_COMPILE
+DEFINES += LIBXANTE_COMPILE DEBUG
 
 # Input
 HEADERS += $$CURRENT_ROOT_PATH/include/cpp/config.hpp     \
@@ -26,8 +26,7 @@ lib_dev_header.path = /usr/local/include/xante
 lib_dev_header.files = $$CURRENT_ROOT_PATH/include/libxante.h
 dev_headers.path = /usr/local/include/xante/cpp
 dev_headers.files = $$CURRENT_ROOT_PATH/include/cpp/*.hpp
-target.path = $$PWD
+target.path = /usr/local/lib
 
-DESTDIR = /usr/local/lib
 INSTALLS += target lib_dev_header dev_headers
 

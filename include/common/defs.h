@@ -98,11 +98,13 @@ extern "C" {
 #define XANTE_STR_DYNAMIC_MENU                  "dynamic"
 
 /* FIXME: Put the library prefix here */
-/** Object events */
-#define EV_ITEM_SELECTED                        "item-selected"
-#define EV_ITEM_VALUE_CONFIRM                   "item-value-confirm"
-#define EV_ITEM_VALUE_UPDATED                   "item-value-updated"
-#define EV_ITEM_EXIT                            "item-exit"
+/**
+ * Object events. Events marked with '*' may be triggered for all items.
+ **/
+#define EV_ITEM_SELECTED                        "item-selected"         //*
+#define EV_ITEM_VALUE_CONFIRM                   "item-value-confirm"    //*
+#define EV_ITEM_VALUE_UPDATED                   "item-value-updated"    //*
+#define EV_ITEM_EXIT                            "item-exit"             //*
 #define EV_MENU_EXIT                            "menu-exit"
 #define EV_CUSTOM                               "custom-event"
 #define EV_UPDATE_ROUTINE                       "update-routine"
@@ -110,7 +112,7 @@ extern "C" {
 #define EV_SYNC_ROUTINE                         "sync-routine"
 #define EV_VALUE_STRLEN                         "value-strlen"
 #define EV_VALUE_CHECK                          "value-check"
-#define EV_EXTRA_BUTTON_PRESSED                 "extra-button-pressed"
+#define EV_EXTRA_BUTTON_PRESSED                 "extra-button-pressed"  //*
 
 /** String keys of a supported widget */
 #define XANTE_STR_WIDGET_MENU                   "menu"
@@ -151,6 +153,9 @@ enum XanteAccessMode {
     XanteAccessView     = (1 << 0),
     XanteAccessEdit     = (1 << 1)
 };
+
+/* The minimum number of events that an item may have */
+#define XANTE_ITEM_DEFAULT_EVENTS               5
 
 #ifdef __cplusplus
 }

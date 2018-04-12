@@ -36,8 +36,7 @@ type XanteEvent struct {
 	Menu       *XanteMenu
 	Item       *XanteItem
 	CfgFile    *collections.ClConfigFile
-	EventValue unsafe.Pointer
-	Changes    unsafe.Pointer
+	EventValue *collections.ClObject
 	Data       unsafe.Pointer
 }
 
@@ -55,8 +54,7 @@ func LoadEvent(arguments unsafe.Pointer) (*XanteEvent, error) {
 		Menu:       LoadXanteMenu(args.Pointer("menu")),
 		Item:       LoadXanteItem(args.Pointer("item")),
 		CfgFile:    collections.NewConfigFile(args.Pointer("cfg-file")),
-		EventValue: args.Pointer("value"),
-		Changes:    args.Pointer("changes"),
+		EventValue: collections.NewObject(args.Pointer("value")),
 		Data:       args.Pointer("data"),
 	}, nil
 }

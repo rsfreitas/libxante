@@ -49,7 +49,7 @@ enum xante_return_value xante_manager_run(xante_t *xpp);
 
 /**
  * @name xante_manager_single_run
- * @brief Puts a SIJTF object to run.
+ * @brief Puts a JTS object to run.
  *
  * This function may be called inside a module event function and also, this
  * event may run with an already running application or not. This way this
@@ -57,12 +57,12 @@ enum xante_return_value xante_manager_run(xante_t *xpp);
  * initialization to run the object.
  *
  * @param [in,out] xpp: The library main object.
- * @param [in] raw_mjtf: The SIJTF object in a string format.
+ * @param [in] jts: The JTS object in a string format.
  *
  * @return Return an exit value indicating what happened inside (see enum
  *         xante_return_value declaration).
  */
-enum xante_return_value xante_manager_single_run(xante_t *xpp, const char *raw_mjtf);
+enum xante_return_value xante_manager_single_run(xante_t *xpp, const char *jts);
 
 #endif
 

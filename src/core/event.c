@@ -28,15 +28,6 @@
 
 #include "libxante.h"
 
-/* Plugin function argument names */
-#define ARG_XANTE_APP       "xpp"
-#define ARG_XANTE_MENU      "menu"
-#define ARG_XANTE_ITEM      "item"
-#define ARG_CFG_FILE        "cfg-file"
-#define ARG_VALUE           "value"
-#define ARG_CHANGES         "changes"
-#define ARG_DATA            "data"
-
 struct module_function {
     bool    found;
     bool    need_internal_dispatch;
@@ -58,7 +49,7 @@ static int ev_void(struct xante_app *xpp, const char *event_name)
 
     xante_log_info("%s: chamando %s", __FUNCTION__, event_name);
     ret = cl_plugin_call(xpp->module.module, event_name, CL_INT,
-                         ARG_XANTE_APP, CL_POINTER, false, xpp, -1, NULL,
+                         XANTE_ARG_XANTE_APP, CL_POINTER, false, xpp, -1, NULL,
                          NULL);
 
     if (strcmp(event_name, EV_INIT) == 0)
@@ -76,8 +67,8 @@ static void ev_config(struct xante_app *xpp, const char *event_name, va_list ap)
 
     cfg_file = va_arg(ap, void *);
     ret = cl_plugin_call(xpp->module.module, event_name, CL_VOID,
-                         ARG_XANTE_APP, CL_POINTER, false, xpp, -1, NULL,
-                         ARG_CFG_FILE, CL_POINTER, false, cfg_file, -1, NULL,
+                         XANTE_ARG_XANTE_APP, CL_POINTER, false, xpp, -1, NULL,
+                         XANTE_ARG_CFG_FILE, CL_POINTER, false, cfg_file, -1, NULL,
                          NULL);
 
     cl_object_unref(ret);
@@ -195,9 +186,9 @@ static int ev_item(struct xante_app *xpp, const char *event_name, va_list ap)
         }
 
         ret = cl_plugin_call(pl, function.name, CL_INT,
-                             ARG_XANTE_APP, CL_POINTER, false, xpp, -1, NULL,
-                             ARG_XANTE_ITEM, CL_POINTER, false, item, -1, NULL,
-                             ARG_DATA, CL_POINTER, false, data, -1, NULL,
+                             XANTE_ARG_XANTE_APP, CL_POINTER, false, xpp, -1, NULL,
+                             XANTE_ARG_XANTE_ITEM, CL_POINTER, false, item, -1, NULL,
+                             XANTE_ARG_DATA, CL_POINTER, false, data, -1, NULL,
                              NULL);
 
         if (NULL == ret) {
@@ -246,8 +237,8 @@ static int ev_menu(struct xante_app *xpp, const char *event_name, va_list ap)
         return 0; /* Should we return an error? */
 
     ret = cl_plugin_call(xpp->module.module, function.name, CL_INT,
-                         ARG_XANTE_APP, CL_POINTER, false, xpp, -1, NULL,
-                         ARG_XANTE_MENU, CL_POINTER, false, menu, -1, NULL,
+                         XANTE_ARG_XANTE_APP, CL_POINTER, false, xpp, -1, NULL,
+                         XANTE_ARG_XANTE_MENU, CL_POINTER, false, menu, -1, NULL,
                          NULL);
 
     if (strcmp(event_name, EV_MENU_EXIT) == 0)
@@ -315,9 +306,9 @@ static int ev_item_value(struct xante_app *xpp, const char *event_name, va_list 
         }
 
         ret = cl_plugin_call(pl, function.name, CL_INT,
-                             ARG_XANTE_APP, CL_POINTER, false, xpp, -1, NULL,
-                             ARG_XANTE_ITEM, CL_POINTER, false, item, -1, NULL,
-                             ARG_VALUE, CL_POINTER, false, value, -1, NULL,
+                             XANTE_ARG_XANTE_APP, CL_POINTER, false, xpp, -1, NULL,
+                             XANTE_ARG_XANTE_ITEM, CL_POINTER, false, item, -1, NULL,
+                             XANTE_ARG_VALUE, CL_POINTER, false, value, -1, NULL,
                              NULL);
 
         if (strcmp(event_name, EV_ITEM_VALUE_CONFIRM) == 0)
@@ -370,8 +361,8 @@ static int ev_changes(struct xante_app *xpp)
     int event_return = 0;
 
     ret = cl_plugin_call(xpp->module.module, EV_CHANGES_SAVED, CL_INT,
-                         ARG_XANTE_APP, CL_POINTER, false, xpp, -1, NULL,
-                         ARG_CHANGES, CL_POINTER, false,
+                         XANTE_ARG_XANTE_APP, CL_POINTER, false, xpp, -1, NULL,
+                         XANTE_ARG_CHANGES, CL_POINTER, false,
                          xpp->changes.user_changes, -1, NULL, NULL);
 
     event_return = CL_OBJECT_AS_INT(ret);

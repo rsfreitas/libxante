@@ -1,21 +1,19 @@
-# SIJTF - Single Instance JTF
+# JTS - Json Template for Sessions
 
 This document describes a JTF format specifically used to build and run
 widgets inside an already running application, called here as a
-Single Instance JTF (SIJTF).
+JTS - Json Template for Sessions.
 
 With this mechanism one may build custom dialogs to be called on an
-active application.
-
-Its format is very similar to the JTF file, but instead having all
-specific application information it only has the widgets part, with a
-few modifications.
+active application. Its format is very similar to the JTF file, but
+instead having all specific application information it only has the
+widgets part, with a few modifications.
 
 While in the JTF you must have all information about any accessible
-option described in details and inside an array of menus, in this kind
-of SIJTF you can put only one specific kind of widget to be built or
-even a sequence of widgets to be accessible through the first one
-(pretty much like a menu).
+option described in details and inside an array of menus, in this file
+you can put only one specific widget properties to be built or even a
+sequence of widgets to be accessible through the first one (pretty much
+like a menu).
 
 ## Details
 
@@ -53,12 +51,12 @@ even a sequence of widgets to be accessible through the first one
 }
 ```
 
-Note that with a single item one does not need to configure the _object\_id_ of
-an item.
+Note that with a single item you don't need to set the _object\_id_ of the item.
 
 ### Sequnce of dialogs
 
-**Notice** that this format is exactly the same of the JTF.
+**Notice** that this format is exactly the same of the JTF when looking at the
+object names.
 
 ```
 {

@@ -286,8 +286,8 @@ struct xante_app {
     struct cl_ref_s         ref;
 };
 
-/** The structure to hold a single widget to run */
-struct xante_single_instance_jtf {
+/** The structure to hold a single widget to run, a JTS data */
+struct xante_jts {
     cl_list_t           *menus;
     struct xante_item   *object;
 };
@@ -322,7 +322,7 @@ struct xante_single_instance_jtf {
 #include "menu.h"
 #include "runtime.h"
 #include "session.h"
-#include "si_jtf.h"
+#include "jts.h"
 #include "utils.h"
 
 #endif

@@ -106,6 +106,15 @@ class XanteJTF
         bool beta(void) const { return m_beta; }
         void beta(bool beta) { m_beta = beta; }
 
+        bool escKey(void) const { return m_escKey; }
+        void escKey(bool escKey) { m_escKey = escKey; }
+
+        bool suspendKey(void) const { return m_suspendKey; }
+        void suspendKey(bool suspendKey) { m_suspendKey = suspendKey; }
+
+        bool stopKey(void) const { return m_stopKey; }
+        void stopKey(bool stopKey) { m_stopKey = stopKey; }
+
         XanteMenu &menuAt(int index);
         XanteMenu &getMenu(QString objectId);
         int totalMenus(void) const { return m_menus.size(); }
@@ -116,17 +125,21 @@ class XanteJTF
         QString m_applicationName, m_description, m_company, m_plugin,
                 m_cfgPathname, m_logPathname, m_version, m_mainMenu;
 
-        int m_revision, m_build, m_fileRevision = 1;
-        bool m_beta, m_empty = true;
+        int m_fileRevision = 1, m_revision, m_build;
+        bool m_beta, m_empty = true, m_escKey = false, m_suspendKey = true,
+             m_stopKey = true;
+
         QList<XanteMenu> m_menus;
         QJsonObject m_jtfRoot;
 
         void writeJtfData(QJsonObject &root);
         void writeJtfUi(QJsonObject &root);
+        void writeBlockedKeys(QJsonObject &blockedKeys);
         void writeJtfGeneral(QJsonObject &root);
         void writeJtfInternal(QJsonObject &root);
         bool loadJtfFromFile(void);
         bool loadJtfInternal(void);
+        bool loadBlockedKeys(void);
         bool loadJtfGeneral(void);
         bool loadJtfUi(void);
         void buildDefaultMenu(void);

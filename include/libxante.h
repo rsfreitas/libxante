@@ -30,7 +30,7 @@
 #ifdef LIBXANTE_COMPILE
 # define MAJOR_VERSION          0
 # define MINOR_VERSION          0
-# define RELEASE                16
+# define RELEASE                17
 #endif
 
 /* Common declarations to all library versions */
@@ -143,6 +143,15 @@ enum xante_item_search_mode {
     XANTE_ITEM_SEARCH_BY_OBJECT_ID
 };
 
+/* Plugin function argument names */
+#define XANTE_ARG_XANTE_APP       "xpp"
+#define XANTE_ARG_XANTE_MENU      "menu"
+#define XANTE_ARG_XANTE_ITEM      "item"
+#define XANTE_ARG_CFG_FILE        "cfg-file"
+#define XANTE_ARG_VALUE           "value"
+#define XANTE_ARG_CHANGES         "changes"
+#define XANTE_ARG_DATA            "data"
+
 /** Main library object */
 typedef void    xante_t;
 
@@ -168,6 +177,7 @@ struct xante_change_entry {
 #include "api/config.h"
 #include "api/env.h"
 #include "api/error.h"
+#include "api/event.h"
 #include "api/gadget.h"
 #include "api/info.h"
 #include "api/init.h"

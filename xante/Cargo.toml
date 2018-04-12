@@ -1,0 +1,8 @@
+[package]
+name = "xante"
+version = "0.1.0"
+authors = ["Rodrigo Freitas <rsfreitas@users.noreply.github.com>"]
+
+[dependencies]
+rcollections = { path = "/home/rodrigo/desenv/Personal/git/github/libcollections/src/rust/rcollections", version = "0.1" }
+libc = "0.2.0"

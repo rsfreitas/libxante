@@ -53,8 +53,20 @@ void XanteJTF::writeJtfInternal(QJsonObject &root)
     root[XANTE_JTF_APPLICATION] = japplication;
 }
 
+/*
+ * Fill the "blocked_keys" object with data to be written into the JTF file.
+ */
+void XanteJTF::writeBlockedKeys(QJsonObject &blockedKeys)
+{
+    blockedKeys[XANTE_JTF_ESC_KEY] = m_escKey;
+    blockedKeys[XANTE_JTF_SUSPEND_KEY] = m_suspendKey;
+    blockedKeys[XANTE_JTF_STOP_KEY] = m_stopKey;
+}
+
 void XanteJTF::writeJtfGeneral(QJsonObject &root)
 {
+    QJsonObject blockedKeys;
+
     root[XANTE_JTF_NAME] = m_applicationName;
     root[XANTE_JTF_DESCRIPTION] = m_description;
     root[XANTE_JTF_MODULE_NAME] = m_plugin;
@@ -62,6 +74,9 @@ void XanteJTF::writeJtfGeneral(QJsonObject &root)
     root[XANTE_JTF_LOG_PATHNAME] = m_logPathname;
     root[XANTE_JTF_LOG_LEVEL] = "info";
     root[XANTE_JTF_COMPANY] = m_company;
+
+    writeBlockedKeys(blockedKeys);
+    root[XANTE_JTF_BLOCKED_KEYS] = blockedKeys;
 }
 
 void XanteJTF::writeJtfUi(QJsonObject &root)
@@ -102,7 +117,37 @@ bool XanteJTF::save(QString filename)
     QJsonObject jtfObject;
     writeJtfData(jtfObject);
     QJsonDocument doc(jtfObject);
+
+#ifdef DEBUG
+    file.write(doc.toJson(QJsonDocument::Indented));
+#else
     file.write(doc.toJson(QJsonDocument::Compact));
+#endif
+
+    return true;
+}
+
+/*
+ * Parses the "blocked_keys" object inside the "general" object from a JTF
+ * file.
+ */
+bool XanteJTF::loadBlockedKeys(void)
+{
+    QJsonValue value = m_jtfRoot.value(QString(XANTE_JTF_GENERAL));
+
+    if (value.isObject() == false)
+        return false;
+
+    QJsonObject general = value.toObject();
+    value = general[XANTE_JTF_BLOCKED_KEYS];
+
+    if (value.isObject() == false)
+        return false;
+
+    QJsonObject blockedKeys = value.toObject();
+    m_escKey = blockedKeys[XANTE_JTF_ESC_KEY].toBool();
+    m_suspendKey = blockedKeys[XANTE_JTF_SUSPEND_KEY].toBool();
+    m_stopKey = blockedKeys[XANTE_JTF_STOP_KEY].toBool();
 
     return true;
 }
@@ -169,6 +214,7 @@ bool XanteJTF::loadJtfUi(void)
 bool XanteJTF::loadJtfFromFile(void)
 {
     if ((loadJtfInternal() == false) ||
+        (loadBlockedKeys() == false) ||
         (loadJtfGeneral() == false) ||
         (loadJtfUi() == false))
     {

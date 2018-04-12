@@ -51,16 +51,26 @@ void XanteMenu::preLoad(void)
                              QString(XANTE_STR_DEFAULT_MENU));
 }
 
+/*
+ * Parses the main objects of a menu.
+ */
 void XanteMenu::parseCommonData(QJsonObject menu)
 {
     int tmp;
 
     m_name = menu[XANTE_JTF_NAME].toString();
     m_objectId = menu[XANTE_JTF_OBJECT_ID].toString();
+
+    if (m_objectId.isEmpty())
+        m_objectId = XanteJTF::objectIdCalc(m_applicationName, m_name);
+
     tmp = menu[XANTE_JTF_MODE].toInt();
     m_mode = (enum XanteAccessMode)tmp;
 }
 
+/*
+ * Parses the "events" object inside a menu.
+ */
 void XanteMenu::parseEventsData(QJsonObject menu)
 {
     QJsonValue value = menu[XANTE_JTF_EVENTS];
@@ -84,6 +94,9 @@ void XanteMenu::parseEventsData(QJsonObject menu)
     }
 }
 
+/*
+ * Parses the "dynamic" object inside a menu.
+ */
 void XanteMenu::parseDynamicData(QJsonObject menu)
 {
     QJsonValue value = menu[XANTE_JTF_TYPE];
@@ -123,6 +136,24 @@ void XanteMenu::parseDynamicData(QJsonObject menu)
     }
 }
 
+/*
+ * Parses the "geometry" object inside a menu.
+ */
+void XanteMenu::parseGeometryData(QJsonObject menu)
+{
+    QJsonValue value = menu[XANTE_JTF_GEOMETRY];
+
+    if (value.isObject() == false)
+        return; // nothing to parse
+
+    QJsonObject geometry = value.toObject();
+    m_width = geometry[XANTE_JTF_WIDTH].toInt();
+    m_height = geometry[XANTE_JTF_HEIGHT].toInt();
+}
+
+/*
+ * Parses the "item" object from a menu.
+ */
 void XanteMenu::parseItems(QJsonObject menu)
 {
     QJsonArray jitems = menu[XANTE_JTF_ITEMS].toArray();
@@ -133,11 +164,15 @@ void XanteMenu::parseItems(QJsonObject menu)
     }
 }
 
+/*
+ * Parses a menu object, an item from its array.
+ */
 void XanteMenu::parse(QJsonObject menu)
 {
     parseCommonData(menu);
     parseEventsData(menu);
     parseDynamicData(menu);
+    parseGeometryData(menu);
     parseItems(menu);
 }
 
@@ -158,6 +193,8 @@ XanteMenu::XanteMenu(QString applicationName, QString name)
 
     /* We always create an empty item for a new menu */
     XanteItem it(applicationName, name, QString("Item"));
+    it.type(XanteItem::Type::Menu);
+    it.referencedMenu(XanteJTF::objectIdCalc(applicationName, name));
     m_items.append(it);
 }
 
@@ -211,6 +248,16 @@ QJsonObject XanteMenu::writeDynamic(void) const
     return dynamic;
 }
 
+QJsonObject XanteMenu::writeGeometry(void) const
+{
+    QJsonObject geometry;
+
+    geometry[XANTE_JTF_WIDTH] = m_width;
+    geometry[XANTE_JTF_HEIGHT] = m_height;
+
+    return geometry;
+}
+
 void XanteMenu::write(QJsonObject &root) const
 {
     QJsonArray jitems;
@@ -232,7 +279,17 @@ void XanteMenu::write(QJsonObject &root) const
     if (m_type == XanteMenu::Type::Dynamic)
         root[XANTE_JTF_DYNAMIC] = writeDynamic();
 
+    if ((m_width != -1) || (m_height != -1))
+        root[XANTE_JTF_GEOMETRY] = writeGeometry();
+
     root[XANTE_JTF_ITEMS] = jitems;
 }
 
+XanteItem &XanteMenu::itemAt(int index)
+{
+    if ((index < 0) || (index > m_items.size()))
+        throw std::out_of_range(QObject::tr("Item not found.").toLocal8Bit().data());
+
+    return m_items[index];
+}
 
