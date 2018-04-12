@@ -60,6 +60,10 @@ void XanteMenu::parseCommonData(QJsonObject menu)
 
     m_name = menu[XANTE_JTF_NAME].toString();
     m_objectId = menu[XANTE_JTF_OBJECT_ID].toString();
+
+    if (m_objectId.isEmpty())
+        m_objectId = XanteJTF::objectIdCalc(m_applicationName, m_name);
+
     tmp = menu[XANTE_JTF_MODE].toInt();
     m_mode = (enum XanteAccessMode)tmp;
 }
@@ -189,6 +193,8 @@ XanteMenu::XanteMenu(QString applicationName, QString name)
 
     /* We always create an empty item for a new menu */
     XanteItem it(applicationName, name, QString("Item"));
+    it.type(XanteItem::Type::Menu);
+    it.referencedMenu(XanteJTF::objectIdCalc(applicationName, name));
     m_items.append(it);
 }
 
@@ -279,4 +285,11 @@ void XanteMenu::write(QJsonObject &root) const
     root[XANTE_JTF_ITEMS] = jitems;
 }
 
+XanteItem &XanteMenu::itemAt(int index)
+{
+    if ((index < 0) || (index > m_items.size()))
+        throw std::out_of_range(QObject::tr("Item not found.").toLocal8Bit().data());
+
+    return m_items[index];
+}
 

@@ -198,7 +198,7 @@ static int build_sheet(const struct xante_item *item,
     cl_string_truncate(session->row_title, -1);
     cl_string_truncate(session->column_title, -1);
     session->sheet = spreadsheet_st_init(cl_string_valueof(session->row_title),
-                                            cl_string_valueof(session->column_title));
+                                         cl_string_valueof(session->column_title));
 
     if (NULL == session->sheet)
         return -1;

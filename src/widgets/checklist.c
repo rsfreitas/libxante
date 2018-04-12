@@ -46,7 +46,7 @@ static int prepare_content(const struct xante_item *item,
     cl_string_t *option = NULL;
 
     session->litems = calloc(session->number_of_items,
-                                sizeof(DIALOG_LISTITEM));
+                             sizeof(DIALOG_LISTITEM));
 
     if (NULL == session->litems) {
         errno_set(XANTE_ERROR_NO_MEMORY);
@@ -83,7 +83,7 @@ static void build_session(const struct xante_item *item,
 {
     session->number_of_items = cl_stringlist_size(item->list_items);
     session->width = (item->geometry.width == 0) ? DEFAULT_WIDTH
-                                                    : item->geometry.width;
+                                                 : item->geometry.width;
 
     /* The +1 on height is because we have a prompt inside the object */
     session->displayed_items = dlgx_get_dlg_items(session->number_of_items);

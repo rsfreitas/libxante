@@ -57,8 +57,8 @@ class XanteMenu
         XanteMenu(QString applicationName, QString name);
         XanteMenu(QString objectId) : m_objectId(objectId) {}
 
+        XanteItem &itemAt(int index);
         int totalItems(void) { return m_items.size(); }
-        XanteItem &itemAt(int index) { return m_items[index]; }
         void itemMove(int from, int to) { m_items.move(from, to); }
         void addItem(XanteItem item) { m_items.append(item); }
         void removeItem(int index) { m_items.removeAt(index); }
@@ -216,6 +216,9 @@ class XanteMenu
             m_dynamicOriginItem = originItem;
             m_dynamicType = XanteMenu::DynamicType::DynamicOptions;
         }
+
+        void size(QSize size) { m_width = size.width(); m_height = size.height(); }
+        QSize size(void) const { return QSize(m_width, m_height); }
 
     private:
         QString m_applicationName, m_name, m_objectId, m_dynamicBlockPrefix,

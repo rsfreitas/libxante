@@ -34,6 +34,14 @@ enum {
     MaxRecentFiles = 5
 };
 
+class XanteConfigObject {
+    public:
+        virtual void loadSettings(QSettings &settings) = 0;
+        virtual void writeSettings(QSettings &settings) = 0;
+        virtual ~XanteConfigObject() = default;
+
+};
+
 /**
  * @name XanteConfig
  * @brief A class to handle an application configuration file.
@@ -41,7 +49,7 @@ enum {
 class XanteConfig
 {
     public:
-        XanteConfig(const QString &app_name);
+        XanteConfig(const QString &app_name, XanteConfigObject &custom);
         ~XanteConfig();
 
         void windowSize(QSize size) { m_windowSize = size; }
@@ -59,6 +67,7 @@ class XanteConfig
         QSize m_windowSize;
         QPoint m_windowPosition;
         QStringList m_recentOpenedFiles;
+        XanteConfigObject &custom;
 
         void loadDefaultValues(void);
         void readFile(void);

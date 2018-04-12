@@ -30,7 +30,8 @@
 #define DEFAULT_WINDOW_WIDTH            800
 #define DEFAULT_WINDOW_HEIGHT           600
 
-XanteConfig::XanteConfig(const QString &app_name)
+XanteConfig::XanteConfig(const QString &app_name, XanteConfigObject &custom)
+    : custom(custom)
 {
     m_pathname = QString("%1/.%2").arg(getenv("HOME"))
                                   .arg(app_name);
@@ -53,7 +54,6 @@ void XanteConfig::loadDefaultValues(void)
 {
     m_windowSize = QSize(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT);
     m_windowPosition = QPoint(0, 0);
-    m_recentOpenedFiles = QStringList("");
 }
 
 /**
@@ -73,6 +73,8 @@ void XanteConfig::writeFile(void)
     settings.beginGroup("RecentFiles");
     settings.setValue("files", m_recentOpenedFiles);
     settings.endGroup();
+
+    custom.writeSettings(settings);
 }
 
 /**
@@ -99,6 +101,8 @@ void XanteConfig::readFile(void)
     settings.beginGroup("RecentFiles");
     m_recentOpenedFiles = settings.value("files").value<QStringList>();
     settings.endGroup();
+
+    custom.loadSettings(settings);
 }
 
 /*

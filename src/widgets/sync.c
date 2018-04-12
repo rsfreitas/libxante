@@ -31,9 +31,9 @@
 #define DIALOG_WIDTH                60
 
 struct sync_thread {
-    session_t     *session;
-    void                *data;
-    cl_timeout_t        *tm_task;
+    session_t       *session;
+    void            *data;
+    cl_timeout_t    *tm_task;
 };
 
 struct sync {
@@ -176,10 +176,10 @@ static void *make_sync(cl_thread_t *thread)
                                       CL_TM_SECONDS);
 
     session->width = (item->geometry.width == 0) ? DIALOG_WIDTH
-                                                   : item->geometry.width;
+                                                 : item->geometry.width;
 
     session->height = (item->geometry.height == 0) ? DIALOG_HEIGHT
-                                                     : item->geometry.height;
+                                                   : item->geometry.height;
 
     cl_thread_set_state(thread, CL_THREAD_ST_INITIALIZED);
     xante_log_debug("%s: started sync thread", __FUNCTION__);

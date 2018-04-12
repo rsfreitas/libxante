@@ -215,7 +215,7 @@ static int prepare_content(const struct xante_menu *menu,
     session_t *session)
 {
     session->litems = calloc(session->number_of_items,
-                                sizeof(DIALOG_LISTITEM));
+                             sizeof(DIALOG_LISTITEM));
 
     if (NULL == session->litems) {
         errno_set(XANTE_ERROR_NO_MEMORY);
@@ -237,7 +237,7 @@ static void build_session(const struct xante_menu *menu,
      * name to the user.
      */
     session->width = (menu->geometry.width == 0) ? calc_menu_width(menu)
-                                                    : menu->geometry.width;
+                                                 : menu->geometry.width;
 
     session->displayed_items = dlgx_get_dlg_items(session->number_of_items);
     session->height = (menu->geometry.height == 0)
@@ -569,6 +569,7 @@ static int manager_run_widget(struct xante_app *xpp, cl_list_t *menus,
     else
         ret_dialog = run_selected_object(&session);
 
+    /* FIXME: Remove */
     xante_log_info("%s: %d, %d", __FUNCTION__,
             ret_dialog.selected_button,
             ret_dialog.updated_value);

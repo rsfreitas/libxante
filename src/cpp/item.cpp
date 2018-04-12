@@ -45,7 +45,8 @@ void XanteItem::name(QString name)
 void XanteItem::writeOptions(QJsonObject &root) const
 {
     if ((m_type == XanteItem::Type::RadioChecklist) ||
-        (m_type == XanteItem::Type::Checklist))
+        (m_type == XanteItem::Type::Checklist) ||
+        (m_type == XanteItem::Type::Buildlist))
     {
         QJsonArray options;
 
@@ -61,16 +62,33 @@ QJsonObject XanteItem::writeInputRanges(void) const
 {
     QJsonObject inputRanges;
 
-    if (m_type == XanteItem::Type::InputString)
-        inputRanges[XANTE_JTF_STRING_LENGTH] = m_stringLength;
-    else {
-        if (m_type == XanteItem::Type::InputInt) {
+    switch (m_type) {
+        case XanteItem::Type::InputString:
+        case XanteItem::Type::InputPasswd:
+        case XanteItem::Type::Inputscroll:
+            inputRanges[XANTE_JTF_STRING_LENGTH] = m_stringLength;
+            break;
+
+        case XanteItem::Type::InputInt:
+        case XanteItem::Type::Range:
             inputRanges[XANTE_JTF_MAX_RANGE] = m_maxInputRange.toInt();
             inputRanges[XANTE_JTF_MIN_RANGE] = m_minInputRange.toInt();
-        } else if (m_type == XanteItem::Type::InputFloat) {
+            break;
+
+        case XanteItem::Type::InputFloat:
             inputRanges[XANTE_JTF_MAX_RANGE] = m_maxInputRange.toFloat();
             inputRanges[XANTE_JTF_MIN_RANGE] = m_minInputRange.toFloat();
-        }
+            break;
+
+        case XanteItem::Type::UpdateObject:
+        case XanteItem::Type::Progress:
+        case XanteItem::Type::SpinnerSync:
+        case XanteItem::Type::DotsSync:
+            inputRanges[XANTE_JTF_MAX_RANGE] = m_maxInputRange.toInt();
+            break;
+
+        default:
+            break;
     }
 
     return inputRanges;
@@ -81,7 +99,7 @@ QJsonObject XanteItem::writeConfig(void) const
     QJsonObject config;
 
     config[XANTE_JTF_BLOCK] = m_configBlock;
-    config[XANTE_JTF_ITEM] = m_configItem;
+    config[XANTE_JTF_ITEM] = m_configEntry;
 
     return config;
 }
@@ -281,7 +299,7 @@ void XanteItem::preLoad(void)
         XANTE_STR_WIDGET_MIXEDFORM,
         XANTE_STR_WIDGET_BUILDLIST,
         XANTE_STR_WIDGET_SPREADSHEET,
-        XANTE_STR_GADGET_CLOCK,
+        "gadget:" XANTE_STR_GADGET_CLOCK,
     };
 
     for (int i = XanteItem::Type::Menu, j = 0; i < XanteItem::Type::MaxTypes; i++, j++)
@@ -309,13 +327,6 @@ XanteItem::XanteItem(QString applicationName, QString menuName, QString name)
      */
     this->name(name);
     mode(XanteAccessMode::XanteAccessEdit);
-    type(XanteItem::Type::Menu);
-
-    /*
-     * We also need to fill the menuReferenceId and allow this item to be
-     * correctly parsed by libxanted.
-     */
-    m_menuReferenceId = XanteJTF::objectIdCalc(applicationName, menuName);
 }
 
 enum XanteItem::Type XanteItem::toXanteItem(const QString &type)
@@ -333,6 +344,9 @@ void XanteItem::parseCommonData(QJsonObject item)
     /* Load item from JSON */
     m_name = item[XANTE_JTF_NAME].toString();
     m_objectId = item[XANTE_JTF_OBJECT_ID].toString();
+
+    if (m_objectId.isEmpty())
+        m_objectId = XanteJTF::objectIdCalc(m_applicationName, m_menuName);
 
     tmp = item[XANTE_JTF_MODE].toInt();
     m_mode = (enum XanteAccessMode)tmp;
@@ -382,7 +396,7 @@ void XanteItem::parseConfigData(QJsonObject data)
     QJsonObject config = value.toObject();
 
     m_configBlock = config[XANTE_JTF_BLOCK].toString();
-    m_configItem = config[XANTE_JTF_ITEM].toString();
+    m_configEntry = config[XANTE_JTF_ITEM].toString();
 }
 
 /*
@@ -542,5 +556,193 @@ XanteItem::XanteItem(QString applicationName, QString menuName,
 {
     preLoad();
     parse(item);
+}
+
+bool XanteItem::needsSettings(enum XanteItem::Type type)
+{
+    bool ret = false;
+
+    switch (type) {
+        case XanteItem::Type::Spreadsheet:
+        case XanteItem::Type::InputInt:
+        case XanteItem::Type::InputFloat:
+        case XanteItem::Type::InputDate:
+        case XanteItem::Type::InputTime:
+        case XanteItem::Type::InputString:
+        case XanteItem::Type::InputPasswd:
+        case XanteItem::Type::Calendar:
+        case XanteItem::Type::Timebox:
+        case XanteItem::Type::YesNo:
+        case XanteItem::Type::Checklist:
+        case XanteItem::Type::RadioChecklist:
+        case XanteItem::Type::Range:
+        case XanteItem::Type::Buildlist:
+        case XanteItem::Type::Inputscroll:
+            ret = true;
+            break;
+
+        default:
+            break;
+    }
+
+    return ret;
+}
+
+bool XanteItem::needsMinRange(enum XanteItem::Type type)
+{
+    bool ret = false;
+
+    switch (type) {
+        case XanteItem::Type::Range:
+        case XanteItem::Type::InputInt:
+        case XanteItem::Type::InputFloat:
+            ret = true;
+            break;
+
+        default:
+            break;
+    }
+
+    return ret;
+}
+
+bool XanteItem::needsMaxRange(enum XanteItem::Type type)
+{
+    bool ret = false;
+
+    switch (type) {
+        case XanteItem::Type::UpdateObject:
+        case XanteItem::Type::Progress:
+        case XanteItem::Type::SpinnerSync:
+        case XanteItem::Type::DotsSync:
+        case XanteItem::Type::Range:
+        case XanteItem::Type::InputInt:
+        case XanteItem::Type::InputFloat:
+            ret = true;
+            break;
+
+        default:
+            break;
+    }
+
+    return ret;
+}
+
+bool XanteItem::needsStringLengthRange(enum XanteItem::Type type)
+{
+    bool ret = false;
+
+    switch (type) {
+        case XanteItem::Type::InputString:
+        case XanteItem::Type::InputPasswd:
+        case XanteItem::Type::Inputscroll:
+            ret = true;
+            break;
+
+        default:
+            break;
+    }
+
+    return ret;
+}
+
+bool XanteItem::needsDescription(enum XanteItem::Type type)
+{
+    bool ret = false;
+
+    switch (type) {
+        case XanteItem::Type::Spreadsheet:
+        case XanteItem::Type::Range:
+        case XanteItem::Type::Mixedform:
+        case XanteItem::Type::FileSelect:
+        case XanteItem::Type::DirSelect:
+        case XanteItem::Type::Scrolltext:
+        case XanteItem::Type::Inputscroll:
+        case XanteItem::Type::SpinnerSync:
+        case XanteItem::Type::DotsSync:
+        case XanteItem::Type::UpdateObject:
+        case XanteItem::Type::Progress:
+        case XanteItem::Type::InputInt:
+        case XanteItem::Type::InputFloat:
+        case XanteItem::Type::InputDate:
+        case XanteItem::Type::InputTime:
+        case XanteItem::Type::InputString:
+        case XanteItem::Type::InputPasswd:
+        case XanteItem::Type::Calendar:
+        case XanteItem::Type::Timebox:
+        case XanteItem::Type::YesNo:
+        case XanteItem::Type::DeleteDynamicMenu:
+            ret = true;
+            break;
+
+        default:
+            break;
+    }
+
+    return ret;
+}
+
+bool XanteItem::needsOptions(enum XanteItem::Type type)
+{
+    bool ret = false;
+
+    switch (type) {
+        case XanteItem::Type::Buildlist:
+        case XanteItem::Type::Checklist:
+        case XanteItem::Type::RadioChecklist:
+            ret = true;
+            break;
+
+        default:
+            break;
+    }
+
+    return ret;
+}
+
+bool XanteItem::needsDefaultValue(enum XanteItem::Type type)
+{
+    bool ret = false;
+
+    switch (type) {
+        case XanteItem::Type::Scrolltext:
+        case XanteItem::Type::Tailbox:
+        case XanteItem::Type::Inputscroll:
+        case XanteItem::Type::Buildlist:
+        case XanteItem::Type::InputInt:
+        case XanteItem::Type::InputFloat:
+        case XanteItem::Type::InputDate:
+        case XanteItem::Type::InputTime:
+        case XanteItem::Type::InputString:
+        case XanteItem::Type::InputPasswd:
+        case XanteItem::Type::Calendar:
+        case XanteItem::Type::Timebox:
+        case XanteItem::Type::YesNo:
+        case XanteItem::Type::Checklist:
+        case XanteItem::Type::RadioChecklist:
+            ret = true;
+            break;
+
+        default:
+            break;
+    }
+
+    return ret;
+}
+
+bool XanteItem::needsMenuReference(enum XanteItem::Type type)
+{
+    bool ret = false;
+
+    switch (type) {
+        case XanteItem::Type::Menu:
+            ret = true;
+            break;
+
+        default:
+            break;
+    }
+
+    return ret;
 }
 

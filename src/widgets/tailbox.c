@@ -43,10 +43,10 @@ int tailbox(session_t *session)
     cl_object_t *value = NULL;
 
     session->width = (item->geometry.width == 0) ? DIALOG_WIDTH
-                                                   : item->geometry.width;
+                                                 : item->geometry.width;
 
     session->height = (item->geometry.height == 0) ? DIALOG_HEIGHT
-                                                     : item->geometry.height;
+                                                   : item->geometry.height;
 
     /* Gets the item value */
     value = item_value(item);
